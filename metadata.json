@@ -1,0 +1,6 @@
+{
+  "name": "Berry Alloys Limited",
+  "description": "Industrial ferro alloys manufacturer — Ferro Manganese, Silico Manganese, Ferro Chrome, and Ferro Silicon for domestic and international steelmaking.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}
