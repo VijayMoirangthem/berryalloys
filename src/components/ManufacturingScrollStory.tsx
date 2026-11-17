@@ -60,6 +60,7 @@ export function ManufacturingScrollStory() {
   const sectionRef = useRef<HTMLElement>(null);
   const pinTargetRef = useRef<HTMLDivElement>(null);
   const progressBarRef = useRef<HTMLDivElement>(null);
+  const lastStageRef = useRef(0);
   const [activeStage, setActiveStage] = useState(0);
   const [prefersReducedMotion, setPrefersReducedMotion] = useState(() =>
     typeof window !== 'undefined'
@@ -91,7 +92,10 @@ export function ManufacturingScrollStory() {
             PROCESS_STAGES.length - 1,
             Math.floor(self.progress * PROCESS_STAGES.length)
           );
-          setActiveStage(nextIdx);
+          if (nextIdx !== lastStageRef.current) {
+            lastStageRef.current = nextIdx;
+            setActiveStage(nextIdx);
+          }
           if (progressBarRef.current) {
             progressBarRef.current.style.transform = `scaleX(${Math.max(0.08, self.progress)})`;
           }
@@ -105,6 +109,7 @@ export function ManufacturingScrollStory() {
   }, [prefersReducedMotion]);
 
   const handleManualStageSelect = (idx: number) => {
+    lastStageRef.current = idx;
     setActiveStage(idx);
     if (progressBarRef.current) {
       progressBarRef.current.style.transform = `scaleX(${(idx + 1) / PROCESS_STAGES.length})`;

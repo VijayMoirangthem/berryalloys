@@ -193,7 +193,7 @@ export function ChapterRail() {
     <aside
       ref={asideRef}
       aria-label="Homepage chapters GlassDock"
-      className="hidden xl:flex fixed right-3 top-1/2 -translate-y-1/2 z-30 pointer-events-none"
+      className="hidden xl:flex fixed right-3 top-[44%] -translate-y-1/2 z-30 pointer-events-none"
     >
       <AnimatePresence mode="wait" initial={false}>
         {!isExpanded ? (
@@ -364,7 +364,7 @@ export function ChapterRail() {
             </div>
 
             {/* Chapter List */}
-            <ol className="py-1.5 px-1.5 space-y-0.5 max-h-[58vh] overflow-y-auto">
+            <ol className="py-1.5 px-1.5 space-y-0.5 max-h-[48vh] overflow-y-auto">
               {HOME_CHAPTERS.map((chapter) => {
                 const isActive = chapter.id === activeId;
                 return (

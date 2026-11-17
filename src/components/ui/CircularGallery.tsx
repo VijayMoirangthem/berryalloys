@@ -1,4 +1,5 @@
 import React, { useRef, useState, useEffect, useCallback } from 'react';
+import { ChevronLeft, ChevronRight, Maximize2 } from 'lucide-react';
 import gsap from 'gsap';
 import { cn } from '../../lib/utils';
 
@@ -21,8 +22,8 @@ export interface CircularGalleryProps {
 }
 
 /**
- * CircularGallery — Tilted 3D GSAP rotating visual ring with hover center
- * zoom preview, horizontal scroll/drag rotation, and lightbox selection support.
+ * CircularGallery — Tilted 3D GSAP rotating visual ring with live front-plate tracking,
+ * center inspection preview, horizontal drag/wheel/button stepping, and lightbox support.
  */
 export function CircularGallery({
   items,
@@ -36,8 +37,14 @@ export function CircularGallery({
   const galleryRef = useRef<HTMLDivElement>(null);
   const ringRef = useRef<HTMLDivElement>(null);
   const [hoveredItem, setHoveredItem] = useState<CircularGalleryItem | null>(null);
+  const [frontIndex, setFrontIndex] = useState<number>(() => {
+    if (items.length === 0) return 0;
+    const step = 360 / items.length;
+    return ((Math.round(-initialRotation / step) % items.length) + items.length) % items.length;
+  });
   const [containerScale, setContainerScale] = useState(1);
 
+  const frontIndexRef = useRef(frontIndex);
   const rotationRef = useRef({ current: initialRotation, target: initialRotation });
   const dragRef = useRef({
     isDragging: false,
@@ -67,9 +74,10 @@ export function CircularGallery({
 
   useEffect(() => {
     const prefersReduced = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
-    if (!galleryRef.current || !ringRef.current) return;
+    if (!galleryRef.current || !ringRef.current || items.length === 0) return;
 
     const ringElement = ringRef.current;
+    const angleStep = 360 / items.length;
 
     gsap.set(galleryRef.current, {
       perspective: 1650,
@@ -77,7 +85,7 @@ export function CircularGallery({
 
     gsap.set(ringElement, {
       transformStyle: 'preserve-3d',
-      rotateY: initialRotation,
+      rotateY: rotationRef.current.current,
     });
 
     if (!prefersReduced) {
@@ -95,11 +103,20 @@ export function CircularGallery({
     const animate = () => {
       if (disposed) return;
       const rot = rotationRef.current;
-      if (!dragRef.current.isDragging && !prefersReduced) {
+      if (!dragRef.current.isDragging && !prefersReduced && !hoveredItem) {
         rot.target += 0.06;
       }
       rot.current += (rot.target - rot.current) * 0.085;
       gsap.set(ringElement, { rotateY: rot.current });
+
+      const nextFront =
+        ((Math.round(-rot.current / angleStep) % items.length) + items.length) %
+        items.length;
+      if (nextFront !== frontIndexRef.current) {
+        frontIndexRef.current = nextFront;
+        setFrontIndex(nextFront);
+      }
+
       rafId = window.requestAnimationFrame(animate);
     };
 
@@ -110,7 +127,17 @@ export function CircularGallery({
       window.cancelAnimationFrame(rafId);
       gsap.killTweensOf(ringElement);
     };
-  }, [initialRotation, items.length]);
+  }, [hoveredItem, items.length]);
+
+  const stepRing = useCallback(
+    (deltaSteps: number) => {
+      if (items.length === 0) return;
+      const angleStep = 360 / items.length;
+      setHoveredItem(null);
+      rotationRef.current.target -= deltaSteps * angleStep;
+    },
+    [items.length]
+  );
 
   const handleWheel = useCallback((e: React.WheelEvent<HTMLDivElement>) => {
     if (Math.abs(e.deltaX) > Math.abs(e.deltaY) || e.shiftKey) {
@@ -120,6 +147,7 @@ export function CircularGallery({
   }, []);
 
   const handlePointerDown = (e: React.PointerEvent<HTMLDivElement>) => {
+    if ((e.target as HTMLElement).closest('[data-gallery-control="true"]')) return;
     dragRef.current = {
       isDragging: true,
       startX: e.clientX,
@@ -142,7 +170,10 @@ export function CircularGallery({
     }, 60);
   };
 
-  const previewItem = hoveredItem ?? items[0] ?? null;
+  const previewItem = hoveredItem ?? items[frontIndex] ?? items[0] ?? null;
+  const previewIndex = previewItem
+    ? Math.max(0, items.findIndex((it) => it.id === previewItem.id))
+    : 0;
 
   return (
     <div
@@ -151,9 +182,12 @@ export function CircularGallery({
       onPointerDown={handlePointerDown}
       onPointerMove={handlePointerMove}
       onPointerUp={handlePointerUp}
-      onPointerLeave={handlePointerUp}
+      onPointerLeave={() => {
+        handlePointerUp();
+        setHoveredItem(null);
+      }}
       className={cn(
-        'relative h-[460px] sm:h-[540px] w-full select-none overflow-hidden border border-[#141618]/14 dark:border-[#F3F0E9]/14 bg-[#141618] text-[#F3F0E9] cursor-grab active:cursor-grabbing',
+        'relative h-[480px] sm:h-[550px] w-full select-none overflow-hidden border border-[#141618]/14 dark:border-[#F3F0E9]/14 bg-[#141618] text-[#F3F0E9] cursor-grab active:cursor-grabbing',
         className
       )}
     >
@@ -186,7 +220,9 @@ export function CircularGallery({
                 key={item.id}
                 type="button"
                 onMouseEnter={() => setHoveredItem(item)}
+                onMouseLeave={() => setHoveredItem(null)}
                 onFocus={() => setHoveredItem(item)}
+                onBlur={() => setHoveredItem(null)}
                 onClick={() => {
                   if (dragRef.current.movedDistance > 8) return;
                   onItemSelect?.(item, idx);
@@ -227,7 +263,7 @@ export function CircularGallery({
 
       {/* Center Featured Inspection Card */}
       {previewItem && (
-        <div className="pointer-events-none absolute left-1/2 top-1/2 z-30 -translate-x-1/2 -translate-y-1/2 w-[170px] sm:w-[220px] border border-[#EC743C]/55 bg-[#121417]/94 p-2 shadow-[0_24px_60px_rgba(0,0,0,0.65)]">
+        <div className="pointer-events-none absolute left-1/2 top-[47%] z-30 -translate-x-1/2 -translate-y-1/2 w-[178px] sm:w-[228px] border border-[#EC743C]/55 bg-[#121417]/95 p-2 shadow-[0_24px_60px_rgba(0,0,0,0.65)]">
           <div
             className={cn(
               'aspect-[4/3] w-full overflow-hidden',
@@ -245,7 +281,7 @@ export function CircularGallery({
           </div>
           <div className="pt-2 space-y-0.5 text-left">
             <p className="text-[10px] font-mono-tabular uppercase tracking-wider text-[#EC743C]">
-              {previewItem.category ?? 'Archive Frame'}
+              Fig. {String(previewIndex + 1).padStart(2, '0')} · {previewItem.category ?? 'Archive Frame'}
             </p>
             <p className="text-[11px] text-[#F3F0E9]/90 line-clamp-2 leading-snug">
               {previewItem.caption ?? previewItem.alt}
@@ -254,10 +290,42 @@ export function CircularGallery({
         </div>
       )}
 
-      {/* Quiet Drag Instruction Footer */}
-      <div className="pointer-events-none absolute bottom-3 left-4 right-4 z-30 flex items-center justify-between text-[11px] font-mono-tabular text-[#A1A7AB]">
-        <span>Drag horizontally or hold Shift + scroll to rotate 3D ring</span>
-        <span>Click any plate to open full viewer</span>
+      {/* Responsive Controls & Instructions Bar */}
+      <div className="absolute bottom-3 left-4 right-4 z-30 flex flex-wrap items-center justify-between gap-2 text-[11px] font-mono-tabular text-[#A1A7AB]">
+        <span className="pointer-events-none">
+          <span className="hidden sm:inline">Drag horizontally or hold Shift + scroll · Click any plate for lightbox</span>
+          <span className="sm:hidden">Swipe ring or tap any plate</span>
+        </span>
+
+        <div data-gallery-control="true" className="flex items-center gap-1.5 ml-auto">
+          <button
+            type="button"
+            onClick={() => stepRing(-1)}
+            aria-label="Rotate gallery to previous frame"
+            className="inline-flex items-center justify-center w-8 h-8 border border-[#F3F0E9]/22 bg-[#121417]/90 text-[#F3F0E9] hover:border-[#EC743C] hover:text-[#EC743C] transition-colors cursor-pointer"
+          >
+            <ChevronLeft className="w-4 h-4" aria-hidden="true" />
+          </button>
+          {previewItem && onItemSelect && (
+            <button
+              type="button"
+              onClick={() => onItemSelect(previewItem, previewIndex)}
+              aria-label={`Open full lightbox for Fig. ${previewIndex + 1}`}
+              className="inline-flex items-center gap-1.5 h-8 px-2.5 border border-[#EC743C]/45 bg-[#121417]/90 text-[#EC743C] hover:bg-[#9E4B28] hover:text-[#F6F4EF] transition-colors cursor-pointer text-[10px] uppercase tracking-wider"
+            >
+              <Maximize2 className="w-3 h-3" aria-hidden="true" />
+              <span>Inspect</span>
+            </button>
+          )}
+          <button
+            type="button"
+            onClick={() => stepRing(1)}
+            aria-label="Rotate gallery to next frame"
+            className="inline-flex items-center justify-center w-8 h-8 border border-[#F3F0E9]/22 bg-[#121417]/90 text-[#F3F0E9] hover:border-[#EC743C] hover:text-[#EC743C] transition-colors cursor-pointer"
+          >
+            <ChevronRight className="w-4 h-4" aria-hidden="true" />
+          </button>
+        </div>
       </div>
     </div>
   );

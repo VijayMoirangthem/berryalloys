@@ -255,7 +255,7 @@ export function FacilityCorridorMap() {
                 <g
                   key={node.id}
                   transform={`translate(${node.coordinates.x}, ${node.coordinates.y})`}
-                  className="cursor-pointer"
+                  className="cursor-pointer focus:outline-none [&:focus-visible_.node-focus-ring]:opacity-100"
                   onClick={() => setSelectedId(node.id)}
                   onKeyDown={(e) => {
                     if (e.key === 'Enter' || e.key === ' ') {
@@ -268,6 +268,13 @@ export function FacilityCorridorMap() {
                   aria-label={`${node.name}, ${node.region}`}
                   aria-pressed={isSelected}
                 >
+                  <circle
+                    className="node-focus-ring opacity-0 transition-opacity"
+                    r={isSelected ? 21 : 16}
+                    fill="none"
+                    stroke="#EC743C"
+                    strokeWidth="2"
+                  />
                   <circle
                     r={isSelected ? 17 : 11}
                     fill={isSelected ? 'rgba(236,116,60,0.26)' : 'rgba(243,240,233,0.1)'}
@@ -320,7 +327,11 @@ export function FacilityCorridorMap() {
           </svg>
         </div>
 
-        <div className="mt-4 pt-4 border-t border-[#F3F0E9]/12 flex flex-col sm:flex-row sm:items-start justify-between gap-4">
+        <div
+          aria-live="polite"
+          aria-atomic="true"
+          className="mt-4 pt-4 border-t border-[#F3F0E9]/12 flex flex-col sm:flex-row sm:items-start justify-between gap-4"
+        >
           <div>
             <p className="text-xs font-mono-tabular text-[#EC743C]">
               {activeNode.status} · {activeNode.region}
