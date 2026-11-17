@@ -238,7 +238,7 @@ export function HomeAlloyShowcase({ onEnquireAlloy }: HomeAlloyShowcaseProps) {
                       type="button"
                       onClick={() => setSelectedSlug(item.slug)}
                       aria-pressed={isSelected}
-                      className={`min-h-[40px] px-3.5 py-2 text-xs font-medium border transition-colors cursor-pointer whitespace-nowrap ${
+                      className={`min-h-[40px] px-3.5 py-2 text-xs font-medium border transition-colors cursor-pointer text-left whitespace-normal sm:whitespace-nowrap ${
                         isSelected
                           ? 'bg-[#141618] text-[#F6F4EF] border-[#141618] font-semibold dark:bg-[#F3F0E9] dark:text-[#141618] dark:border-[#F3F0E9]'
                           : 'bg-white text-[#141618] border-[#141618]/18 hover:border-[#9E4B28] dark:bg-[#20242A] dark:text-[#F3F0E9]/80 dark:border-[#F3F0E9]/16 dark:hover:border-[#EC743C]'

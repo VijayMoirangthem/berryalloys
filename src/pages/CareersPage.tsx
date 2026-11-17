@@ -148,10 +148,10 @@ export function CareersPage() {
             <div className="p-6 sm:p-8 space-y-2">
               <p className="font-mono-tabular text-xs text-[#9E4B28] dark:text-[#EC743C]">02</p>
               <h3 className="font-display text-2xl font-bold uppercase text-[#141618] dark:text-[#F3F0E9]">
-                Occupational Safety & Health
+                Zero Harm Safety & Health
               </h3>
               <p className="text-sm text-[#4A5054] dark:text-[#A1A7AB] leading-relaxed">
-                Plant safety protocols paired with periodic multi-specialty employee medical camps and regular occupational health screening.
+                Dedicated Zero Harm seminars for permanent and contract crews paired with periodic multi-specialty employee medical camps.
               </p>
             </div>
             <div className="p-6 sm:p-8 space-y-2">
@@ -163,6 +163,32 @@ export function CareersPage() {
                 Equal-opportunity hiring across eleven operational and corporate functions, alongside recognition of women employees and families.
               </p>
             </div>
+          </div>
+
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5 mt-8">
+            {[
+              GALLERY_ITEMS[3],
+              GALLERY_ITEMS[4],
+              GALLERY_ITEMS[5],
+              GALLERY_ITEMS[6],
+            ].map((asset) => (
+              <figure
+                key={asset.id}
+                className="bg-white dark:bg-[#20242A] border border-[#141618]/14 dark:border-[#F3F0E9]/14 overflow-hidden flex flex-col"
+              >
+                <div className="aspect-[16/10] bg-[#141618] overflow-hidden">
+                  <img
+                    src={asset.src}
+                    alt={asset.alt}
+                    loading="lazy"
+                    className="w-full h-full object-cover"
+                  />
+                </div>
+                <figcaption className="px-4 py-3 text-xs text-[#4A5054] dark:text-[#A1A7AB] leading-relaxed">
+                  {asset.caption}
+                </figcaption>
+              </figure>
+            ))}
           </div>
 
           <PixelatedImageTrail

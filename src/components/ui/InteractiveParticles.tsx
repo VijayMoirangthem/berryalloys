@@ -85,17 +85,17 @@ const VERTEX_SHADER = `
 
     vec3 displaced = offset;
     displaced.xy += vec2(random(pindex) - 0.5, random(offset.x + pindex) - 0.5) * uRandom;
-    float rndz = (random(pindex) + snoise(vec3(pindex * 0.1, uTime * 0.1, 0.0)));
-    displaced.z += rndz * (random(pindex) * 2.0 * uDepth);
+    float rndz = (random(pindex) + snoise(vec3(pindex * 0.08, uTime * 0.08, 0.0)));
+    displaced.z += rndz * (random(pindex) * 2.2 * uDepth);
     displaced.xy -= uTextureSize * 0.5;
 
     float t = texture2D(uTouch, puv).r;
-    displaced.z += t * 22.0 * rndz;
-    displaced.x += cos(angle) * t * 18.0 * rndz;
-    displaced.y += sin(angle) * t * 18.0 * rndz;
+    displaced.z += t * 34.0 * rndz;
+    displaced.x += cos(angle) * t * 28.0 * rndz;
+    displaced.y += sin(angle) * t * 28.0 * rndz;
 
-    float psize = (snoise(vec3(uTime * 0.35, puv * 3.0)) + 2.0);
-    psize *= max(grey, 0.25);
+    float psize = (snoise(vec3(uTime * 0.3, puv * 3.0)) + 2.15);
+    psize *= max(grey, 0.3);
     psize *= uSize;
 
     vec4 mvPosition = modelViewMatrix * vec4(displaced, 1.0);
@@ -122,8 +122,7 @@ const FRAGMENT_SHADER = `
     float t = smoothstep(0.0, 0.5, 0.5 - dist);
     float radius = max(0.0, 0.5 - dist) * 2.0;
 
-    // Subtle ember edge highlight mixed with primary copper/ivory tint
-    vec3 tint = mix(uAccentColor, uColor, smoothstep(0.35, 0.95, grey));
+    vec3 tint = mix(uAccentColor, uColor, smoothstep(0.32, 0.92, grey));
     vec4 color = vec4(tint, grey * radius * t);
     if (color.a < 0.05) discard;
     gl_FragColor = color;
@@ -135,7 +134,7 @@ class TouchTexture {
   width = 64;
   height = 64;
   maxAge = 96;
-  radius = 0.16;
+  radius = 0.145;
   trail: Array<{ x: number; y: number; age: number; force: number }> = [];
   canvas: HTMLCanvasElement;
   ctx: CanvasRenderingContext2D;
@@ -155,13 +154,13 @@ class TouchTexture {
   }
 
   addTouch(point: { x: number; y: number }) {
-    let force = 0;
+    let force = 0.35;
     const last = this.trail[this.trail.length - 1];
     if (last) {
       const dx = last.x - point.x;
       const dy = last.y - point.y;
       const dd = dx * dx + dy * dy;
-      force = Math.min(dd * 10000, 1);
+      force = Math.max(0.28, Math.min(dd * 9500, 1));
     }
     this.trail.push({ x: point.x, y: point.y, age: 0, force });
   }
@@ -196,7 +195,7 @@ class TouchTexture {
     const r = this.size * this.radius * intensity;
     if (r <= 0.1) return;
     const grd = this.ctx.createRadialGradient(pos.x, pos.y, r * 0.25, pos.x, pos.y, r);
-    grd.addColorStop(0, 'rgba(255, 255, 255, 0.28)');
+    grd.addColorStop(0, 'rgba(255, 255, 255, 0.32)');
     grd.addColorStop(1, 'rgba(0, 0, 0, 0.0)');
 
     this.ctx.beginPath();
@@ -212,6 +211,7 @@ class TouchTexture {
 
 export interface InteractiveParticlesProps {
   text?: string;
+  secondaryText?: string;
   subtitle?: string;
   className?: string;
   particleColor?: string;
@@ -219,49 +219,110 @@ export interface InteractiveParticlesProps {
   particleSize?: number;
 }
 
+const SAMPLE_W = 920;
+const SAMPLE_H = 380;
+const CAMERA_FOV = 44;
+const CAMERA_Z = 420;
+
+function drawSpacedCenteredText(
+  ctx: CanvasRenderingContext2D,
+  label: string,
+  centerX: number,
+  y: number,
+  trackingPx: number
+) {
+  const chars = [...label];
+  const widths = chars.map((c) => ctx.measureText(c).width);
+  const totalWidth = widths.reduce((sum, w) => sum + w, 0) + trackingPx * Math.max(0, chars.length - 1);
+  let cursorX = centerX - totalWidth / 2;
+  ctx.textAlign = 'left';
+  chars.forEach((ch, idx) => {
+    ctx.fillText(ch, cursorX, y);
+    cursorX += widths[idx] + trackingPx;
+  });
+}
+
 /**
- * Generates an offscreen high-contrast bitmap typography texture for particle sampling
- * so the brand title renders deterministically with zero external 404 risk.
+ * Generates a high-resolution high-contrast bitmap typography texture for GPU particle sampling.
  */
-function createTypographySampleDataUrl(text: string, subtitle?: string): string {
+function createTypographySampleDataUrl(
+  text: string,
+  secondaryText?: string,
+  subtitle?: string
+): string {
   const canvas = document.createElement('canvas');
-  canvas.width = 480;
-  canvas.height = 170;
+  canvas.width = SAMPLE_W;
+  canvas.height = SAMPLE_H;
   const ctx = canvas.getContext('2d');
   if (!ctx) return '';
 
   ctx.fillStyle = '#000000';
-  ctx.fillRect(0, 0, canvas.width, canvas.height);
-
-  ctx.textAlign = 'center';
+  ctx.fillRect(0, 0, SAMPLE_W, SAMPLE_H);
   ctx.textBaseline = 'middle';
 
+  const hasSecondary = Boolean(secondaryText);
   const hasSub = Boolean(subtitle);
-  const titleFontSize = text.length > 14 ? 54 : 82;
-  ctx.font = `700 ${titleFontSize}px "Barlow Condensed", sans-serif`;
-  ctx.fillStyle = '#FFFFFF';
-  ctx.fillText(text.toUpperCase(), canvas.width / 2, hasSub ? canvas.height * 0.43 : canvas.height * 0.5);
 
-  if (subtitle) {
-    ctx.font = '600 22px "IBM Plex Mono", monospace';
-    ctx.fillStyle = '#D8D1C3';
-    ctx.fillText(subtitle.toUpperCase(), canvas.width / 2, canvas.height * 0.78);
+  if (hasSecondary && secondaryText) {
+    const primarySize = text.length > 12 ? 128 : 156;
+    ctx.font = `800 ${primarySize}px "Barlow Condensed", sans-serif`;
+    ctx.fillStyle = '#FFFFFF';
+    ctx.textAlign = 'center';
+    ctx.fillText(text.toUpperCase(), SAMPLE_W / 2, SAMPLE_H * 0.28);
+
+    const secondarySize = secondaryText.length > 10 ? 74 : 84;
+    ctx.font = `700 ${secondarySize}px "Barlow Condensed", sans-serif`;
+    ctx.fillStyle = '#F5F1E8';
+    const track = secondaryText.length <= 8 ? 20 : 6;
+    drawSpacedCenteredText(ctx, secondaryText.toUpperCase(), SAMPLE_W / 2, SAMPLE_H * 0.58, track);
+
+    if (hasSub && subtitle) {
+      ctx.font = '600 22px "IBM Plex Mono", monospace';
+      ctx.fillStyle = '#C9BBA4';
+      ctx.textAlign = 'center';
+      ctx.fillText(subtitle.toUpperCase(), SAMPLE_W / 2, SAMPLE_H * 0.84);
+    }
+  } else {
+    const titleFontSize = text.length > 14 ? 96 : 142;
+    ctx.font = `800 ${titleFontSize}px "Barlow Condensed", sans-serif`;
+    ctx.fillStyle = '#FFFFFF';
+    ctx.textAlign = 'center';
+    ctx.fillText(
+      text.toUpperCase(),
+      SAMPLE_W / 2,
+      hasSub ? SAMPLE_H * 0.42 : SAMPLE_H * 0.5
+    );
+
+    if (hasSub && subtitle) {
+      ctx.font = '600 24px "IBM Plex Mono", monospace';
+      ctx.fillStyle = '#C9BBA4';
+      ctx.textAlign = 'center';
+      ctx.fillText(subtitle.toUpperCase(), SAMPLE_W / 2, SAMPLE_H * 0.77);
+    }
   }
 
   return canvas.toDataURL('image/png');
 }
 
+function computeHeroParticleScale(containerW: number, containerH: number): number {
+  const aspect = Math.max(0.4, containerW / Math.max(1, containerH));
+  const visibleH = 2 * CAMERA_Z * Math.tan((CAMERA_FOV * Math.PI) / 360);
+  const visibleW = visibleH * aspect;
+  return Math.min((visibleW * 0.9) / SAMPLE_W, (visibleH * 0.86) / SAMPLE_H);
+}
+
 /**
- * InteractiveParticles — GPU WebGL Three.js instanced particle field sampling
- * the Berry Alloys title mark from canvas raster data with cursor scatter physics.
+ * InteractiveParticles — Monumental GPU WebGL Three.js instanced particle hero canvas
+ * sampling the Berry Alloys Limited corporate mark with damped pointer scatter physics.
  */
 export function InteractiveParticles({
   text = 'BERRY ALLOYS',
-  subtitle = 'FROM HEAT TO PRECISION',
+  secondaryText = 'LIMITED',
+  subtitle = 'FROM HEAT TO PRECISION · EST. 2006',
   className,
   particleColor = '#F3F0E9',
   accentColor = '#EC743C',
-  particleSize = 1.65,
+  particleSize = 2.05,
 }: InteractiveParticlesProps) {
   const containerRef = useRef<HTMLDivElement>(null);
   const [fallback, setFallback] = useState(false);
@@ -274,7 +335,11 @@ export function InteractiveParticles({
 
     let renderer: THREE.WebGLRenderer | null = null;
     try {
-      renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true, powerPreference: 'high-performance' });
+      renderer = new THREE.WebGLRenderer({
+        antialias: true,
+        alpha: true,
+        powerPreference: 'high-performance',
+      });
     } catch {
       setFallback(true);
       return;
@@ -298,14 +363,14 @@ export function InteractiveParticles({
     container.appendChild(canvasEl);
 
     const scene = new THREE.Scene();
-    const camera = new THREE.PerspectiveCamera(44, width / height, 1, 3000);
-    camera.position.z = 360;
+    const camera = new THREE.PerspectiveCamera(CAMERA_FOV, width / height, 1, 3000);
+    camera.position.z = CAMERA_Z;
 
     const touch = new TouchTexture();
     const raycaster = new THREE.Raycaster();
     const mouse = new THREE.Vector2(-99, -99);
 
-    const hitGeo = new THREE.PlaneGeometry(520, 220, 1, 1);
+    const hitGeo = new THREE.PlaneGeometry(SAMPLE_W, SAMPLE_H, 1, 1);
     const hitMat = new THREE.MeshBasicMaterial({ visible: false });
     const hitMesh = new THREE.Mesh(hitGeo, hitMat);
     scene.add(hitMesh);
@@ -318,10 +383,16 @@ export function InteractiveParticles({
     let timeoutId = 0;
     const clock = new THREE.Clock();
 
+    const syncMeshScale = (w: number, h: number) => {
+      const s = computeHeroParticleScale(w, h);
+      if (particlesMesh) particlesMesh.scale.setScalar(s);
+      hitMesh.scale.setScalar(s);
+    };
+
     const buildParticlesFromBitmap = () => {
       if (disposed) return;
 
-      const dataUrl = createTypographySampleDataUrl(text, subtitle);
+      const dataUrl = createTypographySampleDataUrl(text, secondaryText, subtitle);
       if (!dataUrl) {
         setFallback(true);
         return;
@@ -338,8 +409,8 @@ export function InteractiveParticles({
         texture.generateMipmaps = false;
 
         const img = texture.image as HTMLImageElement;
-        const imgW = img.width || 480;
-        const imgH = img.height || 170;
+        const imgW = img.width || SAMPLE_W;
+        const imgH = img.height || SAMPLE_H;
 
         const sampleCanvas = document.createElement('canvas');
         sampleCanvas.width = imgW;
@@ -348,7 +419,8 @@ export function InteractiveParticles({
         ctx.drawImage(img, 0, 0, imgW, imgH);
         const imgData = ctx.getImageData(0, 0, imgW, imgH).data;
 
-        const step = isSoftwareGl ? 2 : 1;
+        // Tuned stride for rich particle density with fluid 60fps performance
+        const step = isSoftwareGl ? 3 : 2;
         const indicesList: number[] = [];
         const offsetsList: number[] = [];
         const anglesList: number[] = [];
@@ -391,9 +463,9 @@ export function InteractiveParticles({
         const material = new THREE.RawShaderMaterial({
           uniforms: {
             uTime: { value: 0 },
-            uRandom: { value: prefersReduced ? 0.0 : 0.45 },
-            uDepth: { value: prefersReduced ? 0.0 : 1.1 },
-            uSize: { value: particleSize * (isSoftwareGl ? 1.4 : 1) },
+            uRandom: { value: prefersReduced ? 0.0 : 0.72 },
+            uDepth: { value: prefersReduced ? 0.0 : 1.55 },
+            uSize: { value: particleSize * (isSoftwareGl ? 1.55 : 1.25) },
             uTextureSize: { value: new THREE.Vector2(imgW, imgH) },
             uTexture: { value: texture },
             uTouch: { value: touch.texture },
@@ -409,8 +481,9 @@ export function InteractiveParticles({
         particlesMesh = new THREE.Mesh(geometry, material);
         particlesMesh.frustumCulled = false;
 
-        const fitScale = Math.min((width * 0.9) / imgW, (height * 0.85) / imgH) * 0.92;
-        particlesMesh.scale.setScalar(Math.max(0.45, Math.min(1.15, fitScale)));
+        const cw = Math.max(1, container.clientWidth);
+        const ch = Math.max(1, container.clientHeight);
+        syncMeshScale(cw, ch);
 
         scene.add(particlesMesh);
         renderer?.render(scene, camera);
@@ -436,6 +509,7 @@ export function InteractiveParticles({
     };
 
     container.addEventListener('pointermove', onPointerMove, { passive: true });
+    container.addEventListener('pointerdown', onPointerMove, { passive: true });
 
     const observer = new IntersectionObserver(
       (entries) => {
@@ -452,12 +526,16 @@ export function InteractiveParticles({
       camera.aspect = w / h;
       camera.updateProjectionMatrix();
       renderer.setSize(w, h);
-      if (particlesMesh) {
-        const fitScale = Math.min((w * 0.9) / 480, (h * 0.85) / 170) * 0.92;
-        particlesMesh.scale.setScalar(Math.max(0.42, Math.min(1.15, fitScale)));
+      syncMeshScale(w, h);
+      if (prefersReduced && particlesMesh) {
+        renderer.render(scene, camera);
       }
     };
-    window.addEventListener('resize', onResize);
+
+    const resizeObserver =
+      typeof ResizeObserver !== 'undefined' ? new ResizeObserver(onResize) : null;
+    resizeObserver?.observe(container);
+    window.addEventListener('resize', onResize, { passive: true });
 
     const tick = () => {
       if (disposed || prefersReduced) return;
@@ -485,7 +563,9 @@ export function InteractiveParticles({
       window.cancelAnimationFrame(rafId);
       window.clearTimeout(timeoutId);
       observer.disconnect();
+      resizeObserver?.disconnect();
       container.removeEventListener('pointermove', onPointerMove);
+      container.removeEventListener('pointerdown', onPointerMove);
       window.removeEventListener('resize', onResize);
 
       hitGeo.dispose();
@@ -502,16 +582,21 @@ export function InteractiveParticles({
         container.removeChild(canvasEl);
       }
     };
-  }, [accentColor, particleColor, particleSize, subtitle, text]);
+  }, [accentColor, particleColor, particleSize, secondaryText, subtitle, text]);
 
   if (fallback) {
     return (
       <div className={cn('flex flex-col items-center justify-center py-12 px-4 text-center', className)}>
-        <p className="font-display text-5xl sm:text-7xl font-bold uppercase tracking-tight text-[#F3F0E9]">
+        <p className="font-display text-5xl sm:text-7xl lg:text-8xl font-extrabold uppercase tracking-tight text-[#F3F0E9] leading-none">
           {text}
         </p>
+        {secondaryText && (
+          <p className="font-display text-2xl sm:text-4xl lg:text-5xl font-bold uppercase tracking-[0.22em] text-[#F3F0E9]/90 mt-2">
+            {secondaryText}
+          </p>
+        )}
         {subtitle && (
-          <p className="font-mono-tabular text-xs sm:text-sm uppercase tracking-[0.28em] text-[#EC743C] mt-2">
+          <p className="font-mono-tabular text-xs sm:text-sm uppercase tracking-[0.28em] text-[#EC743C] mt-4">
             {subtitle}
           </p>
         )}
@@ -523,8 +608,13 @@ export function InteractiveParticles({
     <div
       ref={containerRef}
       role="img"
-      aria-label={`${text} — ${subtitle ?? 'interactive metallurgical particle typography'}`}
-      className={cn('relative w-full h-full min-h-[220px] sm:min-h-[260px] select-none overflow-hidden cursor-crosshair', className)}
+      aria-label={`${text}${secondaryText ? ` ${secondaryText}` : ''} — ${
+        subtitle ?? 'interactive metallurgical particle typography'
+      }`}
+      className={cn(
+        'relative w-full h-full min-h-[280px] sm:min-h-[380px] lg:min-h-[460px] select-none overflow-hidden cursor-crosshair',
+        className
+      )}
     />
   );
 }

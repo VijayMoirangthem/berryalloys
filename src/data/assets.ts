@@ -30,6 +30,10 @@ import ferroChromeImg from '../assets/images/ferro_chrome_crystals_1794773263273
 import ferroSiliconImg from '../assets/images/ferro_silicon_granules_1794773263704.jpg';
 import silicoManganeseImg from '../assets/images/silico_manganese_ingots_1794773266157.jpg';
 import solarPlantImg from '../assets/images/solar_industrial_plant_1794767506553.jpg';
+import teamFurnaceEngineersImg from '../assets/images/team_furnace_engineers_1794873970636.jpg';
+import teamQaMetallurgistsImg from '../assets/images/team_qa_metallurgists_1794873971080.jpg';
+import teamZeroHarmBriefingImg from '../assets/images/team_zero_harm_briefing_1794873970938.jpg';
+import teamDispatchCrewImg from '../assets/images/team_dispatch_crew_1794873972811.jpg';
 
 export interface VisualAsset {
   id: string;
@@ -44,6 +48,7 @@ export interface VisualAsset {
     | 'Logistics'
     | 'Energy'
     | 'Community & CSR'
+    | 'Workforce & People'
     | 'Corporate';
   isOfficialPhoto?: boolean;
   specimenPlate?: boolean;
@@ -272,12 +277,44 @@ export const ASSETS = {
     caption: 'Illustrative industrial solar power generation adjacent to alloy manufacturing',
     category: 'Energy',
   },
+  teamFurnaceEngineers: {
+    id: 'team-furnace-engineers',
+    src: teamFurnaceEngineersImg,
+    alt: 'Illustrative scene of Indian metallurgical furnace engineers in hard hats and fire-retardant jackets overseeing submerged-arc furnace operations',
+    caption: 'Illustrative smelting shift engineers monitoring submerged-arc reduction bays',
+    category: 'Workforce & People',
+  },
+  teamQaMetallurgists: {
+    id: 'team-qa-metallurgists',
+    src: teamQaMetallurgistsImg,
+    alt: 'Illustrative scene of metallurgical quality assurance analysts examining crystalline ferro-manganese specimens beside an optical emission spectrometer',
+    caption: 'Illustrative QA/QC laboratory chemists conducting batch alloy specimen verification',
+    category: 'Workforce & People',
+  },
+  teamZeroHarmBriefing: {
+    id: 'team-zero-harm-briefing',
+    src: teamZeroHarmBriefingImg,
+    alt: 'Illustrative Zero Harm morning safety briefing with Indian plant technicians and supervisors wearing helmets and high-visibility vests',
+    caption: 'Illustrative Zero Harm shift briefing reinforcing ISO 45001 shopfloor safety protocols',
+    category: 'Workforce & People',
+  },
+  teamDispatchCrew: {
+    id: 'team-dispatch-crew',
+    src: teamDispatchCrewImg,
+    alt: 'Illustrative plant export logistics crew inspecting FIBC jumbo bags of crushed ferro alloys prior to dispatch',
+    caption: 'Illustrative dispatch & logistics team inspecting screened alloy jumbo bags',
+    category: 'Workforce & People',
+  },
 } as const satisfies Record<string, VisualAsset>;
 
 export const GALLERY_ITEMS: VisualAsset[] = [
   ASSETS.officialPlantGate,
   ASSETS.officialAerialComplex,
   ASSETS.officialPlantOverview,
+  ASSETS.teamFurnaceEngineers,
+  ASSETS.teamZeroHarmBriefing,
+  ASSETS.teamQaMetallurgists,
+  ASSETS.teamDispatchCrew,
   ASSETS.heroSmelting,
   ASSETS.furnaceElectrodes,
   ASSETS.officialProdFeMn,

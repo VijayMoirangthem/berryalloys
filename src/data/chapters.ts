@@ -10,7 +10,7 @@ export const HOME_CHAPTERS: HomeChapter[] = [
     id: 'overview',
     number: '01',
     label: 'Overview',
-    summary: 'Strength begins with precision',
+    summary: 'Berry Alloys Limited · Heat to precision',
   },
   {
     id: 'legacy',
@@ -51,8 +51,8 @@ export const HOME_CHAPTERS: HomeChapter[] = [
   {
     id: 'responsibility',
     number: '08',
-    label: 'Stewardship',
-    summary: 'Clean power disclosure & grassroots CSR',
+    label: 'People & CSR',
+    summary: 'Workforce, clean power & grassroots CSR',
   },
   {
     id: 'presence',

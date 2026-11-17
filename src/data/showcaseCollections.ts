@@ -9,14 +9,14 @@ import type { PerspectiveSlide } from '../components/ui/PerspectiveCarousel';
 export const LIFE_CULTURE_SCATTER_SETS: ScatterImageSet[] = [
   {
     id: 'workplace-culture',
-    label: 'Workplace & Recognition',
+    label: 'Shopfloor Teams & Recognition',
     subtitle:
-      'ET Edge Best Organization to Work 2026 culture, plant operations at Bobbili, and promoter stewardship.',
+      'ET Edge Best Organization to Work 2026 culture, furnace engineering shifts, and Zero Harm workplace leadership.',
     images: [
       {
-        src: ASSETS.officialPlantGate.src,
-        alt: ASSETS.officialPlantGate.alt,
-        caption: 'Bobbili Works Gate',
+        src: ASSETS.teamFurnaceEngineers.src,
+        alt: ASSETS.teamFurnaceEngineers.alt,
+        caption: 'Furnace Bay Engineering Shift',
       },
       {
         src: ASSETS.awardEtEdge2026.src,
@@ -25,24 +25,24 @@ export const LIFE_CULTURE_SCATTER_SETS: ScatterImageSet[] = [
         isEmblem: true,
       },
       {
-        src: ASSETS.officialAerialComplex.src,
-        alt: ASSETS.officialAerialComplex.alt,
-        caption: 'Integrated Smelting Complex',
+        src: ASSETS.teamZeroHarmBriefing.src,
+        alt: ASSETS.teamZeroHarmBriefing.alt,
+        caption: 'Zero Harm Safety Briefing',
       },
       {
-        src: ASSETS.corporateHouse.src,
-        alt: ASSETS.corporateHouse.alt,
-        caption: 'Corporate House · Kolkata',
+        src: ASSETS.teamQaMetallurgists.src,
+        alt: ASSETS.teamQaMetallurgists.alt,
+        caption: 'QA/QC Assay Team',
       },
       {
-        src: ASSETS.officialPlantOverview.src,
-        alt: ASSETS.officialPlantOverview.alt,
-        caption: 'Bobbili Reduction Bays',
+        src: ASSETS.teamDispatchCrew.src,
+        alt: ASSETS.teamDispatchCrew.alt,
+        caption: 'Dispatch & Logistics Crew',
       },
       {
-        src: ASSETS.qualityLab.src,
-        alt: ASSETS.qualityLab.alt,
-        caption: 'Assay & QA Laboratory',
+        src: ASSETS.officialPlantGate.src,
+        alt: ASSETS.officialPlantGate.alt,
+        caption: 'Bobbili Works Complex',
       },
     ],
   },
@@ -58,14 +58,19 @@ export const LIFE_CULTURE_SCATTER_SETS: ScatterImageSet[] = [
         caption: 'Abhaya Health Camp 2026',
       },
       {
+        src: ASSETS.csrPlantation.src,
+        alt: ASSETS.csrPlantation.alt,
+        caption: 'Plant Personnel Sapling Drive',
+      },
+      {
+        src: ASSETS.teamZeroHarmBriefing.src,
+        alt: ASSETS.teamZeroHarmBriefing.alt,
+        caption: 'Zero Harm Shift Briefing',
+      },
+      {
         src: ASSETS.csrWater.src,
         alt: ASSETS.csrWater.alt,
         caption: 'RO Clean Water Stations',
-      },
-      {
-        src: ASSETS.officialPlantOverview.src,
-        alt: ASSETS.officialPlantOverview.alt,
-        caption: 'Bobbili Plant Corridor',
       },
       {
         src: ASSETS.officialGreenBelt.src,
@@ -73,14 +78,9 @@ export const LIFE_CULTURE_SCATTER_SETS: ScatterImageSet[] = [
         caption: 'Green Belt Canopy',
       },
       {
-        src: ASSETS.csrPlantation.src,
-        alt: ASSETS.csrPlantation.alt,
-        caption: 'Workforce Sapling Drive',
-      },
-      {
         src: ASSETS.csrSchool.src,
         alt: ASSETS.csrSchool.alt,
-        caption: 'Community Outreach Desk',
+        caption: 'Employee Family & School Aid',
       },
     ],
   },
@@ -134,9 +134,9 @@ export const LIFE_CULTURE_SCATTER_SETS: ScatterImageSet[] = [
         caption: 'Rooftop Photovoltaic Array',
       },
       {
-        src: ASSETS.csrPlantation.src,
-        alt: ASSETS.csrPlantation.alt,
-        caption: 'Native Sapling Plantation',
+        src: ASSETS.teamDispatchCrew.src,
+        alt: ASSETS.teamDispatchCrew.alt,
+        caption: 'Jumbo Bagging & Dispatch',
       },
       {
         src: ASSETS.milestone2025Visual.src,
@@ -189,8 +189,8 @@ export const PLANT_REVEAL_ROWS: ImageRevealItem[] = [
     label: 'Visakhapatnam Port Gateway',
     category: 'Coastal Andhra · Export Corridor',
     subtitle: 'Director office (Visakhapatnam 530003) & Three Star Export House marine bulk dispatch',
-    image: ASSETS.portLogistics.src,
-    alt: ASSETS.portLogistics.alt,
+    image: ASSETS.teamDispatchCrew.src,
+    alt: ASSETS.teamDispatchCrew.alt,
     to: '/contact',
   },
   {
@@ -206,11 +206,11 @@ export const PLANT_REVEAL_ROWS: ImageRevealItem[] = [
   {
     id: 'solar-stewardship',
     index: '05',
-    label: 'Captive Solar, Wind & Green Belt',
-    category: 'ISO 14067 · CBAM · Clean Power',
-    subtitle: '83 MW solar & 29.6 MW wind sustainability disclosures with planted ecological buffers',
-    image: ASSETS.officialSolarRoof.src,
-    alt: ASSETS.officialSolarRoof.alt,
+    label: 'Workforce Safety, Solar & Green Belt',
+    category: 'ET Edge 2026 · Zero Harm · Clean Power',
+    subtitle: 'Shopfloor engineers, Zero Harm seminars, 83 MW solar & 29.6 MW wind disclosures',
+    image: ASSETS.teamZeroHarmBriefing.src,
+    alt: ASSETS.teamZeroHarmBriefing.alt,
     to: '/sustainability',
   },
 ];

@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react';
 import { AnimatePresence, motion, useReducedMotion } from 'motion/react';
+import { BerryMonogram } from '../BerryMonogram';
 import { BrandLockup } from '../BrandLockup';
 
 const SESSION_KEY = 'berry-alloys-intro-seen';
@@ -87,28 +88,28 @@ export function KineticLoader() {
 
             {/* Kinetic Orbit Monogram + Wordmark */}
             <div className="flex items-center gap-3 sm:gap-5">
-              <div className="relative w-11 h-11 sm:w-14 sm:h-14 border border-[#F3F0E9]/25 bg-[#191C20] flex items-center justify-center">
+              <div className="relative w-14 h-14 sm:w-16 sm:h-16 flex items-center justify-center">
                 <motion.span
                   aria-hidden="true"
                   animate={{ rotate: 360 }}
-                  transition={{ repeat: Infinity, duration: 2.2, ease: 'linear' }}
-                  className="block w-full h-full relative"
+                  transition={{ repeat: Infinity, duration: 2.6, ease: 'linear' }}
+                  className="block w-full h-full border border-[#F3F0E9]/22 relative"
                 >
                   <span className="absolute -top-1 left-1/2 -translate-x-1/2 w-2 h-2 bg-[#EC743C]" />
                   <span className="absolute -bottom-1 left-1/2 -translate-x-1/2 w-2 h-2 bg-[#F3F0E9]" />
                 </motion.span>
-                <span className="absolute font-mono-tabular text-[11px] font-bold tracking-wider text-[#F3F0E9]">
-                  BA
-                </span>
+                <div className="absolute inset-0 flex items-center justify-center">
+                  <BerryMonogram size={42} title="Berry Alloys Limited" />
+                </div>
               </div>
 
               <motion.p
                 initial={{ letterSpacing: '0.18em', opacity: 0 }}
                 animate={{ letterSpacing: '0.04em', opacity: 1 }}
                 transition={{ duration: 0.55, ease: [0.16, 1, 0.3, 1] }}
-                className="font-display text-4xl sm:text-6xl font-bold uppercase tracking-tight text-[#F3F0E9]"
+                className="font-display text-3xl sm:text-5xl font-bold uppercase tracking-tight text-[#F3F0E9]"
               >
-                Berry Alloys
+                Berry Alloys Limited
               </motion.p>
             </div>
 
