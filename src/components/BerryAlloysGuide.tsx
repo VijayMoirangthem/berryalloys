@@ -25,6 +25,11 @@ import { AnimatePresence, motion, useReducedMotion } from 'motion/react';
 import { KNOWLEDGE_BASE, KNOWLEDGE_CATEGORIES } from '../data/knowledgeBase';
 import { useGuide } from '../context/GuideContext';
 import { CompassMark } from './CompassMark';
+import { useAssistant } from '../assistant/AssistantContext';
+import { AssistantLanguageSelect, LocalizedCompassBody } from '../assistant/LocalizedCompassBody';
+import { DICTIONARIES } from '../i18n';
+import { LOCALE_META } from '../i18n/locales';
+import { useLocale } from '../i18n/useLocale';
 
 const MAX_INPUT_LENGTH = 360;
 const LAUNCHER_PREF_KEY = 'berry-compass-launcher-v1';
@@ -106,6 +111,12 @@ export function BerryAlloysGuide() {
   const [snapPreviewEdge, setSnapPreviewEdge] = useState<DockEdge>(null);
   const [isPeekRevealed, setIsPeekRevealed] = useState(false);
   const [isFocusWithinLauncher, setIsFocusWithinLauncher] = useState(false);
+  // Legacy English pages keep the existing English engine; every localised route (and any non-English assistant language)
+  // uses the multilingual RFQ co-pilot body.
+  const assistant = useAssistant();
+  const { routeLocale } = useLocale();
+  const useLocalizedBody = assistant.lang !== 'en' || routeLocale !== null;
+  const tC = DICTIONARIES[assistant.lang].compass;
   // The label pill is shown briefly on the first visit of a session so the launcher introduces itself.
   const [showIntroLabel, setShowIntroLabel] = useState(false);
   useEffect(() => {
@@ -692,13 +703,13 @@ export function BerryAlloysGuide() {
               className="w-full h-[var(--guide-vh)] sm:h-[min(660px,calc(100dvh-3rem))] sm:w-[420px] sm:max-w-[calc(100vw-3rem)] bg-[#FFFFFF] dark:bg-[#10243A] text-[#10243A] dark:text-[#F4F8FC] border-t sm:border border-[#10243A]/20 dark:border-[#F4F8FC]/20 shadow-2xl flex flex-col overflow-hidden"
             >
               {/* Header */}
-              <div className="shrink-0 px-4 sm:px-5 py-3.5 bg-[#10243A] text-[#F4F8FC] border-b border-[#F4F8FC]/14 flex items-start justify-between gap-3 pt-[max(0.875rem,env(safe-area-inset-top))]">
+              <div dir={LOCALE_META[assistant.lang].dir} lang={LOCALE_META[assistant.lang].htmlLang} className="shrink-0 px-4 sm:px-5 py-3.5 bg-[#10243A] text-[#F4F8FC] border-b border-[#F4F8FC]/14 flex items-start justify-between gap-3 pt-[max(0.875rem,env(safe-area-inset-top))]">
                 <span aria-hidden="true" className="group relative mt-0.5 hidden h-12 w-12 shrink-0 rounded-full bg-[radial-gradient(circle_at_30%_22%,#1B5C8C,#0B2A47_55%,#06131F)] text-[#69C5F5] ring-2 ring-[#69C5F5]/55 sm:block">
                   <CompassMark className="absolute inset-[5px] h-[calc(100%-10px)] w-[calc(100%-10px)]" />
                 </span>
                 <div className="min-w-0 flex-1 space-y-1">
                   <p className="text-[10px] font-mono-tabular uppercase tracking-widest text-[#69C5F5]">
-                    Automated product assistant · Answers from prepared company information.
+                    {tC.disclosure}
                   </p>
                   <h2
                     id="berry-guide-title"
@@ -710,7 +721,7 @@ export function BerryAlloysGuide() {
                     id="berry-guide-disclosure"
                     className="text-[11px] text-[#B5C5D7] leading-snug"
                   >
-                    Products, specifications and enquiries.
+                    {tC.purpose}
                   </p>
                 </div>
 
@@ -721,6 +732,7 @@ export function BerryAlloysGuide() {
                       setTopicBrowserOpen(false);
                       setInputNotice(null);
                       resetConversation();
+                      assistant.reset();
                     }}
                     aria-label="Reset conversation"
                     title="Reset conversation"
@@ -741,6 +753,16 @@ export function BerryAlloysGuide() {
                 </div>
               </div>
 
+              {/* Assistant language: independent of the website language, on its own row so the header keeps room for the title */}
+              <div className="shrink-0 flex items-center justify-between gap-3 border-b border-[#10243A]/12 dark:border-[#F4F8FC]/12 bg-[#F1F6FB] dark:bg-[#0D1B2E] px-4 sm:px-5 py-1.5">
+                <span className="text-[11px] text-[#465C72] dark:text-[#B5C5D7]">{tC.assistantLanguage}</span>
+                <AssistantLanguageSelect />
+              </div>
+
+              {useLocalizedBody ? (
+                <LocalizedCompassBody />
+              ) : (
+              <>
               {/* Polite Screen-Reader Statuses: announced once on preparation and once on final reply */}
               <div className="sr-only" role="status" aria-live="polite" aria-atomic="true">
                 {preparingAnnouncement}
@@ -1104,6 +1126,8 @@ export function BerryAlloysGuide() {
                   )}
                 </div>
               </div>
+              </>
+              )}
             </motion.div>
           </motion.div>
         )}

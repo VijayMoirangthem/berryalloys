@@ -5,11 +5,14 @@ import { OFFICES, UPCOMING_OFFICE_NOTICE } from '../data/company';
 import { getProductBySlug, PRODUCTS } from '../data/products';
 import { Breadcrumbs } from '../components/Breadcrumbs';
 import { EnquiryFormPanel } from '../components/EnquiryFormPanel';
+import { useLocation } from 'react-router-dom';
 import { SplitText } from '../components/motion/SplitText';
 import { SocialFlipButton } from '../components/ui/SocialFlipButton';
 
 export function ContactPage() {
   const [searchParams, setSearchParams] = useSearchParams();
+  const location = useLocation();
+  const rfqPrefill = searchParams.get('from') === 'rfq' ? (location.state as { prefill?: { gradeLabel?: string; sizingAndPacking?: string; message?: string } } | null)?.prefill : undefined;
   const urlTab = searchParams.get('tab') === 'general' ? 'general' : 'quote';
   const urlProduct = searchParams.get('product');
 
@@ -48,6 +51,7 @@ export function ContactPage() {
           <div className="lg:col-span-7">
             <EnquiryFormPanel
               selectedProductSlug={initialProductSlug}
+              prefill={rfqPrefill}
               initialTab={urlTab}
               onTabChange={handleTabChange}
               idPrefix="contact"

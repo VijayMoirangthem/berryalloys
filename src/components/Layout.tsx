@@ -18,6 +18,7 @@ import { useSearch } from '../context/SearchContext';
 import { BrandLockup } from './BrandLockup';
 import { ThemeToggle } from './ThemeToggle';
 import { AmbientMotionToggle } from './AmbientMotionToggle';
+import { LanguageSelector } from './localized/LanguageSelector';
 import { AnimatedFooterCanvas } from './ui/AnimatedFooterCanvas';
 import { SocialFlipButton } from './ui/SocialFlipButton';
 
@@ -507,6 +508,7 @@ export function Layout({ children }: LayoutProps) {
               <span className="hidden xl:inline font-mono-tabular text-[11px] opacity-80">⌘K</span>
             </button>
 
+            <LanguageSelector className="hidden sm:block" />
             <ThemeToggle overDarkHero={darkHeroOverlayHeader} />
 
             {/* Compact "Explore sections" menu for screens below xl */}
@@ -756,6 +758,9 @@ export function Layout({ children }: LayoutProps) {
                   <span className="font-mono-tabular text-[10px] opacity-75">⌘K</span>
                 </button>
 
+                <div className="pb-3">
+                  <LanguageSelector align="start" />
+                </div>
                 <nav aria-label="Mobile navigation" className="space-y-1">
                   <NavLink
                     to="/"
@@ -971,6 +976,14 @@ export function Layout({ children }: LayoutProps) {
               <AmbientMotionToggle />
               <Link to="/faq" className="hover:text-[#10243A] dark:hover:text-[#F4F8FC] transition-colors">
                 FAQs
+              </Link>
+              <span aria-hidden="true">·</span>
+              <Link to="/insights" className="hover:text-[#10243A] dark:hover:text-[#F4F8FC] transition-colors">
+                Buyer Guides
+              </Link>
+              <span aria-hidden="true">·</span>
+              <Link to="/en/" className="hover:text-[#10243A] dark:hover:text-[#F4F8FC] transition-colors">
+                International Buyers
               </Link>
               <span aria-hidden="true">·</span>
               <Link to="/documents" className="hover:text-[#10243A] dark:hover:text-[#F4F8FC] transition-colors">

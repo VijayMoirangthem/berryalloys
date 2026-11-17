@@ -19,6 +19,8 @@ import { useGuide } from '../context/GuideContext';
 import { BerryMonogram } from '../components/BerryMonogram';
 import { BrandLockup } from '../components/BrandLockup';
 import { ChapterRail } from '../components/ChapterRail';
+import { ClientLogoStrip } from '../components/ClientLogoStrip';
+import { InsightsPreview } from '../components/InsightsPreview';
 import { DirectorPortraitSection } from '../components/DirectorPortraitSection';
 import { EnquiryFormPanel } from '../components/EnquiryFormPanel';
 import { FacilityCorridorMap } from '../components/FacilityCorridorMap';
@@ -384,6 +386,13 @@ export function HomePage() {
           </div>
         </div>
       </section>
+
+      {/* Steel producers featured on the Berry Alloys website (logos from the company site; featured, not endorsed) */}
+      <div className="border-y border-[#10243A]/12 dark:border-[#F4F8FC]/10 bg-canvas py-8">
+        <div className="max-w-[1360px] mx-auto px-4 sm:px-6 lg:px-8 xl:px-14 2xl:px-8">
+          <ClientLogoStrip title="Steel producers featured on the Berry Alloys website" note="Logos are shown as featured on the company website. They are not endorsements." />
+        </div>
+      </div>
 
       {/* Institutional Credentials Continuous Marquee Ribbon */}
       <div
@@ -1447,6 +1456,8 @@ export function HomePage() {
 
       {/* 11 / FAQ — Concise Pre-Enquiry Questions */}
       <HomeFaqSection />
+
+      <InsightsPreview />
 
       {/* 12 / ENQUIRY — Commercial Quotation Desk & Offices */}
       <section

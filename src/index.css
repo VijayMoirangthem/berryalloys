@@ -506,3 +506,44 @@ html[data-ambient="paused"] .compass-needle {
 html[data-ambient="paused"] .flag-float {
   animation: none;
 }
+
+/* ---------- Localised routes: typography that suits each script ---------- */
+.loc-root:lang(ja) {
+  font-family: 'Noto Sans JP', 'Hiragino Sans', 'Hiragino Kaku Gothic ProN', 'Yu Gothic UI', 'Yu Gothic', 'Meiryo', system-ui, sans-serif;
+}
+.loc-root:lang(ko) {
+  font-family: 'Noto Sans KR', 'Apple SD Gothic Neo', 'Malgun Gothic', 'Nanum Gothic', system-ui, sans-serif;
+}
+.loc-root:lang(ar) {
+  font-family: 'Noto Sans Arabic', 'Segoe UI', 'Tahoma', 'Arial', system-ui, sans-serif;
+}
+/* Condensed Latin display faces and letter-spacing are not applied to CJK or Arabic. */
+.loc-root:lang(ja) :is(h1, h2, h3, h4, .font-display),
+.loc-root:lang(ko) :is(h1, h2, h3, h4, .font-display),
+.loc-root:lang(ar) :is(h1, h2, h3, h4, .font-display) {
+  font-family: inherit;
+  letter-spacing: 0;
+  text-transform: none;
+  font-weight: 700;
+  line-height: 1.3;
+  word-break: keep-all;
+  overflow-wrap: anywhere;
+}
+.loc-root:lang(ja) h1, .loc-root:lang(ko) h1 { line-height: 1.25; }
+.loc-root:lang(ja) :is(p, li, dd), .loc-root:lang(ko) :is(p, li, dd) { line-height: 1.85; }
+.loc-root:lang(ar) :is(p, li, dd) { line-height: 1.9; }
+/* German: allow long compound words to break instead of clipping or overflowing. */
+.loc-root:lang(de) :is(h1, h2, h3, p, li, button, a, dd, dt) { hyphens: auto; overflow-wrap: anywhere; }
+.loc-root :is(h1, h2, h3) { text-wrap: balance; }
+/* Tables stay left-to-right for numeric columns only where marked; text columns follow the language direction. */
+.loc-root table { font-variant-numeric: tabular-nums; }
+
+@keyframes compass-pulse-dot {
+  0%, 100% { opacity: 0.3; }
+  50% { opacity: 1; }
+}
+
+/* Logo marquee obeys the ambient-motion pause */
+html[data-ambient="paused"] .logo-slider__track {
+  animation: none;
+}

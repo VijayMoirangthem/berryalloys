@@ -23,6 +23,8 @@ interface EnquiryFormPanelProps {
   onTabChange?: (next: 'quote' | 'general') => void;
   idPrefix?: string;
   variant?: 'light' | 'dark' | 'auto';
+  /** Values carried over from the multilingual RFQ demo. Purely initial values; the visitor can edit everything. */
+  prefill?: { gradeLabel?: string; sizingAndPacking?: string; message?: string };
 }
 
 export function EnquiryFormPanel({
@@ -32,6 +34,7 @@ export function EnquiryFormPanel({
   onTabChange,
   idPrefix = 'enquiry',
   variant = 'auto',
+  prefill,
 }: EnquiryFormPanelProps) {
   const [tab, setTab] = useState<'quote' | 'general'>(initialTab);
   const [name, setName] = useState('');
@@ -43,10 +46,10 @@ export function EnquiryFormPanel({
       ? selectedProductSlug
       : PRODUCTS[0].slug
   );
-  const [gradeLabel, setGradeLabel] = useState('');
-  const [sizingAndPacking, setSizingAndPacking] = useState('');
+  const [gradeLabel, setGradeLabel] = useState(prefill?.gradeLabel ?? '');
+  const [sizingAndPacking, setSizingAndPacking] = useState(prefill?.sizingAndPacking ?? '');
   const [subject, setSubject] = useState('');
-  const [message, setMessage] = useState('');
+  const [message, setMessage] = useState(prefill?.message ?? '');
   const [errors, setErrors] = useState<Record<string, string>>({});
   const [submittedReceipt, setSubmittedReceipt] = useState<EnquiryPayload | null>(null);
 
