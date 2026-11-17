@@ -245,7 +245,7 @@ export function DirectorPortraitSection({ variant = 'home' }: DirectorPortraitSe
             <div
               ref={frameLayerRef}
               aria-hidden="true"
-              className="pointer-events-none absolute top-14 sm:top-18 inset-x-3 sm:inset-x-5 bottom-0 bg-gradient-to-br from-[#F1F6FB] via-[#E7F3FA] to-[#D4DFEB] dark:from-[#19314B] dark:via-[#12243B] dark:to-[#0D1B2E] border border-[#10243A]/14 dark:border-[#F4F8FC]/14 transition-[border-color] duration-500 will-change-transform"
+              className="pointer-events-none absolute top-14 sm:top-18 inset-x-3 sm:inset-x-5 bottom-0 bg-gradient-to-br from-[#FFFFFF] via-[#F6FAFE] to-[#E4EEF7] dark:from-[#2B5078] dark:via-[#1E3E62] dark:to-[#12294A] border border-[#10243A]/14 dark:border-[#F4F8FC]/14 transition-[border-color] duration-500 will-change-transform"
             >
               {/* Restrained horizontal copper accent hairline inside top edge of backdrop frame */}
               <div className="h-[2px] w-16 bg-brand dark:bg-[#69C5F5] mt-4 ml-4" />
@@ -261,7 +261,7 @@ export function DirectorPortraitSection({ variant = 'home' }: DirectorPortraitSe
             <div
               ref={shadowLayerRef}
               aria-hidden="true"
-              className="pointer-events-none absolute left-1/2 -translate-x-1/2 bottom-0 w-[68%] h-[76%] rounded-full bg-[#10243A]/24 dark:bg-black/65 blur-2xl will-change-transform"
+              className="pointer-events-none absolute left-1/2 -translate-x-1/2 bottom-0 w-[78%] h-[82%] rounded-full bg-white/90 dark:bg-[#9AD9FA]/30 blur-3xl will-change-transform"
             />
 
             {/* Layer 4 (Outer GSAP Entrance -> Inner rAF Tilt): Intact Original Cutout Portrait */}
@@ -277,7 +277,9 @@ export function DirectorPortraitSection({ variant = 'home' }: DirectorPortraitSe
                   height={1799}
                   loading="lazy"
                   decoding="async"
-                  className="block w-full h-auto max-h-[460px] sm:max-h-[500px] object-contain object-bottom drop-shadow-[0_14px_24px_rgba(16,36,58,0.18)] dark:drop-shadow-[0_18px_32px_rgba(0,0,0,0.55)]"
+                  // Gentle exposure lift only (brightness/contrast). Skin tone is not recoloured.
+                  style={{ filter: 'brightness(1.08) contrast(1.03) drop-shadow(0 10px 18px rgba(16,36,58,0.16))' }}
+                  className="block w-full h-auto max-h-[460px] sm:max-h-[500px] object-contain object-bottom"
                 />
               </div>
             </div>
