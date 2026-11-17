@@ -212,7 +212,7 @@ export const FACILITY_NODES: FacilityNode[] = [
     role: 'Primary highlighted ferro alloy manufacturing complex (Bobbili Growth Centre)',
     status: 'Active / Highlighted',
     detail: 'Core smelting and AOD refining hub highlighted on the company website for bulk manganese and silicon alloy production, plus announced ₹1,200 Cr / 93.43-acre expansion project.',
-    coordinates: { x: 268, y: 278 },
+    coordinates: { x: 204, y: 264 },
   },
   {
     id: 'visakhapatnam-port',
@@ -221,7 +221,7 @@ export const FACILITY_NODES: FacilityNode[] = [
     role: 'Deep-water export gateway & Director Office (Visakhapatnam 530003)',
     status: 'Active / Highlighted',
     detail: 'Coastal maritime logistics corridor supporting Three Star Export House containerised and bulk shipments alongside regional executive coordination.',
-    coordinates: { x: 245, y: 312 },
+    coordinates: { x: 224, y: 308 },
   },
   {
     id: 'dhalbhumgarh',
@@ -230,7 +230,7 @@ export const FACILITY_NODES: FacilityNode[] = [
     role: 'Manufacturing facility (Kadambeda Village, Dhalbhumgarh 832302)',
     status: 'Active / Highlighted',
     detail: 'Eastern India smelting complex with reported Unit-2 Kadambera expansion plans announced in August 2026.',
-    coordinates: { x: 356, y: 158 },
+    coordinates: { x: 376, y: 146 },
   },
   {
     id: 'ghatsila',
@@ -239,7 +239,7 @@ export const FACILITY_NODES: FacilityNode[] = [
     role: 'Existing 24 MVA furnace operations & planned DRI/WHR integration site',
     status: 'Reported Expansion',
     detail: 'Company sustainability records report existing 24 MVA furnace operations alongside planned two 1,000 TPD DRI plants and 90 MW waste heat recovery.',
-    coordinates: { x: 380, y: 170 },
+    coordinates: { x: 342, y: 118 },
   },
   {
     id: 'kolkata',
@@ -248,7 +248,7 @@ export const FACILITY_NODES: FacilityNode[] = [
     role: 'Registered Head Office (21A, Shakespeare Sarani, Kolkata 700017)',
     status: 'Documented Office',
     detail: 'Corporate governance, finance, MIS, and commercial marketing headquarters; future corporate office announced at 56 Chowringhee Road.',
-    coordinates: { x: 432, y: 184 },
+    coordinates: { x: 462, y: 126 },
   },
 ];
 

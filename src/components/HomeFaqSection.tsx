@@ -1,13 +1,13 @@
 import { useState } from 'react';
 import { Link } from 'react-router-dom';
-import { ArrowRight, ChevronDown, Compass, MessageSquare } from 'lucide-react';
-import { AnimatePresence, motion, useReducedMotion } from 'motion/react';
+import { ArrowRight, Compass, MessageSquare, Plus } from 'lucide-react';
 import { FEATURED_HOME_FAQS, KNOWLEDGE_BASE } from '../data/knowledgeBase';
 import { useGuide } from '../context/GuideContext';
+import { cn } from '../lib/utils';
+import { CreepyButton } from './ui/CreepyButton';
 import { IndustrialButton } from './ui/IndustrialButton';
 
 export function HomeFaqSection() {
-  const prefersReduced = useReducedMotion();
   const { openGuide, executeAction } = useGuide();
   const [openId, setOpenId] = useState<string | null>(FEATURED_HOME_FAQS[0]?.id ?? null);
 
@@ -42,20 +42,18 @@ export function HomeFaqSection() {
                 <ArrowRight className="w-4 h-4" aria-hidden="true" />
               </IndustrialButton>
 
-              <IndustrialButton
+              <CreepyButton
                 type="button"
-                variant="primary"
-                onClick={(e) =>
-                  openGuide({ returnFocusEl: e.currentTarget })
-                }
+                variant="copper"
+                onClick={(e) => openGuide({ returnFocusEl: e.currentTarget as HTMLElement })}
               >
                 <Compass className="w-4 h-4" aria-hidden="true" />
                 Open Berry Alloys Guide
-              </IndustrialButton>
+              </CreepyButton>
             </div>
           </div>
 
-          {/* Right Expandable FAQ Preview List */}
+          {/* Right Expandable FaqAccordion List (Smooth CSS Grid Row Expansion) */}
           <div className="lg:col-span-7 bg-white dark:bg-[#20242A] border border-[#141618]/14 dark:border-[#F3F0E9]/14 divide-y divide-[#141618]/12 dark:divide-[#F3F0E9]/12">
             {FEATURED_HOME_FAQS.map((entry) => {
               const isOpen = openId === entry.id;
@@ -63,7 +61,13 @@ export function HomeFaqSection() {
               const btnId = `home-faq-btn-${entry.id}`;
 
               return (
-                <article key={entry.id}>
+                <article
+                  key={entry.id}
+                  className={cn(
+                    'transition-colors duration-200',
+                    isOpen ? 'bg-[#F6F4EF]/55 dark:bg-[#191C20]/60' : ''
+                  )}
+                >
                   <h3>
                     <button
                       id={btnId}
@@ -71,7 +75,7 @@ export function HomeFaqSection() {
                       aria-expanded={isOpen}
                       aria-controls={panelId}
                       onClick={() => setOpenId(isOpen ? null : entry.id)}
-                      className="w-full text-left px-5 sm:px-6 py-5 min-h-[56px] flex items-start justify-between gap-4 hover:bg-[#F6F4EF]/70 dark:hover:bg-[#191C20]/60 transition-colors cursor-pointer"
+                      className="w-full text-left px-5 sm:px-6 py-5 min-h-[56px] flex items-start justify-between gap-4 hover:bg-[#F6F4EF]/80 dark:hover:bg-[#191C20]/80 transition-colors cursor-pointer"
                     >
                       <div className="space-y-1">
                         <span className="block text-[10px] font-mono-tabular uppercase tracking-wider text-[#9E4B28] dark:text-[#EC743C]">
@@ -81,27 +85,37 @@ export function HomeFaqSection() {
                           {entry.question}
                         </span>
                       </div>
-                      <ChevronDown
-                        className={`w-5 h-5 text-[#4A5054] dark:text-[#A1A7AB] shrink-0 mt-1 transition-transform duration-200 ${
-                          isOpen ? 'rotate-180 text-[#9E4B28] dark:text-[#EC743C]' : ''
-                        }`}
+                      <span
                         aria-hidden="true"
-                      />
+                        className={cn(
+                          'w-7 h-7 shrink-0 mt-1 border flex items-center justify-center transition-colors duration-200',
+                          isOpen
+                            ? 'bg-[#9E4B28] border-[#9E4B28] text-[#F6F4EF] dark:bg-[#EC743C] dark:border-[#EC743C] dark:text-[#141618]'
+                            : 'border-[#141618]/18 dark:border-[#F3F0E9]/18 text-[#4A5054] dark:text-[#A1A7AB]'
+                        )}
+                      >
+                        <Plus
+                          className={cn(
+                            'w-4 h-4 transition-transform duration-350',
+                            isOpen ? 'rotate-45' : ''
+                          )}
+                        />
+                      </span>
                     </button>
                   </h3>
 
-                  <AnimatePresence initial={false}>
-                    {isOpen && (
-                      <motion.div
-                        id={panelId}
-                        role="region"
-                        aria-labelledby={btnId}
-                        initial={prefersReduced ? false : { opacity: 0 }}
-                        animate={{ opacity: 1 }}
-                        exit={prefersReduced ? undefined : { opacity: 0 }}
-                        transition={{ duration: 0.16 }}
-                        className="px-5 sm:px-6 pb-6 pt-1 space-y-4"
-                      >
+                  <div
+                    id={panelId}
+                    role="region"
+                    aria-labelledby={btnId}
+                    aria-hidden={!isOpen}
+                    className={cn(
+                      'grid transition-[grid-template-rows,opacity] duration-450 ease-[cubic-bezier(0.22,1,0.36,1)]',
+                      isOpen ? 'grid-rows-[1fr] opacity-100' : 'grid-rows-[0fr] opacity-0'
+                    )}
+                  >
+                    <div className="overflow-hidden">
+                      <div className="px-5 sm:px-6 pb-6 pt-1 space-y-4">
                         <p className="text-sm text-[#4A5054] dark:text-[#F3F0E9]/82 leading-relaxed max-w-[65ch]">
                           {entry.answer}
                         </p>
@@ -114,8 +128,12 @@ export function HomeFaqSection() {
                           {entry.actions[0] && (
                             <Link
                               to={entry.actions[0].to}
+                              tabIndex={isOpen ? 0 : -1}
                               onClick={(e) => {
-                                if (entry.actions[0].enquiryProductSlug || entry.actions[0].to.startsWith('/#')) {
+                                if (
+                                  entry.actions[0].enquiryProductSlug ||
+                                  entry.actions[0].to.startsWith('/#')
+                                ) {
                                   e.preventDefault();
                                   executeAction(entry.actions[0]);
                                 }
@@ -129,6 +147,7 @@ export function HomeFaqSection() {
 
                           <button
                             type="button"
+                            tabIndex={isOpen ? 0 : -1}
                             onClick={(e) =>
                               openGuide({
                                 entryId: entry.id,
@@ -143,14 +162,15 @@ export function HomeFaqSection() {
 
                           <Link
                             to={`/faq#${entry.id}`}
+                            tabIndex={isOpen ? 0 : -1}
                             className="text-xs text-[#4A5054] dark:text-[#A1A7AB] hover:underline ml-auto"
                           >
                             Direct FAQ link
                           </Link>
                         </div>
-                      </motion.div>
-                    )}
-                  </AnimatePresence>
+                      </div>
+                    </div>
+                  </div>
                 </article>
               );
             })}

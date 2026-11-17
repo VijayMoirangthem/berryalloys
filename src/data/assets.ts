@@ -1,12 +1,13 @@
 // Real official images sourced from berryalloys.com alongside high-resolution metallurgical scenes
-import logoBerryImg from '../assets/images/official/logo_berry.png';
+import logoBerryImg from '../assets/images/official/berry_logo_clean.png';
+import logoBerryDarkImg from '../assets/images/official/berry_logo_dark.png';
 import aboutPlantImg from '../assets/images/official/about_plant.jpeg';
 import heroAerialPlantImg from '../assets/images/official/hero_slide_1.jpg';
 import heroSolarRoofImg from '../assets/images/official/hero_slide_2.jpg';
 import heroGreenBeltImg from '../assets/images/official/hero_slide_3.jpg';
 import plantOverviewWideImg from '../assets/images/official/plant_overview_9.jpg';
 import berryBuildingImg from '../assets/images/official/berry_building.png';
-import vijayGuptaMdImg from '../assets/images/official/vijay_gupta_md.png';
+import vijayGuptaMdImg from '../assets/images/official/vijay_gupta_md_clean.png';
 import prodFeMnImg from '../assets/images/official/prod_femn_hc.jpg';
 import prodSiMnImg from '../assets/images/official/prod_simn_hc.jpg';
 import prodFeCrImg from '../assets/images/official/prod_fecr_lc.jpg';
@@ -49,6 +50,7 @@ export interface VisualAsset {
 }
 
 export const OFFICIAL_BRAND_MARK = logoBerryImg;
+export const OFFICIAL_BRAND_MARK_DARK = logoBerryDarkImg;
 
 export const ASSETS = {
   officialPlantGate: {

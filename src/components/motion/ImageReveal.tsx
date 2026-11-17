@@ -40,7 +40,7 @@ export function ImageReveal({
         {
           clipPath: 'inset(0% 0% 0% 0%)',
           opacity: 1,
-          duration: 0.85,
+          duration: 1.18,
           ease: 'power3.out',
           clearProps: 'clipPath,opacity',
           scrollTrigger: {
@@ -56,7 +56,7 @@ export function ImageReveal({
         { scale: 1.07 },
         {
           scale: 1,
-          duration: 1.05,
+          duration: 1.4,
           ease: 'power2.out',
           clearProps: 'transform',
           scrollTrigger: {

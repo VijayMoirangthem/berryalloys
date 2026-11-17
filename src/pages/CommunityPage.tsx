@@ -2,10 +2,13 @@ import { Link } from 'react-router-dom';
 import { ArrowRight } from 'lucide-react';
 import { ASSETS } from '../data/assets';
 import { CSR_STORIES } from '../data/communityNewsCareersDocs';
+import { CSR_DIAGONAL_SLIDES, LIFE_CULTURE_SCATTER_SETS } from '../data/showcaseCollections';
 import { Breadcrumbs } from '../components/Breadcrumbs';
 import { ResilientImage } from '../components/ResilientImage';
 import { CORPORATE_SUBNAV_LINKS, SubNav } from '../components/SubNav';
 import { SplitText } from '../components/motion/SplitText';
+import { DiagonalCarousel } from '../components/ui/DiagonalCarousel';
+import { ImageScatter } from '../components/ui/ImageScatter';
 
 const CSR_PHOTO_MAP: Record<string, { src: string; alt: string } | undefined> = {
   'school-infrastructure': ASSETS.csrSchool,
@@ -64,6 +67,33 @@ export function CommunityPage() {
             </ul>
           </div>
         </article>
+
+        {/* Slanted Fieldwork Deck */}
+        <DiagonalCarousel
+          slides={CSR_DIAGONAL_SLIDES}
+          eyebrow="Grassroots Field Highlights · Education, Water & Health"
+        />
+
+        {/* Interactive Scattered Photo Showcase */}
+        <section aria-labelledby="community-scatter-heading" className="pt-4 space-y-6">
+          <div className="flex flex-col sm:flex-row sm:items-end justify-between gap-2">
+            <div>
+              <p className="text-xs font-mono-tabular uppercase tracking-widest text-[#9E4B28] dark:text-[#EC743C]">
+                Life & Community Fieldwork
+              </p>
+              <h2
+                id="community-scatter-heading"
+                className="font-display text-3xl font-bold uppercase text-[#141618] dark:text-[#F3F0E9]"
+              >
+                Plant Culture, Health & Ecological Programs
+              </h2>
+            </div>
+            <p className="text-xs text-[#4A5054] dark:text-[#A1A7AB]">
+              Switch sets or pause playback to inspect each community field archive.
+            </p>
+          </div>
+          <ImageScatter imageSets={LIFE_CULTURE_SCATTER_SETS} />
+        </section>
 
         {/* Documented CSR Stories Index */}
         <section aria-labelledby="csr-stories-heading" className="pt-4">

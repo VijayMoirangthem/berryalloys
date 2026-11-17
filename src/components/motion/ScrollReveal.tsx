@@ -38,8 +38,8 @@ export function ScrollReveal({
         {
           opacity: 1,
           y: 0,
-          stagger: 0.035,
-          duration: 0.45,
+          stagger: 0.048,
+          duration: 0.78,
           ease: 'power2.out',
           clearProps: 'transform,opacity',
           scrollTrigger: {

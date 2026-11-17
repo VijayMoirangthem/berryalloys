@@ -1,9 +1,11 @@
 import { useState } from 'react';
 import { Link } from 'react-router-dom';
 import { ArrowRight, ExternalLink } from 'lucide-react';
+import { GALLERY_ITEMS } from '../data/assets';
 import { NEWS_ITEMS, NewsItem } from '../data/communityNewsCareersDocs';
 import { Breadcrumbs } from '../components/Breadcrumbs';
 import { SplitText } from '../components/motion/SplitText';
+import { ImageTrail } from '../components/ui/ImageTrail';
 
 type NewsFilter = 'All' | NewsItem['type'];
 
@@ -17,21 +19,26 @@ export function NewsPage() {
   return (
     <div className="bg-[#F6F4EF] dark:bg-[#121417] text-[#141618] dark:text-[#F3F0E9] py-12 lg:py-16">
       <div className="max-w-[1360px] mx-auto px-4 sm:px-6 lg:px-8 space-y-12">
-        <div className="max-w-3xl space-y-4">
-          <Breadcrumbs items={[{ label: 'News & Media' }]} />
+        <ImageTrail
+          images={GALLERY_ITEMS.slice(0, 6).map((i) => ({ src: i.src, alt: i.alt }))}
+          className="border border-[#141618]/12 dark:border-[#F3F0E9]/14 bg-[#ECE8DF]/55 dark:bg-[#191C20]/70 p-6 sm:p-10"
+        >
+          <div className="max-w-3xl space-y-4">
+            <Breadcrumbs items={[{ label: 'News & Media' }]} />
 
-          <p className="text-xs font-mono-tabular uppercase tracking-widest text-[#9E4B28] dark:text-[#EC743C]">
-            Announcements & Technical Notes
-          </p>
-          <SplitText
-            text="Company news, awards & steelmaking articles."
-            as="h1"
-            className="font-display fluid-section-title font-bold uppercase tracking-tight text-[#141618] dark:text-[#F3F0E9]"
-          />
-          <p className="text-base text-[#4A5054] dark:text-[#A1A7AB] leading-relaxed">
-            Dated announcements and educational metallurgical articles indexed from the Berry Alloys Limited website. Where only an announcement excerpt was archived in our source bundle, each detail view links directly to the published company portal.
-          </p>
-        </div>
+            <p className="text-xs font-mono-tabular uppercase tracking-widest text-[#9E4B28] dark:text-[#EC743C]">
+              Announcements & Technical Notes
+            </p>
+            <SplitText
+              text="Company news, awards & steelmaking articles."
+              as="h1"
+              className="font-display fluid-section-title font-bold uppercase tracking-tight text-[#141618] dark:text-[#F3F0E9]"
+            />
+            <p className="text-base text-[#4A5054] dark:text-[#A1A7AB] leading-relaxed">
+              Dated announcements and educational metallurgical articles indexed from the Berry Alloys Limited website. Where only an announcement excerpt was archived in our source bundle, each detail view links directly to the published company portal.
+            </p>
+          </div>
+        </ImageTrail>
 
         {/* Filter Bar */}
         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-6 border-b border-[#141618]/15 dark:border-[#F3F0E9]/14">
@@ -65,10 +72,14 @@ export function NewsPage() {
             href="https://berryalloys.com/ferro-alloys-news/"
             target="_blank"
             rel="noopener noreferrer"
-            className="inline-flex items-center gap-1.5 text-xs font-medium text-[#4A5054] dark:text-[#A1A7AB] hover:text-[#141618] dark:hover:text-[#F3F0E9] whitespace-nowrap"
+            className="group relative inline-flex items-center gap-1.5 pb-0.5 text-xs font-medium text-[#4A5054] dark:text-[#A1A7AB] hover:text-[#141618] dark:hover:text-[#F3F0E9] transition-colors duration-300 whitespace-nowrap"
           >
-            Company News Archive
+            <span>Company News Archive</span>
             <ExternalLink className="w-3.5 h-3.5" aria-hidden="true" />
+            <span
+              aria-hidden="true"
+              className="absolute inset-x-0 bottom-0 h-[1.5px] bg-[#9E4B28] dark:bg-[#EC743C] origin-left scale-x-0 group-hover:scale-x-100 transition-transform duration-500 ease-[cubic-bezier(0.22,1,0.36,1)]"
+            />
           </a>
         </div>
 
@@ -106,9 +117,9 @@ export function NewsPage() {
                   href={item.sourceUrl}
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="inline-flex items-center gap-1 text-xs text-[#4A5054] dark:text-[#A1A7AB] hover:text-[#141618] dark:hover:text-[#F3F0E9]"
+                  className="inline-flex items-center gap-1 text-xs text-[#4A5054] dark:text-[#A1A7AB] hover:text-[#141618] dark:hover:text-[#F3F0E9] hover:underline underline-offset-4 transition-colors duration-300"
                 >
-                  Source
+                  <span>Source</span>
                   <ExternalLink className="w-3 h-3" aria-hidden="true" />
                 </a>
               </div>

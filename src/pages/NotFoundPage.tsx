@@ -1,5 +1,6 @@
 import { Link } from 'react-router-dom';
 import { ArrowLeft, ArrowRight } from 'lucide-react';
+import { CreepyButton } from '../components/ui/CreepyButton';
 import { IndustrialButton } from '../components/ui/IndustrialButton';
 
 export function NotFoundPage() {
@@ -17,10 +18,10 @@ export function NotFoundPage() {
         </p>
 
         <div className="pt-4 flex flex-wrap items-center justify-center gap-4">
-          <IndustrialButton to="/" variant="secondary">
+          <CreepyButton to="/" variant="obsidian">
             <ArrowLeft className="w-4 h-4" aria-hidden="true" />
             Return Home
-          </IndustrialButton>
+          </CreepyButton>
           <IndustrialButton to="/products" variant="outline-light">
             Browse Alloys
             <ArrowRight className="w-4 h-4" aria-hidden="true" />

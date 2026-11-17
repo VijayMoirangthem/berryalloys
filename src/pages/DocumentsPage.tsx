@@ -1,15 +1,42 @@
 import { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { ExternalLink, FileText } from 'lucide-react';
 import { CORPORATE_DOCUMENT_GROUPS, CorporateDocGroup } from '../data/communityNewsCareersDocs';
 import { COMPANY_INFO } from '../data/company';
+import { BERRY_COMPENDIUM_BOOKS } from '../data/showcaseCollections';
 import { Breadcrumbs } from '../components/Breadcrumbs';
 import { CORPORATE_SUBNAV_LINKS, SubNav } from '../components/SubNav';
 import { SplitText } from '../components/motion/SplitText';
+import { BookCfg, BooksShowcase } from '../components/ui/BooksShowcase';
 
 type DocTypeFilter = 'All' | CorporateDocGroup['type'];
 
 export function DocumentsPage() {
+  const navigate = useNavigate();
   const [filter, setFilter] = useState<DocTypeFilter>('All');
+
+  const handleBookPrimary = (book: BookCfg) => {
+    if (book.id === 'mgt-7-statutory') {
+      setFilter('Annual Returns (Form MGT-7)');
+      document.getElementById('doc-directory')?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+      return;
+    }
+    if (book.targetRoute) {
+      navigate(book.targetRoute);
+    }
+  };
+
+  const handleBookSecondary = (book: BookCfg) => {
+    if (book.id === 'femn-aod-handbook' || book.id === 'simn-fesi-fecr-compendium') {
+      navigate('/contact?tab=quote');
+      return;
+    }
+    if (book.id === 'csr-community-chronicle') {
+      navigate('/careers');
+      return;
+    }
+    navigate(book.targetRoute ?? '/contact');
+  };
 
   const filteredGroups = CORPORATE_DOCUMENT_GROUPS.filter(
     (g) => filter === 'All' || g.type === filter
@@ -36,11 +63,41 @@ export function DocumentsPage() {
           </p>
         </div>
 
+        {/* Interactive 3D Compendium Stage */}
+        <section aria-labelledby="books-compendium-heading" className="space-y-4">
+          <div className="flex flex-col sm:flex-row sm:items-end justify-between gap-2">
+            <div>
+              <p className="text-xs font-mono-tabular uppercase tracking-widest text-[#9E4B28] dark:text-[#EC743C]">
+                3D Technical & Statutory Archive
+              </p>
+              <h2
+                id="books-compendium-heading"
+                className="font-display text-3xl font-bold uppercase text-[#141618] dark:text-[#F3F0E9]"
+              >
+                Inspect Bound Reference Dossiers
+              </h2>
+            </div>
+            <p className="text-xs text-[#4A5054] dark:text-[#A1A7AB]">
+              Select any hardcover spine or click Open Volume to inspect tables of contents.
+            </p>
+          </div>
+          <div className="border border-[#141618]/15 dark:border-[#F3F0E9]/15 overflow-hidden">
+            <BooksShowcase
+              books={BERRY_COMPENDIUM_BOOKS}
+              heroTitle="Compendia"
+              navTitle="Berry Alloys Library"
+              onPrimaryAction={handleBookPrimary}
+              onSecondaryAction={handleBookSecondary}
+            />
+          </div>
+        </section>
+
         {/* Category Filter */}
         <div
+          id="doc-directory"
           role="tablist"
           aria-label="Filter corporate documents by category"
-          className="flex flex-wrap items-center gap-1.5 pb-6 border-b border-[#141618]/15 dark:border-[#F3F0E9]/14"
+          className="scroll-mt-24 flex flex-wrap items-center gap-1.5 pb-6 border-b border-[#141618]/15 dark:border-[#F3F0E9]/14"
         >
           {(
             [
@@ -92,9 +149,9 @@ export function DocumentsPage() {
                   href={group.sourcePageUrl}
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="inline-flex items-center gap-1.5 min-h-[40px] px-4 py-2 text-xs font-semibold bg-[#141618] text-[#F6F4EF] hover:bg-[#9E4B28] dark:bg-[#A95632] dark:text-[#F3F0E9] dark:hover:bg-[#823B1D] transition-colors whitespace-nowrap shrink-0"
+                  className="inline-flex items-center gap-1.5 min-h-[40px] px-4 py-2 text-xs font-semibold bg-[#141618] text-[#F6F4EF] hover:bg-[#9E4B28] dark:bg-[#A95632] dark:text-[#F3F0E9] dark:hover:bg-[#823B1D] transition-colors duration-300 whitespace-nowrap shrink-0"
                 >
-                  Open Live Portal Index
+                  <span>Open Live Portal Index</span>
                   <ExternalLink className="w-3.5 h-3.5" aria-hidden="true" />
                 </a>
               </div>
@@ -128,7 +185,7 @@ export function DocumentsPage() {
                         href={group.sourcePageUrl}
                         target="_blank"
                         rel="noopener noreferrer"
-                        className="text-xs font-semibold text-[#9E4B28] dark:text-[#EC743C] hover:underline whitespace-nowrap"
+                        className="text-xs font-semibold text-[#9E4B28] dark:text-[#EC743C] hover:underline underline-offset-4 transition-colors duration-300 whitespace-nowrap"
                       >
                         Portal Link
                       </a>

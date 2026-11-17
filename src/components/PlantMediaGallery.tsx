@@ -1,19 +1,22 @@
 import { PointerEvent, useEffect, useRef, useState } from 'react';
-import { ArrowLeft, ArrowRight, Maximize2, X } from 'lucide-react';
+import { ArrowLeft, ArrowRight, LayoutGrid, Maximize2, Orbit, X } from 'lucide-react';
 import { AnimatePresence, motion } from 'motion/react';
 import { GALLERY_ITEMS } from '../data/assets';
 import { ResilientImage } from './ResilientImage';
+import { CircularGallery } from './ui/CircularGallery';
 
 interface PlantMediaGalleryProps {
   embedded?: boolean;
 }
 
 /**
- * PlantMediaGallery — Interactive horizontal photography strip featuring real plant aerials,
- * framed official alloy specimen plates, CSR field imagery, and an accessible full-screen lightbox.
+ * PlantMediaGallery — Interactive photography gallery featuring real plant aerials,
+ * framed official alloy specimen plates, CSR field imagery, switchable between a
+ * 3D CircularGallery ring and draggable Horizontal Strip with accessible lightbox.
  */
 export function PlantMediaGallery({ embedded = false }: PlantMediaGalleryProps) {
   const scrollerRef = useRef<HTMLDivElement>(null);
+  const [viewMode, setViewMode] = useState<'circular' | 'strip'>('circular');
   const [lightboxIndex, setLightboxIndex] = useState<number | null>(null);
   const [activeSlide, setActiveSlide] = useState(0);
   const [scrollRatio, setScrollRatio] = useState(0);
@@ -124,110 +127,153 @@ export function PlantMediaGallery({ embedded = false }: PlantMediaGalleryProps) 
               Works photography, alloy specimens, and CSR records
             </h2>
             <p className="text-xs text-[#4A5054] dark:text-[#A1A7AB]">
-              Drag horizontally or use arrow controls to browse aerial plant visuals, official ferro alloy specimens, and community programmes; click any frame to inspect full size.
+              Spin the 3D orbital gallery ring or switch to the horizontal strip; click any frame to open the full-resolution lightbox.
             </p>
           </div>
 
-          <div className="flex items-center gap-3 shrink-0">
-            <span className="font-mono-tabular text-xs text-[#4A5054] dark:text-[#A1A7AB] mr-2">
-              {String(activeSlide + 1).padStart(2, '0')} / {String(GALLERY_ITEMS.length).padStart(2, '0')}
-            </span>
-            <button
-              type="button"
-              onClick={() => scrollByCard(-1)}
-              aria-label="Previous gallery image"
-              className="inline-flex items-center justify-center w-11 h-11 border border-[#141618]/25 text-[#141618] hover:bg-[#141618] hover:text-[#F6F4EF] dark:border-[#F3F0E9]/25 dark:text-[#F3F0E9] dark:hover:bg-[#A95632] dark:hover:border-[#A95632] transition-colors cursor-pointer"
+          <div className="flex flex-wrap items-center gap-3 shrink-0">
+            <div
+              role="group"
+              aria-label="Gallery presentation mode"
+              className="inline-flex border border-[#141618]/18 dark:border-[#F3F0E9]/18 bg-[#FFFFFF] dark:bg-[#121417] p-0.5"
             >
-              <ArrowLeft className="w-4 h-4" aria-hidden="true" />
-            </button>
-            <button
-              type="button"
-              onClick={() => scrollByCard(1)}
-              aria-label="Next gallery image"
-              className="inline-flex items-center justify-center w-11 h-11 border border-[#141618]/25 text-[#141618] hover:bg-[#141618] hover:text-[#F6F4EF] dark:border-[#F3F0E9]/25 dark:text-[#F3F0E9] dark:hover:bg-[#A95632] dark:hover:border-[#A95632] transition-colors cursor-pointer"
-            >
-              <ArrowRight className="w-4 h-4" aria-hidden="true" />
-            </button>
-          </div>
-        </div>
-
-        {/* Horizontal Strip */}
-        <div className="space-y-4">
-          <div
-            ref={scrollerRef}
-            onPointerDown={handlePointerDown}
-            onPointerMove={handlePointerMove}
-            onPointerUp={endDrag}
-            onPointerCancel={endDrag}
-            onPointerLeave={endDrag}
-            onScroll={(e) => {
-              const target = e.currentTarget;
-              const cardWidth = target.firstElementChild?.getBoundingClientRect().width ?? 360;
-              const idx = Math.round(target.scrollLeft / (cardWidth + 24));
-              setActiveSlide(Math.max(0, Math.min(GALLERY_ITEMS.length - 1, idx)));
-              const maxScroll = Math.max(1, target.scrollWidth - target.clientWidth);
-              setScrollRatio(Math.min(1, Math.max(0, target.scrollLeft / maxScroll)));
-            }}
-            className={`flex gap-6 overflow-x-auto pb-4 select-none ${
-              isDragging ? 'cursor-grabbing' : 'cursor-grab snap-x snap-mandatory scroll-smooth'
-            }`}
-          >
-            {GALLERY_ITEMS.map((item, idx) => (
-              <figure
-                key={item.id}
-                className="snap-start shrink-0 w-[82vw] sm:w-[420px] lg:w-[460px] bg-white dark:bg-[#20242A] border border-[#141618]/12 dark:border-[#F3F0E9]/14 flex flex-col justify-between group"
+              <button
+                type="button"
+                onClick={() => setViewMode('circular')}
+                aria-pressed={viewMode === 'circular'}
+                className={`inline-flex items-center gap-1.5 min-h-[38px] px-3 py-1.5 text-xs font-semibold transition-colors cursor-pointer ${
+                  viewMode === 'circular'
+                    ? 'bg-[#141618] text-[#F6F4EF] dark:bg-[#A95632] dark:text-[#F3F0E9]'
+                    : 'text-[#4A5054] dark:text-[#A1A7AB] hover:text-[#141618] dark:hover:text-[#F3F0E9]'
+                }`}
               >
+                <Orbit className="w-3.5 h-3.5" aria-hidden="true" />
+                3D Circular Ring
+              </button>
+              <button
+                type="button"
+                onClick={() => setViewMode('strip')}
+                aria-pressed={viewMode === 'strip'}
+                className={`inline-flex items-center gap-1.5 min-h-[38px] px-3 py-1.5 text-xs font-semibold transition-colors cursor-pointer ${
+                  viewMode === 'strip'
+                    ? 'bg-[#141618] text-[#F6F4EF] dark:bg-[#A95632] dark:text-[#F3F0E9]'
+                    : 'text-[#4A5054] dark:text-[#A1A7AB] hover:text-[#141618] dark:hover:text-[#F3F0E9]'
+                }`}
+              >
+                <LayoutGrid className="w-3.5 h-3.5" aria-hidden="true" />
+                Strip View
+              </button>
+            </div>
+
+            {viewMode === 'strip' && (
+              <div className="flex items-center gap-2">
+                <span className="font-mono-tabular text-xs text-[#4A5054] dark:text-[#A1A7AB] mr-1">
+                  {String(activeSlide + 1).padStart(2, '0')} / {String(GALLERY_ITEMS.length).padStart(2, '0')}
+                </span>
                 <button
                   type="button"
-                  onClick={(e) => {
-                    if (dragStateRef.current.movedDistance > 6) {
-                      e.preventDefault();
-                      return;
-                    }
-                    triggerRef.current = e.currentTarget;
-                    setLightboxIndex(idx);
-                  }}
-                  aria-label={`Inspect larger image: ${item.caption}`}
-                  className={`relative aspect-[4/3] w-full overflow-hidden cursor-pointer text-left ${
-                    item.specimenPlate ? 'bg-[#F6F4EF] p-4' : 'bg-[#141618]'
-                  }`}
+                  onClick={() => scrollByCard(-1)}
+                  aria-label="Previous gallery image"
+                  className="inline-flex items-center justify-center w-10 h-10 border border-[#141618]/25 text-[#141618] hover:bg-[#141618] hover:text-[#F6F4EF] dark:border-[#F3F0E9]/25 dark:text-[#F3F0E9] dark:hover:bg-[#A95632] dark:hover:border-[#A95632] transition-colors cursor-pointer"
                 >
-                  <ResilientImage
-                    src={item.src}
-                    alt={item.alt}
-                    loading="eager"
-                    className={`w-full h-full transition-transform duration-500 group-hover:scale-[1.03] pointer-events-none ${
-                      item.specimenPlate ? 'object-contain' : 'object-cover'
-                    }`}
-                    containerClassName="w-full h-full"
-                  />
-                  <span className="absolute top-3 right-3 inline-flex items-center justify-center w-9 h-9 bg-[#141618]/80 text-[#F3F0E9] opacity-90 group-hover:bg-[#9E4B28] transition-colors">
-                    <Maximize2 className="w-4 h-4" aria-hidden="true" />
-                  </span>
+                  <ArrowLeft className="w-4 h-4" aria-hidden="true" />
                 </button>
-
-                <figcaption className="p-4 border-t border-[#141618]/10 dark:border-[#F3F0E9]/10 space-y-1">
-                  <p className="text-[11px] font-mono-tabular uppercase tracking-wider text-[#9E4B28] dark:text-[#EC743C]">
-                    Fig. {String(idx + 1).padStart(2, '0')} · {item.category}
-                  </p>
-                  <p className="text-xs text-[#141618] dark:text-[#F3F0E9]/88 leading-relaxed">
-                    {item.caption}
-                  </p>
-                </figcaption>
-              </figure>
-            ))}
-          </div>
-
-          {/* Scroll Progress Track */}
-          <div className="h-[2px] w-full bg-[#141618]/12 dark:bg-[#F3F0E9]/14 overflow-hidden" aria-hidden="true">
-            <div
-              className="h-full bg-[#9E4B28] dark:bg-[#EC743C] origin-left transition-transform duration-150"
-              style={{
-                transform: `scaleX(${Math.max(1 / GALLERY_ITEMS.length, scrollRatio)})`,
-              }}
-            />
+                <button
+                  type="button"
+                  onClick={() => scrollByCard(1)}
+                  aria-label="Next gallery image"
+                  className="inline-flex items-center justify-center w-10 h-10 border border-[#141618]/25 text-[#141618] hover:bg-[#141618] hover:text-[#F6F4EF] dark:border-[#F3F0E9]/25 dark:text-[#F3F0E9] dark:hover:bg-[#A95632] dark:hover:border-[#A95632] transition-colors cursor-pointer"
+                >
+                  <ArrowRight className="w-4 h-4" aria-hidden="true" />
+                </button>
+              </div>
+            )}
           </div>
         </div>
+
+        {viewMode === 'circular' ? (
+          <CircularGallery
+            items={GALLERY_ITEMS}
+            onItemSelect={(_, index) => setLightboxIndex(index)}
+          />
+        ) : (
+          <div className="space-y-4">
+            <div
+              ref={scrollerRef}
+              onPointerDown={handlePointerDown}
+              onPointerMove={handlePointerMove}
+              onPointerUp={endDrag}
+              onPointerCancel={endDrag}
+              onPointerLeave={endDrag}
+              onScroll={(e) => {
+                const target = e.currentTarget;
+                const cardWidth = target.firstElementChild?.getBoundingClientRect().width ?? 360;
+                const idx = Math.round(target.scrollLeft / (cardWidth + 24));
+                setActiveSlide(Math.max(0, Math.min(GALLERY_ITEMS.length - 1, idx)));
+                const maxScroll = Math.max(1, target.scrollWidth - target.clientWidth);
+                setScrollRatio(Math.min(1, Math.max(0, target.scrollLeft / maxScroll)));
+              }}
+              className={`flex gap-6 overflow-x-auto pb-4 select-none ${
+                isDragging ? 'cursor-grabbing' : 'cursor-grab snap-x snap-mandatory scroll-smooth'
+              }`}
+            >
+              {GALLERY_ITEMS.map((item, idx) => (
+                <figure
+                  key={item.id}
+                  className="snap-start shrink-0 w-[82vw] sm:w-[420px] lg:w-[460px] bg-white dark:bg-[#20242A] border border-[#141618]/12 dark:border-[#F3F0E9]/14 flex flex-col justify-between group"
+                >
+                  <button
+                    type="button"
+                    onClick={(e) => {
+                      if (dragStateRef.current.movedDistance > 6) {
+                        e.preventDefault();
+                        return;
+                      }
+                      triggerRef.current = e.currentTarget;
+                      setLightboxIndex(idx);
+                    }}
+                    aria-label={`Inspect larger image: ${item.caption}`}
+                    className={`relative aspect-[4/3] w-full overflow-hidden cursor-pointer text-left ${
+                      item.specimenPlate ? 'bg-[#F6F4EF] p-4' : 'bg-[#141618]'
+                    }`}
+                  >
+                    <ResilientImage
+                      src={item.src}
+                      alt={item.alt}
+                      loading="eager"
+                      className={`w-full h-full transition-transform duration-500 group-hover:scale-[1.03] pointer-events-none ${
+                        item.specimenPlate ? 'object-contain' : 'object-cover'
+                      }`}
+                      containerClassName="w-full h-full"
+                    />
+                    <span className="absolute top-3 right-3 inline-flex items-center justify-center w-9 h-9 bg-[#141618]/80 text-[#F3F0E9] opacity-90 group-hover:bg-[#9E4B28] transition-colors">
+                      <Maximize2 className="w-4 h-4" aria-hidden="true" />
+                    </span>
+                  </button>
+
+                  <figcaption className="p-4 border-t border-[#141618]/10 dark:border-[#F3F0E9]/10 space-y-1">
+                    <p className="text-[11px] font-mono-tabular uppercase tracking-wider text-[#9E4B28] dark:text-[#EC743C]">
+                      Fig. {String(idx + 1).padStart(2, '0')} · {item.category}
+                    </p>
+                    <p className="text-xs text-[#141618] dark:text-[#F3F0E9]/88 leading-relaxed">
+                      {item.caption}
+                    </p>
+                  </figcaption>
+                </figure>
+              ))}
+            </div>
+
+            {/* Scroll Progress Track */}
+            <div className="h-[2px] w-full bg-[#141618]/12 dark:bg-[#F3F0E9]/14 overflow-hidden" aria-hidden="true">
+              <div
+                className="h-full bg-[#9E4B28] dark:bg-[#EC743C] origin-left transition-transform duration-150"
+                style={{
+                  transform: `scaleX(${Math.max(1 / GALLERY_ITEMS.length, scrollRatio)})`,
+                }}
+              />
+            </div>
+          </div>
+        )}
       </div>
 
       {/* Accessible Lightbox Viewer */}

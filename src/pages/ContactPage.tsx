@@ -6,6 +6,7 @@ import { getProductBySlug, PRODUCTS } from '../data/products';
 import { Breadcrumbs } from '../components/Breadcrumbs';
 import { EnquiryFormPanel } from '../components/EnquiryFormPanel';
 import { SplitText } from '../components/motion/SplitText';
+import { SocialFlipButton } from '../components/ui/SocialFlipButton';
 
 export function ContactPage() {
   const [searchParams, setSearchParams] = useSearchParams();
@@ -103,6 +104,10 @@ export function ContactPage() {
               <p className="leading-relaxed text-[#4A5054] dark:text-[#A1A7AB]">
                 {UPCOMING_OFFICE_NOTICE.note}
               </p>
+            </div>
+
+            <div className="bg-white dark:bg-[#20242A] border border-[#141618]/15 dark:border-[#F3F0E9]/14 p-6">
+              <SocialFlipButton heading="Direct & Social Channels" />
             </div>
           </aside>
         </div>

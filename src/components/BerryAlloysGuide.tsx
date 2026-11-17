@@ -1,10 +1,22 @@
-import { FormEvent, KeyboardEvent, useEffect, useRef, useState } from 'react';
+import {
+  FormEvent,
+  KeyboardEvent,
+  PointerEvent as ReactPointerEvent,
+  useCallback,
+  useEffect,
+  useRef,
+  useState,
+} from 'react';
 import {
   ArrowDown,
   ArrowRight,
   BookOpen,
+  ChevronLeft,
+  ChevronRight,
   Compass,
   Grid,
+  GripVertical,
+  Pin,
   RotateCcw,
   Send,
   X,
@@ -14,6 +26,48 @@ import { KNOWLEDGE_BASE, KNOWLEDGE_CATEGORIES } from '../data/knowledgeBase';
 import { useGuide } from '../context/GuideContext';
 
 const MAX_INPUT_LENGTH = 360;
+const LAUNCHER_PREF_KEY = 'berry-guide-launcher-v1';
+const EDGE_SNAP_THRESHOLD = 22;
+const TOP_SAFE_MARGIN = 76;
+const BOTTOM_SAFE_MARGIN = 16;
+
+type DockEdge = 'right' | 'left' | null;
+
+interface LauncherState {
+  docked: DockEdge;
+  /** Viewport X ratio (0..1) within usable horizontal travel when floating */
+  xRatio: number;
+  /** Viewport Y ratio (0..1) within usable vertical travel [TOP_SAFE_MARGIN .. innerHeight - h - BOTTOM_SAFE_MARGIN] */
+  yRatio: number;
+}
+
+function loadLauncherState(): LauncherState {
+  try {
+    const raw = window.localStorage.getItem(LAUNCHER_PREF_KEY);
+    if (raw) {
+      const parsed = JSON.parse(raw) as Partial<LauncherState>;
+      const docked: DockEdge =
+        parsed.docked === 'right' || parsed.docked === 'left' ? parsed.docked : null;
+      const xRatio =
+        typeof parsed.xRatio === 'number' && Number.isFinite(parsed.xRatio)
+          ? Math.min(1, Math.max(0, parsed.xRatio))
+          : 1;
+      const yRatio =
+        typeof parsed.yRatio === 'number' && Number.isFinite(parsed.yRatio)
+          ? Math.min(1, Math.max(0, parsed.yRatio))
+          : 0.9;
+      return { docked, xRatio, yRatio };
+    }
+  } catch {
+    // Ignore storage read errors
+  }
+  return { docked: null, xRatio: 1, yRatio: 0.9 };
+}
+
+function clamp(val: number, min: number, max: number): number {
+  if (max <= min) return min;
+  return Math.min(max, Math.max(min, val));
+}
 
 export function BerryAlloysGuide() {
   const prefersReduced = useReducedMotion();
@@ -35,12 +89,235 @@ export function BerryAlloysGuide() {
   const [topicBrowserOpen, setTopicBrowserOpen] = useState(false);
   const [hasUnseenMessage, setHasUnseenMessage] = useState(false);
 
+  // Draggable & edge-hidable launcher state
+  const [launcherPref, setLauncherPref] = useState<LauncherState>(loadLauncherState);
+  const [coords, setCoords] = useState<{ left: number; top: number } | null>(null);
+  const [isDragging, setIsDragging] = useState(false);
+  const [snapPreviewEdge, setSnapPreviewEdge] = useState<DockEdge>(null);
+  const [isPeekRevealed, setIsPeekRevealed] = useState(false);
+  const [isFocusWithinLauncher, setIsFocusWithinLauncher] = useState(false);
+
+  const launcherDockRef = useRef<HTMLDivElement>(null);
+  const justDraggedRef = useRef(false);
+
   const dialogRef = useRef<HTMLDivElement>(null);
   const closeBtnRef = useRef<HTMLButtonElement>(null);
   const inputRef = useRef<HTMLTextAreaElement>(null);
   const scrollContainerRef = useRef<HTMLDivElement>(null);
   const isNearBottomRef = useRef(true);
   const prevMsgCountRef = useRef(messages.length);
+
+  // Persist launcher dock/position preference
+  useEffect(() => {
+    try {
+      window.localStorage.setItem(LAUNCHER_PREF_KEY, JSON.stringify(launcherPref));
+    } catch {
+      // Ignore storage write errors
+    }
+  }, [launcherPref]);
+
+  // Resolve pixel coordinates from ratios cleanly on mount, resize, or dialog close
+  const syncCoordsFromPref = useCallback(
+    (pref: LauncherState) => {
+      const el = launcherDockRef.current;
+      const vw = window.innerWidth;
+      const vh = window.innerHeight;
+      const width = el?.offsetWidth || (vw < 640 ? 154 : 214);
+      const height = el?.offsetHeight || 46;
+      const sideMargin = vw < 640 ? 16 : 24;
+
+      const minLeft = sideMargin;
+      const maxLeft = Math.max(minLeft, vw - width - sideMargin);
+      const minTop = TOP_SAFE_MARGIN;
+      const maxTop = Math.max(minTop, vh - height - BOTTOM_SAFE_MARGIN);
+
+      let resolvedLeft: number;
+      if (pref.docked === 'right') {
+        resolvedLeft = vw - width;
+      } else if (pref.docked === 'left') {
+        resolvedLeft = 0;
+      } else {
+        resolvedLeft = minLeft + pref.xRatio * (maxLeft - minLeft);
+      }
+
+      // Default initial bottom resting height sits ~84px above bottom edge (clear of bottom-right watermarks & ChapterRail)
+      const resolvedTop =
+        pref.yRatio === 0.9 && !pref.docked && pref.xRatio === 1
+          ? clamp(vh - height - (vw < 640 ? 72 : 84), minTop, maxTop)
+          : minTop + pref.yRatio * (maxTop - minTop);
+
+      setCoords({
+        left: Math.round(resolvedLeft),
+        top: Math.round(clamp(resolvedTop, minTop, maxTop)),
+      });
+    },
+    []
+  );
+
+  useEffect(() => {
+    if (isOpen || isDragging) return;
+    const raf = window.requestAnimationFrame(() => syncCoordsFromPref(launcherPref));
+    const onResize = () => syncCoordsFromPref(launcherPref);
+    window.addEventListener('resize', onResize, { passive: true });
+    return () => {
+      window.cancelAnimationFrame(raf);
+      window.removeEventListener('resize', onResize);
+    };
+  }, [isOpen, isDragging, launcherPref, syncCoordsFromPref]);
+
+  // Collapse peek-revealed launcher back to edge if user taps outside (helpful on touch screens)
+  useEffect(() => {
+    if (!launcherPref.docked || !isPeekRevealed || isDragging) return;
+    const onOutsidePointerDown = (e: PointerEvent) => {
+      if (!launcherDockRef.current?.contains(e.target as Node)) {
+        setIsPeekRevealed(false);
+      }
+    };
+    document.addEventListener('pointerdown', onOutsidePointerDown);
+    return () => document.removeEventListener('pointerdown', onOutsidePointerDown);
+  }, [launcherPref.docked, isPeekRevealed, isDragging]);
+
+  const handleLauncherPointerDown = (e: ReactPointerEvent<HTMLDivElement>) => {
+    if (e.button !== 0 && e.pointerType === 'mouse') return;
+    // Let secondary Dock/Undock button handle its own click without dragging
+    if ((e.target as HTMLElement).closest('[data-launcher-dock-btn="true"]')) {
+      return;
+    }
+
+    const dockEl = launcherDockRef.current;
+    if (!dockEl) return;
+
+    const rect = dockEl.getBoundingClientRect();
+    const startX = e.clientX;
+    const startY = e.clientY;
+    const originLeft = rect.left;
+    const originTop = rect.top;
+    const width = rect.width;
+    const height = rect.height;
+
+    let movedBeyondThreshold = false;
+    let latestLeft = clamp(originLeft, 0, Math.max(0, window.innerWidth - width));
+    let latestTop = originTop;
+    let latestSnap: DockEdge = null;
+
+    const onPointerMove = (moveEvent: PointerEvent) => {
+      const dx = moveEvent.clientX - startX;
+      const dy = moveEvent.clientY - startY;
+
+      if (!movedBeyondThreshold && Math.hypot(dx, dy) < 6) {
+        return;
+      }
+
+      if (!movedBeyondThreshold) {
+        movedBeyondThreshold = true;
+        setIsDragging(true);
+        setIsPeekRevealed(true);
+      }
+
+      const vw = window.innerWidth;
+      const vh = window.innerHeight;
+      latestLeft = clamp(originLeft + dx, 0, Math.max(0, vw - width));
+      latestTop = clamp(
+        originTop + dy,
+        TOP_SAFE_MARGIN,
+        Math.max(TOP_SAFE_MARGIN, vh - height - BOTTOM_SAFE_MARGIN)
+      );
+
+      if (latestLeft >= vw - width - EDGE_SNAP_THRESHOLD) {
+        latestSnap = 'right';
+      } else if (latestLeft <= EDGE_SNAP_THRESHOLD) {
+        latestSnap = 'left';
+      } else {
+        latestSnap = null;
+      }
+
+      setSnapPreviewEdge(latestSnap);
+      setCoords({ left: Math.round(latestLeft), top: Math.round(latestTop) });
+    };
+
+    const cleanup = () => {
+      window.removeEventListener('pointermove', onPointerMove);
+      window.removeEventListener('pointerup', onPointerUp);
+      window.removeEventListener('pointercancel', onPointerUp);
+    };
+
+    const onPointerUp = () => {
+      cleanup();
+      if (!movedBeyondThreshold) return;
+
+      justDraggedRef.current = true;
+      window.setTimeout(() => {
+        justDraggedRef.current = false;
+      }, 80);
+
+      const vw = window.innerWidth;
+      const vh = window.innerHeight;
+      const sideMargin = vw < 640 ? 16 : 24;
+      const minLeft = sideMargin;
+      const maxLeft = Math.max(minLeft, vw - width - sideMargin);
+      const minTop = TOP_SAFE_MARGIN;
+      const maxTop = Math.max(minTop, vh - height - BOTTOM_SAFE_MARGIN);
+
+      const nextYRatio = maxTop > minTop ? (latestTop - minTop) / (maxTop - minTop) : 0.85;
+      const nextXRatio =
+        maxLeft > minLeft ? clamp((latestLeft - minLeft) / (maxLeft - minLeft), 0, 1) : 1;
+
+      setIsDragging(false);
+      setSnapPreviewEdge(null);
+
+      if (latestSnap) {
+        setIsPeekRevealed(false);
+        setIsFocusWithinLauncher(false);
+        setLauncherPref({
+          docked: latestSnap,
+          xRatio: latestSnap === 'right' ? 1 : 0,
+          yRatio: clamp(nextYRatio, 0, 1),
+        });
+      } else {
+        setIsPeekRevealed(false);
+        setLauncherPref({
+          docked: null,
+          xRatio: nextXRatio,
+          yRatio: clamp(nextYRatio, 0, 1),
+        });
+      }
+    };
+
+    window.addEventListener('pointermove', onPointerMove);
+    window.addEventListener('pointerup', onPointerUp);
+    window.addEventListener('pointercancel', onPointerUp);
+  };
+
+  const handleHideToNearestEdge = () => {
+    const el = launcherDockRef.current;
+    const vw = window.innerWidth;
+    const vh = window.innerHeight;
+    const rect = el?.getBoundingClientRect();
+    const minTop = TOP_SAFE_MARGIN;
+    const maxTop = Math.max(minTop, vh - (rect?.height || 46) - BOTTOM_SAFE_MARGIN);
+    const currentTop = rect ? rect.top : maxTop;
+    const yRatio = maxTop > minTop ? clamp((currentTop - minTop) / (maxTop - minTop), 0, 1) : 0.85;
+    const centerX = rect ? rect.left + rect.width / 2 : vw;
+    const targetEdge: DockEdge = centerX < vw / 2 ? 'left' : 'right';
+
+    setIsPeekRevealed(false);
+    setIsFocusWithinLauncher(false);
+    setLauncherPref({
+      docked: targetEdge,
+      xRatio: targetEdge === 'right' ? 1 : 0,
+      yRatio,
+    });
+  };
+
+  const handleUnpinToCanvas = () => {
+    const isCurrentlyLeft = launcherPref.docked === 'left';
+    setIsPeekRevealed(false);
+    setLauncherPref((prev) => ({
+      docked: null,
+      xRatio: isCurrentlyLeft ? 0 : 1,
+      yRatio: prev.yRatio,
+    }));
+  };
 
   // Body scroll lock & Escape / Focus Trap inside modal dialog
   useEffect(() => {
@@ -168,27 +445,175 @@ export function BerryAlloysGuide() {
 
   return (
     <>
-      {/* Bottom-Right Architectural Launcher (Hidden while modal open to avoid duplicate focusable control) */}
-      {!isOpen && (
-        <div className="fixed bottom-4 right-4 sm:bottom-6 sm:right-6 z-40">
-          <button
-            ref={launcherRef}
-            type="button"
-            onClick={() => openGuide()}
-            aria-label="Open Berry Alloys Guide for product help and FAQs"
-            className="group inline-flex items-center gap-2.5 min-h-[46px] px-4 py-2.5 bg-[#141618] text-[#F6F4EF] border border-[#141618] hover:bg-[#9E4B28] hover:border-[#9E4B28] dark:bg-[#20242A] dark:text-[#F3F0E9] dark:border-[#EC743C]/45 dark:hover:bg-[#A95632] dark:hover:border-[#EC743C] shadow-xl transition-colors duration-150 cursor-pointer focus-visible:outline-2 focus-visible:outline-[#EC743C] focus-visible:outline-offset-2"
+      {/* Draggable & Edge-Hidable Architectural Launcher (Hidden while modal open) */}
+      {!isOpen && (() => {
+        const isDocked = launcherPref.docked !== null;
+        const isDockedLeft = launcherPref.docked === 'left';
+        const isLeftHalf = isDocked ? isDockedLeft : launcherPref.xRatio < 0.5;
+        const isRevealed = !isDocked || isPeekRevealed || isFocusWithinLauncher || isDragging;
+        const isTucked = isDocked && !isRevealed;
+
+        const tuckTransformClass = isTucked
+          ? isDockedLeft
+            ? '-translate-x-[calc(100%-22px)]'
+            : 'translate-x-[calc(100%-22px)]'
+          : 'translate-x-0';
+
+        const transitionClass =
+          isDragging || prefersReduced
+            ? ''
+            : 'transition-transform duration-200 ease-[cubic-bezier(0.16,1,0.3,1)]';
+
+        return (
+          <div
+            ref={launcherDockRef}
+            onPointerDown={handleLauncherPointerDown}
+            onPointerEnter={(e) => {
+              if (e.pointerType === 'mouse' && isDocked) {
+                setIsPeekRevealed(true);
+              }
+            }}
+            onPointerMove={(e) => {
+              if (e.pointerType === 'mouse' && isDocked && !isDragging && !isPeekRevealed) {
+                setIsPeekRevealed(true);
+              }
+            }}
+            onPointerLeave={(e) => {
+              if (e.pointerType === 'mouse' && isDocked && !isDragging) {
+                setIsPeekRevealed(false);
+              }
+            }}
+            onFocus={() => {
+              if (isDocked) setIsFocusWithinLauncher(true);
+            }}
+            onBlur={(e) => {
+              if (!e.currentTarget.contains(e.relatedTarget as Node | null)) {
+                setIsFocusWithinLauncher(false);
+              }
+            }}
+            style={
+              coords
+                ? { left: `${coords.left}px`, top: `${coords.top}px`, touchAction: 'none' }
+                : { touchAction: 'none' }
+            }
+            className={`fixed z-40 flex items-stretch shadow-xl select-none ${
+              coords ? '' : 'bottom-[72px] sm:bottom-[84px] right-4 sm:right-6'
+            } ${isDockedLeft ? 'flex-row-reverse' : 'flex-row'} ${tuckTransformClass} ${transitionClass}`}
           >
-            <Compass
-              className="w-4 h-4 text-[#EC743C] group-hover:text-[#F6F4EF] shrink-0 transition-colors"
-              aria-hidden="true"
-            />
-            <span className="text-xs font-semibold tracking-wide whitespace-nowrap">
-              <span className="sm:hidden">Ask Berry</span>
-              <span className="hidden sm:inline">Berry Alloys Guide</span>
-            </span>
-          </button>
-        </div>
-      )}
+            {/* Invisible proximity hover halo when tucked at edge so moving cursor near edge slides it smoothly out */}
+            {isDocked && (
+              <span
+                aria-hidden="true"
+                className={`absolute inset-y-[-10px] w-7 pointer-events-auto ${
+                  isDockedLeft ? '-right-7' : '-left-7'
+                }`}
+              />
+            )}
+
+            {/* Drag Snap Edge Hint */}
+            {isDragging && snapPreviewEdge && (
+              <span
+                role="status"
+                className={`pointer-events-none absolute -top-7 px-2 py-0.5 text-[10px] font-mono-tabular uppercase tracking-wider whitespace-nowrap bg-[#141618] text-[#EC743C] border border-[#EC743C]/45 shadow-md ${
+                  snapPreviewEdge === 'right' ? 'right-0' : 'left-0'
+                }`}
+              >
+                Release to hide at {snapPreviewEdge} edge
+              </span>
+            )}
+
+            {/* Primary Guide Button (matches CSS selector button:nth-of-type(1)) */}
+            <button
+              ref={launcherRef}
+              type="button"
+              onClick={(e) => {
+                if (justDraggedRef.current) {
+                  e.preventDefault();
+                  return;
+                }
+                if (isTucked) {
+                  setIsPeekRevealed(true);
+                  return;
+                }
+                setIsPeekRevealed(false);
+                openGuide();
+              }}
+              aria-label={
+                isTucked
+                  ? 'Reveal hidden Berry Alloys Guide launcher'
+                  : 'Open Berry Alloys Guide for product help and FAQs (drag to move)'
+              }
+              title={isTucked ? 'Hover or tap to reveal Berry Alloys Guide' : 'Open Berry Alloys Guide · Drag to reposition'}
+              className={`group relative inline-flex items-center gap-2 min-h-[46px] pr-3.5 pl-2.5 py-2.5 bg-[#141618] text-[#F6F4EF] border border-[#141618] hover:bg-[#9E4B28] hover:border-[#9E4B28] dark:bg-[#20242A] dark:text-[#F3F0E9] dark:border-[#EC743C]/45 dark:hover:bg-[#A95632] dark:hover:border-[#EC743C] transition-colors duration-150 focus-visible:outline-2 focus-visible:outline-[#EC743C] focus-visible:outline-offset-2 ${
+                isDragging ? 'cursor-grabbing ring-2 ring-[#EC743C]' : 'cursor-grab'
+              } ${isDockedLeft ? 'flex-row-reverse pl-3.5 pr-2.5' : ''}`}
+            >
+              {/* Exposed Edge Peek Sliver Indicator (always visible 22px strip when docked) */}
+              <span
+                aria-hidden="true"
+                className={`inline-flex items-center justify-center shrink-0 ${
+                  isTucked
+                    ? 'text-[#EC743C]'
+                    : 'text-[#A1A7AB] group-hover:text-[#F6F4EF]'
+                }`}
+              >
+                {isTucked ? (
+                  isDockedLeft ? (
+                    <ChevronRight className="w-3.5 h-3.5" />
+                  ) : (
+                    <ChevronLeft className="w-3.5 h-3.5" />
+                  )
+                ) : (
+                  <GripVertical className="w-3.5 h-3.5" />
+                )}
+              </span>
+
+              {/* Thin copper architectural edge line visible even at edge sliver */}
+              {isTucked && (
+                <span
+                  aria-hidden="true"
+                  className={`absolute inset-y-0 w-[3px] bg-[#EC743C] ${
+                    isDockedLeft ? 'right-0' : 'left-0'
+                  }`}
+                />
+              )}
+
+              <Compass
+                className="w-4 h-4 text-[#EC743C] group-hover:text-[#F6F4EF] shrink-0 transition-colors"
+                aria-hidden="true"
+              />
+              <span className="text-xs font-semibold tracking-wide whitespace-nowrap">
+                <span className="sm:hidden">Ask Berry</span>
+                <span className="hidden sm:inline">Berry Alloys Guide</span>
+              </span>
+            </button>
+
+            {/* Compact Dock / Pin Toggle Button */}
+            <button
+              type="button"
+              data-launcher-dock-btn="true"
+              onClick={() => (isDocked ? handleUnpinToCanvas() : handleHideToNearestEdge())}
+              aria-label={
+                isDocked
+                  ? 'Pin Berry Alloys Guide back onto page'
+                  : 'Hide Berry Alloys Guide to nearest screen edge'
+              }
+              title={isDocked ? 'Keep visible on page' : 'Hide to screen edge'}
+              className={`inline-flex items-center justify-center min-w-[34px] min-h-[46px] px-2 bg-[#1E2228] text-[#A1A7AB] hover:text-[#F6F4EF] hover:bg-[#2E343B] border-y ${
+                isDockedLeft ? 'border-l' : 'border-r'
+              } border-[#141618] dark:bg-[#191C20] dark:border-[#EC743C]/45 dark:hover:bg-[#2E343B] transition-colors cursor-pointer focus-visible:outline-2 focus-visible:outline-[#EC743C] focus-visible:outline-offset-[-2px]`}
+            >
+              {isDocked ? (
+                <Pin className="w-3.5 h-3.5 text-[#EC743C]" aria-hidden="true" />
+              ) : isLeftHalf ? (
+                <ChevronLeft className="w-3.5 h-3.5" aria-hidden="true" />
+              ) : (
+                <ChevronRight className="w-3.5 h-3.5" aria-hidden="true" />
+              )}
+            </button>
+          </div>
+        );
+      })()}
 
       {/* Modal Guide Panel */}
       <AnimatePresence>

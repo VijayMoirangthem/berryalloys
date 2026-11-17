@@ -7,7 +7,9 @@ import { ALLOY_FAMILIES, AlloyFamily, AlloyProduct, PRODUCTS } from '../data/pro
 import { CompareModal } from './CompareModal';
 import { ResilientImage } from './ResilientImage';
 import { SpotlightSurface } from './motion/SpotlightSurface';
+import { AnimatedTooltip } from './ui/AnimatedTooltip';
 import { IndustrialButton } from './ui/IndustrialButton';
+import { WaveGridBackground } from './ui/WaveGridBackground';
 
 const FAMILY_MEDIA: Record<
   AlloyFamily,
@@ -98,9 +100,10 @@ export function HomeAlloyShowcase({ onEnquireAlloy }: HomeAlloyShowcaseProps) {
     <section
       id="alloys"
       aria-labelledby="alloy-explorer-heading"
-      className="scroll-mt-20 py-20 lg:py-28 bg-[#ECE8DF] text-[#141618] dark:bg-[#141618] dark:text-[#F3F0E9] border-t border-[#141618]/12 dark:border-[#F3F0E9]/10"
+      className="relative overflow-hidden scroll-mt-20 py-20 lg:py-28 bg-[#ECE8DF] text-[#141618] dark:bg-[#141618] dark:text-[#F3F0E9] border-t border-[#141618]/12 dark:border-[#F3F0E9]/10"
     >
-      <div className="max-w-[1360px] mx-auto px-4 sm:px-6 lg:px-8 xl:px-14 2xl:px-8 space-y-12">
+      <WaveGridBackground className="absolute inset-0 opacity-75" />
+      <div className="relative z-10 max-w-[1360px] mx-auto px-4 sm:px-6 lg:px-8 xl:px-14 2xl:px-8 space-y-12">
         {/* Section Header */}
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 items-end pb-8 border-b border-[#141618]/14 dark:border-[#F3F0E9]/12">
           <div className="lg:col-span-8 space-y-3">
@@ -168,7 +171,7 @@ export function HomeAlloyShowcase({ onEnquireAlloy }: HomeAlloyShowcaseProps) {
                     type="button"
                     onClick={() => handleSelectFamily(family)}
                     aria-pressed={isActive}
-                    className={`w-full text-left py-5 px-4 transition-colors duration-200 flex items-start justify-between gap-4 cursor-pointer ${
+                    className={`w-full text-left py-5 px-4 transition-colors duration-350 flex items-start justify-between gap-4 cursor-pointer ${
                       isActive
                         ? 'bg-white dark:bg-[#20242A]'
                         : 'hover:bg-white/60 dark:hover:bg-[#20242A]/55'
@@ -208,7 +211,7 @@ export function HomeAlloyShowcase({ onEnquireAlloy }: HomeAlloyShowcaseProps) {
                     <span className="inline-flex items-center gap-2 font-mono-tabular text-[11px] text-[#4A5054] dark:text-[#A1A7AB] shrink-0 pt-1">
                       <span>{variantCount} series</span>
                       <ArrowRight
-                        className={`w-3.5 h-3.5 transition-transform duration-200 ${
+                        className={`w-3.5 h-3.5 transition-transform duration-350 ${
                           isActive
                             ? 'text-[#9E4B28] dark:text-[#EC743C] translate-x-0.5'
                             : 'opacity-40'
@@ -304,7 +307,7 @@ export function HomeAlloyShowcase({ onEnquireAlloy }: HomeAlloyShowcaseProps) {
                   initial={{ opacity: 0, y: 8 }}
                   animate={{ opacity: 1, y: 0 }}
                   exit={{ opacity: 0, y: -6 }}
-                  transition={{ duration: 0.28, ease: [0.16, 1, 0.3, 1] }}
+                  transition={{ duration: 0.48, ease: [0.22, 1, 0.36, 1] }}
                 >
                   {/* Framed Official Specimen Plate (consistent studio tray in both themes) */}
                   <div className="p-4 sm:p-5 bg-[#F6F4EF] border-b border-[#141618]/14 dark:border-[#F3F0E9]/14">
@@ -340,7 +343,23 @@ export function HomeAlloyShowcase({ onEnquireAlloy }: HomeAlloyShowcaseProps) {
                       <div className="space-y-1.5">
                         <p className="text-xs font-mono-tabular text-[#9E4B28] dark:text-[#EC743C]">
                           {activeProduct.family} · {activeProduct.carbonTier}
-                          {activeProduct.lowPhosphorusOption ? ' · Low-P Available' : ''}
+                          {activeProduct.lowPhosphorusOption && (
+                            <>
+                              {' · '}
+                              <AnimatedTooltip
+                                variant="copper"
+                                label="Low Phosphorus & Specialty Trace Control"
+                                sublabel="P ≤ 0.1% / Low-B 50 ppm options available for clean steel melts."
+                              >
+                                <span
+                                  tabIndex={0}
+                                  className="underline decoration-dotted underline-offset-4 cursor-help focus-visible:outline-none"
+                                >
+                                  Low-P Available
+                                </span>
+                              </AnimatedTooltip>
+                            </>
+                          )}
                         </p>
                         <h3 className="font-display text-3xl sm:text-4xl font-bold uppercase tracking-tight text-[#141618] dark:text-[#F3F0E9]">
                           {activeProduct.name}

@@ -54,7 +54,7 @@ export function IndustrialButton(props: ButtonProps) {
   const { children, variant = 'primary', className = '' } = props;
   const styles = VARIANT_CLASSES[variant];
   const base =
-    'group relative overflow-hidden inline-flex items-center justify-center min-h-[44px] px-6 py-3 text-xs sm:text-sm font-semibold tracking-wide border transition-colors duration-200 active:translate-y-[1px] whitespace-nowrap shrink-0 cursor-pointer disabled:opacity-40 disabled:cursor-not-allowed';
+    'group relative overflow-hidden inline-flex items-center justify-center min-h-[44px] px-6 py-3 text-xs sm:text-sm font-semibold tracking-wide border transition-colors duration-350 active:translate-y-[1px] whitespace-nowrap shrink-0 cursor-pointer disabled:opacity-40 disabled:cursor-not-allowed';
 
   const classes = `${base} ${styles.container} ${className}`;
 
@@ -62,9 +62,9 @@ export function IndustrialButton(props: ButtonProps) {
     <>
       <span
         aria-hidden="true"
-        className={`pointer-events-none absolute inset-0 -translate-x-full group-hover:translate-x-0 group-focus-visible:translate-x-0 transition-transform duration-200 ease-[cubic-bezier(0.16,1,0.3,1)] ${styles.sweep}`}
+        className={`pointer-events-none absolute inset-0 -translate-x-full group-hover:translate-x-0 group-focus-visible:translate-x-0 transition-transform duration-500 ease-[cubic-bezier(0.22,1,0.36,1)] ${styles.sweep}`}
       />
-      <span className="relative z-10 inline-flex items-center justify-center gap-2.5 [&_svg]:transition-transform [&_svg]:duration-200 group-hover:[&_svg]:translate-x-0.5">
+      <span className="relative z-10 inline-flex items-center justify-center gap-2.5 [&_svg]:transition-transform [&_svg]:duration-400 group-hover:[&_svg]:translate-x-1">
         {children}
       </span>
     </>

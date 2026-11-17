@@ -1,10 +1,14 @@
 import { FormEvent, useState } from 'react';
 import { CheckCircle2, Info } from 'lucide-react';
+import { GALLERY_ITEMS } from '../data/assets';
 import { CAREERS_DEPARTMENTS, JOB_VACANCIES } from '../data/communityNewsCareersDocs';
 import { Breadcrumbs } from '../components/Breadcrumbs';
 import { CORPORATE_SUBNAV_LINKS, SubNav } from '../components/SubNav';
 import { SplitText } from '../components/motion/SplitText';
+import { CreepyButton } from '../components/ui/CreepyButton';
+import { FlipFadeText } from '../components/ui/FlipFadeText';
 import { IndustrialButton } from '../components/ui/IndustrialButton';
+import { PixelatedImageTrail } from '../components/ui/PixelatedImageTrail';
 
 interface CareersFormState {
   mode: 'role' | 'general';
@@ -103,9 +107,34 @@ export function CareersPage() {
 
         {/* Workplace Pillars */}
         <section aria-labelledby="culture-heading" className="pt-8 border-t border-[#141618]/15 dark:border-[#F3F0E9]/14">
-          <h2 id="culture-heading" className="font-display text-3xl font-bold uppercase text-[#141618] dark:text-[#F3F0E9] mb-6">
-            Workplace Practices
-          </h2>
+          <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-6">
+            <h2 id="culture-heading" className="font-display text-3xl font-bold uppercase text-[#141618] dark:text-[#F3F0E9]">
+              Workplace Practices
+            </h2>
+            <div className="flex flex-wrap items-center gap-4">
+              <div className="flex items-center gap-3 bg-white dark:bg-[#20242A] border border-[#141618]/14 dark:border-[#F3F0E9]/14 px-4 py-1.5">
+                <span className="text-[10px] font-mono-tabular uppercase tracking-widest text-[#9E4B28] dark:text-[#EC743C]">
+                  Core Ethos:
+                </span>
+                <FlipFadeText
+                  words={['TRAINING', 'MENTORSHIP', 'SAFETY', 'HEALTHCARE', 'INCLUSION', 'TEAMWORK']}
+                  className="min-h-[34px]"
+                  textClassName="text-lg sm:text-xl"
+                />
+              </div>
+              <CreepyButton
+                type="button"
+                variant="copper"
+                onClick={() =>
+                  document
+                    .getElementById('careers-application-form')
+                    ?.scrollIntoView({ behavior: 'smooth', block: 'start' })
+                }
+              >
+                Jump to Demo Application
+              </CreepyButton>
+            </div>
+          </div>
           <div className="grid grid-cols-1 md:grid-cols-3 border-t border-b border-[#141618]/15 dark:border-[#F3F0E9]/14 divide-y md:divide-y-0 md:divide-x divide-[#141618]/15 dark:divide-[#F3F0E9]/14 bg-white dark:bg-[#20242A]">
             <div className="p-6 sm:p-8 space-y-2">
               <p className="font-mono-tabular text-xs text-[#9E4B28] dark:text-[#EC743C]">01</p>
@@ -135,6 +164,27 @@ export function CareersPage() {
               </p>
             </div>
           </div>
+
+          <PixelatedImageTrail
+            images={GALLERY_ITEMS.slice(0, 8).map((a) => a.src)}
+            className="mt-8 bg-[#121417] text-[#F3F0E9] border border-[#141618]/18 dark:border-[#F3F0E9]/14 p-8 sm:p-10 min-h-[240px] flex flex-col justify-between"
+          >
+            <div className="flex flex-wrap items-center justify-between gap-4 text-[11px] font-mono-tabular uppercase tracking-widest text-[#EC743C]">
+              <span>Life at Berry Alloys · ET Edge 2026</span>
+              <span className="text-[#A1A7AB]">Move cursor to trace plant life & fieldwork photographs</span>
+            </div>
+            <div className="py-5 space-y-2 max-w-2xl">
+              <h3 className="font-display text-2xl sm:text-3xl font-bold uppercase tracking-tight text-[#F3F0E9]">
+                Recognized Workplace Culture Across Eleven Departments
+              </h3>
+              <p className="text-sm text-[#F3F0E9]/82 leading-relaxed">
+                From submerged-arc furnace operations in Bobbili and Dhalbhumgarh to commercial logistics and laboratories in Kolkata and Visakhapatnam.
+              </p>
+            </div>
+            <p className="text-[11px] font-mono-tabular text-[#A1A7AB]">
+              Interactive pointer trail · Reduced motion respected
+            </p>
+          </PixelatedImageTrail>
         </section>
 
         {/* Documented Vacancies */}

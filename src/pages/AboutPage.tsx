@@ -2,12 +2,18 @@ import { Link } from 'react-router-dom';
 import { ArrowRight } from 'lucide-react';
 import { ASSETS } from '../data/assets';
 import { COMPANY_INFO, UPCOMING_OFFICE_NOTICE } from '../data/company';
+import { CredentialStackedMatrix } from '../data/CredentialMatrices';
+import { CORPORATE_DOSSIER_PAGES } from '../data/showcaseCollections';
 import { Breadcrumbs } from '../components/Breadcrumbs';
+import { DirectorPortraitSection } from '../components/DirectorPortraitSection';
 import { GrowthChronicle } from '../components/GrowthChronicle';
 import { ResilientImage } from '../components/ResilientImage';
 import { CORPORATE_SUBNAV_LINKS, SubNav } from '../components/SubNav';
 import { ImageReveal } from '../components/motion/ImageReveal';
 import { SplitText } from '../components/motion/SplitText';
+import { CursorCard } from '../components/ui/CursorCard';
+import { GooeyTextReveal } from '../components/ui/GooeyTextReveal';
+import { InteractiveBook } from '../components/ui/InteractiveBook';
 
 export function AboutPage() {
   return (
@@ -29,13 +35,49 @@ export function AboutPage() {
                 className="font-display fluid-section-title font-bold uppercase tracking-tight text-[#141618] dark:text-[#F3F0E9]"
               />
               <div className="space-y-4 text-base text-[#4A5054] dark:text-[#F3F0E9]/82 leading-relaxed max-w-[64ch]">
-                <p>{COMPANY_INFO.legacyNarrative.founderNote}</p>
+                <p>
+                  Rooted in the industrial ethos of{' '}
+                  <CursorCard
+                    imageSrc={ASSETS.corporateHouse.src}
+                    imageAlt={ASSETS.corporateHouse.alt}
+                    caption="DKG Group Lineage"
+                    description="Founding pillar whose business discipline guides Berry Alloys Limited and allied steel operations."
+                  >
+                    Late Shri Dashrath Kumar Gupta
+                  </CursorCard>
+                  , founder of the DKG Group, Berry Alloys Limited translates multi-generational trading and manufacturing discipline into high-temperature metallurgical execution.
+                </p>
                 <p>{COMPANY_INFO.legacyNarrative.alliedEnterprise}</p>
-                <p>{COMPANY_INFO.legacyNarrative.geographyStory}</p>
+                <p>
+                  From first submerged-arc furnaces commissioned in 2010 to multi-unit operations spanning{' '}
+                  <CursorCard
+                    imageSrc={ASSETS.officialAerialComplex.src}
+                    imageAlt={ASSETS.officialAerialComplex.alt}
+                    caption="Bobbili & Dhalbhumgarh"
+                    description="Smelting facilities across Andhra Pradesh and Jharkhand connected directly to Visakhapatnam Harbour Port."
+                  >
+                    Bobbili Growth Centre and Dhalbhumgarh
+                  </CursorCard>
+                  , the company links eastern India’s mineral belt directly to global vessels via{' '}
+                  <CursorCard
+                    imageSrc={ASSETS.portLogistics.src}
+                    imageAlt={ASSETS.portLogistics.alt}
+                    caption="Three Star Export House"
+                    description="Awarded by the Government of India for sustained bulk export dispatch performance."
+                  >
+                    Visakhapatnam Harbour Port
+                  </CursorCard>
+                  .
+                </p>
               </div>
-              <p className="text-xs text-[#4A5054] dark:text-[#A1A7AB] leading-relaxed max-w-[64ch]">
-                {COMPANY_INFO.incorporationYearNote}
-              </p>
+              <GooeyTextReveal>
+                <p
+                  data-gooey-reveal-item=""
+                  className="text-xs text-[#4A5054] dark:text-[#A1A7AB] leading-relaxed max-w-[64ch]"
+                >
+                  {COMPANY_INFO.incorporationYearNote}
+                </p>
+              </GooeyTextReveal>
             </div>
 
             <div className="lg:col-span-5 space-y-6">
@@ -75,6 +117,13 @@ export function AboutPage() {
             </div>
           </div>
         </div>
+
+        {/* Interactive 3D Heritage Dossier */}
+        <InteractiveBook
+          coverTitle="Berry Alloys Corporate Dossier"
+          coverSubtitle="DKG Group Heritage, Promoter Governance & Multi-Plant Milestones"
+          pages={CORPORATE_DOSSIER_PAGES}
+        />
 
         {/* Mission & Vision Split */}
         <section
@@ -133,57 +182,9 @@ export function AboutPage() {
         {/* Promoters & Managing Director Profile */}
         <section
           aria-labelledby="leadership-heading"
-          className="pt-12 border-t border-[#141618]/15 dark:border-[#F3F0E9]/14 grid grid-cols-1 lg:grid-cols-12 gap-10 items-start"
+          className="pt-12 border-t border-[#141618]/15 dark:border-[#F3F0E9]/14"
         >
-          <div className="lg:col-span-5">
-            <figure className="bg-white dark:bg-[#20242A] border border-[#141618]/14 dark:border-[#F3F0E9]/14 overflow-hidden">
-              <div className="aspect-[4/4] bg-gradient-to-b from-[#ECE8DF] via-[#E1DCD0] to-[#CFC8B8] dark:from-[#252A31] dark:via-[#1D2127] dark:to-[#121417] flex items-end justify-center pt-6 px-4">
-                <ResilientImage
-                  src={ASSETS.vijayGuptaPortrait.src}
-                  alt={ASSETS.vijayGuptaPortrait.alt}
-                  className="w-full h-full object-contain object-bottom"
-                  containerClassName="w-full h-full"
-                />
-              </div>
-              <figcaption className="p-5 border-t border-[#141618]/12 dark:border-[#F3F0E9]/12">
-                <p className="text-[11px] font-mono-tabular uppercase text-[#9E4B28] dark:text-[#EC743C]">
-                  Managing Director & Founder
-                </p>
-                <p className="font-display text-2xl font-bold uppercase text-[#141618] dark:text-[#F3F0E9]">
-                  {COMPANY_INFO.managingDirector.name}
-                </p>
-              </figcaption>
-            </figure>
-          </div>
-
-          <div className="lg:col-span-7 space-y-6">
-            <div>
-              <p className="text-xs font-mono-tabular uppercase tracking-widest text-[#9E4B28] dark:text-[#EC743C] mb-2">
-                Promoters & Governance Leadership
-              </p>
-              <h2 id="leadership-heading" className="font-display text-3xl sm:text-4xl font-bold uppercase text-[#141618] dark:text-[#F3F0E9]">
-                Chairman Shri Sanjay Gupta & MD Shri Vijay Gupta
-              </h2>
-            </div>
-
-            <div className="bg-white dark:bg-[#20242A] border border-[#141618]/15 dark:border-[#F3F0E9]/14 p-6 sm:p-8 space-y-4">
-              {COMPANY_INFO.managingDirector.bio.map((paragraph) => (
-                <p key={paragraph} className="text-sm sm:text-base text-[#4A5054] dark:text-[#F3F0E9]/82 leading-relaxed">
-                  {paragraph}
-                </p>
-              ))}
-              <div className="pt-4 border-t border-[#141618]/10 dark:border-[#F3F0E9]/10 text-xs text-[#4A5054] dark:text-[#A1A7AB] space-y-1">
-                <p>
-                  <span className="font-semibold text-[#141618] dark:text-[#F3F0E9]">Chairman Governance:</span>{' '}
-                  {COMPANY_INFO.leadershipTeam[0].summary}
-                </p>
-                <p>
-                  <span className="font-semibold text-[#141618] dark:text-[#F3F0E9]">Reported Recognition:</span>{' '}
-                  {COMPANY_INFO.managingDirector.recognitionClaim}
-                </p>
-              </div>
-            </div>
-          </div>
+          <DirectorPortraitSection variant="about" />
         </section>
 
         {/* Full Interactive Growth Story */}
@@ -214,6 +215,25 @@ export function AboutPage() {
               <ArrowRight className="w-3.5 h-3.5" aria-hidden="true" />
             </Link>
           </div>
+        </section>
+
+        {/* Accreditations & Institutional Matrix */}
+        <section
+          aria-labelledby="about-credentials-heading"
+          className="pt-12 border-t border-[#141618]/15 dark:border-[#F3F0E9]/14 space-y-6"
+        >
+          <div className="max-w-2xl space-y-1.5">
+            <p className="text-xs font-mono-tabular uppercase tracking-widest text-[#9E4B28] dark:text-[#EC743C]">
+              Accreditations & Recognition Matrix
+            </p>
+            <h2
+              id="about-credentials-heading"
+              className="font-display text-3xl sm:text-4xl font-bold uppercase text-[#141618] dark:text-[#F3F0E9]"
+            >
+              ISO Frameworks, Credit Ratings & Memberships
+            </h2>
+          </div>
+          <CredentialStackedMatrix />
         </section>
       </div>
     </div>

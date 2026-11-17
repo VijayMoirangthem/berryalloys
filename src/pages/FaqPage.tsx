@@ -3,15 +3,15 @@ import { Link, useLocation, useSearchParams } from 'react-router-dom';
 import {
   ArrowRight,
   Check,
-  ChevronDown,
   Compass,
   Link2,
   MessageSquare,
+  Plus,
   RotateCcw,
   Search,
   X,
 } from 'lucide-react';
-import { AnimatePresence, motion, useReducedMotion } from 'motion/react';
+import { useReducedMotion } from 'motion/react';
 import {
   getKnowledgeById,
   KNOWLEDGE_BASE,
@@ -20,7 +20,9 @@ import {
   KnowledgeEntry,
 } from '../data/knowledgeBase';
 import { useGuide } from '../context/GuideContext';
+import { cn } from '../lib/utils';
 import { Breadcrumbs } from '../components/Breadcrumbs';
+import { CORPORATE_SUBNAV_LINKS, SubNav } from '../components/SubNav';
 import { SplitText } from '../components/motion/SplitText';
 import { IndustrialButton } from '../components/ui/IndustrialButton';
 
@@ -37,7 +39,6 @@ export function FaqPage() {
   const [openIds, setOpenIds] = useState<Record<string, boolean>>({});
   const [copiedId, setCopiedId] = useState<string | null>(null);
 
-  // Only render category buttons that actually contain entries
   const populatedCategories = useMemo(
     () =>
       KNOWLEDGE_CATEGORIES.filter((cat) =>
@@ -46,7 +47,6 @@ export function FaqPage() {
     []
   );
 
-  // Support direct links via /faq#<id> or /faq?q=<id>
   useEffect(() => {
     const rawTarget = (hash ? hash.slice(1) : searchParams.get('q')) ?? '';
     if (!rawTarget) return;
@@ -133,9 +133,10 @@ export function FaqPage() {
       <article
         key={entry.id}
         id={entry.id}
-        className={`scroll-mt-24 transition-colors ${
-          isDirectHit ? 'bg-[#ECE8DF]/45 dark:bg-[#20242A]/85' : ''
-        }`}
+        className={cn(
+          'scroll-mt-24 transition-colors duration-200',
+          isDirectHit || isOpen ? 'bg-[#ECE8DF]/45 dark:bg-[#191C20]/75' : ''
+        )}
       >
         <h3>
           <button
@@ -144,7 +145,7 @@ export function FaqPage() {
             aria-expanded={isOpen}
             aria-controls={panelId}
             onClick={() => toggleEntry(entry.id)}
-            className="w-full text-left px-5 sm:px-7 py-5 min-h-[58px] flex items-start justify-between gap-4 hover:bg-[#F6F4EF]/70 dark:hover:bg-[#191C20]/60 transition-colors cursor-pointer"
+            className="w-full text-left px-5 sm:px-7 py-5 min-h-[58px] flex items-start justify-between gap-4 hover:bg-[#F6F4EF]/75 dark:hover:bg-[#191C20]/80 transition-colors cursor-pointer"
           >
             <div className="space-y-1">
               <span className="block text-[10px] font-mono-tabular uppercase tracking-wider text-[#9E4B28] dark:text-[#EC743C]">
@@ -154,27 +155,37 @@ export function FaqPage() {
                 {entry.question}
               </span>
             </div>
-            <ChevronDown
-              className={`w-5 h-5 text-[#4A5054] dark:text-[#A1A7AB] shrink-0 mt-1 transition-transform duration-200 ${
-                isOpen ? 'rotate-180 text-[#9E4B28] dark:text-[#EC743C]' : ''
-              }`}
+            <span
               aria-hidden="true"
-            />
+              className={cn(
+                'w-7 h-7 shrink-0 mt-1 border flex items-center justify-center transition-colors duration-200',
+                isOpen
+                  ? 'bg-[#9E4B28] border-[#9E4B28] text-[#F6F4EF] dark:bg-[#EC743C] dark:border-[#EC743C] dark:text-[#141618]'
+                  : 'border-[#141618]/18 dark:border-[#F3F0E9]/18 text-[#4A5054] dark:text-[#A1A7AB]'
+              )}
+            >
+              <Plus
+                className={cn(
+                  'w-4 h-4 transition-transform duration-200',
+                  isOpen ? 'rotate-45' : ''
+                )}
+              />
+            </span>
           </button>
         </h3>
 
-        <AnimatePresence initial={false}>
-          {isOpen && (
-            <motion.div
-              id={panelId}
-              role="region"
-              aria-labelledby={btnId}
-              initial={prefersReduced ? false : { opacity: 0 }}
-              animate={{ opacity: 1 }}
-              exit={prefersReduced ? undefined : { opacity: 0 }}
-              transition={{ duration: 0.16 }}
-              className="px-5 sm:px-7 pb-7 pt-1 space-y-4"
-            >
+        <div
+          id={panelId}
+          role="region"
+          aria-labelledby={btnId}
+          aria-hidden={!isOpen}
+          className={cn(
+            'grid transition-[grid-template-rows,opacity] duration-200 ease-[cubic-bezier(0.16,1,0.3,1)]',
+            isOpen ? 'grid-rows-[1fr] opacity-100' : 'grid-rows-[0fr] opacity-0'
+          )}
+        >
+          <div className="overflow-hidden">
+            <div className="px-5 sm:px-7 pb-7 pt-1 space-y-4">
               <p className="text-sm sm:text-base text-[#141618]/90 dark:text-[#F3F0E9]/88 leading-relaxed max-w-[68ch]">
                 {entry.answer}
               </p>
@@ -190,6 +201,7 @@ export function FaqPage() {
                   <Link
                     key={`${entry.id}-${action.label}-${action.to}`}
                     to={action.to}
+                    tabIndex={isOpen ? 0 : -1}
                     onClick={(e) => {
                       if (action.enquiryProductSlug || action.to.startsWith('/#')) {
                         e.preventDefault();
@@ -209,6 +221,7 @@ export function FaqPage() {
 
                 <button
                   type="button"
+                  tabIndex={isOpen ? 0 : -1}
                   onClick={(e) =>
                     openGuide({
                       entryId: entry.id,
@@ -223,6 +236,7 @@ export function FaqPage() {
 
                 <button
                   type="button"
+                  tabIndex={isOpen ? 0 : -1}
                   onClick={() => copyDirectLink(entry.id)}
                   aria-label={`Copy direct link to "${entry.question}"`}
                   className="inline-flex items-center gap-1.5 min-h-[40px] px-3 py-2 text-xs text-[#4A5054] dark:text-[#A1A7AB] hover:text-[#141618] dark:hover:text-[#F3F0E9] transition-colors cursor-pointer ml-auto"
@@ -240,16 +254,18 @@ export function FaqPage() {
                   )}
                 </button>
               </div>
-            </motion.div>
-          )}
-        </AnimatePresence>
+            </div>
+          </div>
+        </div>
       </article>
     );
   };
 
   return (
-    <div className="bg-[#F6F4EF] dark:bg-[#121417] text-[#141618] dark:text-[#F3F0E9] py-12 lg:py-16">
-      <div className="max-w-[1360px] mx-auto px-4 sm:px-6 lg:px-8 space-y-12">
+    <div className="bg-[#F6F4EF] dark:bg-[#121417] text-[#141618] dark:text-[#F3F0E9]">
+      <SubNav links={CORPORATE_SUBNAV_LINKS} ariaLabel="Corporate navigation" />
+
+      <div className="max-w-[1360px] mx-auto px-4 sm:px-6 lg:px-8 py-12 lg:py-16 space-y-12">
         {/* Editorial Intro Header */}
         <header className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-end pb-8 border-b border-[#141618]/14 dark:border-[#F3F0E9]/14">
           <div className="lg:col-span-8 space-y-4">
@@ -332,7 +348,7 @@ export function FaqPage() {
             </div>
           </div>
 
-          {/* Horizontal Scrollable Category Navigation (Mobile + Desktop) */}
+          {/* Horizontal Scrollable Category Navigation */}
           <div
             role="tablist"
             aria-label="Filter FAQs by category"

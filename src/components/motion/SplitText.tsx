@@ -40,8 +40,8 @@ export function SplitText({
       gsap.from(targets, {
         yPercent: 105,
         opacity: 0,
-        duration: 0.7,
-        stagger: 0.045,
+        duration: 0.98,
+        stagger: 0.06,
         delay,
         ease: 'power3.out',
         clearProps: 'transform,opacity',

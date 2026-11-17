@@ -1,0 +1,137 @@
+import React, { useRef, useState } from 'react';
+import { Link } from 'react-router-dom';
+import { cn } from '../../lib/utils';
+
+export interface CreepyButtonProps {
+  children: React.ReactNode;
+  to?: string;
+  href?: string;
+  onClick?: (e: React.MouseEvent<HTMLElement>) => void;
+  type?: 'button' | 'submit' | 'reset';
+  className?: string;
+  variant?: 'copper' | 'obsidian';
+  'aria-label'?: string;
+}
+
+/**
+ * CreepyButton — Dual-layer pointer-tracking CTA button where hovering/focusing
+ * tilts the upper plate to reveal a pair of animated pupil orbs underneath.
+ */
+export function CreepyButton({
+  children,
+  to,
+  href,
+  onClick,
+  type = 'button',
+  className,
+  variant = 'copper',
+  'aria-label': ariaLabel,
+}: CreepyButtonProps) {
+  const eyesRef = useRef<HTMLSpanElement>(null);
+  const [eyeCoords, setEyeCoords] = useState({ x: 0, y: 0 });
+  const [isHovered, setIsHovered] = useState(false);
+
+  const updateEyes = (clientX: number, clientY: number) => {
+    const rect = eyesRef.current?.getBoundingClientRect();
+    if (!rect) return;
+    const cx = rect.left + rect.width / 2;
+    const cy = rect.top + rect.height / 2;
+    const dx = clientX - cx;
+    const dy = clientY - cy;
+    const angle = Math.atan2(dy, dx);
+    const dist = Math.min(1, Math.hypot(dx, dy) / 140);
+    setEyeCoords({
+      x: Math.cos(angle) * dist * 18,
+      y: Math.sin(angle) * dist * 16,
+    });
+  };
+
+  const resetEyes = () => {
+    setIsHovered(false);
+    setEyeCoords({ x: 0, y: 0 });
+  };
+
+  const underLayerClass =
+    variant === 'copper' ? 'bg-[#141618] border border-[#EC743C]/40' : 'bg-[#0D0F12] border border-[#9E4B28]/50';
+
+  const topPlateClass =
+    variant === 'copper'
+      ? 'bg-[#9E4B28] text-[#F6F4EF] dark:bg-[#A95632] dark:text-[#F3F0E9] group-hover:bg-[#823B1D]'
+      : 'bg-[#141618] text-[#F6F4EF] dark:bg-[#20242A] dark:text-[#F3F0E9] border border-[#141618] dark:border-[#F3F0E9]/20';
+
+  const innerContent = (
+    <>
+      {/* Hidden underneath orbital eyes */}
+      <span
+        ref={eyesRef}
+        aria-hidden="true"
+        className="absolute inset-0 flex items-center justify-end pr-4 pointer-events-none select-none"
+      >
+        <span className="flex items-center gap-1.5">
+          {[0, 1].map((eye) => (
+            <span
+              key={eye}
+              className="relative w-3.5 h-4 bg-[#F6F4EF] rounded-full overflow-hidden flex items-center justify-center shadow-inner"
+            >
+              <span
+                className="w-1.5 h-1.5 bg-[#141618] rounded-full transition-transform duration-75"
+                style={{
+                  transform: `translate(${eyeCoords.x}%, ${eyeCoords.y}%)`,
+                }}
+              />
+            </span>
+          ))}
+        </span>
+      </span>
+
+      {/* Top Interactive Plate */}
+      <span
+        className={cn(
+          'relative z-10 inline-flex items-center justify-center gap-2 w-full min-h-[44px] px-5 py-2.5 text-xs sm:text-sm font-semibold tracking-wide origin-bottom-left transition-transform duration-200 ease-[cubic-bezier(0.16,1,0.3,1)] motion-reduce:transition-none',
+          isHovered && 'motion-safe:-translate-y-1.5 motion-safe:-rotate-[6deg]',
+          topPlateClass
+        )}
+      >
+        {children}
+      </span>
+    </>
+  );
+
+  const sharedProps = {
+    'aria-label': ariaLabel,
+    onMouseEnter: () => setIsHovered(true),
+    onMouseMove: (e: React.MouseEvent<HTMLElement>) => updateEyes(e.clientX, e.clientY),
+    onMouseLeave: resetEyes,
+    onFocus: () => setIsHovered(true),
+    onBlur: resetEyes,
+    className: cn(
+      'group relative inline-flex items-center overflow-visible cursor-pointer whitespace-nowrap shrink-0 select-none',
+      underLayerClass,
+      className
+    ),
+  };
+
+  if (to) {
+    return (
+      <Link to={to} onClick={onClick} {...sharedProps}>
+        {innerContent}
+      </Link>
+    );
+  }
+
+  if (href) {
+    return (
+      <a href={href} onClick={onClick} {...sharedProps}>
+        {innerContent}
+      </a>
+    );
+  }
+
+  return (
+    <button type={type} onClick={onClick} {...sharedProps}>
+      {innerContent}
+    </button>
+  );
+}
+
+export default CreepyButton;

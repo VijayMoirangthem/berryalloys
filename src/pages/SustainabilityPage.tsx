@@ -3,11 +3,14 @@ import { Link } from 'react-router-dom';
 import { ArrowRight } from 'lucide-react';
 import { ASSETS } from '../data/assets';
 import { SUSTAINABILITY_INITIATIVES, SustainabilityInitiative } from '../data/company';
+import { CSR_DIAGONAL_SLIDES } from '../data/showcaseCollections';
 import { Breadcrumbs } from '../components/Breadcrumbs';
 import { ResilientImage } from '../components/ResilientImage';
 import { OPERATIONS_SUBNAV_LINKS, SubNav } from '../components/SubNav';
 import { ImageReveal } from '../components/motion/ImageReveal';
 import { SplitText } from '../components/motion/SplitText';
+import { DiagonalCarousel } from '../components/ui/DiagonalCarousel';
+import { GooeyTextReveal } from '../components/ui/GooeyTextReveal';
 
 type StageFilter = 'All' | SustainabilityInitiative['stage'];
 
@@ -36,9 +39,14 @@ export function SustainabilityPage() {
                 as="h1"
                 className="font-display fluid-section-title font-bold uppercase tracking-tight text-[#141618] dark:text-[#F3F0E9]"
               />
-              <p className="text-base text-[#4A5054] dark:text-[#A1A7AB] leading-relaxed max-w-[62ch]">
-                Ferro alloy smelting is energy intensive. Berry Alloys’ published disclosures describe solar and wind generation assets alongside planned waste heat recovery at Ghatsila and exploratory biomass evaluations. Each initiative below is categorized transparently by stage without inventing unverified emissions counters.
-              </p>
+              <GooeyTextReveal>
+                <p
+                  data-gooey-reveal-item=""
+                  className="text-base text-[#4A5054] dark:text-[#A1A7AB] leading-relaxed max-w-[62ch]"
+                >
+                  Ferro alloy smelting is energy intensive. Berry Alloys’ published disclosures describe solar and wind generation assets alongside planned waste heat recovery at Ghatsila and exploratory biomass evaluations. Each initiative below is categorized transparently by stage without inventing unverified emissions counters.
+                </p>
+              </GooeyTextReveal>
             </div>
 
             <div className="lg:col-span-5">
@@ -126,6 +134,12 @@ export function SustainabilityPage() {
             ))}
           </div>
         </div>
+
+        {/* Ecological & Fieldwork Showcase */}
+        <DiagonalCarousel
+          slides={CSR_DIAGONAL_SLIDES}
+          eyebrow="Ecological & Community Fieldwork"
+        />
 
         {/* Methodological Note */}
         <aside className="bg-[#141618] text-[#F3F0E9] border border-[#141618] dark:border-[#F3F0E9]/14 p-6 sm:p-10 flex flex-col md:flex-row md:items-center justify-between gap-6">
