@@ -17,7 +17,7 @@ interface DirectorPortraitSectionProps {
  *   Layer 1: Static section canvas (inherited from parent section)
  *   Layer 2: Restrained architectural backdrop frame (counter-translates subtly on pointer)
  *   Layer 3: Soft radial/elliptical depth shadow behind the silhouette
- *   Layer 4: Original intact RGBA portrait (`vijay_gupta_md_clean.png`, NO blend modes)
+ *   Layer 4: Original intact RGBA portrait (`vijay_gupta_md_portrait.webp`, NO blend modes)
  *   Layer 5: Fine copper foreground corner bracket & baseline coordinate rule
  *
  * Scroll entrance runs once on an outer GSAP wrapper; fine-pointer rAF tilt runs cleanly
@@ -273,13 +273,12 @@ export function DirectorPortraitSection({ variant = 'home' }: DirectorPortraitSe
                 <img
                   src={ASSETS.vijayGuptaPortrait.src}
                   alt={ASSETS.vijayGuptaPortrait.alt}
-                  width={1107}
-                  height={1799}
+                  width={1024}
+                  height={1536}
                   loading="lazy"
                   decoding="async"
-                  // Gentle exposure lift only (brightness/contrast). Skin tone is not recoloured.
-                  style={{ filter: 'brightness(1.08) contrast(1.03) drop-shadow(0 10px 18px rgba(16,36,58,0.16))' }}
-                  className="block w-full h-auto max-h-[460px] sm:max-h-[500px] object-contain object-bottom"
+                  // Supplied transparent studio cutout. No colour filters are applied; only a soft ground shadow.
+                  className="block w-full h-auto max-h-[500px] sm:max-h-[540px] object-contain object-bottom drop-shadow-[0_12px_20px_rgba(16,36,58,0.16)] dark:drop-shadow-[0_16px_28px_rgba(0,0,0,0.45)]"
                 />
               </div>
             </div>

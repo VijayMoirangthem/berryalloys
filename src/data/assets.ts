@@ -9,7 +9,7 @@ import plantOverviewWideImg from '../assets/images/official/plant_overview_9.jpg
 import berryBuildingImg from '../assets/images/official/berry_building.png';
 import heroNewOfficeImg from '../assets/images/official/hero_new_office.jpg';
 import sustainabilityFeatureImg from '../assets/images/official/sustainability_feature.jpg';
-import vijayGuptaMdImg from '../assets/images/official/vijay_gupta_md_clean.png';
+import vijayGuptaMdImg from '../assets/images/official/vijay_gupta_md_portrait.webp';
 import prodFeMnImg from '../assets/images/official/prod_femn_hc.jpg';
 import prodSiMnImg from '../assets/images/official/prod_simn_hc.jpg';
 import prodFeCrImg from '../assets/images/official/prod_fecr_lc.jpg';
