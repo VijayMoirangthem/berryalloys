@@ -52,12 +52,12 @@ export function CreepyButton({
   };
 
   const underLayerClass =
-    variant === 'copper' ? 'bg-[#141618] border border-[#EC743C]/40' : 'bg-[#0D0F12] border border-[#9E4B28]/50';
+    variant === 'copper' ? 'bg-[#10243A] border border-[#69C5F5]/40' : 'bg-[#07111F] border border-brand/50';
 
   const topPlateClass =
     variant === 'copper'
-      ? 'bg-[#9E4B28] text-[#F6F4EF] dark:bg-[#A95632] dark:text-[#F3F0E9] group-hover:bg-[#823B1D]'
-      : 'bg-[#141618] text-[#F6F4EF] dark:bg-[#20242A] dark:text-[#F3F0E9] border border-[#141618] dark:border-[#F3F0E9]/20';
+      ? 'bg-brand text-[#FFFFFF] dark:bg-[#0A6AA1] dark:text-[#F4F8FC] group-hover:bg-brand-hover'
+      : 'bg-[#10243A] text-[#FFFFFF] dark:bg-[#12243B] dark:text-[#F4F8FC] border border-[#10243A] dark:border-[#F4F8FC]/20';
 
   const innerContent = (
     <>
@@ -71,10 +71,10 @@ export function CreepyButton({
           {[0, 1].map((eye) => (
             <span
               key={eye}
-              className="relative w-3.5 h-4 bg-[#F6F4EF] rounded-full overflow-hidden flex items-center justify-center shadow-inner"
+              className="relative w-3.5 h-4 bg-[#FFFFFF] rounded-full overflow-hidden flex items-center justify-center shadow-inner"
             >
               <span
-                className="w-1.5 h-1.5 bg-[#141618] rounded-full transition-transform duration-75"
+                className="w-1.5 h-1.5 bg-[#10243A] rounded-full transition-transform duration-75"
                 style={{
                   transform: `translate(${eyeCoords.x}%, ${eyeCoords.y}%)`,
                 }}

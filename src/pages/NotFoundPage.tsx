@@ -5,15 +5,15 @@ import { IndustrialButton } from '../components/ui/IndustrialButton';
 
 export function NotFoundPage() {
   return (
-    <div className="bg-[#F6F4EF] dark:bg-[#121417] text-[#141618] dark:text-[#F3F0E9] py-24 lg:py-32">
+    <div className="bg-[#FFFFFF] dark:bg-[#07111F] text-[#10243A] dark:text-[#F4F8FC] py-24 lg:py-32">
       <div className="max-w-[760px] mx-auto px-4 sm:px-6 text-center space-y-6">
-        <p className="text-xs font-mono-tabular uppercase tracking-widest text-[#9E4B28] dark:text-[#EC743C]">
+        <p className="text-xs font-mono-tabular uppercase tracking-widest text-brand dark:text-[#69C5F5]">
           404 · Page Not Found
         </p>
-        <h1 className="font-display fluid-section-title font-bold uppercase tracking-tight text-[#141618] dark:text-[#F3F0E9]">
+        <h1 className="font-display fluid-section-title font-bold uppercase tracking-tight text-[#10243A] dark:text-[#F4F8FC]">
           The requested page does not exist
         </h1>
-        <p className="text-base text-[#4A5054] dark:text-[#A1A7AB] leading-relaxed">
+        <p className="text-base text-[#465C72] dark:text-[#B5C5D7] leading-relaxed">
           Use the links below to return to the Berry Alloys Limited overview, inspect our ferro alloy product specifications, or submit a commercial quotation enquiry.
         </p>
 
@@ -28,7 +28,7 @@ export function NotFoundPage() {
           </IndustrialButton>
           <Link
             to="/contact?tab=quote"
-            className="inline-flex items-center px-5 py-3 text-xs font-semibold text-[#9E4B28] dark:text-[#EC743C] hover:underline"
+            className="inline-flex items-center px-5 py-3 text-xs font-semibold text-brand dark:text-[#69C5F5] hover:underline"
           >
             Request Quotation
           </Link>

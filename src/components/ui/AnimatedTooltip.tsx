@@ -22,11 +22,11 @@ interface AnimatedTooltipProps {
 
 const VARIANT_CLASSES: Record<TooltipVariant, string> = {
   copper:
-    'bg-[#9E4B28] text-[#F6F4EF] border-[#EC743C]/40 dark:bg-[#A95632] dark:text-[#F3F0E9]',
+    'bg-brand text-[#FFFFFF] border-[#69C5F5]/40 dark:bg-[#0A6AA1] dark:text-[#F4F8FC]',
   graphite:
-    'bg-[#141618] text-[#F3F0E9] border-[#F3F0E9]/20 dark:bg-[#20242A] dark:text-[#F3F0E9]',
+    'bg-[#10243A] text-[#F4F8FC] border-[#F4F8FC]/20 dark:bg-[#12243B] dark:text-[#F4F8FC]',
   ivory:
-    'bg-[#FFFFFF] text-[#141618] border-[#141618]/20 dark:bg-[#F3F0E9] dark:text-[#141618]',
+    'bg-[#FFFFFF] text-[#10243A] border-[#10243A]/20 dark:bg-[#F4F8FC] dark:text-[#10243A]',
 };
 
 /**

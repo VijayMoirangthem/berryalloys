@@ -70,7 +70,7 @@ export function PixelatedImageTrail({
 
       const wrapper = document.createElement('div');
       wrapper.className =
-        'pointer-events-none absolute -translate-x-1/2 -translate-y-1/2 overflow-hidden border border-[#F3F0E9]/25 bg-[#121417] shadow-2xl';
+        'pointer-events-none absolute -translate-x-1/2 -translate-y-1/2 overflow-hidden border border-[#F4F8FC]/25 bg-[#07111F] shadow-2xl';
       wrapper.style.left = `${x}px`;
       wrapper.style.top = `${y}px`;
       wrapper.style.width = `${imageSize.width}px`;

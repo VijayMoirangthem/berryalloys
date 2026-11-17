@@ -100,19 +100,19 @@ export function HomeAlloyShowcase({ onEnquireAlloy }: HomeAlloyShowcaseProps) {
     <section
       id="alloys"
       aria-labelledby="alloy-explorer-heading"
-      className="relative overflow-hidden scroll-mt-20 py-20 lg:py-28 bg-[#ECE8DF] text-[#141618] dark:bg-[#141618] dark:text-[#F3F0E9] border-t border-[#141618]/12 dark:border-[#F3F0E9]/10"
+      className="relative overflow-hidden scroll-mt-20 py-20 lg:py-28 bg-[#F1F6FB] text-[#10243A] dark:bg-[#10243A] dark:text-[#F4F8FC] border-t border-[#10243A]/12 dark:border-[#F4F8FC]/10"
     >
       <WaveGridBackground className="absolute inset-0 opacity-75" />
       <div className="relative z-10 max-w-[1360px] mx-auto px-4 sm:px-6 lg:px-8 xl:px-14 2xl:px-8 space-y-12">
         {/* Section Header */}
-        <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 items-end pb-8 border-b border-[#141618]/14 dark:border-[#F3F0E9]/12">
+        <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 items-end pb-8 border-b border-[#10243A]/14 dark:border-[#F4F8FC]/12">
           <div className="lg:col-span-8 space-y-3">
-            <p className="text-xs font-mono-tabular uppercase tracking-widest text-[#9E4B28] dark:text-[#EC743C]">
+            <p className="text-xs font-mono-tabular uppercase tracking-widest text-brand dark:text-[#69C5F5]">
               05 / Alloy Portfolio
             </p>
             <h2
               id="alloy-explorer-heading"
-              className="font-display fluid-section-title font-bold uppercase tracking-tight text-[#141618] dark:text-[#F3F0E9]"
+              className="font-display fluid-section-title font-bold uppercase tracking-tight text-[#10243A] dark:text-[#F4F8FC]"
             >
               Four bulk alloy families. Ten documented grade series.
             </h2>
@@ -120,7 +120,7 @@ export function HomeAlloyShowcase({ onEnquireAlloy }: HomeAlloyShowcaseProps) {
           <div className="lg:col-span-4 lg:text-right">
             <Link
               to="/products"
-              className="inline-flex items-center gap-2 text-xs font-semibold uppercase tracking-wider text-[#141618] hover:text-[#9E4B28] dark:text-[#F3F0E9] dark:hover:text-[#EC743C] transition-colors"
+              className="inline-flex items-center gap-2 text-xs font-semibold uppercase tracking-wider text-[#10243A] hover:text-brand dark:text-[#F4F8FC] dark:hover:text-[#69C5F5] transition-colors"
             >
               Search & Filter Full Catalogue
               <ArrowRight className="w-4 h-4" aria-hidden="true" />
@@ -149,8 +149,8 @@ export function HomeAlloyShowcase({ onEnquireAlloy }: HomeAlloyShowcaseProps) {
                     onClick={() => handleSelectFamily(family)}
                     className={`min-h-[44px] px-4 py-2 text-xs font-semibold border transition-colors whitespace-nowrap shrink-0 cursor-pointer ${
                       isActive
-                        ? 'bg-[#9E4B28] text-[#F6F4EF] border-[#9E4B28] dark:bg-[#A95632] dark:border-[#A95632]'
-                        : 'bg-white text-[#4A5054] border-[#141618]/15 hover:text-[#141618] dark:bg-[#20242A] dark:text-[#A1A7AB] dark:border-[#F3F0E9]/14 dark:hover:text-[#F3F0E9]'
+                        ? 'bg-brand text-[#FFFFFF] border-brand dark:bg-[#0A6AA1] dark:border-[#0A6AA1]'
+                        : 'bg-white text-[#465C72] border-[#10243A]/15 hover:text-[#10243A] dark:bg-[#12243B] dark:text-[#B5C5D7] dark:border-[#F4F8FC]/14 dark:hover:text-[#F4F8FC]'
                     }`}
                   >
                     {FAMILY_MEDIA[family].index}. {family}
@@ -160,7 +160,7 @@ export function HomeAlloyShowcase({ onEnquireAlloy }: HomeAlloyShowcaseProps) {
             </div>
 
             {/* Desktop Vertical Numbered Family List */}
-            <div className="hidden lg:block divide-y divide-[#141618]/12 dark:divide-[#F3F0E9]/12 border-t border-b border-[#141618]/12 dark:border-[#F3F0E9]/12">
+            <div className="hidden lg:block divide-y divide-[#10243A]/12 dark:divide-[#F4F8FC]/12 border-t border-b border-[#10243A]/12 dark:border-[#F4F8FC]/12">
               {ALLOY_FAMILIES.map((family) => {
                 const isActive = activeFamily === family;
                 const meta = FAMILY_MEDIA[family];
@@ -173,8 +173,8 @@ export function HomeAlloyShowcase({ onEnquireAlloy }: HomeAlloyShowcaseProps) {
                     aria-pressed={isActive}
                     className={`w-full text-left py-5 px-4 transition-colors duration-350 flex items-start justify-between gap-4 cursor-pointer ${
                       isActive
-                        ? 'bg-white dark:bg-[#20242A]'
-                        : 'hover:bg-white/60 dark:hover:bg-[#20242A]/55'
+                        ? 'bg-white dark:bg-[#12243B]'
+                        : 'hover:bg-white/60 dark:hover:bg-[#12243B]/55'
                     }`}
                   >
                     <div className="space-y-1.5">
@@ -182,8 +182,8 @@ export function HomeAlloyShowcase({ onEnquireAlloy }: HomeAlloyShowcaseProps) {
                         <span
                           className={`font-mono-tabular text-xs ${
                             isActive
-                              ? 'text-[#9E4B28] dark:text-[#EC743C]'
-                              : 'text-[#4A5054] dark:text-[#A1A7AB]'
+                              ? 'text-brand dark:text-[#69C5F5]'
+                              : 'text-[#465C72] dark:text-[#B5C5D7]'
                           }`}
                         >
                           {meta.index}
@@ -191,8 +191,8 @@ export function HomeAlloyShowcase({ onEnquireAlloy }: HomeAlloyShowcaseProps) {
                         <span
                           className={`font-display text-2xl sm:text-3xl font-bold uppercase tracking-tight ${
                             isActive
-                              ? 'text-[#141618] dark:text-[#F3F0E9]'
-                              : 'text-[#141618]/65 dark:text-[#F3F0E9]/65'
+                              ? 'text-[#10243A] dark:text-[#F4F8FC]'
+                              : 'text-[#10243A]/65 dark:text-[#F4F8FC]/65'
                           }`}
                         >
                           {family}
@@ -201,19 +201,19 @@ export function HomeAlloyShowcase({ onEnquireAlloy }: HomeAlloyShowcaseProps) {
                       <p
                         className={`text-xs leading-relaxed pl-7 max-w-md ${
                           isActive
-                            ? 'text-[#4A5054] dark:text-[#F3F0E9]/80'
-                            : 'text-[#4A5054]/80 dark:text-[#A1A7AB]'
+                            ? 'text-[#465C72] dark:text-[#F4F8FC]/80'
+                            : 'text-[#465C72]/80 dark:text-[#B5C5D7]'
                         }`}
                       >
                         {meta.tagline}
                       </p>
                     </div>
-                    <span className="inline-flex items-center gap-2 font-mono-tabular text-[11px] text-[#4A5054] dark:text-[#A1A7AB] shrink-0 pt-1">
+                    <span className="inline-flex items-center gap-2 font-mono-tabular text-[11px] text-[#465C72] dark:text-[#B5C5D7] shrink-0 pt-1">
                       <span>{variantCount} series</span>
                       <ArrowRight
                         className={`w-3.5 h-3.5 transition-transform duration-350 ${
                           isActive
-                            ? 'text-[#9E4B28] dark:text-[#EC743C] translate-x-0.5'
+                            ? 'text-brand dark:text-[#69C5F5] translate-x-0.5'
                             : 'opacity-40'
                         }`}
                         aria-hidden="true"
@@ -226,7 +226,7 @@ export function HomeAlloyShowcase({ onEnquireAlloy }: HomeAlloyShowcaseProps) {
 
             {/* Active Family Variant Selector */}
             <div className="space-y-3">
-              <p className="text-[11px] font-mono-tabular uppercase tracking-wider text-[#4A5054] dark:text-[#A1A7AB]">
+              <p className="text-[11px] font-mono-tabular uppercase tracking-wider text-[#465C72] dark:text-[#B5C5D7]">
                 Select Grade Series in {activeFamily}
               </p>
               <div className="flex flex-wrap gap-2">
@@ -240,8 +240,8 @@ export function HomeAlloyShowcase({ onEnquireAlloy }: HomeAlloyShowcaseProps) {
                       aria-pressed={isSelected}
                       className={`min-h-[40px] px-3.5 py-2 text-xs font-medium border transition-colors cursor-pointer whitespace-nowrap ${
                         isSelected
-                          ? 'bg-[#141618] text-[#F6F4EF] border-[#141618] font-semibold dark:bg-[#F3F0E9] dark:text-[#141618] dark:border-[#F3F0E9]'
-                          : 'bg-white text-[#141618] border-[#141618]/18 hover:border-[#9E4B28] dark:bg-[#20242A] dark:text-[#F3F0E9]/80 dark:border-[#F3F0E9]/16 dark:hover:border-[#EC743C]'
+                          ? 'bg-[#10243A] text-[#FFFFFF] border-[#10243A] font-semibold dark:bg-[#F4F8FC] dark:text-[#10243A] dark:border-[#F4F8FC]'
+                          : 'bg-white text-[#10243A] border-[#10243A]/18 hover:border-brand dark:bg-[#12243B] dark:text-[#F4F8FC]/80 dark:border-[#F4F8FC]/16 dark:hover:border-[#69C5F5]'
                       }`}
                     >
                       {item.name}
@@ -252,11 +252,11 @@ export function HomeAlloyShowcase({ onEnquireAlloy }: HomeAlloyShowcaseProps) {
             </div>
 
             {/* Inline Comparison Bar */}
-            <div className="bg-white dark:bg-[#20242A] border border-[#141618]/14 dark:border-[#F3F0E9]/14 p-4 space-y-3">
+            <div className="bg-white dark:bg-[#12243B] border border-[#10243A]/14 dark:border-[#F4F8FC]/14 p-4 space-y-3">
               <div className="flex flex-wrap items-center justify-between gap-2 sm:gap-3">
-                <span className="inline-flex items-center gap-2 text-xs font-semibold text-[#141618] dark:text-[#F3F0E9]">
+                <span className="inline-flex items-center gap-2 text-xs font-semibold text-[#10243A] dark:text-[#F4F8FC]">
                   <GitCompare
-                    className="w-4 h-4 text-[#9E4B28] dark:text-[#EC743C] shrink-0"
+                    className="w-4 h-4 text-brand dark:text-[#69C5F5] shrink-0"
                     aria-hidden="true"
                   />
                   Compare Alloys ({comparedProducts.length}/3)
@@ -265,7 +265,7 @@ export function HomeAlloyShowcase({ onEnquireAlloy }: HomeAlloyShowcaseProps) {
                   type="button"
                   disabled={comparedProducts.length < 2}
                   onClick={() => setCompareModalOpen(true)}
-                  className="px-3 py-1.5 text-xs font-semibold bg-[#9E4B28] text-[#F6F4EF] hover:bg-[#823B1D] dark:bg-[#A95632] dark:hover:bg-[#8D4323] disabled:opacity-40 disabled:cursor-not-allowed transition-colors cursor-pointer whitespace-nowrap shrink-0"
+                  className="px-3 py-1.5 text-xs font-semibold bg-brand text-[#FFFFFF] hover:bg-brand-hover dark:bg-[#0A6AA1] dark:hover:bg-[#004C73] disabled:opacity-40 disabled:cursor-not-allowed transition-colors cursor-pointer whitespace-nowrap shrink-0"
                 >
                   Open Matrix
                 </button>
@@ -275,14 +275,14 @@ export function HomeAlloyShowcase({ onEnquireAlloy }: HomeAlloyShowcaseProps) {
                   {comparedProducts.map((p) => (
                     <span
                       key={p.slug}
-                      className="inline-flex items-center gap-1.5 text-[11px] bg-[#F6F4EF] border border-[#141618]/15 px-2.5 py-1 text-[#141618] dark:bg-[#121417] dark:border-[#F3F0E9]/16 dark:text-[#F3F0E9]"
+                      className="inline-flex items-center gap-1.5 text-[11px] bg-[#FFFFFF] border border-[#10243A]/15 px-2.5 py-1 text-[#10243A] dark:bg-[#07111F] dark:border-[#F4F8FC]/16 dark:text-[#F4F8FC]"
                     >
                       {p.shortName}
                       <button
                         type="button"
                         onClick={() => toggleCompare(p.slug)}
                         aria-label={`Remove ${p.name} from comparison`}
-                        className="text-[#4A5054] hover:text-[#141618] dark:text-[#A1A7AB] dark:hover:text-[#F3F0E9] cursor-pointer"
+                        className="text-[#465C72] hover:text-[#10243A] dark:text-[#B5C5D7] dark:hover:text-[#F4F8FC] cursor-pointer"
                       >
                         <X className="w-3 h-3" aria-hidden="true" />
                       </button>
@@ -291,7 +291,7 @@ export function HomeAlloyShowcase({ onEnquireAlloy }: HomeAlloyShowcaseProps) {
                 </div>
               )}
               {limitNotice && (
-                <p role="status" className="text-xs text-[#9E4B28] dark:text-[#EC743C]">
+                <p role="status" className="text-xs text-brand dark:text-[#69C5F5]">
                   {limitNotice}
                 </p>
               )}
@@ -300,7 +300,7 @@ export function HomeAlloyShowcase({ onEnquireAlloy }: HomeAlloyShowcaseProps) {
 
           {/* Right: Official Specimen Tray + Specification Card */}
           <div className="lg:col-span-7">
-            <SpotlightSurface className="bg-white dark:bg-[#20242A] border border-[#141618]/14 dark:border-[#F3F0E9]/14">
+            <SpotlightSurface className="bg-white dark:bg-[#12243B] border border-[#10243A]/14 dark:border-[#F4F8FC]/14">
               <AnimatePresence mode="wait">
                 <motion.div
                   key={activeProduct.slug}
@@ -310,13 +310,13 @@ export function HomeAlloyShowcase({ onEnquireAlloy }: HomeAlloyShowcaseProps) {
                   transition={{ duration: 0.48, ease: [0.22, 1, 0.36, 1] }}
                 >
                   {/* Framed Official Specimen Plate (consistent studio tray in both themes) */}
-                  <div className="p-4 sm:p-5 bg-[#F6F4EF] border-b border-[#141618]/14 dark:border-[#F3F0E9]/14">
-                    <div className="flex flex-wrap items-center justify-between gap-2 pb-3 text-[11px] font-mono-tabular uppercase tracking-wider text-[#4A5054]">
+                  <div className="p-4 sm:p-5 bg-[#FFFFFF] border-b border-[#10243A]/14 dark:border-[#F4F8FC]/14">
+                    <div className="flex flex-wrap items-center justify-between gap-2 pb-3 text-[11px] font-mono-tabular uppercase tracking-wider text-[#465C72]">
                       <span>Official Alloy Specimen Plate · {activeProduct.family}</span>
                       <span>Berry Alloys Assay Series</span>
                     </div>
                     <div className="grid grid-cols-1 sm:grid-cols-12 gap-4 items-center">
-                      <div className="sm:col-span-8 aspect-[16/10] bg-white border border-[#141618]/12 overflow-hidden">
+                      <div className="sm:col-span-8 aspect-[16/10] bg-white border border-[#10243A]/12 overflow-hidden">
                         <ResilientImage
                           src={activeImage.src}
                           alt={`${activeProduct.name} — ${activeImage.alt}`}
@@ -324,7 +324,7 @@ export function HomeAlloyShowcase({ onEnquireAlloy }: HomeAlloyShowcaseProps) {
                           containerClassName="w-full h-full"
                         />
                       </div>
-                      <div className="sm:col-span-4 aspect-[16/10] sm:aspect-square bg-[#141618] border border-[#141618]/15 overflow-hidden">
+                      <div className="sm:col-span-4 aspect-[16/10] sm:aspect-square bg-[#10243A] border border-[#10243A]/15 overflow-hidden">
                         <ResilientImage
                           src={activeFamilyMedia.fractureScene.src}
                           alt={activeFamilyMedia.fractureScene.alt}
@@ -332,7 +332,7 @@ export function HomeAlloyShowcase({ onEnquireAlloy }: HomeAlloyShowcaseProps) {
                         />
                       </div>
                     </div>
-                    <p className="pt-3 text-[11px] font-mono-tabular text-[#4A5054]">
+                    <p className="pt-3 text-[11px] font-mono-tabular text-[#465C72]">
                       {activeImage.caption}
                     </p>
                   </div>
@@ -341,7 +341,7 @@ export function HomeAlloyShowcase({ onEnquireAlloy }: HomeAlloyShowcaseProps) {
                   <div className="p-5 sm:p-8 space-y-6">
                     <div className="flex flex-wrap items-start justify-between gap-4">
                       <div className="space-y-1.5">
-                        <p className="text-xs font-mono-tabular text-[#9E4B28] dark:text-[#EC743C]">
+                        <p className="text-xs font-mono-tabular text-brand dark:text-[#69C5F5]">
                           {activeProduct.family} · {activeProduct.carbonTier}
                           {activeProduct.lowPhosphorusOption && (
                             <>
@@ -361,7 +361,7 @@ export function HomeAlloyShowcase({ onEnquireAlloy }: HomeAlloyShowcaseProps) {
                             </>
                           )}
                         </p>
-                        <h3 className="font-display text-3xl sm:text-4xl font-bold uppercase tracking-tight text-[#141618] dark:text-[#F3F0E9]">
+                        <h3 className="font-display text-3xl sm:text-4xl font-bold uppercase tracking-tight text-[#10243A] dark:text-[#F4F8FC]">
                           {activeProduct.name}
                         </h3>
                       </div>
@@ -372,8 +372,8 @@ export function HomeAlloyShowcase({ onEnquireAlloy }: HomeAlloyShowcaseProps) {
                         aria-pressed={isCurrentCompared}
                         className={`min-h-[40px] inline-flex items-center gap-1.5 px-3.5 py-2 text-xs font-medium border transition-colors cursor-pointer shrink-0 ${
                           isCurrentCompared
-                            ? 'bg-[#141618] text-[#F6F4EF] border-[#141618] dark:bg-[#F3F0E9] dark:text-[#141618] dark:border-[#F3F0E9]'
-                            : 'bg-transparent text-[#141618] border-[#141618]/25 hover:border-[#9E4B28] dark:text-[#F3F0E9] dark:border-[#F3F0E9]/25 dark:hover:border-[#EC743C]'
+                            ? 'bg-[#10243A] text-[#FFFFFF] border-[#10243A] dark:bg-[#F4F8FC] dark:text-[#10243A] dark:border-[#F4F8FC]'
+                            : 'bg-transparent text-[#10243A] border-[#10243A]/25 hover:border-brand dark:text-[#F4F8FC] dark:border-[#F4F8FC]/25 dark:hover:border-[#69C5F5]'
                         }`}
                       >
                         {isCurrentCompared && <Check className="w-3.5 h-3.5" aria-hidden="true" />}
@@ -381,41 +381,41 @@ export function HomeAlloyShowcase({ onEnquireAlloy }: HomeAlloyShowcaseProps) {
                       </button>
                     </div>
 
-                    <p className="text-sm sm:text-base text-[#4A5054] dark:text-[#F3F0E9]/82 leading-relaxed max-w-2xl">
+                    <p className="text-sm sm:text-base text-[#465C72] dark:text-[#F4F8FC]/82 leading-relaxed max-w-2xl">
                       {activeProduct.summary}
                     </p>
 
                     {/* Chemistry Preview Strip */}
-                    <dl className="grid grid-cols-2 sm:grid-cols-4 gap-4 py-4 border-t border-b border-[#141618]/12 dark:border-[#F3F0E9]/12">
+                    <dl className="grid grid-cols-2 sm:grid-cols-4 gap-4 py-4 border-t border-b border-[#10243A]/12 dark:border-[#F4F8FC]/12">
                       <div>
-                        <dt className="text-[11px] text-[#4A5054] dark:text-[#A1A7AB]">
+                        <dt className="text-[11px] text-[#465C72] dark:text-[#B5C5D7]">
                           {activeProduct.comparison.primaryElementLabel}
                         </dt>
-                        <dd className="font-mono-tabular text-sm font-semibold text-[#141618] dark:text-[#F3F0E9] mt-1">
+                        <dd className="font-mono-tabular text-sm font-semibold text-[#10243A] dark:text-[#F4F8FC] mt-1">
                           {activeProduct.comparison.primaryElementRange}
                         </dd>
                       </div>
                       <div>
-                        <dt className="text-[11px] text-[#4A5054] dark:text-[#A1A7AB]">
+                        <dt className="text-[11px] text-[#465C72] dark:text-[#B5C5D7]">
                           {activeProduct.comparison.siliconLabel}
                         </dt>
-                        <dd className="font-mono-tabular text-sm font-semibold text-[#141618] dark:text-[#F3F0E9] mt-1">
+                        <dd className="font-mono-tabular text-sm font-semibold text-[#10243A] dark:text-[#F4F8FC] mt-1">
                           {activeProduct.comparison.siliconRange}
                         </dd>
                       </div>
                       <div>
-                        <dt className="text-[11px] text-[#4A5054] dark:text-[#A1A7AB]">
+                        <dt className="text-[11px] text-[#465C72] dark:text-[#B5C5D7]">
                           {activeProduct.comparison.carbonLabel}
                         </dt>
-                        <dd className="font-mono-tabular text-sm font-semibold text-[#141618] dark:text-[#F3F0E9] mt-1">
+                        <dd className="font-mono-tabular text-sm font-semibold text-[#10243A] dark:text-[#F4F8FC] mt-1">
                           {activeProduct.comparison.carbonRange}
                         </dd>
                       </div>
                       <div>
-                        <dt className="text-[11px] text-[#4A5054] dark:text-[#A1A7AB]">
+                        <dt className="text-[11px] text-[#465C72] dark:text-[#B5C5D7]">
                           {activeProduct.comparison.phosphorusLabel}
                         </dt>
-                        <dd className="font-mono-tabular text-sm font-semibold text-[#141618] dark:text-[#F3F0E9] mt-1">
+                        <dd className="font-mono-tabular text-sm font-semibold text-[#10243A] dark:text-[#F4F8FC] mt-1">
                           {activeProduct.comparison.phosphorusRange}
                         </dd>
                       </div>

@@ -1,7 +1,8 @@
-import React, { useRef, useState, useEffect, useCallback } from 'react';
-import { ChevronLeft, ChevronRight, Maximize2 } from 'lucide-react';
+import React, { useCallback, useEffect, useRef, useState } from 'react';
+import { ChevronLeft, ChevronRight, Pause, Play } from 'lucide-react';
 import gsap from 'gsap';
 import { cn } from '../../lib/utils';
+import { useInViewActive, useMotion } from '../../context/MotionContext';
 
 export interface CircularGalleryItem {
   id: string;
@@ -18,12 +19,24 @@ export interface CircularGalleryProps {
   cardSize?: { width: number; height: number };
   className?: string;
   initialRotation?: number;
-  onItemSelect?: (item: CircularGalleryItem, index: number) => void;
+  /** Called on an intentional click / Enter / Space only — never at the end of a drag. */
+  onItemSelect?: (item: CircularGalleryItem, index: number, trigger: HTMLElement) => void;
+}
+
+const DRAG_THRESHOLD_PX = 6;
+const DEG_PER_PX = 0.28;
+const IDLE_BEFORE_DRIFT_MS = 2400;
+
+function normalise(angle: number) {
+  return ((angle % 360) + 360) % 360;
 }
 
 /**
- * CircularGallery — Tilted 3D GSAP rotating visual ring with live front-plate tracking,
- * center inspection preview, horizontal drag/wheel/button stepping, and lightbox support.
+ * CircularGallery — tilted 3D orbital ring.
+ * - No permanent preview: hover/focus only lifts + outlines the card and shows a small caption.
+ * - Drag rotates with inertia and settles on the nearest frame; a movement threshold separates drag from click.
+ * - Ambient drift pauses while inspecting, offscreen, in a hidden tab, or when the visitor pauses ambient motion.
+ * - CSS hover transforms live on a nested wrapper so they never fight the transform that positions each card.
  */
 export function CircularGallery({
   items,
@@ -33,295 +46,395 @@ export function CircularGallery({
   initialRotation = 165,
   onItemSelect,
 }: CircularGalleryProps) {
+  const { ambientActive, ambientPaused, reducedMotion, toggleAmbient } = useMotion();
   const containerRef = useRef<HTMLDivElement>(null);
-  const galleryRef = useRef<HTMLDivElement>(null);
+  const stageRef = useRef<HTMLDivElement>(null);
   const ringRef = useRef<HTMLDivElement>(null);
-  const [hoveredItem, setHoveredItem] = useState<CircularGalleryItem | null>(null);
-  const [frontIndex, setFrontIndex] = useState<number>(() => {
-    if (items.length === 0) return 0;
-    const step = 360 / items.length;
-    return ((Math.round(-initialRotation / step) % items.length) + items.length) % items.length;
-  });
-  const [containerScale, setContainerScale] = useState(1);
+  const cardRefs = useRef<Array<HTMLButtonElement | null>>([]);
+  const [focusedId, setFocusedId] = useState<string | null>(null);
+  const [hoveredId, setHoveredId] = useState<string | null>(null);
+  const [dragging, setDragging] = useState(false);
+  const [scale, setScale] = useState<number | null>(null);
 
-  const frontIndexRef = useRef(frontIndex);
-  const rotationRef = useRef({ current: initialRotation, target: initialRotation });
-  const dragRef = useRef({
-    isDragging: false,
+  const active = useInViewActive(containerRef);
+  const inspectingRef = useRef(false);
+  const ambientRef = useRef(ambientActive);
+  ambientRef.current = ambientActive;
+
+  const n = items.length;
+  const step = n ? 360 / n : 360;
+  const radius = Math.max(250, Math.round(n * spacing * 0.78));
+
+  const rot = useRef({ current: initialRotation, target: initialRotation });
+  const lastInteraction = useRef(0);
+  const drag = useRef({
+    active: false,
+    captured: false,
+    pointerId: -1,
     startX: 0,
-    startRotation: initialRotation,
-    movedDistance: 0,
+    startTarget: 0,
+    lastX: 0,
+    lastT: 0,
+    velocity: 0,
+    moved: 0,
   });
+  const suppressClick = useRef(false);
 
-  const radius = Math.max(250, Math.round(items.length * spacing * 0.78));
-
+  // Responsive geometry via ResizeObserver; the scene is not positioned until the container has a real width.
   useEffect(() => {
-    const updateScale = () => {
-      if (!containerRef.current) return;
-      const w = containerRef.current.clientWidth;
-      if (w < 640) {
-        setContainerScale(0.62);
-      } else if (w < 980) {
-        setContainerScale(0.8);
-      } else {
-        setContainerScale(1);
-      }
+    const el = containerRef.current;
+    if (!el) return;
+    const apply = () => {
+      const w = el.clientWidth;
+      if (w <= 0) return;
+      setScale(w < 640 ? 0.62 : w < 980 ? 0.8 : 1);
     };
-    updateScale();
-    window.addEventListener('resize', updateScale);
-    return () => window.removeEventListener('resize', updateScale);
+    apply();
+    const ro = new ResizeObserver(apply);
+    ro.observe(el);
+    return () => ro.disconnect();
   }, []);
 
+  // Entrance
   useEffect(() => {
-    const prefersReduced = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
-    if (!galleryRef.current || !ringRef.current || items.length === 0) return;
-
-    const ringElement = ringRef.current;
-    const angleStep = 360 / items.length;
-
-    gsap.set(galleryRef.current, {
-      perspective: 1650,
-    });
-
-    gsap.set(ringElement, {
-      transformStyle: 'preserve-3d',
-      rotateY: rotationRef.current.current,
-    });
-
-    if (!prefersReduced) {
-      gsap.from(ringElement, {
-        scale: 0.92,
-        opacity: 0,
-        duration: 0.75,
-        ease: 'power3.out',
-      });
-    }
-
-    let rafId = 0;
-    let disposed = false;
-
-    const animate = () => {
-      if (disposed) return;
-      const rot = rotationRef.current;
-      if (!dragRef.current.isDragging && !prefersReduced && !hoveredItem) {
-        rot.target += 0.06;
-      }
-      rot.current += (rot.target - rot.current) * 0.085;
-      gsap.set(ringElement, { rotateY: rot.current });
-
-      const nextFront =
-        ((Math.round(-rot.current / angleStep) % items.length) + items.length) %
-        items.length;
-      if (nextFront !== frontIndexRef.current) {
-        frontIndexRef.current = nextFront;
-        setFrontIndex(nextFront);
-      }
-
-      rafId = window.requestAnimationFrame(animate);
+    if (!stageRef.current || reducedMotion) return;
+    const tween = gsap.fromTo(
+      stageRef.current,
+      { opacity: 0, y: 14 },
+      { opacity: 1, y: 0, duration: 0.7, ease: 'power3.out' }
+    );
+    return () => {
+      tween.kill();
     };
+  }, [reducedMotion]);
 
-    rafId = window.requestAnimationFrame(animate);
+  const paint = useCallback(() => {
+    const ring = ringRef.current;
+    if (!ring) return;
+    const r = rot.current.current;
+    ring.style.transform = `rotateY(${r}deg)`;
+    for (let i = 0; i < n; i++) {
+      const el = cardRefs.current[i];
+      if (!el) continue;
+      const facing = Math.cos(((normalise(i * step + r) - 0) * Math.PI) / 180);
+      const o = 0.32 + 0.68 * ((facing + 1) / 2);
+      el.style.opacity = String(o);
+      el.style.pointerEvents = facing < -0.35 ? 'none' : 'auto';
+    }
+  }, [n, step]);
 
+  // Render loop — only runs while the gallery is on screen and the tab is visible.
+  useEffect(() => {
+    if (n === 0 || scale === null) return;
+    paint();
+    if (!active) return;
+    let raf = 0;
+    let disposed = false;
+    const tick = () => {
+      if (disposed) return;
+      const r = rot.current;
+      const idle = performance.now() - lastInteraction.current > IDLE_BEFORE_DRIFT_MS;
+      if (ambientRef.current && !drag.current.active && !inspectingRef.current && idle) {
+        r.target += 0.05;
+      }
+      const delta = r.target - r.current;
+      if (Math.abs(delta) > 0.01) {
+        r.current += delta * (reducedMotion ? 1 : 0.09);
+        paint();
+      }
+      raf = window.requestAnimationFrame(tick);
+    };
+    raf = window.requestAnimationFrame(tick);
     return () => {
       disposed = true;
-      window.cancelAnimationFrame(rafId);
-      gsap.killTweensOf(ringElement);
+      window.cancelAnimationFrame(raf);
     };
-  }, [hoveredItem, items.length]);
+  }, [active, n, paint, reducedMotion, scale]);
+
+  const settleTo = useCallback(
+    (target: number) => {
+      lastInteraction.current = performance.now();
+      rot.current.target = Math.round(target / step) * step;
+    },
+    [step]
+  );
 
   const stepRing = useCallback(
     (deltaSteps: number) => {
-      if (items.length === 0) return;
-      const angleStep = 360 / items.length;
-      setHoveredItem(null);
-      rotationRef.current.target -= deltaSteps * angleStep;
+      if (!n) return;
+      lastInteraction.current = performance.now();
+      settleTo(rot.current.target - deltaSteps * step);
     },
-    [items.length]
+    [n, settleTo, step]
   );
 
-  const handleWheel = useCallback((e: React.WheelEvent<HTMLDivElement>) => {
+  const rotateToIndex = useCallback(
+    (index: number) => {
+      // Shortest path to bring `index` to the front.
+      const desired = -index * step;
+      const cur = rot.current.target;
+      const diff = ((((desired - cur) % 360) + 540) % 360) - 180;
+      settleTo(cur + diff);
+    },
+    [settleTo, step]
+  );
+
+  const onPointerDown = (e: React.PointerEvent<HTMLDivElement>) => {
+    if (e.pointerType === 'mouse' && e.button !== 0) return;
+    if ((e.target as HTMLElement).closest('[data-gallery-control="true"]')) return;
+    const d = drag.current;
+    d.active = true;
+    d.captured = false;
+    d.pointerId = e.pointerId;
+    d.startX = e.clientX;
+    d.lastX = e.clientX;
+    d.lastT = performance.now();
+    d.startTarget = rot.current.target;
+    d.velocity = 0;
+    d.moved = 0;
+    lastInteraction.current = performance.now();
+  };
+
+  const onPointerMove = (e: React.PointerEvent<HTMLDivElement>) => {
+    const d = drag.current;
+    if (!d.active || e.pointerId !== d.pointerId) return;
+    const dx = e.clientX - d.startX;
+    d.moved = Math.max(d.moved, Math.abs(dx));
+    if (d.moved <= DRAG_THRESHOLD_PX) return;
+    if (!d.captured) {
+      // Capture only once this is clearly a drag so ordinary clicks still reach their card.
+      try {
+        containerRef.current?.setPointerCapture(e.pointerId);
+      } catch {
+        /* ignore */
+      }
+      d.captured = true;
+      setDragging(true);
+    }
+    const now = performance.now();
+    const dt = Math.max(1, now - d.lastT);
+    d.velocity = d.velocity * 0.7 + ((e.clientX - d.lastX) / dt) * 0.3;
+    d.lastX = e.clientX;
+    d.lastT = now;
+    lastInteraction.current = now;
+    rot.current.target = d.startTarget + dx * DEG_PER_PX;
+  };
+
+  const endDrag = (e?: React.PointerEvent<HTMLDivElement>) => {
+    const d = drag.current;
+    if (!d.active) return;
+    d.active = false;
+    if (d.captured) {
+      suppressClick.current = true;
+      window.setTimeout(() => {
+        suppressClick.current = false;
+      }, 0);
+      if (e) {
+        try {
+          containerRef.current?.releasePointerCapture(e.pointerId);
+        } catch {
+          /* ignore */
+        }
+      }
+      // Controlled inertia, then settle on the nearest frame.
+      const flick = Math.max(-1.6, Math.min(1.6, d.velocity)) * 160 * DEG_PER_PX;
+      settleTo(rot.current.target + flick);
+    }
+    d.captured = false;
+    setDragging(false);
+  };
+
+  const onWheel = (e: React.WheelEvent<HTMLDivElement>) => {
     if (Math.abs(e.deltaX) > Math.abs(e.deltaY) || e.shiftKey) {
       e.preventDefault();
-      rotationRef.current.target -= (e.deltaX || e.deltaY) * 0.14;
+      lastInteraction.current = performance.now();
+      rot.current.target -= (e.deltaX || e.deltaY) * 0.12;
     }
-  }, []);
-
-  const handlePointerDown = (e: React.PointerEvent<HTMLDivElement>) => {
-    if ((e.target as HTMLElement).closest('[data-gallery-control="true"]')) return;
-    dragRef.current = {
-      isDragging: true,
-      startX: e.clientX,
-      startRotation: rotationRef.current.target,
-      movedDistance: 0,
-    };
   };
 
-  const handlePointerMove = (e: React.PointerEvent<HTMLDivElement>) => {
-    if (!dragRef.current.isDragging) return;
-    const dx = e.clientX - dragRef.current.startX;
-    dragRef.current.movedDistance = Math.max(dragRef.current.movedDistance, Math.abs(dx));
-    rotationRef.current.target = dragRef.current.startRotation + dx * 0.25;
+  const onKeyDown = (e: React.KeyboardEvent<HTMLDivElement>) => {
+    if (e.key === 'ArrowRight') {
+      e.preventDefault();
+      stepRing(1);
+    } else if (e.key === 'ArrowLeft') {
+      e.preventDefault();
+      stepRing(-1);
+    }
   };
 
-  const handlePointerUp = () => {
-    dragRef.current.isDragging = false;
-    window.setTimeout(() => {
-      dragRef.current.movedDistance = 0;
-    }, 60);
-  };
-
-  const previewItem = hoveredItem ?? items[frontIndex] ?? items[0] ?? null;
-  const previewIndex = previewItem
-    ? Math.max(0, items.findIndex((it) => it.id === previewItem.id))
-    : 0;
+  const highlightId = hoveredId ?? focusedId;
+  inspectingRef.current = Boolean(highlightId) || dragging;
+  const highlightIndex = highlightId ? items.findIndex((it) => it.id === highlightId) : -1;
+  const highlightItem = highlightIndex >= 0 ? items[highlightIndex] : null;
 
   return (
     <div
       ref={containerRef}
-      onWheel={handleWheel}
-      onPointerDown={handlePointerDown}
-      onPointerMove={handlePointerMove}
-      onPointerUp={handlePointerUp}
-      onPointerLeave={() => {
-        handlePointerUp();
-        setHoveredItem(null);
+      role="group"
+      aria-roledescription="carousel"
+      aria-label="Plant and specimen gallery, orbital view"
+      onKeyDown={onKeyDown}
+      onWheel={onWheel}
+      onPointerDown={onPointerDown}
+      onPointerMove={onPointerMove}
+      onPointerUp={endDrag}
+      onPointerCancel={endDrag}
+      onLostPointerCapture={() => endDrag()}
+      onPointerLeave={(e) => {
+        if (!drag.current.captured) endDrag(e);
+        setHoveredId(null);
       }}
+      style={{ touchAction: 'pan-y' }}
       className={cn(
-        'relative h-[480px] sm:h-[550px] w-full select-none overflow-hidden border border-[#141618]/14 dark:border-[#F3F0E9]/14 bg-[#141618] text-[#F3F0E9] cursor-grab active:cursor-grabbing',
+        'relative h-[460px] sm:h-[540px] w-full select-none overflow-hidden border border-subtle bg-band text-ink',
+        dragging ? 'cursor-grabbing' : 'cursor-grab',
         className
       )}
     >
-      {/* Subtle Copper Overhead Studio Glow */}
       <div
         aria-hidden="true"
-        className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_50%_45%,rgba(236,116,60,0.16),transparent_65%)]"
+        className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_50%_46%,color-mix(in_srgb,var(--brand-primary)_14%,transparent),transparent_62%)]"
       />
 
-      {/* Tilted 3D Ring Stage */}
-      <div
-        ref={galleryRef}
-        className="relative flex h-full w-full items-center justify-center"
-        style={{
-          transformStyle: 'preserve-3d',
-          transform: `scale(${containerScale}) rotate(-10deg)`,
-        }}
-      >
-        <div
-          ref={ringRef}
-          className="relative flex items-center justify-center"
-          style={{
-            transformStyle: 'preserve-3d',
-          }}
-        >
-          {items.map((item, idx) => {
-            const angle = (idx / items.length) * 360;
-            return (
-              <button
-                key={item.id}
-                type="button"
-                onMouseEnter={() => setHoveredItem(item)}
-                onMouseLeave={() => setHoveredItem(null)}
-                onFocus={() => setHoveredItem(item)}
-                onBlur={() => setHoveredItem(null)}
-                onClick={() => {
-                  if (dragRef.current.movedDistance > 8) return;
-                  onItemSelect?.(item, idx);
-                }}
-                aria-label={`Inspect ${item.caption ?? item.alt}`}
-                className="group absolute flex flex-col overflow-hidden border border-[#F3F0E9]/25 bg-[#191C20] shadow-[0_14px_30px_rgba(0,0,0,0.45)] transition-transform duration-200 hover:scale-110 hover:border-[#EC743C] focus-visible:border-[#EC743C] focus-visible:outline-none cursor-pointer"
-                style={{
-                  width: `${cardSize.width}px`,
-                  height: `${cardSize.height}px`,
-                  transform: `rotateY(${angle}deg) translateZ(${radius}px)`,
-                  backfaceVisibility: 'visible',
-                }}
-              >
-                <div
-                  className={cn(
-                    'flex-1 w-full overflow-hidden',
-                    item.specimenPlate ? 'bg-[#F6F4EF] p-1.5' : 'bg-[#121417]'
-                  )}
-                >
-                  <img
-                    src={item.src}
-                    alt={item.alt}
-                    draggable={false}
-                    className={cn(
-                      'w-full h-full pointer-events-none',
-                      item.specimenPlate ? 'object-contain' : 'object-cover'
-                    )}
-                  />
-                </div>
-                <span className="px-1.5 py-1 text-[9px] font-mono-tabular uppercase tracking-wider text-[#F3F0E9]/85 bg-[#121417]/95 truncate text-left w-full border-t border-[#F3F0E9]/12">
-                  Fig. {String(idx + 1).padStart(2, '0')} · {item.category ?? 'Work'}
-                </span>
-              </button>
-            );
-          })}
-        </div>
+      <div ref={stageRef} className="absolute inset-0">
+        {scale !== null && (
+          <div
+            className="relative flex h-full w-full items-center justify-center"
+            style={{
+              perspective: 1650,
+              transformStyle: 'preserve-3d',
+              transform: `scale(${scale}) rotate(-8deg)`,
+            }}
+          >
+            <div
+              ref={ringRef}
+              className="relative flex items-center justify-center"
+              style={{ transformStyle: 'preserve-3d', transform: `rotateY(${initialRotation}deg)` }}
+            >
+              {items.map((item, idx) => {
+                const angle = idx * step;
+                const isHot = highlightId === item.id;
+                return (
+                  <button
+                    key={item.id}
+                    ref={(el) => {
+                      cardRefs.current[idx] = el;
+                    }}
+                    type="button"
+                    onMouseEnter={() => setHoveredId(item.id)}
+                    onMouseLeave={() => setHoveredId((prev) => (prev === item.id ? null : prev))}
+                    onFocus={() => {
+                      setFocusedId(item.id);
+                      rotateToIndex(idx);
+                    }}
+                    onBlur={() => setFocusedId((prev) => (prev === item.id ? null : prev))}
+                    onClick={(e) => {
+                      if (suppressClick.current) {
+                        e.preventDefault();
+                        return;
+                      }
+                      onItemSelect?.(item, idx, e.currentTarget);
+                    }}
+                    aria-label={`Inspect: ${item.caption ?? item.alt}`}
+                    className="group absolute focus-visible:outline-none cursor-pointer"
+                    style={{
+                      width: `${cardSize.width}px`,
+                      height: `${cardSize.height}px`,
+                      transform: `rotateY(${angle}deg) translateZ(${radius}px)`,
+                    }}
+                  >
+                    {/* Nested wrapper: hover/focus transforms never touch the positioning transform above. */}
+                    <span
+                      className={cn(
+                        'flex h-full w-full flex-col overflow-hidden border bg-card shadow-[0_14px_30px_rgba(16,36,58,0.22)] transition-[transform,border-color,box-shadow] duration-200 ease-out',
+                        isHot
+                          ? '-translate-y-1.5 border-brand ring-2 ring-brand/60 shadow-[0_20px_36px_rgba(16,36,58,0.32)]'
+                          : 'border-subtle'
+                      )}
+                    >
+                      <span
+                        className={cn(
+                          'block flex-1 w-full overflow-hidden',
+                          item.specimenPlate ? 'bg-white p-1.5' : 'bg-band'
+                        )}
+                      >
+                        <img
+                          src={item.src}
+                          alt=""
+                          draggable={false}
+                          loading="lazy"
+                          className={cn(
+                            'block w-full h-full pointer-events-none',
+                            item.specimenPlate ? 'object-contain' : 'object-cover'
+                          )}
+                        />
+                      </span>
+                      <span className="block px-1.5 py-1 text-[9px] font-mono-tabular uppercase tracking-wider text-ink-2 bg-card truncate text-left w-full border-t border-subtle">
+                        Fig. {String(idx + 1).padStart(2, '0')} · {item.category ?? 'Work'}
+                      </span>
+                    </span>
+                  </button>
+                );
+              })}
+            </div>
+          </div>
+        )}
       </div>
 
-      {/* Center Featured Inspection Card */}
-      {previewItem && (
-        <div className="pointer-events-none absolute left-1/2 top-[47%] z-30 -translate-x-1/2 -translate-y-1/2 w-[178px] sm:w-[228px] border border-[#EC743C]/55 bg-[#121417]/95 p-2 shadow-[0_24px_60px_rgba(0,0,0,0.65)]">
-          <div
-            className={cn(
-              'aspect-[4/3] w-full overflow-hidden',
-              previewItem.specimenPlate ? 'bg-[#F6F4EF] p-2' : 'bg-[#191C20]'
-            )}
-          >
-            <img
-              src={previewItem.src}
-              alt={previewItem.alt}
-              className={cn(
-                'w-full h-full',
-                previewItem.specimenPlate ? 'object-contain' : 'object-cover'
-              )}
-            />
-          </div>
-          <div className="pt-2 space-y-0.5 text-left">
-            <p className="text-[10px] font-mono-tabular uppercase tracking-wider text-[#EC743C]">
-              Fig. {String(previewIndex + 1).padStart(2, '0')} · {previewItem.category ?? 'Archive Frame'}
-            </p>
-            <p className="text-[11px] text-[#F3F0E9]/90 line-clamp-2 leading-snug">
-              {previewItem.caption ?? previewItem.alt}
-            </p>
-          </div>
-        </div>
-      )}
+      {/* Compact caption — appears only while a frame is hovered or focused; never a centre overlay. */}
+      <div className="pointer-events-none absolute left-4 right-4 bottom-14 z-20 flex justify-center">
+        <p
+          aria-hidden={!highlightItem}
+          className={cn(
+            'max-w-xl truncate border border-subtle bg-card/95 px-3 py-1.5 text-[11px] text-ink shadow-sm transition-opacity duration-150',
+            highlightItem ? 'opacity-100' : 'opacity-0'
+          )}
+        >
+          {highlightItem ? (
+            <>
+              <span className="font-mono-tabular uppercase tracking-wider text-brand mr-2">
+                Fig. {String(highlightIndex + 1).padStart(2, '0')}
+              </span>
+              {highlightItem.caption ?? highlightItem.alt}
+            </>
+          ) : null}
+        </p>
+      </div>
 
-      {/* Responsive Controls & Instructions Bar */}
-      <div className="absolute bottom-3 left-4 right-4 z-30 flex flex-wrap items-center justify-between gap-2 text-[11px] font-mono-tabular text-[#A1A7AB]">
+      <div className="absolute bottom-3 left-4 right-4 z-30 flex flex-wrap items-center justify-between gap-2 text-[11px] font-mono-tabular text-ink-2">
         <span className="pointer-events-none">
-          <span className="hidden sm:inline">Drag horizontally or hold Shift + scroll · Click any plate for lightbox</span>
-          <span className="sm:hidden">Swipe ring or tap any plate</span>
+          <span className="hidden sm:inline">Drag to rotate · Click or press Enter on a frame to inspect</span>
+          <span className="sm:hidden">Drag to rotate · tap a frame to inspect</span>
         </span>
 
         <div data-gallery-control="true" className="flex items-center gap-1.5 ml-auto">
           <button
             type="button"
+            onClick={toggleAmbient}
+            aria-pressed={ambientPaused}
+            disabled={reducedMotion}
+            aria-label={ambientPaused ? 'Resume automatic gallery rotation' : 'Pause automatic gallery rotation'}
+            className="inline-flex items-center justify-center w-9 h-9 border border-control bg-card text-ink hover:border-brand hover:text-brand transition-colors cursor-pointer disabled:opacity-40"
+          >
+            {ambientPaused || reducedMotion ? (
+              <Play className="w-4 h-4" aria-hidden="true" />
+            ) : (
+              <Pause className="w-4 h-4" aria-hidden="true" />
+            )}
+          </button>
+          <button
+            type="button"
             onClick={() => stepRing(-1)}
             aria-label="Rotate gallery to previous frame"
-            className="inline-flex items-center justify-center w-8 h-8 border border-[#F3F0E9]/22 bg-[#121417]/90 text-[#F3F0E9] hover:border-[#EC743C] hover:text-[#EC743C] transition-colors cursor-pointer"
+            className="inline-flex items-center justify-center w-9 h-9 border border-control bg-card text-ink hover:border-brand hover:text-brand transition-colors cursor-pointer"
           >
             <ChevronLeft className="w-4 h-4" aria-hidden="true" />
           </button>
-          {previewItem && onItemSelect && (
-            <button
-              type="button"
-              onClick={() => onItemSelect(previewItem, previewIndex)}
-              aria-label={`Open full lightbox for Fig. ${previewIndex + 1}`}
-              className="inline-flex items-center gap-1.5 h-8 px-2.5 border border-[#EC743C]/45 bg-[#121417]/90 text-[#EC743C] hover:bg-[#9E4B28] hover:text-[#F6F4EF] transition-colors cursor-pointer text-[10px] uppercase tracking-wider"
-            >
-              <Maximize2 className="w-3 h-3" aria-hidden="true" />
-              <span>Inspect</span>
-            </button>
-          )}
           <button
             type="button"
             onClick={() => stepRing(1)}
             aria-label="Rotate gallery to next frame"
-            className="inline-flex items-center justify-center w-8 h-8 border border-[#F3F0E9]/22 bg-[#121417]/90 text-[#F3F0E9] hover:border-[#EC743C] hover:text-[#EC743C] transition-colors cursor-pointer"
+            className="inline-flex items-center justify-center w-9 h-9 border border-control bg-card text-ink hover:border-brand hover:text-brand transition-colors cursor-pointer"
           >
             <ChevronRight className="w-4 h-4" aria-hidden="true" />
           </button>

@@ -205,23 +205,23 @@ export function DirectorPortraitSection({ variant = 'home' }: DirectorPortraitSe
             <div
               ref={frameLayerRef}
               aria-hidden="true"
-              className="pointer-events-none absolute top-14 sm:top-18 inset-x-3 sm:inset-x-5 bottom-0 bg-gradient-to-br from-[#EAE5DA] via-[#E2DDD0] to-[#D4CEC0] dark:from-[#232830] dark:via-[#1B1F26] dark:to-[#13161B] border border-[#141618]/14 dark:border-[#F3F0E9]/14 transition-[border-color] duration-500 will-change-transform"
+              className="pointer-events-none absolute top-14 sm:top-18 inset-x-3 sm:inset-x-5 bottom-0 bg-gradient-to-br from-[#F1F6FB] via-[#E7F3FA] to-[#D4DFEB] dark:from-[#19314B] dark:via-[#12243B] dark:to-[#0D1B2E] border border-[#10243A]/14 dark:border-[#F4F8FC]/14 transition-[border-color] duration-500 will-change-transform"
             >
               {/* Restrained horizontal copper accent hairline inside top edge of backdrop frame */}
-              <div className="h-[2px] w-16 bg-[#9E4B28] dark:bg-[#EC743C] mt-4 ml-4" />
+              <div className="h-[2px] w-16 bg-brand dark:bg-[#69C5F5] mt-4 ml-4" />
               {/* Subtle drafting coordinate index inside backdrop frame */}
-              <span className="hidden sm:block absolute top-3.5 right-4 text-[10px] font-mono-tabular uppercase tracking-widest text-[#141618]/38 dark:text-[#F3F0E9]/32">
+              <span className="hidden sm:block absolute top-3.5 right-4 text-[10px] font-mono-tabular uppercase tracking-widest text-[#10243A]/38 dark:text-[#F4F8FC]/32">
                 DKG · EST. 2006
               </span>
               {/* Fine horizontal drafting grid lines */}
-              <div className="absolute inset-x-5 bottom-1/3 h-px bg-[#141618]/8 dark:bg-[#F3F0E9]/8" />
+              <div className="absolute inset-x-5 bottom-1/3 h-px bg-[#10243A]/8 dark:bg-[#F4F8FC]/8" />
             </div>
 
             {/* Layer 3: Soft Depth Shadow behind portrait silhouette */}
             <div
               ref={shadowLayerRef}
               aria-hidden="true"
-              className="pointer-events-none absolute left-1/2 -translate-x-1/2 bottom-0 w-[68%] h-[76%] rounded-full bg-[#141618]/24 dark:bg-black/65 blur-2xl will-change-transform"
+              className="pointer-events-none absolute left-1/2 -translate-x-1/2 bottom-0 w-[68%] h-[76%] rounded-full bg-[#10243A]/24 dark:bg-black/65 blur-2xl will-change-transform"
             />
 
             {/* Layer 4 (Outer GSAP Entrance -> Inner rAF Tilt): Intact Original Cutout Portrait */}
@@ -237,7 +237,7 @@ export function DirectorPortraitSection({ variant = 'home' }: DirectorPortraitSe
                   height={1799}
                   loading="lazy"
                   decoding="async"
-                  className="block w-full h-auto max-h-[460px] sm:max-h-[500px] object-contain object-bottom drop-shadow-[0_14px_24px_rgba(20,22,24,0.18)] dark:drop-shadow-[0_18px_32px_rgba(0,0,0,0.55)]"
+                  className="block w-full h-auto max-h-[460px] sm:max-h-[500px] object-contain object-bottom drop-shadow-[0_14px_24px_rgba(16,36,58,0.18)] dark:drop-shadow-[0_18px_32px_rgba(0,0,0,0.55)]"
                 />
               </div>
             </div>
@@ -248,21 +248,21 @@ export function DirectorPortraitSection({ variant = 'home' }: DirectorPortraitSe
               aria-hidden="true"
               className="pointer-events-none absolute bottom-3 right-5 sm:right-7 z-20 will-change-transform"
             >
-              <div className="w-6 h-6 border-r-2 border-b-2 border-[#9E4B28] dark:border-[#EC743C]" />
+              <div className="w-6 h-6 border-r-2 border-b-2 border-brand dark:border-[#69C5F5]" />
             </div>
           </div>
 
           {/* Crisp Architectural Base Plinth Caption */}
-          <figcaption className="mx-3 sm:mx-5 pt-4 pb-3 px-4 bg-white dark:bg-[#191C20] border border-[#141618]/14 dark:border-[#F3F0E9]/14 flex items-baseline justify-between gap-4">
+          <figcaption className="mx-3 sm:mx-5 pt-4 pb-3 px-4 bg-white dark:bg-[#0D1B2E] border border-[#10243A]/14 dark:border-[#F4F8FC]/14 flex items-baseline justify-between gap-4">
             <div>
-              <p className="text-[11px] font-mono-tabular uppercase tracking-wider text-[#9E4B28] dark:text-[#EC743C]">
+              <p className="text-[11px] font-mono-tabular uppercase tracking-wider text-brand dark:text-[#69C5F5]">
                 Managing Director & Founder
               </p>
-              <p className="font-display text-2xl font-bold uppercase tracking-tight text-[#141618] dark:text-[#F3F0E9]">
+              <p className="font-display text-2xl font-bold uppercase tracking-tight text-[#10243A] dark:text-[#F4F8FC]">
                 {COMPANY_INFO.managingDirector.name}
               </p>
             </div>
-            <span className="text-[11px] font-mono-tabular text-[#4A5054] dark:text-[#A1A7AB] whitespace-nowrap">
+            <span className="text-[11px] font-mono-tabular text-[#465C72] dark:text-[#B5C5D7] whitespace-nowrap">
               25+ Yrs Experience
             </span>
           </figcaption>
@@ -273,15 +273,15 @@ export function DirectorPortraitSection({ variant = 'home' }: DirectorPortraitSe
       <div className="lg:col-span-7 space-y-7">
         <div className="space-y-4">
           <div className="director-editorial-stagger flex items-center gap-3">
-            <span className="inline-block w-8 h-[2px] bg-[#9E4B28] dark:bg-[#EC743C]" aria-hidden="true" />
-            <p className="text-xs font-mono-tabular uppercase tracking-widest text-[#9E4B28] dark:text-[#EC743C]">
+            <span className="inline-block w-8 h-[2px] bg-brand dark:bg-[#69C5F5]" aria-hidden="true" />
+            <p className="text-xs font-mono-tabular uppercase tracking-widest text-brand dark:text-[#69C5F5]">
               {variant === 'home' ? '04 / Leadership & Operating Principles' : 'Promoters & Governance Leadership'}
             </p>
           </div>
 
           <h2
             id={variant === 'home' ? 'leadership-section-heading' : 'leadership-heading'}
-            className="director-editorial-stagger font-display fluid-statement font-bold uppercase text-[#141618] dark:text-[#F3F0E9]"
+            className="director-editorial-stagger font-display fluid-statement font-bold uppercase text-[#10243A] dark:text-[#F4F8FC]"
           >
             {variant === 'home'
               ? 'Second-generation industrialists driving operational accountability.'
@@ -290,11 +290,11 @@ export function DirectorPortraitSection({ variant = 'home' }: DirectorPortraitSe
         </div>
 
         {/* Fine Copper Rule + Confirmed MD Biography */}
-        <div className="director-editorial-stagger pt-5 border-t border-[#141618]/14 dark:border-[#F3F0E9]/14 space-y-3.5 max-w-[64ch]">
+        <div className="director-editorial-stagger pt-5 border-t border-[#10243A]/14 dark:border-[#F4F8FC]/14 space-y-3.5 max-w-[64ch]">
           {COMPANY_INFO.managingDirector.bio.map((paragraph) => (
             <p
               key={paragraph}
-              className="text-sm sm:text-base text-[#4A5054] dark:text-[#F3F0E9]/84 leading-relaxed"
+              className="text-sm sm:text-base text-[#465C72] dark:text-[#F4F8FC]/84 leading-relaxed"
             >
               {paragraph}
             </p>
@@ -306,15 +306,15 @@ export function DirectorPortraitSection({ variant = 'home' }: DirectorPortraitSe
           {COMPANY_INFO.leadershipTeam.map((leader) => (
             <div
               key={leader.name}
-              className="bg-white dark:bg-[#20242A] border border-[#141618]/12 dark:border-[#F3F0E9]/14 p-5 space-y-2"
+              className="bg-white dark:bg-[#12243B] border border-[#10243A]/12 dark:border-[#F4F8FC]/14 p-5 space-y-2"
             >
-              <p className="text-[11px] font-mono-tabular uppercase tracking-wider text-[#9E4B28] dark:text-[#EC743C]">
+              <p className="text-[11px] font-mono-tabular uppercase tracking-wider text-brand dark:text-[#69C5F5]">
                 {leader.role}
               </p>
-              <h3 className="font-display text-2xl font-bold uppercase text-[#141618] dark:text-[#F3F0E9]">
+              <h3 className="font-display text-2xl font-bold uppercase text-[#10243A] dark:text-[#F4F8FC]">
                 {leader.name}
               </h3>
-              <p className="text-xs sm:text-sm text-[#4A5054] dark:text-[#A1A7AB] leading-relaxed">
+              <p className="text-xs sm:text-sm text-[#465C72] dark:text-[#B5C5D7] leading-relaxed">
                 {leader.summary}
               </p>
             </div>
@@ -322,28 +322,28 @@ export function DirectorPortraitSection({ variant = 'home' }: DirectorPortraitSe
         </div>
 
         {/* Recognition Disclosure Note */}
-        <div className="director-editorial-stagger bg-[#ECE8DF] dark:bg-[#191C20] border border-[#141618]/12 dark:border-[#F3F0E9]/14 p-4 sm:p-5 space-y-1.5 text-xs text-[#4A5054] dark:text-[#A1A7AB]">
-          <p className="text-[#141618] dark:text-[#F3F0E9] font-medium leading-relaxed">
+        <div className="director-editorial-stagger bg-[#F1F6FB] dark:bg-[#0D1B2E] border border-[#10243A]/12 dark:border-[#F4F8FC]/14 p-4 sm:p-5 space-y-1.5 text-xs text-[#465C72] dark:text-[#B5C5D7]">
+          <p className="text-[#10243A] dark:text-[#F4F8FC] font-medium leading-relaxed">
             {COMPANY_INFO.managingDirector.recognitionClaim}
           </p>
           <p>{COMPANY_INFO.managingDirector.attributionNote}</p>
         </div>
 
         {variant === 'home' && (
-          <div className="director-editorial-stagger grid grid-cols-1 sm:grid-cols-2 gap-6 pt-5 border-t border-[#141618]/14 dark:border-[#F3F0E9]/14">
+          <div className="director-editorial-stagger grid grid-cols-1 sm:grid-cols-2 gap-6 pt-5 border-t border-[#10243A]/14 dark:border-[#F4F8FC]/14">
             <div className="space-y-1.5">
-              <p className="text-[11px] font-mono-tabular uppercase tracking-wider text-[#9E4B28] dark:text-[#EC743C]">
+              <p className="text-[11px] font-mono-tabular uppercase tracking-wider text-brand dark:text-[#69C5F5]">
                 Operational Mission
               </p>
-              <p className="text-xs sm:text-sm text-[#4A5054] dark:text-[#F3F0E9]/82 leading-relaxed">
+              <p className="text-xs sm:text-sm text-[#465C72] dark:text-[#F4F8FC]/82 leading-relaxed">
                 {COMPANY_INFO.mission}
               </p>
             </div>
             <div className="space-y-1.5">
-              <p className="text-[11px] font-mono-tabular uppercase tracking-wider text-[#9E4B28] dark:text-[#EC743C]">
+              <p className="text-[11px] font-mono-tabular uppercase tracking-wider text-brand dark:text-[#69C5F5]">
                 Long-Term Vision
               </p>
-              <p className="text-xs sm:text-sm text-[#4A5054] dark:text-[#F3F0E9]/82 leading-relaxed">
+              <p className="text-xs sm:text-sm text-[#465C72] dark:text-[#F4F8FC]/82 leading-relaxed">
                 {COMPANY_INFO.vision}
               </p>
             </div>
@@ -354,7 +354,7 @@ export function DirectorPortraitSection({ variant = 'home' }: DirectorPortraitSe
           <div className="director-editorial-stagger pt-1">
             <Link
               to="/about"
-              className="group relative inline-flex items-center gap-2 pb-1 text-xs font-semibold uppercase tracking-wider text-[#141618] hover:text-[#9E4B28] dark:text-[#F3F0E9] dark:hover:text-[#EC743C] transition-colors duration-300"
+              className="group relative inline-flex items-center gap-2 pb-1 text-xs font-semibold uppercase tracking-wider text-[#10243A] hover:text-brand dark:text-[#F4F8FC] dark:hover:text-[#69C5F5] transition-colors duration-300"
             >
               <span>Inspect Leadership & Corporate Governance</span>
               <ArrowRight
@@ -363,7 +363,7 @@ export function DirectorPortraitSection({ variant = 'home' }: DirectorPortraitSe
               />
               <span
                 aria-hidden="true"
-                className="absolute inset-x-0 bottom-0 h-[1.5px] bg-[#9E4B28] dark:bg-[#EC743C] origin-left scale-x-0 group-hover:scale-x-100 transition-transform duration-500 ease-[cubic-bezier(0.22,1,0.36,1)]"
+                className="absolute inset-x-0 bottom-0 h-[1.5px] bg-brand dark:bg-[#69C5F5] origin-left scale-x-0 group-hover:scale-x-100 transition-transform duration-500 ease-[cubic-bezier(0.22,1,0.36,1)]"
               />
             </Link>
           </div>

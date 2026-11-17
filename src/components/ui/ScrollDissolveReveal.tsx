@@ -323,7 +323,7 @@ export function ScrollDissolveReveal({
     let isVisible = true;
     const observer = new IntersectionObserver(
       (entries) => {
-        isVisible = entries[0]?.isIntersecting ?? true;
+        isVisible = entries[entries.length - 1]?.isIntersecting ?? true;
       },
       { threshold: 0.02 }
     );
@@ -417,7 +417,7 @@ export function ScrollDissolveReveal({
     <section
       ref={containerRef}
       aria-label="Transition from plant complex to submerged-arc furnace smelting"
-      className={cn('relative w-full h-[160vh] bg-[#121417] text-[#F3F0E9]', className)}
+      className={cn('relative w-full h-[160vh] bg-[#07111F] text-[#F4F8FC]', className)}
     >
       <div className="sticky top-16 h-[calc(100vh-4rem)] min-h-[500px] w-full overflow-hidden">
         {fallback ? (
@@ -432,37 +432,37 @@ export function ScrollDissolveReveal({
         {/* Measured Contrast Scrim */}
         <div
           aria-hidden="true"
-          className="pointer-events-none absolute inset-0 bg-gradient-to-t from-[#121417]/88 via-[#121417]/25 to-[#121417]/55"
+          className="pointer-events-none absolute inset-0 bg-gradient-to-t from-[#07111F]/88 via-[#07111F]/25 to-[#07111F]/55"
         />
 
         {/* Editorial Split Caption Overlay */}
         <div className="pointer-events-none relative z-10 max-w-[1360px] mx-auto h-full px-4 sm:px-6 lg:px-8 xl:px-14 2xl:px-8 py-10 flex flex-col justify-between">
-          <div className="flex items-center justify-between gap-4 text-[11px] font-mono-tabular uppercase tracking-widest text-[#F3F0E9]/80">
+          <div className="flex items-center justify-between gap-4 text-[11px] font-mono-tabular uppercase tracking-widest text-[#F4F8FC]/80">
             <span>Thermal Reduction Bridge</span>
-            <span className="text-[#EC743C]">Transformation {revealPercent}%</span>
+            <span className="text-[#69C5F5]">Transformation {revealPercent}%</span>
           </div>
 
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6 items-end pb-4">
-            <div className="bg-[#121417]/92 border border-[#F3F0E9]/16 p-5 space-y-1.5 max-w-md">
-              <p className="text-[11px] font-mono-tabular uppercase tracking-wider text-[#EC743C]">
+            <div className="bg-[#07111F]/92 border border-[#F4F8FC]/16 p-5 space-y-1.5 max-w-md">
+              <p className="text-[11px] font-mono-tabular uppercase tracking-wider text-[#69C5F5]">
                 {leftKicker ?? 'Stage 01 · Integrated Complex'}
               </p>
-              <h3 className="font-display text-2xl sm:text-3xl font-bold uppercase text-[#F3F0E9]">
+              <h3 className="font-display text-2xl sm:text-3xl font-bold uppercase text-[#F4F8FC]">
                 {leftTitle ?? 'Bobbili & Jharkhand Works'}
               </h3>
-              <p className="text-xs sm:text-sm text-[#F3F0E9]/82 leading-relaxed">
+              <p className="text-xs sm:text-sm text-[#F4F8FC]/82 leading-relaxed">
                 {leftDescription ?? 'Raw manganese, quartz, chromite, and metallurgical reductants prepared across multi-furnace production sheds.'}
               </p>
             </div>
 
-            <div className="bg-[#121417]/92 border border-[#F3F0E9]/16 p-5 space-y-1.5 max-w-md md:ml-auto">
-              <p className="text-[11px] font-mono-tabular uppercase tracking-wider text-[#EC743C]">
+            <div className="bg-[#07111F]/92 border border-[#F4F8FC]/16 p-5 space-y-1.5 max-w-md md:ml-auto">
+              <p className="text-[11px] font-mono-tabular uppercase tracking-wider text-[#69C5F5]">
                 {rightKicker ?? 'Stage 02 · High-Temperature Reduction'}
               </p>
-              <h3 className="font-display text-2xl sm:text-3xl font-bold uppercase text-[#F3F0E9]">
+              <h3 className="font-display text-2xl sm:text-3xl font-bold uppercase text-[#F4F8FC]">
                 {rightTitle ?? 'From Heat To Precision'}
               </h3>
-              <p className="text-xs sm:text-sm text-[#F3F0E9]/82 leading-relaxed">
+              <p className="text-xs sm:text-sm text-[#F4F8FC]/82 leading-relaxed">
                 {rightDescription ?? 'Submerged-arc electrodes, 6,000 MT/month AOD converters, and spectrographic assay verification.'}
               </p>
             </div>

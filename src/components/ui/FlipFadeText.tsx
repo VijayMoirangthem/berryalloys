@@ -77,7 +77,7 @@ const Word = memo(function Word({
   return (
     <motion.div
       className={cn(
-        'flex flex-wrap justify-center gap-[0.06em] font-display text-2xl sm:text-3xl font-bold uppercase tracking-wider text-[#141618] dark:text-[#F3F0E9]',
+        'flex flex-wrap justify-center gap-[0.06em] font-display text-2xl sm:text-3xl font-bold uppercase tracking-wider text-[#10243A] dark:text-[#F4F8FC]',
         textClassName
       )}
       initial="initial"
@@ -142,7 +142,7 @@ export function FlipFadeText({
       <div className={cn('flex items-center justify-center min-h-[56px]', className)}>
         <span
           className={cn(
-            'font-display text-2xl sm:text-3xl font-bold uppercase tracking-wider text-[#141618] dark:text-[#F3F0E9]',
+            'font-display text-2xl sm:text-3xl font-bold uppercase tracking-wider text-[#10243A] dark:text-[#F4F8FC]',
             textClassName
           )}
         >

@@ -5,43 +5,87 @@
   --font-display: "Barlow Condensed", ui-sans-serif, system-ui, sans-serif;
   --font-sans: "Plus Jakarta Sans", ui-sans-serif, system-ui, sans-serif;
   --font-mono: "IBM Plex Mono", ui-monospace, SFMono-Regular, monospace;
+}
 
-  --color-graphite-950: #121417;
-  --color-graphite-900: #191C20;
-  --color-graphite-800: #20242A;
-  --color-graphite-700: #2E343B;
-
-  --color-ivory-50: #F6F4EF;
-  --color-ivory-100: #ECE8DF;
-  --color-ivory-200: #D8D1C3;
-
-  --color-steel-400: #A1A7AB;
-  --color-steel-600: #4A5054;
-
-  --color-copper-700: #823B1D;
-  --color-copper-600: #9E4B28;
-  --color-ember-500: #EC743C;
+/* Semantic colour utilities (bg-brand, text-accent-red, border-control ...) backed by theme variables. */
+@theme inline {
+  --color-canvas: var(--surface-canvas);
+  --color-band: var(--surface-band);
+  --color-card: var(--surface-card);
+  --color-elevated: var(--surface-elevated);
+  --color-ink: var(--ink-primary);
+  --color-ink-2: var(--ink-secondary);
+  --color-ink-muted: var(--ink-muted);
+  --color-subtle: var(--border-subtle);
+  --color-control: var(--border-control);
+  --color-brand: var(--brand-primary);
+  --color-brand-hover: var(--brand-hover);
+  --color-brand-soft: var(--brand-soft);
+  --color-on-brand: var(--on-brand);
+  --color-accent-red: var(--accent-red);
+  --color-accent-red-hover: var(--accent-red-hover);
+  --color-accent-red-soft: var(--accent-red-soft);
+  --color-on-accent: var(--on-accent);
+  --color-success: var(--status-success);
+  --color-warning: var(--status-warning);
+  --color-danger: var(--status-error);
 }
 
 @layer base {
   :root {
-    --surface-canvas: #F6F4EF;
-    --surface-band: #ECE8DF;
+    --surface-canvas: #FFFFFF;
+    --surface-band: #F1F6FB;
     --surface-card: #FFFFFF;
-    --ink-primary: #141618;
-    --ink-secondary: #4A5054;
-    --accent-copper: #9E4B28;
-    --accent-ember: #EC743C;
+    --surface-elevated: #FFFFFF;
+    --ink-primary: #10243A;
+    --ink-secondary: #465C72;
+    --ink-muted: #5B6E82;
+    --border-subtle: #D4DFEB;
+    --border-control: #73869B;
+    --brand-primary: #006393;
+    --brand-hover: #004C73;
+    --brand-soft: #E7F3FA;
+    --on-brand: #FFFFFF;
+    --accent-red: #C9233B;
+    --accent-red-hover: #A51B30;
+    --accent-red-soft: #FFF0F2;
+    --on-accent: #FFFFFF;
+    --focus-ring: #006393;
+    --particle-primary: #10243A;
+    --particle-accent: #006393;
+    --status-success: #17703E;
+    --status-warning: #8A5A00;
+    --status-error: #B3261E;
+    --accent-copper: var(--brand-primary);
+    --accent-ember: var(--brand-primary);
+    color-scheme: light;
   }
 
   .dark {
-    --surface-canvas: #121417;
-    --surface-band: #191C20;
-    --surface-card: #20242A;
-    --ink-primary: #F3F0E9;
-    --ink-secondary: #A1A7AB;
-    --accent-copper: #E06D38;
-    --accent-ember: #EC743C;
+    --surface-canvas: #07111F;
+    --surface-band: #0D1B2E;
+    --surface-card: #12243B;
+    --surface-elevated: #19314B;
+    --ink-primary: #F4F8FC;
+    --ink-secondary: #B5C5D7;
+    --ink-muted: #94A9BF;
+    --border-subtle: #29435F;
+    --border-control: #6F89A4;
+    --brand-primary: #69C5F5;
+    --brand-hover: #9AD9FA;
+    --brand-soft: #143650;
+    --on-brand: #07111F;
+    --accent-red: #FF8091;
+    --accent-red-hover: #FFA6B1;
+    --accent-red-soft: #3A2030;
+    --on-accent: #07111F;
+    --focus-ring: #9AD9FA;
+    --particle-primary: #F4F8FC;
+    --particle-accent: #69C5F5;
+    --status-success: #6FD59A;
+    --status-warning: #F0C060;
+    --status-error: #FF8A80;
+    color-scheme: dark;
   }
 
   html {
@@ -65,9 +109,14 @@
   }
 
   :focus-visible {
-    outline: 2px solid #EC743C;
+    outline: 2px solid var(--focus-ring);
     outline-offset: 2px;
   }
+}
+
+/* Short colour transitions on structural surfaces only (never transition: all). */
+body, header, footer, section, nav, main {
+  transition: background-color 220ms ease, color 220ms ease, border-color 220ms ease;
 }
 
 .fluid-hero-title {
@@ -231,7 +280,7 @@
   transition: opacity 280ms ease;
   background: radial-gradient(
     260px circle at var(--mouse-x) var(--mouse-y),
-    rgba(236, 116, 60, 0.14),
+    rgba(40, 148, 204, 0.14),
     transparent 68%
   );
 }
@@ -245,7 +294,7 @@
   padding: 1px;
   background: radial-gradient(
     220px circle at var(--mouse-x) var(--mouse-y),
-    rgba(236, 116, 60, 0.65),
+    rgba(40, 148, 204, 0.65),
     transparent 70%
   );
   -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
@@ -293,21 +342,21 @@
   inset: 0;
   transform: rotateX(90deg) translateZ(0.45em);
   transform-origin: center center;
-  color: #EC743C;
+  color: var(--accent-red);
   backface-visibility: hidden;
   pointer-events: none;
 }
 
 .dark .flip-text-wrapper .flip-char::after {
-  color: #EC743C;
+  color: var(--accent-red);
 }
 
 .glass-border {
-  border: 1px solid rgba(20, 22, 24, 0.14);
+  border: 1px solid rgba(16, 36, 58, 0.14);
 }
 
 .dark .glass-border {
-  border: 1px solid rgba(243, 240, 233, 0.14);
+  border: 1px solid rgba(244, 248, 252, 0.14);
 }
 
 .perspective-\[2000px\] {
@@ -334,3 +383,67 @@
 }
 
 
+
+/* Global presence: flowing route dashes on the SVG fallback map */
+@keyframes presence-route-flow {
+  to {
+    stroke-dashoffset: -26;
+  }
+}
+
+.presence-route-flow {
+  animation: presence-route-flow 2.2s linear infinite;
+}
+
+/* Decorative motion stops when the visitor pauses ambient motion */
+html[data-ambient="paused"] .presence-route-flow {
+  animation: none;
+}
+
+/* Logistics journey: stage discs light up in sequence */
+@keyframes lj-disc {
+  0% { opacity: 0; }
+  2% { opacity: 1; }
+  18% { opacity: 1; }
+  22%, 100% { opacity: 0; }
+}
+
+.lj-disc {
+  opacity: 0;
+  animation: lj-disc 14s linear infinite both;
+}
+
+html[data-ambient="paused"] .lj-disc {
+  animation: none;
+  opacity: 0;
+}
+
+/* Section eyebrow hairline (controlled red accent), drawn in by useIndustrialReveals */
+.reveal-eyebrow {
+  --rule: 1;
+}
+
+.reveal-eyebrow::after {
+  content: '';
+  display: block;
+  width: 2.5rem;
+  height: 2px;
+  margin-top: 0.5rem;
+  background: var(--accent-red);
+  transform: scaleX(var(--rule));
+  transform-origin: left center;
+}
+
+/* Hero: slow ambient glow breathing (stops when ambient motion is paused) */
+@keyframes hero-breathe {
+  0%, 100% { opacity: 0.85; transform: scale(1); }
+  50% { opacity: 1; transform: scale(1.04); }
+}
+
+.hero-breathe {
+  animation: hero-breathe 9s ease-in-out infinite;
+}
+
+html[data-ambient="paused"] .hero-breathe {
+  animation: none;
+}

@@ -30,23 +30,23 @@ const VARIANT_CLASSES: Record<
 > = {
   primary: {
     container:
-      'bg-[#9E4B28] text-[#F6F4EF] border-[#9E4B28] hover:border-[#823B1D] dark:bg-[#A95632] dark:border-[#A95632] dark:hover:border-[#EC743C]',
-    sweep: 'bg-[#823B1D] dark:bg-[#EC743C]/20',
+      'bg-brand text-[#FFFFFF] border-brand hover:border-brand-hover dark:bg-[#0A6AA1] dark:border-[#0A6AA1] dark:hover:border-[#69C5F5]',
+    sweep: 'bg-brand-hover dark:bg-[#69C5F5]/20',
   },
   secondary: {
     container:
-      'bg-[#141618] text-[#F6F4EF] border-[#141618] hover:border-[#9E4B28] dark:bg-[#F3F0E9] dark:text-[#141618] dark:border-[#F3F0E9] dark:hover:text-[#F6F4EF] dark:hover:border-[#EC743C]',
-    sweep: 'bg-[#9E4B28] dark:bg-[#A95632]',
+      'bg-[#10243A] text-[#FFFFFF] border-[#10243A] hover:border-brand dark:bg-[#F4F8FC] dark:text-[#10243A] dark:border-[#F4F8FC] dark:hover:text-[#FFFFFF] dark:hover:border-[#69C5F5]',
+    sweep: 'bg-brand dark:bg-[#0A6AA1]',
   },
   'outline-dark': {
     container:
-      'bg-transparent text-[#F3F0E9] border-[#F3F0E9]/35 hover:text-[#141618] hover:border-[#F3F0E9]',
-    sweep: 'bg-[#F3F0E9]',
+      'bg-transparent text-[#F4F8FC] border-[#F4F8FC]/35 hover:text-[#10243A] hover:border-[#F4F8FC]',
+    sweep: 'bg-[#F4F8FC]',
   },
   'outline-light': {
     container:
-      'bg-transparent text-[#141618] border-[#141618]/30 hover:text-[#F6F4EF] hover:border-[#141618] dark:text-[#F3F0E9] dark:border-[#F3F0E9]/30 dark:hover:text-[#141618] dark:hover:border-[#F3F0E9]',
-    sweep: 'bg-[#141618] dark:bg-[#F3F0E9]',
+      'bg-transparent text-[#10243A] border-[#10243A]/30 hover:text-[#FFFFFF] hover:border-[#10243A] dark:text-[#F4F8FC] dark:border-[#F4F8FC]/30 dark:hover:text-[#10243A] dark:hover:border-[#F4F8FC]',
+    sweep: 'bg-[#10243A] dark:bg-[#F4F8FC]',
   },
 };
 

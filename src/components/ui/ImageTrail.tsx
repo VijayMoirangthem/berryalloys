@@ -119,7 +119,7 @@ export function ImageTrail({
                   top: `${node.y}px`,
                   transform: 'translate(-50%, -50%)',
                 }}
-                className="absolute w-32 h-22 sm:w-40 sm:h-26 border border-[#9E4B28]/35 dark:border-[#EC743C]/35 bg-[#121417] shadow-xl overflow-hidden"
+                className="absolute w-32 h-22 sm:w-40 sm:h-26 border border-brand/35 dark:border-[#69C5F5]/35 bg-[#07111F] shadow-xl overflow-hidden"
               >
                 <img
                   src={node.src}

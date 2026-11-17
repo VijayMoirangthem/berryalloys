@@ -27,6 +27,11 @@ import { useGuide } from '../context/GuideContext';
 
 const MAX_INPUT_LENGTH = 360;
 const LAUNCHER_PREF_KEY = 'berry-compass-launcher-v1';
+
+function isCompactViewport(): boolean {
+  if (typeof window === 'undefined') return false;
+  return window.matchMedia('(max-width: 639px), (pointer: coarse)').matches;
+}
 const EDGE_SNAP_THRESHOLD = 22;
 const TOP_SAFE_MARGIN = 76;
 const BOTTOM_SAFE_MARGIN = 16;
@@ -135,10 +140,11 @@ export function BerryAlloysGuide() {
       const minTop = TOP_SAFE_MARGIN;
       const maxTop = Math.max(minTop, vh - height - BOTTOM_SAFE_MARGIN);
 
+      const dockedEdge = isCompactViewport() ? null : pref.docked;
       let resolvedLeft: number;
-      if (pref.docked === 'right') {
+      if (dockedEdge === 'right') {
         resolvedLeft = vw - width;
-      } else if (pref.docked === 'left') {
+      } else if (dockedEdge === 'left') {
         resolvedLeft = 0;
       } else {
         resolvedLeft = minLeft + pref.xRatio * (maxLeft - minLeft);
@@ -323,6 +329,21 @@ export function BerryAlloysGuide() {
     }));
   };
 
+  // Track the visual viewport so the panel shrinks above the software keyboard on phones.
+  const [visualHeight, setVisualHeight] = useState<number | null>(null);
+  useEffect(() => {
+    if (!isOpen) return;
+    const vv = window.visualViewport;
+    if (!vv) return;
+    const update = () => setVisualHeight(Math.round(vv.height));
+    update();
+    vv.addEventListener('resize', update);
+    return () => {
+      vv.removeEventListener('resize', update);
+      setVisualHeight(null);
+    };
+  }, [isOpen]);
+
   // Body scroll lock & Escape / Focus Trap inside modal dialog
   useEffect(() => {
     if (!isOpen) return;
@@ -419,6 +440,10 @@ export function BerryAlloysGuide() {
   };
 
   const submitDraft = () => {
+    if (isPreparing) {
+      setInputNotice('One moment — Berry Compass is still preparing the previous answer.');
+      return;
+    }
     const trimmed = draft.trim();
     if (!trimmed) {
       setInputNotice('Type a question or pick one of the topic buttons above.');
@@ -451,7 +476,8 @@ export function BerryAlloysGuide() {
     <>
       {/* Draggable & Edge-Hidable Architectural Launcher (Hidden while modal open) */}
       {!isOpen && (() => {
-        const isDocked = launcherPref.docked !== null;
+        // On phones and touch devices the launcher always stays fully visible (no edge-hiding).
+        const isDocked = launcherPref.docked !== null && !isCompactViewport();
         const isDockedLeft = launcherPref.docked === 'left';
         const isLeftHalf = isDocked ? isDockedLeft : launcherPref.xRatio < 0.5;
         const isRevealed = !isDocked || isPeekRevealed || isFocusWithinLauncher || isDragging;
@@ -518,7 +544,7 @@ export function BerryAlloysGuide() {
             {isDragging && snapPreviewEdge && (
               <span
                 role="status"
-                className={`pointer-events-none absolute -top-7 px-2 py-0.5 text-[10px] font-mono-tabular uppercase tracking-wider whitespace-nowrap bg-[#141618] text-[#EC743C] border border-[#EC743C]/45 shadow-md ${
+                className={`pointer-events-none absolute -top-7 px-2 py-0.5 text-[10px] font-mono-tabular uppercase tracking-wider whitespace-nowrap bg-[#10243A] text-[#69C5F5] border border-[#69C5F5]/45 shadow-md ${
                   snapPreviewEdge === 'right' ? 'right-0' : 'left-0'
                 }`}
               >
@@ -552,8 +578,8 @@ export function BerryAlloysGuide() {
                   ? 'Hover or tap to reveal Berry Compass'
                   : 'Open Berry Compass · Drag to reposition'
               }
-              className={`group relative inline-flex items-center gap-2 min-h-[46px] pr-3 pl-2.5 py-2.5 bg-[#141618] text-[#F6F4EF] border border-[#141618] hover:bg-[#9E4B28] hover:border-[#9E4B28] dark:bg-[#20242A] dark:text-[#F3F0E9] dark:border-[#EC743C]/45 dark:hover:bg-[#A95632] dark:hover:border-[#EC743C] transition-colors duration-150 focus-visible:outline-2 focus-visible:outline-[#EC743C] focus-visible:outline-offset-2 ${
-                isDragging ? 'cursor-grabbing ring-2 ring-[#EC743C]' : 'cursor-grab'
+              className={`group relative inline-flex items-center gap-2 min-h-[46px] pr-3 pl-2.5 py-2.5 bg-[#10243A] text-[#FFFFFF] border border-[#10243A] hover:bg-brand hover:border-brand dark:bg-[#12243B] dark:text-[#F4F8FC] dark:border-[#69C5F5]/45 dark:hover:bg-[#0A6AA1] dark:hover:border-[#69C5F5] transition-colors duration-150 focus-visible:outline-2 focus-visible:outline-[#69C5F5] focus-visible:outline-offset-2 ${
+                isDragging ? 'cursor-grabbing ring-2 ring-[#69C5F5]' : 'cursor-grab'
               } ${isDockedLeft ? 'flex-row-reverse pl-3 pr-2.5' : ''}`}
             >
               {/* Exposed Edge Peek Sliver Indicator (always visible 22px strip when docked) */}
@@ -561,8 +587,8 @@ export function BerryAlloysGuide() {
                 aria-hidden="true"
                 className={`inline-flex items-center justify-center shrink-0 ${
                   isTucked
-                    ? 'text-[#EC743C]'
-                    : 'text-[#A1A7AB] group-hover:text-[#F6F4EF]'
+                    ? 'text-[#69C5F5]'
+                    : 'text-[#B5C5D7] group-hover:text-[#FFFFFF]'
                 }`}
               >
                 {isTucked ? (
@@ -580,14 +606,14 @@ export function BerryAlloysGuide() {
               {isTucked && (
                 <span
                   aria-hidden="true"
-                  className={`absolute inset-y-0 w-[3px] bg-[#EC743C] ${
+                  className={`absolute inset-y-0 w-[3px] bg-[#69C5F5] ${
                     isDockedLeft ? 'right-0' : 'left-0'
                   }`}
                 />
               )}
 
               <Compass
-                className="w-4 h-4 text-[#EC743C] group-hover:text-[#F6F4EF] shrink-0 transition-colors"
+                className="w-4 h-4 text-[#69C5F5] group-hover:text-[#FFFFFF] shrink-0 transition-colors"
                 aria-hidden="true"
               />
               <span className="text-xs font-semibold tracking-wide whitespace-nowrap">
@@ -599,6 +625,7 @@ export function BerryAlloysGuide() {
             <button
               type="button"
               data-launcher-dock-btn="true"
+              style={isCompactViewport() ? { display: 'none' } : undefined}
               onClick={() => (isDocked ? handleUnpinToCanvas() : handleHideToNearestEdge())}
               aria-label={
                 isDocked
@@ -606,12 +633,12 @@ export function BerryAlloysGuide() {
                   : 'Hide Berry Compass to nearest screen edge'
               }
               title={isDocked ? 'Keep visible on page' : 'Hide to screen edge'}
-              className={`inline-flex items-center justify-center min-w-[34px] min-h-[46px] px-2 bg-[#1E2228] text-[#A1A7AB] hover:text-[#F6F4EF] hover:bg-[#2E343B] border-y ${
+              className={`inline-flex items-center justify-center min-w-[34px] min-h-[46px] px-2 bg-[#1E2228] text-[#B5C5D7] hover:text-[#FFFFFF] hover:bg-[#29435F] border-y ${
                 isDockedLeft ? 'border-l' : 'border-r'
-              } border-[#141618] dark:bg-[#191C20] dark:border-[#EC743C]/45 dark:hover:bg-[#2E343B] transition-colors cursor-pointer focus-visible:outline-2 focus-visible:outline-[#EC743C] focus-visible:outline-offset-[-2px]`}
+              } border-[#10243A] dark:bg-[#0D1B2E] dark:border-[#69C5F5]/45 dark:hover:bg-[#29435F] transition-colors cursor-pointer focus-visible:outline-2 focus-visible:outline-[#69C5F5] focus-visible:outline-offset-[-2px]`}
             >
               {isDocked ? (
-                <Pin className="w-3.5 h-3.5 text-[#EC743C]" aria-hidden="true" />
+                <Pin className="w-3.5 h-3.5 text-[#69C5F5]" aria-hidden="true" />
               ) : isLeftHalf ? (
                 <ChevronLeft className="w-3.5 h-3.5" aria-hidden="true" />
               ) : (
@@ -635,7 +662,7 @@ export function BerryAlloysGuide() {
                 closeGuide();
               }
             }}
-            className="fixed inset-0 z-50 bg-[#141618]/50 backdrop-blur-[1px] flex items-end sm:items-end justify-end sm:p-6"
+            className="fixed inset-0 z-50 bg-[#10243A]/50 backdrop-blur-[1px] flex items-end sm:items-end justify-end sm:p-6"
           >
             <motion.div
               ref={dialogRef}
@@ -647,23 +674,24 @@ export function BerryAlloysGuide() {
               animate={{ opacity: 1, y: 0 }}
               exit={prefersReduced ? undefined : { opacity: 0, y: 8 }}
               transition={{ duration: 0.14, ease: [0.16, 1, 0.3, 1] }}
-              className="w-full h-[100dvh] sm:h-[min(660px,calc(100dvh-3rem))] sm:w-[420px] sm:max-w-[calc(100vw-3rem)] bg-[#F6F4EF] dark:bg-[#141618] text-[#141618] dark:text-[#F3F0E9] border-t sm:border border-[#141618]/20 dark:border-[#F3F0E9]/20 shadow-2xl flex flex-col overflow-hidden"
+              style={{ '--guide-vh': visualHeight ? `${visualHeight}px` : '100dvh' } as React.CSSProperties}
+              className="w-full h-[var(--guide-vh)] sm:h-[min(660px,calc(100dvh-3rem))] sm:w-[420px] sm:max-w-[calc(100vw-3rem)] bg-[#FFFFFF] dark:bg-[#10243A] text-[#10243A] dark:text-[#F4F8FC] border-t sm:border border-[#10243A]/20 dark:border-[#F4F8FC]/20 shadow-2xl flex flex-col overflow-hidden"
             >
               {/* Header */}
-              <div className="shrink-0 px-4 sm:px-5 py-3.5 bg-[#141618] text-[#F3F0E9] border-b border-[#F3F0E9]/14 flex items-start justify-between gap-3 pt-[max(0.875rem,env(safe-area-inset-top))]">
+              <div className="shrink-0 px-4 sm:px-5 py-3.5 bg-[#10243A] text-[#F4F8FC] border-b border-[#F4F8FC]/14 flex items-start justify-between gap-3 pt-[max(0.875rem,env(safe-area-inset-top))]">
                 <div className="min-w-0 space-y-1">
-                  <p className="text-[10px] font-mono-tabular uppercase tracking-widest text-[#EC743C]">
+                  <p className="text-[10px] font-mono-tabular uppercase tracking-widest text-[#69C5F5]">
                     Automated product assistant · Answers from prepared company information.
                   </p>
                   <h2
                     id="berry-guide-title"
-                    className="font-display text-xl font-bold uppercase tracking-tight text-[#F3F0E9]"
+                    className="font-display text-xl font-bold uppercase tracking-tight text-[#F4F8FC]"
                   >
                     Berry Compass
                   </h2>
                   <p
                     id="berry-guide-disclosure"
-                    className="text-[11px] text-[#A1A7AB] leading-snug"
+                    className="text-[11px] text-[#B5C5D7] leading-snug"
                   >
                     Products, specifications and enquiries.
                   </p>
@@ -679,7 +707,7 @@ export function BerryAlloysGuide() {
                     }}
                     aria-label="Reset conversation"
                     title="Reset conversation"
-                    className="inline-flex items-center justify-center w-10 h-10 text-[#A1A7AB] hover:text-[#F3F0E9] hover:bg-[#20242A] transition-colors cursor-pointer"
+                    className="inline-flex items-center justify-center w-10 h-10 text-[#B5C5D7] hover:text-[#F4F8FC] hover:bg-[#12243B] transition-colors cursor-pointer"
                   >
                     <RotateCcw className="w-4 h-4" aria-hidden="true" />
                   </button>
@@ -689,7 +717,7 @@ export function BerryAlloysGuide() {
                     onClick={closeGuide}
                     aria-label="Close Berry Compass"
                     title="Close (Esc)"
-                    className="inline-flex items-center justify-center w-10 h-10 text-[#F3F0E9] hover:text-[#EC743C] hover:bg-[#20242A] transition-colors cursor-pointer"
+                    className="inline-flex items-center justify-center w-10 h-10 text-[#F4F8FC] hover:text-[#69C5F5] hover:bg-[#12243B] transition-colors cursor-pointer"
                   >
                     <X className="w-5 h-5" aria-hidden="true" />
                   </button>
@@ -713,19 +741,19 @@ export function BerryAlloysGuide() {
                 >
                   {topicBrowserOpen ? (
                     <div className="space-y-4 pb-2">
-                      <div className="flex items-center justify-between gap-2 pb-2 border-b border-[#141618]/12 dark:border-[#F3F0E9]/12">
+                      <div className="flex items-center justify-between gap-2 pb-2 border-b border-[#10243A]/12 dark:border-[#F4F8FC]/12">
                         <div>
-                          <p className="text-[11px] font-mono-tabular uppercase tracking-wider text-[#9E4B28] dark:text-[#EC743C] font-semibold">
+                          <p className="text-[11px] font-mono-tabular uppercase tracking-wider text-brand dark:text-[#69C5F5] font-semibold">
                             Browse All Prepared Topics
                           </p>
-                          <p className="text-xs text-[#4A5054] dark:text-[#A1A7AB]">
+                          <p className="text-xs text-[#465C72] dark:text-[#B5C5D7]">
                             Select any question below to view the full answer in chat.
                           </p>
                         </div>
                         <button
                           type="button"
                           onClick={() => setTopicBrowserOpen(false)}
-                          className="min-h-[36px] px-3 py-1 text-xs font-semibold border border-[#141618]/20 dark:border-[#F3F0E9]/20 hover:border-[#9E4B28] dark:hover:border-[#EC743C] transition-colors cursor-pointer shrink-0"
+                          className="min-h-[36px] px-3 py-1 text-xs font-semibold border border-[#10243A]/20 dark:border-[#F4F8FC]/20 hover:border-brand dark:hover:border-[#69C5F5] transition-colors cursor-pointer shrink-0"
                         >
                           Back to Chat
                         </button>
@@ -738,7 +766,7 @@ export function BerryAlloysGuide() {
                         if (entries.length === 0) return null;
                         return (
                           <div key={category} className="space-y-1.5">
-                            <h3 className="text-[11px] font-mono-tabular uppercase tracking-wider font-semibold text-[#4A5054] dark:text-[#A1A7AB]">
+                            <h3 className="text-[11px] font-mono-tabular uppercase tracking-wider font-semibold text-[#465C72] dark:text-[#B5C5D7]">
                               {category}
                             </h3>
                             <div className="space-y-1.5">
@@ -754,11 +782,11 @@ export function BerryAlloysGuide() {
                                       entryId: entry.id,
                                     });
                                   }}
-                                  className="w-full text-left px-3 py-2.5 min-h-[40px] text-xs font-medium bg-white dark:bg-[#20242A] border border-[#141618]/14 dark:border-[#F3F0E9]/14 hover:border-[#9E4B28] dark:hover:border-[#EC743C] text-[#141618] dark:text-[#F3F0E9] transition-colors cursor-pointer flex items-center justify-between gap-2"
+                                  className="w-full text-left px-3 py-2.5 min-h-[40px] text-xs font-medium bg-white dark:bg-[#12243B] border border-[#10243A]/14 dark:border-[#F4F8FC]/14 hover:border-brand dark:hover:border-[#69C5F5] text-[#10243A] dark:text-[#F4F8FC] transition-colors cursor-pointer flex items-center justify-between gap-2"
                                 >
                                   <span>{entry.question}</span>
                                   <ArrowRight
-                                    className="w-3.5 h-3.5 text-[#9E4B28] dark:text-[#EC743C] shrink-0"
+                                    className="w-3.5 h-3.5 text-brand dark:text-[#69C5F5] shrink-0"
                                     aria-hidden="true"
                                   />
                                 </button>
@@ -785,7 +813,7 @@ export function BerryAlloysGuide() {
                               transition={{ duration: 0.16, ease: [0.16, 1, 0.3, 1] }}
                               className="flex justify-end"
                             >
-                              <div className="max-w-[85%] bg-[#141618] text-[#F6F4EF] dark:bg-[#A95632] dark:text-[#F3F0E9] px-3.5 py-2.5 text-xs sm:text-sm leading-relaxed">
+                              <div className="max-w-[85%] bg-[#10243A] text-[#FFFFFF] dark:bg-[#0A6AA1] dark:text-[#F4F8FC] px-3.5 py-2.5 text-xs sm:text-sm leading-relaxed">
                                 {msg.text}
                               </div>
                             </motion.div>
@@ -800,29 +828,29 @@ export function BerryAlloysGuide() {
                             transition={{ duration: 0.2, ease: [0.16, 1, 0.3, 1] }}
                             className="space-y-2.5"
                           >
-                            <div className="bg-white dark:bg-[#20242A] border border-[#141618]/14 dark:border-[#F3F0E9]/14 p-3.5 sm:p-4 space-y-2.5">
+                            <div className="bg-white dark:bg-[#12243B] border border-[#10243A]/14 dark:border-[#F4F8FC]/14 p-3.5 sm:p-4 space-y-2.5">
                               {payload?.title && (
-                                <h3 className="font-display text-base font-bold uppercase tracking-tight text-[#141618] dark:text-[#F3F0E9]">
+                                <h3 className="font-display text-base font-bold uppercase tracking-tight text-[#10243A] dark:text-[#F4F8FC]">
                                   {payload.title}
                                 </h3>
                               )}
 
-                              <p className="text-xs sm:text-sm text-[#141618] dark:text-[#F3F0E9]/90 leading-relaxed">
+                              <p className="text-xs sm:text-sm text-[#10243A] dark:text-[#F4F8FC]/90 leading-relaxed">
                                 {msg.text}
                               </p>
 
                               {payload?.specHighlights &&
                                 payload.specHighlights.length > 0 && (
-                                  <dl className="grid grid-cols-2 gap-2 pt-2 border-t border-[#141618]/10 dark:border-[#F3F0E9]/10 text-[11px]">
+                                  <dl className="grid grid-cols-2 gap-2 pt-2 border-t border-[#10243A]/10 dark:border-[#F4F8FC]/10 text-[11px]">
                                     {payload.specHighlights.map((spec) => (
                                       <div
                                         key={spec.label}
-                                        className="bg-[#F6F4EF] dark:bg-[#141618] px-2.5 py-1.5"
+                                        className="bg-[#FFFFFF] dark:bg-[#10243A] px-2.5 py-1.5"
                                       >
-                                        <dt className="text-[#4A5054] dark:text-[#A1A7AB] truncate">
+                                        <dt className="text-[#465C72] dark:text-[#B5C5D7] truncate">
                                           {spec.label}
                                         </dt>
-                                        <dd className="font-mono-tabular font-semibold text-[#141618] dark:text-[#F3F0E9] mt-0.5">
+                                        <dd className="font-mono-tabular font-semibold text-[#10243A] dark:text-[#F4F8FC] mt-0.5">
                                           {spec.value}
                                         </dd>
                                       </div>
@@ -831,13 +859,13 @@ export function BerryAlloysGuide() {
                                 )}
 
                               {payload?.detailNote && (
-                                <p className="text-[11px] text-[#4A5054] dark:text-[#A1A7AB] leading-relaxed">
+                                <p className="text-[11px] text-[#465C72] dark:text-[#B5C5D7] leading-relaxed">
                                   {payload.detailNote}
                                 </p>
                               )}
 
                               {payload?.checklist && payload.checklist.length > 0 && (
-                                <ul className="space-y-1 text-xs text-[#141618] dark:text-[#F3F0E9]/88 pt-1">
+                                <ul className="space-y-1 text-xs text-[#10243A] dark:text-[#F4F8FC]/88 pt-1">
                                   {payload.checklist.map((item) => (
                                     <li
                                       key={item}
@@ -845,7 +873,7 @@ export function BerryAlloysGuide() {
                                     >
                                       <span
                                         aria-hidden="true"
-                                        className="font-mono-tabular text-[#9E4B28] dark:text-[#EC743C] font-bold"
+                                        className="font-mono-tabular text-brand dark:text-[#69C5F5] font-bold"
                                       >
                                         ·
                                       </span>
@@ -864,8 +892,8 @@ export function BerryAlloysGuide() {
                                       onClick={() => executeAction(action)}
                                       className={`inline-flex items-center gap-1.5 min-h-[40px] px-3 py-1.5 text-xs font-semibold transition-colors cursor-pointer text-left ${
                                         action.variant === 'primary'
-                                          ? 'bg-[#9E4B28] text-[#F6F4EF] hover:bg-[#823B1D] dark:bg-[#A95632] dark:hover:bg-[#EC743C] dark:hover:text-[#141618]'
-                                          : 'bg-[#ECE8DF] text-[#141618] hover:bg-[#D8D1C3] dark:bg-[#141618] dark:text-[#F3F0E9] dark:border dark:border-[#F3F0E9]/20 dark:hover:border-[#EC743C]'
+                                          ? 'bg-brand text-[#FFFFFF] hover:bg-brand-hover dark:bg-[#0A6AA1] dark:hover:bg-[#69C5F5] dark:hover:text-[#10243A]'
+                                          : 'bg-[#F1F6FB] text-[#10243A] hover:bg-[#D4DFEB] dark:bg-[#10243A] dark:text-[#F4F8FC] dark:border dark:border-[#F4F8FC]/20 dark:hover:border-[#69C5F5]'
                                       }`}
                                     >
                                       <span>{action.label}</span>
@@ -896,7 +924,7 @@ export function BerryAlloysGuide() {
                                   }}
                                   className="space-y-1.5 pt-0.5"
                                 >
-                                  <p className="text-[10px] font-mono-tabular uppercase tracking-wider text-[#4A5054] dark:text-[#A1A7AB]">
+                                  <p className="text-[10px] font-mono-tabular uppercase tracking-wider text-[#465C72] dark:text-[#B5C5D7]">
                                     Suggested next
                                   </p>
                                   <div className="flex flex-wrap gap-1.5">
@@ -921,7 +949,8 @@ export function BerryAlloysGuide() {
                                           isNearBottomRef.current = true;
                                           selectSuggestion(chip);
                                         }}
-                                        className="min-h-[40px] px-3 py-2 text-left text-xs font-medium bg-[#ECE8DF]/80 hover:bg-[#ECE8DF] text-[#141618] border border-[#141618]/15 hover:border-[#9E4B28] dark:bg-[#191C20] dark:text-[#F3F0E9] dark:border-[#F3F0E9]/18 dark:hover:border-[#EC743C] transition-colors cursor-pointer"
+                                        disabled={isPreparing}
+                                        className="disabled:opacity-50 disabled:cursor-not-allowed min-h-[40px] px-3 py-2 text-left text-xs font-medium bg-[#F1F6FB]/80 hover:bg-[#F1F6FB] text-[#10243A] border border-[#10243A]/15 hover:border-brand dark:bg-[#0D1B2E] dark:text-[#F4F8FC] dark:border-[#F4F8FC]/18 dark:hover:border-brand transition-colors cursor-pointer"
                                       >
                                         {chip.label}
                                       </motion.button>
@@ -940,7 +969,7 @@ export function BerryAlloysGuide() {
                           initial={prefersReduced ? false : { opacity: 0, y: 6 }}
                           animate={{ opacity: 1, y: 0 }}
                           transition={{ duration: 0.16, ease: [0.16, 1, 0.3, 1] }}
-                          className="inline-flex items-center gap-2.5 bg-white dark:bg-[#20242A] border border-[#141618]/14 dark:border-[#F3F0E9]/14 px-3.5 py-2.5 text-xs text-[#4A5054] dark:text-[#A1A7AB]"
+                          className="inline-flex items-center gap-2.5 bg-white dark:bg-[#12243B] border border-[#10243A]/14 dark:border-[#F4F8FC]/14 px-3.5 py-2.5 text-xs text-[#465C72] dark:text-[#B5C5D7]"
                         >
                           <span
                             className="inline-flex items-center gap-1 shrink-0"
@@ -950,7 +979,7 @@ export function BerryAlloysGuide() {
                               prefersReduced ? (
                                 <span
                                   key={dotIdx}
-                                  className="w-1.5 h-1.5 bg-[#9E4B28] dark:bg-[#EC743C] opacity-75"
+                                  className="w-1.5 h-1.5 bg-brand dark:bg-[#69C5F5] opacity-75"
                                 />
                               ) : (
                                 <motion.span
@@ -962,7 +991,7 @@ export function BerryAlloysGuide() {
                                     delay: dotIdx * 0.16,
                                     ease: 'easeInOut',
                                   }}
-                                  className="w-1.5 h-1.5 bg-[#9E4B28] dark:bg-[#EC743C]"
+                                  className="w-1.5 h-1.5 bg-brand dark:bg-[#69C5F5]"
                                 />
                               )
                             )}
@@ -979,7 +1008,7 @@ export function BerryAlloysGuide() {
                   <button
                     type="button"
                     onClick={scrollToLatest}
-                    className="absolute bottom-3 left-1/2 -translate-x-1/2 inline-flex items-center gap-1.5 min-h-[36px] px-3.5 py-1.5 text-xs font-semibold bg-[#141618] text-[#F6F4EF] dark:bg-[#EC743C] dark:text-[#141618] shadow-lg cursor-pointer"
+                    className="absolute bottom-3 left-1/2 -translate-x-1/2 inline-flex items-center gap-1.5 min-h-[36px] px-3.5 py-1.5 text-xs font-semibold bg-[#10243A] text-[#FFFFFF] dark:bg-[#69C5F5] dark:text-[#10243A] shadow-lg cursor-pointer"
                   >
                     <ArrowDown className="w-3.5 h-3.5" aria-hidden="true" />
                     New message
@@ -988,13 +1017,13 @@ export function BerryAlloysGuide() {
               </div>
 
               {/* Input & Browse Topics Dock */}
-              <div className="shrink-0 bg-white dark:bg-[#191C20] border-t border-[#141618]/14 dark:border-[#F3F0E9]/14 px-4 sm:px-5 py-3 space-y-2 pb-[max(0.75rem,env(safe-area-inset-bottom))]">
+              <div className="shrink-0 bg-white dark:bg-[#0D1B2E] border-t border-[#10243A]/14 dark:border-[#F4F8FC]/14 px-4 sm:px-5 py-3 space-y-2 pb-[max(0.75rem,env(safe-area-inset-bottom))]">
                 <div className="flex items-center justify-between gap-2 text-[11px]">
                   <button
                     type="button"
                     onClick={() => setTopicBrowserOpen((prev) => !prev)}
                     aria-expanded={topicBrowserOpen}
-                    className="inline-flex items-center gap-1.5 font-semibold text-[#9E4B28] dark:text-[#EC743C] hover:underline cursor-pointer min-h-[28px]"
+                    className="inline-flex items-center gap-1.5 font-semibold text-brand dark:text-[#69C5F5] hover:underline cursor-pointer min-h-[28px]"
                   >
                     <Grid className="w-3.5 h-3.5" aria-hidden="true" />
                     {topicBrowserOpen ? 'Return to conversation' : 'Browse topics'}
@@ -1005,7 +1034,7 @@ export function BerryAlloysGuide() {
                     onClick={() =>
                       executeAction({ label: 'All FAQs', to: '/faq' })
                     }
-                    className="inline-flex items-center gap-1 text-[#4A5054] dark:text-[#A1A7AB] hover:text-[#141618] dark:hover:text-[#F3F0E9] transition-colors cursor-pointer min-h-[28px]"
+                    className="inline-flex items-center gap-1 text-[#465C72] dark:text-[#B5C5D7] hover:text-[#10243A] dark:hover:text-[#F4F8FC] transition-colors cursor-pointer min-h-[28px]"
                   >
                     <BookOpen className="w-3 h-3" aria-hidden="true" />
                     All FAQs
@@ -1013,7 +1042,7 @@ export function BerryAlloysGuide() {
                 </div>
 
                 {inputNotice && (
-                  <p role="alert" className="text-[11px] text-[#9E4B28] dark:text-[#EC743C]">
+                  <p role="alert" className="text-[11px] text-brand dark:text-[#69C5F5]">
                     {inputNotice}
                   </p>
                 )}
@@ -1035,20 +1064,21 @@ export function BerryAlloysGuide() {
                       }}
                       onKeyDown={handleTextareaKeyDown}
                       placeholder="Ask Berry Compass about alloys, specs, plants, or quotes…"
-                      className="w-full min-h-[44px] max-h-28 px-3 py-2.5 text-sm bg-[#F6F4EF] dark:bg-[#121417] border border-[#141618]/20 dark:border-[#F3F0E9]/20 text-[#141618] dark:text-[#F3F0E9] placeholder:text-[#4A5054]/70 dark:placeholder:text-[#A1A7AB]/70 focus:border-[#9E4B28] dark:focus:border-[#EC743C] focus:outline-none resize-none"
+                      className="w-full min-h-[44px] max-h-28 px-3 py-2.5 text-sm bg-[#FFFFFF] dark:bg-[#07111F] border border-[#10243A]/20 dark:border-[#F4F8FC]/20 text-[#10243A] dark:text-[#F4F8FC] placeholder:text-[#465C72]/70 dark:placeholder:text-[#B5C5D7]/70 focus:border-brand dark:focus:border-[#69C5F5] focus:outline-none resize-none"
                     />
                   </div>
                   <button
                     type="submit"
                     aria-label="Send message to Berry Compass"
                     aria-busy={isPreparing}
-                    className="inline-flex items-center justify-center min-w-[44px] min-h-[44px] px-3.5 bg-[#9E4B28] text-[#F6F4EF] hover:bg-[#823B1D] dark:bg-[#A95632] dark:text-[#F3F0E9] dark:hover:bg-[#EC743C] dark:hover:text-[#141618] transition-colors cursor-pointer shrink-0"
+                    disabled={isPreparing}
+                    className="disabled:opacity-50 disabled:cursor-not-allowed inline-flex items-center justify-center min-w-[44px] min-h-[44px] px-3.5 bg-brand text-[#FFFFFF] hover:bg-brand-hover dark:bg-[#0A6AA1] dark:text-[#F4F8FC] dark:hover:bg-brand dark:hover:text-[#10243A] transition-colors cursor-pointer shrink-0"
                   >
                     <Send className="w-4 h-4" aria-hidden="true" />
                   </button>
                 </form>
 
-                <div className="flex items-center justify-between gap-2 text-[10px] text-[#4A5054] dark:text-[#A1A7AB]">
+                <div className="flex items-center justify-between gap-2 text-[10px] text-[#465C72] dark:text-[#B5C5D7]">
                   <span>Enter to send · Shift+Enter for new line</span>
                   {draft.length > 260 && (
                     <span className="font-mono-tabular">

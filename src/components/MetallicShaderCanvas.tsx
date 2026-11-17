@@ -64,7 +64,7 @@ export function MetallicShaderCanvas({ className = '' }: { className?: string })
         float sheen = smoothstep(0.26, 0.86, wave * 0.6 + grain * 0.28 + fineStreak * 0.12);
 
         vec3 graphite = vec3(0.075, 0.082, 0.090);   // #131517
-        vec3 steel    = vec3(0.145, 0.160, 0.180);   // #25292E
+        vec3 steel    = vec3(0.145, 0.160, 0.180);   // #19314B
         vec3 copper   = vec3(0.663, 0.337, 0.196);   // #A95632
         vec3 ember    = vec3(0.925, 0.455, 0.235);   // #EC743C
 
@@ -171,7 +171,7 @@ export function MetallicShaderCanvas({ className = '' }: { className?: string })
 
     const observer = new IntersectionObserver(
       (entries) => {
-        isVisible = entries[0]?.isIntersecting ?? true;
+        isVisible = entries[entries.length - 1]?.isIntersecting ?? true;
       },
       { threshold: 0.05 }
     );
@@ -220,7 +220,7 @@ export function MetallicShaderCanvas({ className = '' }: { className?: string })
     return (
       <div
         aria-hidden="true"
-        className={`bg-[radial-gradient(ellipse_at_top_right,rgba(169,86,50,0.28),#141618_62%)] ${className}`}
+        className={`bg-[radial-gradient(ellipse_at_top_right,rgba(10,106,161,0.28),#141618_62%)] ${className}`}
       />
     );
   }

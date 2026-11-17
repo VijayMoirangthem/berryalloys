@@ -15,23 +15,23 @@ export function HomeFaqSection() {
     <section
       id="faq"
       aria-labelledby="home-faq-heading"
-      className="scroll-mt-20 py-20 lg:py-24 bg-[#ECE8DF] text-[#141618] dark:bg-[#191C20] dark:text-[#F3F0E9] border-t border-[#141618]/12 dark:border-[#F3F0E9]/12"
+      className="scroll-mt-20 py-20 lg:py-24 bg-[#F1F6FB] text-[#10243A] dark:bg-[#0D1B2E] dark:text-[#F4F8FC] border-t border-[#10243A]/12 dark:border-[#F4F8FC]/12"
     >
       <div className="max-w-[1360px] mx-auto px-4 sm:px-6 lg:px-8 xl:px-14 2xl:px-8">
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-10 lg:gap-14 items-start">
           {/* Left Editorial Summary & Actions */}
           <div className="lg:col-span-5 space-y-6 lg:sticky lg:top-24">
             <div className="space-y-3">
-              <p className="text-xs font-mono-tabular uppercase tracking-widest text-[#9E4B28] dark:text-[#EC743C]">
+              <p className="text-xs font-mono-tabular uppercase tracking-widest text-brand dark:text-[#69C5F5]">
                 11 / Frequently Asked Questions
               </p>
               <h2
                 id="home-faq-heading"
-                className="font-display fluid-statement font-bold uppercase text-[#141618] dark:text-[#F3F0E9]"
+                className="font-display fluid-statement font-bold uppercase text-[#10243A] dark:text-[#F4F8FC]"
               >
                 Clear answers before you submit an enquiry.
               </h2>
-              <p className="text-sm sm:text-base text-[#4A5054] dark:text-[#F3F0E9]/80 leading-relaxed">
+              <p className="text-sm sm:text-base text-[#465C72] dark:text-[#F4F8FC]/80 leading-relaxed">
                 Essential guidance on alloy grades, chemistry tables, ISO status, plant locations, and quotation requests—sourced from verified company records.
               </p>
             </div>
@@ -54,7 +54,7 @@ export function HomeFaqSection() {
           </div>
 
           {/* Right Expandable FaqAccordion List (Smooth CSS Grid Row Expansion) */}
-          <div className="lg:col-span-7 bg-white dark:bg-[#20242A] border border-[#141618]/14 dark:border-[#F3F0E9]/14 divide-y divide-[#141618]/12 dark:divide-[#F3F0E9]/12">
+          <div className="lg:col-span-7 bg-white dark:bg-[#12243B] border border-[#10243A]/14 dark:border-[#F4F8FC]/14 divide-y divide-[#10243A]/12 dark:divide-[#F4F8FC]/12">
             {FEATURED_HOME_FAQS.map((entry) => {
               const isOpen = openId === entry.id;
               const panelId = `home-faq-panel-${entry.id}`;
@@ -65,7 +65,7 @@ export function HomeFaqSection() {
                   key={entry.id}
                   className={cn(
                     'transition-colors duration-200',
-                    isOpen ? 'bg-[#F6F4EF]/55 dark:bg-[#191C20]/60' : ''
+                    isOpen ? 'bg-[#FFFFFF]/55 dark:bg-[#0D1B2E]/60' : ''
                   )}
                 >
                   <h3>
@@ -75,13 +75,13 @@ export function HomeFaqSection() {
                       aria-expanded={isOpen}
                       aria-controls={panelId}
                       onClick={() => setOpenId(isOpen ? null : entry.id)}
-                      className="w-full text-left px-5 sm:px-6 py-5 min-h-[56px] flex items-start justify-between gap-4 hover:bg-[#F6F4EF]/80 dark:hover:bg-[#191C20]/80 transition-colors cursor-pointer"
+                      className="w-full text-left px-5 sm:px-6 py-5 min-h-[56px] flex items-start justify-between gap-4 hover:bg-[#FFFFFF]/80 dark:hover:bg-[#0D1B2E]/80 transition-colors cursor-pointer"
                     >
                       <div className="space-y-1">
-                        <span className="block text-[10px] font-mono-tabular uppercase tracking-wider text-[#9E4B28] dark:text-[#EC743C]">
+                        <span className="block text-[10px] font-mono-tabular uppercase tracking-wider text-brand dark:text-[#69C5F5]">
                           {entry.category}
                         </span>
-                        <span className="font-display text-lg sm:text-xl font-bold uppercase tracking-tight text-[#141618] dark:text-[#F3F0E9] block">
+                        <span className="font-display text-lg sm:text-xl font-bold uppercase tracking-tight text-[#10243A] dark:text-[#F4F8FC] block">
                           {entry.question}
                         </span>
                       </div>
@@ -90,8 +90,8 @@ export function HomeFaqSection() {
                         className={cn(
                           'w-7 h-7 shrink-0 mt-1 border flex items-center justify-center transition-colors duration-200',
                           isOpen
-                            ? 'bg-[#9E4B28] border-[#9E4B28] text-[#F6F4EF] dark:bg-[#EC743C] dark:border-[#EC743C] dark:text-[#141618]'
-                            : 'border-[#141618]/18 dark:border-[#F3F0E9]/18 text-[#4A5054] dark:text-[#A1A7AB]'
+                            ? 'bg-brand border-brand text-[#FFFFFF] dark:bg-[#69C5F5] dark:border-[#69C5F5] dark:text-[#10243A]'
+                            : 'border-[#10243A]/18 dark:border-[#F4F8FC]/18 text-[#465C72] dark:text-[#B5C5D7]'
                         )}
                       >
                         <Plus
@@ -116,11 +116,11 @@ export function HomeFaqSection() {
                   >
                     <div className="overflow-hidden">
                       <div className="px-5 sm:px-6 pb-6 pt-1 space-y-4">
-                        <p className="text-sm text-[#4A5054] dark:text-[#F3F0E9]/82 leading-relaxed max-w-[65ch]">
+                        <p className="text-sm text-[#465C72] dark:text-[#F4F8FC]/82 leading-relaxed max-w-[65ch]">
                           {entry.answer}
                         </p>
                         {entry.expandedExplanation && (
-                          <p className="text-xs text-[#4A5054] dark:text-[#A1A7AB] leading-relaxed max-w-[65ch]">
+                          <p className="text-xs text-[#465C72] dark:text-[#B5C5D7] leading-relaxed max-w-[65ch]">
                             {entry.expandedExplanation}
                           </p>
                         )}
@@ -138,7 +138,7 @@ export function HomeFaqSection() {
                                   executeAction(entry.actions[0]);
                                 }
                               }}
-                              className="inline-flex items-center gap-1.5 min-h-[38px] px-3.5 py-1.5 text-xs font-semibold bg-[#141618] text-[#F6F4EF] hover:bg-[#9E4B28] dark:bg-[#A95632] dark:text-[#F3F0E9] dark:hover:bg-[#EC743C] dark:hover:text-[#141618] transition-colors"
+                              className="inline-flex items-center gap-1.5 min-h-[38px] px-3.5 py-1.5 text-xs font-semibold bg-[#10243A] text-[#FFFFFF] hover:bg-brand dark:bg-[#0A6AA1] dark:text-[#F4F8FC] dark:hover:bg-[#69C5F5] dark:hover:text-[#10243A] transition-colors"
                             >
                               {entry.actions[0].label}
                               <ArrowRight className="w-3.5 h-3.5" aria-hidden="true" />
@@ -154,7 +154,7 @@ export function HomeFaqSection() {
                                 returnFocusEl: e.currentTarget,
                               })
                             }
-                            className="inline-flex items-center gap-1.5 min-h-[38px] px-3 py-1.5 text-xs font-medium text-[#9E4B28] dark:text-[#EC743C] border border-[#141618]/15 dark:border-[#F3F0E9]/16 hover:border-[#9E4B28] dark:hover:border-[#EC743C] transition-colors cursor-pointer"
+                            className="inline-flex items-center gap-1.5 min-h-[38px] px-3 py-1.5 text-xs font-medium text-brand dark:text-[#69C5F5] border border-[#10243A]/15 dark:border-[#F4F8FC]/16 hover:border-brand dark:hover:border-[#69C5F5] transition-colors cursor-pointer"
                           >
                             <MessageSquare className="w-3.5 h-3.5" aria-hidden="true" />
                             Ask Berry Compass about this
@@ -163,7 +163,7 @@ export function HomeFaqSection() {
                           <Link
                             to={`/faq#${entry.id}`}
                             tabIndex={isOpen ? 0 : -1}
-                            className="text-xs text-[#4A5054] dark:text-[#A1A7AB] hover:underline ml-auto"
+                            className="text-xs text-[#465C72] dark:text-[#B5C5D7] hover:underline ml-auto"
                           >
                             Direct FAQ link
                           </Link>

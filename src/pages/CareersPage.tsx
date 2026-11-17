@@ -84,38 +84,38 @@ export function CareersPage() {
   };
 
   const inputClass =
-    'w-full min-h-[44px] px-3 py-2.5 text-sm bg-[#F6F4EF] border border-[#141618]/20 text-[#141618] focus:border-[#9E4B28] focus:outline-none dark:bg-[#121417] dark:border-[#F3F0E9]/20 dark:text-[#F3F0E9] dark:focus:border-[#EC743C]';
+    'w-full min-h-[44px] px-3 py-2.5 text-sm bg-[#FFFFFF] border border-[#10243A]/20 text-[#10243A] focus:border-brand focus:outline-none dark:bg-[#07111F] dark:border-[#F4F8FC]/20 dark:text-[#F4F8FC] dark:focus:border-[#69C5F5]';
 
   return (
-    <div className="bg-[#F6F4EF] dark:bg-[#121417] text-[#141618] dark:text-[#F3F0E9]">
+    <div className="bg-[#FFFFFF] dark:bg-[#07111F] text-[#10243A] dark:text-[#F4F8FC]">
       <SubNav links={CORPORATE_SUBNAV_LINKS} ariaLabel="Company and governance navigation" />
 
       <div className="max-w-[1360px] mx-auto px-4 sm:px-6 lg:px-8 py-12 lg:py-16 space-y-16">
         <div className="max-w-3xl space-y-4">
           <Breadcrumbs items={[{ label: 'Careers' }]} />
 
-          <p className="text-xs font-mono-tabular uppercase tracking-widest text-[#9E4B28] dark:text-[#EC743C]">
+          <p className="text-xs font-mono-tabular uppercase tracking-widest text-brand dark:text-[#69C5F5]">
             People & Workplace · {COMPANY_INFO.workforceStory.motto}
           </p>
           <SplitText
             text="Engineering, plant operations & commercial teams."
             as="h1"
-            className="font-display fluid-section-title font-bold uppercase tracking-tight text-[#141618] dark:text-[#F3F0E9]"
+            className="font-display fluid-section-title font-bold uppercase tracking-tight text-[#10243A] dark:text-[#F4F8FC]"
           />
-          <p className="text-base text-[#4A5054] dark:text-[#A1A7AB] leading-relaxed">
+          <p className="text-base text-[#465C72] dark:text-[#B5C5D7] leading-relaxed">
             {COMPANY_INFO.workforceStory.narrative}
           </p>
         </div>
 
         {/* People Behind the Furnaces Photo Showcase */}
         <section aria-labelledby="workforce-showcase-heading" className="space-y-6">
-          <div className="grid grid-cols-2 lg:grid-cols-4 border-t border-b border-[#141618]/14 dark:border-[#F3F0E9]/14 divide-y sm:divide-y-0 sm:divide-x divide-[#141618]/14 dark:divide-[#F3F0E9]/14 bg-white dark:bg-[#20242A]">
+          <div className="grid grid-cols-2 lg:grid-cols-4 border-t border-b border-[#10243A]/14 dark:border-[#F4F8FC]/14 divide-y sm:divide-y-0 sm:divide-x divide-[#10243A]/14 dark:divide-[#F4F8FC]/14 bg-white dark:bg-[#12243B]">
             {COMPANY_INFO.workforceStory.highlights.map((item) => (
               <div key={item.metric} className="p-4 sm:p-5 space-y-1">
-                <p className="font-display text-xl sm:text-2xl font-bold uppercase text-[#9E4B28] dark:text-[#EC743C]">
+                <p className="font-display text-xl sm:text-2xl font-bold uppercase text-brand dark:text-[#69C5F5]">
                   {item.metric}
                 </p>
-                <p className="text-xs text-[#4A5054] dark:text-[#A1A7AB] leading-relaxed">
+                <p className="text-xs text-[#465C72] dark:text-[#B5C5D7] leading-relaxed">
                   {item.label}
                 </p>
               </div>
@@ -123,7 +123,7 @@ export function CareersPage() {
           </div>
 
           <div className="space-y-4">
-            <h2 id="workforce-showcase-heading" className="font-display text-2xl sm:text-3xl font-bold uppercase text-[#141618] dark:text-[#F3F0E9]">
+            <h2 id="workforce-showcase-heading" className="font-display text-2xl sm:text-3xl font-bold uppercase text-[#10243A] dark:text-[#F4F8FC]">
               People Behind the Furnaces
             </h2>
             <div className="grid grid-cols-1 md:grid-cols-3 gap-5">
@@ -146,9 +146,9 @@ export function CareersPage() {
               ].map((card) => (
                 <figure
                   key={card.asset.id}
-                  className="bg-white dark:bg-[#20242A] border border-[#141618]/12 dark:border-[#F3F0E9]/14 overflow-hidden flex flex-col"
+                  className="bg-white dark:bg-[#12243B] border border-[#10243A]/12 dark:border-[#F4F8FC]/14 overflow-hidden flex flex-col"
                 >
-                  <div className="aspect-[16/10] bg-[#141618] overflow-hidden">
+                  <div className="aspect-[16/10] bg-[#10243A] overflow-hidden">
                     <ResilientImage
                       src={card.asset.src}
                       alt={card.asset.alt}
@@ -156,13 +156,13 @@ export function CareersPage() {
                     />
                   </div>
                   <figcaption className="p-4 space-y-1">
-                    <p className="text-[11px] font-mono-tabular uppercase tracking-wider text-[#9E4B28] dark:text-[#EC743C]">
+                    <p className="text-[11px] font-mono-tabular uppercase tracking-wider text-brand dark:text-[#69C5F5]">
                       {card.tag}
                     </p>
-                    <h3 className="font-display text-xl font-bold uppercase text-[#141618] dark:text-[#F3F0E9]">
+                    <h3 className="font-display text-xl font-bold uppercase text-[#10243A] dark:text-[#F4F8FC]">
                       {card.title}
                     </h3>
-                    <p className="text-xs text-[#4A5054] dark:text-[#A1A7AB] leading-relaxed">
+                    <p className="text-xs text-[#465C72] dark:text-[#B5C5D7] leading-relaxed">
                       {card.asset.caption}
                     </p>
                   </figcaption>
@@ -173,14 +173,14 @@ export function CareersPage() {
         </section>
 
         {/* Workplace Pillars */}
-        <section aria-labelledby="culture-heading" className="pt-8 border-t border-[#141618]/15 dark:border-[#F3F0E9]/14">
+        <section aria-labelledby="culture-heading" className="pt-8 border-t border-[#10243A]/15 dark:border-[#F4F8FC]/14">
           <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-6">
-            <h2 id="culture-heading" className="font-display text-3xl font-bold uppercase text-[#141618] dark:text-[#F3F0E9]">
+            <h2 id="culture-heading" className="font-display text-3xl font-bold uppercase text-[#10243A] dark:text-[#F4F8FC]">
               Workplace Practices
             </h2>
             <div className="flex flex-wrap items-center gap-4">
-              <div className="flex items-center gap-3 bg-white dark:bg-[#20242A] border border-[#141618]/14 dark:border-[#F3F0E9]/14 px-4 py-1.5">
-                <span className="text-[10px] font-mono-tabular uppercase tracking-widest text-[#9E4B28] dark:text-[#EC743C]">
+              <div className="flex items-center gap-3 bg-white dark:bg-[#12243B] border border-[#10243A]/14 dark:border-[#F4F8FC]/14 px-4 py-1.5">
+                <span className="text-[10px] font-mono-tabular uppercase tracking-widest text-brand dark:text-[#69C5F5]">
                   Core Ethos:
                 </span>
                 <FlipFadeText
@@ -202,31 +202,31 @@ export function CareersPage() {
               </CreepyButton>
             </div>
           </div>
-          <div className="grid grid-cols-1 md:grid-cols-3 border-t border-b border-[#141618]/15 dark:border-[#F3F0E9]/14 divide-y md:divide-y-0 md:divide-x divide-[#141618]/15 dark:divide-[#F3F0E9]/14 bg-white dark:bg-[#20242A]">
+          <div className="grid grid-cols-1 md:grid-cols-3 border-t border-b border-[#10243A]/15 dark:border-[#F4F8FC]/14 divide-y md:divide-y-0 md:divide-x divide-[#10243A]/15 dark:divide-[#F4F8FC]/14 bg-white dark:bg-[#12243B]">
             <div className="p-6 sm:p-8 space-y-2">
-              <p className="font-mono-tabular text-xs text-[#9E4B28] dark:text-[#EC743C]">01</p>
-              <h3 className="font-display text-2xl font-bold uppercase text-[#141618] dark:text-[#F3F0E9]">
+              <p className="font-mono-tabular text-xs text-brand dark:text-[#69C5F5]">01</p>
+              <h3 className="font-display text-2xl font-bold uppercase text-[#10243A] dark:text-[#F4F8FC]">
                 Training & Mentorship
               </h3>
-              <p className="text-sm text-[#4A5054] dark:text-[#A1A7AB] leading-relaxed">
+              <p className="text-sm text-[#465C72] dark:text-[#B5C5D7] leading-relaxed">
                 Practical workshops, structured cross-department progression, and SAP training where required for plant MIS workflows.
               </p>
             </div>
             <div className="p-6 sm:p-8 space-y-2">
-              <p className="font-mono-tabular text-xs text-[#9E4B28] dark:text-[#EC743C]">02</p>
-              <h3 className="font-display text-2xl font-bold uppercase text-[#141618] dark:text-[#F3F0E9]">
+              <p className="font-mono-tabular text-xs text-brand dark:text-[#69C5F5]">02</p>
+              <h3 className="font-display text-2xl font-bold uppercase text-[#10243A] dark:text-[#F4F8FC]">
                 Occupational Safety & Health
               </h3>
-              <p className="text-sm text-[#4A5054] dark:text-[#A1A7AB] leading-relaxed">
+              <p className="text-sm text-[#465C72] dark:text-[#B5C5D7] leading-relaxed">
                 Plant safety protocols paired with periodic multi-specialty employee medical camps and regular occupational health screening.
               </p>
             </div>
             <div className="p-6 sm:p-8 space-y-2">
-              <p className="font-mono-tabular text-xs text-[#9E4B28] dark:text-[#EC743C]">03</p>
-              <h3 className="font-display text-2xl font-bold uppercase text-[#141618] dark:text-[#F3F0E9]">
+              <p className="font-mono-tabular text-xs text-brand dark:text-[#69C5F5]">03</p>
+              <h3 className="font-display text-2xl font-bold uppercase text-[#10243A] dark:text-[#F4F8FC]">
                 Inclusive Recruitment
               </h3>
-              <p className="text-sm text-[#4A5054] dark:text-[#A1A7AB] leading-relaxed">
+              <p className="text-sm text-[#465C72] dark:text-[#B5C5D7] leading-relaxed">
                 Equal-opportunity hiring across eleven operational and corporate functions, alongside recognition of women employees and families.
               </p>
             </div>
@@ -234,33 +234,33 @@ export function CareersPage() {
 
           <PixelatedImageTrail
             images={GALLERY_ITEMS.slice(0, 8).map((a) => a.src)}
-            className="mt-8 bg-[#121417] text-[#F3F0E9] border border-[#141618]/18 dark:border-[#F3F0E9]/14 p-8 sm:p-10 min-h-[240px] flex flex-col justify-between"
+            className="mt-8 bg-[#07111F] text-[#F4F8FC] border border-[#10243A]/18 dark:border-[#F4F8FC]/14 p-8 sm:p-10 min-h-[240px] flex flex-col justify-between"
           >
-            <div className="flex flex-wrap items-center justify-between gap-4 text-[11px] font-mono-tabular uppercase tracking-widest text-[#EC743C]">
+            <div className="flex flex-wrap items-center justify-between gap-4 text-[11px] font-mono-tabular uppercase tracking-widest text-[#69C5F5]">
               <span>Life at Berry Alloys · ET Edge 2026</span>
-              <span className="text-[#A1A7AB]">Move cursor to trace plant life & fieldwork photographs</span>
+              <span className="text-[#B5C5D7]">Move cursor to trace plant life & fieldwork photographs</span>
             </div>
             <div className="py-5 space-y-2 max-w-2xl">
-              <h3 className="font-display text-2xl sm:text-3xl font-bold uppercase tracking-tight text-[#F3F0E9]">
+              <h3 className="font-display text-2xl sm:text-3xl font-bold uppercase tracking-tight text-[#F4F8FC]">
                 Recognized Workplace Culture Across Eleven Departments
               </h3>
-              <p className="text-sm text-[#F3F0E9]/82 leading-relaxed">
+              <p className="text-sm text-[#F4F8FC]/82 leading-relaxed">
                 From submerged-arc furnace operations in Bobbili and Dhalbhumgarh to commercial logistics and laboratories in Kolkata and Visakhapatnam.
               </p>
             </div>
-            <p className="text-[11px] font-mono-tabular text-[#A1A7AB]">
+            <p className="text-[11px] font-mono-tabular text-[#B5C5D7]">
               Interactive pointer trail · Reduced motion respected
             </p>
           </PixelatedImageTrail>
         </section>
 
         {/* Documented Vacancies */}
-        <section aria-labelledby="vacancies-heading" className="pt-8 border-t border-[#141618]/15 dark:border-[#F3F0E9]/14 space-y-6">
+        <section aria-labelledby="vacancies-heading" className="pt-8 border-t border-[#10243A]/15 dark:border-[#F4F8FC]/14 space-y-6">
           <div>
-            <h2 id="vacancies-heading" className="font-display text-3xl font-bold uppercase text-[#141618] dark:text-[#F3F0E9]">
+            <h2 id="vacancies-heading" className="font-display text-3xl font-bold uppercase text-[#10243A] dark:text-[#F4F8FC]">
               Documented Role Listings
             </h2>
-            <p className="text-xs text-[#4A5054] dark:text-[#A1A7AB] mt-1">
+            <p className="text-xs text-[#465C72] dark:text-[#B5C5D7] mt-1">
               Vacancies below reflect roles listed on the company careers page. Active hiring status requires direct HR confirmation.
             </p>
           </div>
@@ -269,29 +269,29 @@ export function CareersPage() {
             {JOB_VACANCIES.map((job) => (
               <article
                 key={job.id}
-                className="bg-white dark:bg-[#20242A] border border-[#141618]/15 dark:border-[#F3F0E9]/14 p-6 sm:p-8 flex flex-col justify-between space-y-6"
+                className="bg-white dark:bg-[#12243B] border border-[#10243A]/15 dark:border-[#F4F8FC]/14 p-6 sm:p-8 flex flex-col justify-between space-y-6"
               >
                 <div className="space-y-4">
-                  <div className="flex flex-wrap items-center gap-2 text-xs font-mono-tabular text-[#4A5054] dark:text-[#A1A7AB]">
-                    <span className="font-semibold text-[#9E4B28] dark:text-[#EC743C]">{job.location}</span>
+                  <div className="flex flex-wrap items-center gap-2 text-xs font-mono-tabular text-[#465C72] dark:text-[#B5C5D7]">
+                    <span className="font-semibold text-brand dark:text-[#69C5F5]">{job.location}</span>
                     <span aria-hidden="true">/</span>
                     <span>{job.experience}</span>
                   </div>
 
-                  <h3 className="font-display text-3xl font-bold uppercase text-[#141618] dark:text-[#F3F0E9]">
+                  <h3 className="font-display text-3xl font-bold uppercase text-[#10243A] dark:text-[#F4F8FC]">
                     {job.title}
                   </h3>
 
-                  <p className="text-xs text-[#4A5054] dark:text-[#A1A7AB]">
-                    <span className="font-semibold text-[#141618] dark:text-[#F3F0E9]">Qualification:</span>{' '}
+                  <p className="text-xs text-[#465C72] dark:text-[#B5C5D7]">
+                    <span className="font-semibold text-[#10243A] dark:text-[#F4F8FC]">Qualification:</span>{' '}
                     {job.qualification}
                   </p>
 
                   <div className="space-y-2 pt-2">
-                    <p className="text-[11px] font-mono-tabular uppercase tracking-wider text-[#4A5054] dark:text-[#A1A7AB]">
+                    <p className="text-[11px] font-mono-tabular uppercase tracking-wider text-[#465C72] dark:text-[#B5C5D7]">
                       Key Responsibilities
                     </p>
-                    <ul className="space-y-1.5 text-sm text-[#4A5054] dark:text-[#A1A7AB]">
+                    <ul className="space-y-1.5 text-sm text-[#465C72] dark:text-[#B5C5D7]">
                       {job.responsibilities.map((r) => (
                         <li key={r}>— {r}</li>
                       ))}
@@ -299,15 +299,15 @@ export function CareersPage() {
                   </div>
 
                   <div className="space-y-1.5 pt-2">
-                    <p className="text-[11px] font-mono-tabular uppercase tracking-wider text-[#4A5054] dark:text-[#A1A7AB]">
+                    <p className="text-[11px] font-mono-tabular uppercase tracking-wider text-[#465C72] dark:text-[#B5C5D7]">
                       Skills Requested
                     </p>
-                    <p className="text-xs text-[#141618] dark:text-[#F3F0E9]">{job.skills.join(' · ')}</p>
+                    <p className="text-xs text-[#10243A] dark:text-[#F4F8FC]">{job.skills.join(' · ')}</p>
                   </div>
                 </div>
 
-                <div className="pt-5 border-t border-[#141618]/12 dark:border-[#F3F0E9]/12 space-y-3">
-                  <p className="text-xs text-[#4A5054] dark:text-[#A1A7AB]">{job.statusNotice}</p>
+                <div className="pt-5 border-t border-[#10243A]/12 dark:border-[#F4F8FC]/12 space-y-3">
+                  <p className="text-xs text-[#465C72] dark:text-[#B5C5D7]">{job.statusNotice}</p>
                   <IndustrialButton
                     type="button"
                     variant="secondary"
@@ -325,35 +325,35 @@ export function CareersPage() {
         <section
           id="careers-application-form"
           aria-labelledby="apply-heading"
-          className="pt-8 border-t border-[#141618]/15 dark:border-[#F3F0E9]/14 grid grid-cols-1 lg:grid-cols-12 gap-10"
+          className="pt-8 border-t border-[#10243A]/15 dark:border-[#F4F8FC]/14 grid grid-cols-1 lg:grid-cols-12 gap-10"
         >
           <div className="lg:col-span-5 space-y-4">
-            <h2 id="apply-heading" className="font-display text-3xl font-bold uppercase text-[#141618] dark:text-[#F3F0E9]">
+            <h2 id="apply-heading" className="font-display text-3xl font-bold uppercase text-[#10243A] dark:text-[#F4F8FC]">
               Submit an Application (Prototype)
             </h2>
-            <p className="text-sm text-[#4A5054] dark:text-[#A1A7AB] leading-relaxed">
+            <p className="text-sm text-[#465C72] dark:text-[#B5C5D7] leading-relaxed">
               Apply against a documented role listing (5 MB CV limit) or submit a general profile across any of Berry Alloys Limited’s 11 functional departments (10 MB CV limit).
             </p>
-            <div className="bg-[#ECE8DF] dark:bg-[#191C20] border border-[#141618]/15 dark:border-[#F3F0E9]/14 p-4 flex items-start gap-3 text-xs text-[#141618] dark:text-[#F3F0E9]">
-              <Info className="w-4 h-4 text-[#9E4B28] dark:text-[#EC743C] shrink-0 mt-0.5" aria-hidden="true" />
+            <div className="bg-[#F1F6FB] dark:bg-[#0D1B2E] border border-[#10243A]/15 dark:border-[#F4F8FC]/14 p-4 flex items-start gap-3 text-xs text-[#10243A] dark:text-[#F4F8FC]">
+              <Info className="w-4 h-4 text-brand dark:text-[#69C5F5] shrink-0 mt-0.5" aria-hidden="true" />
               <p className="leading-relaxed">
                 <strong>Prototype Disclosure:</strong> This is an interactive frontend demonstration. No CV file or personal information is transmitted to a server, emailed, or stored after leaving this page.
               </p>
             </div>
           </div>
 
-          <div className="lg:col-span-7 bg-white dark:bg-[#20242A] border border-[#141618]/15 dark:border-[#F3F0E9]/14 p-6 sm:p-8">
+          <div className="lg:col-span-7 bg-white dark:bg-[#12243B] border border-[#10243A]/15 dark:border-[#F4F8FC]/14 p-6 sm:p-8">
             {submittedDemo ? (
               <div role="status" className="space-y-4 py-4">
-                <div className="flex items-center gap-2.5 text-[#141618] dark:text-[#F3F0E9]">
-                  <CheckCircle2 className="w-5 h-5 text-[#9E4B28] dark:text-[#EC743C]" aria-hidden="true" />
+                <div className="flex items-center gap-2.5 text-[#10243A] dark:text-[#F4F8FC]">
+                  <CheckCircle2 className="w-5 h-5 text-brand dark:text-[#69C5F5]" aria-hidden="true" />
                   <h3 className="font-display text-2xl font-bold uppercase">
                     Demo Application Validated (Not Transmitted)
                   </h3>
                 </div>
-                <p className="text-sm text-[#4A5054] dark:text-[#A1A7AB] leading-relaxed">
+                <p className="text-sm text-[#465C72] dark:text-[#B5C5D7] leading-relaxed">
                   All required fields passed client-side validation for{' '}
-                  <strong className="text-[#141618] dark:text-[#F3F0E9]">{submittedDemo.fullName}</strong> (
+                  <strong className="text-[#10243A] dark:text-[#F4F8FC]">{submittedDemo.fullName}</strong> (
                   {submittedDemo.mode === 'role'
                     ? submittedDemo.roleTitle
                     : `General — ${submittedDemo.department}`}
@@ -369,14 +369,14 @@ export function CareersPage() {
               </div>
             ) : (
               <form onSubmit={handleSubmit} noValidate className="space-y-5">
-                <div className="flex flex-wrap items-center gap-2 pb-4 border-b border-[#141618]/12 dark:border-[#F3F0E9]/12">
+                <div className="flex flex-wrap items-center gap-2 pb-4 border-b border-[#10243A]/12 dark:border-[#F4F8FC]/12">
                   <button
                     type="button"
                     onClick={() => setForm((p) => ({ ...p, mode: 'role' }))}
                     className={`min-h-[40px] px-4 py-2 text-xs font-semibold cursor-pointer transition-colors ${
                       form.mode === 'role'
-                        ? 'bg-[#141618] text-[#F6F4EF] dark:bg-[#A95632] dark:text-[#F3F0E9]'
-                        : 'bg-[#ECE8DF] text-[#4A5054] dark:bg-[#121417] dark:text-[#A1A7AB]'
+                        ? 'bg-[#10243A] text-[#FFFFFF] dark:bg-[#0A6AA1] dark:text-[#F4F8FC]'
+                        : 'bg-[#F1F6FB] text-[#465C72] dark:bg-[#07111F] dark:text-[#B5C5D7]'
                     }`}
                   >
                     Role-Specific (5 MB max)
@@ -386,8 +386,8 @@ export function CareersPage() {
                     onClick={() => setForm((p) => ({ ...p, mode: 'general' }))}
                     className={`min-h-[40px] px-4 py-2 text-xs font-semibold cursor-pointer transition-colors ${
                       form.mode === 'general'
-                        ? 'bg-[#141618] text-[#F6F4EF] dark:bg-[#A95632] dark:text-[#F3F0E9]'
-                        : 'bg-[#ECE8DF] text-[#4A5054] dark:bg-[#121417] dark:text-[#A1A7AB]'
+                        ? 'bg-[#10243A] text-[#FFFFFF] dark:bg-[#0A6AA1] dark:text-[#F4F8FC]'
+                        : 'bg-[#F1F6FB] text-[#465C72] dark:bg-[#07111F] dark:text-[#B5C5D7]'
                     }`}
                   >
                     General Application (10 MB max)
@@ -398,7 +398,7 @@ export function CareersPage() {
                   <div>
                     <label
                       htmlFor="career-role"
-                      className="block text-xs font-semibold text-[#141618] dark:text-[#F3F0E9] mb-1.5"
+                      className="block text-xs font-semibold text-[#10243A] dark:text-[#F4F8FC] mb-1.5"
                     >
                       Target Role
                     </label>
@@ -415,7 +415,7 @@ export function CareersPage() {
                       ))}
                     </select>
                     {errors.roleTitle && (
-                      <p role="alert" className="text-xs text-[#9E4B28] dark:text-[#EC743C] mt-1">
+                      <p role="alert" className="text-xs text-brand dark:text-[#69C5F5] mt-1">
                         {errors.roleTitle}
                       </p>
                     )}
@@ -424,7 +424,7 @@ export function CareersPage() {
                   <div>
                     <label
                       htmlFor="career-department"
-                      className="block text-xs font-semibold text-[#141618] dark:text-[#F3F0E9] mb-1.5"
+                      className="block text-xs font-semibold text-[#10243A] dark:text-[#F4F8FC] mb-1.5"
                     >
                       Department
                     </label>
@@ -447,7 +447,7 @@ export function CareersPage() {
                   <div>
                     <label
                       htmlFor="career-name"
-                      className="block text-xs font-semibold text-[#141618] dark:text-[#F3F0E9] mb-1.5"
+                      className="block text-xs font-semibold text-[#10243A] dark:text-[#F4F8FC] mb-1.5"
                     >
                       Full Name
                     </label>
@@ -461,7 +461,7 @@ export function CareersPage() {
                       className={inputClass}
                     />
                     {errors.fullName && (
-                      <p role="alert" className="text-xs text-[#9E4B28] dark:text-[#EC743C] mt-1">
+                      <p role="alert" className="text-xs text-brand dark:text-[#69C5F5] mt-1">
                         {errors.fullName}
                       </p>
                     )}
@@ -470,7 +470,7 @@ export function CareersPage() {
                   <div>
                     <label
                       htmlFor="career-mobile"
-                      className="block text-xs font-semibold text-[#141618] dark:text-[#F3F0E9] mb-1.5"
+                      className="block text-xs font-semibold text-[#10243A] dark:text-[#F4F8FC] mb-1.5"
                     >
                       Mobile Number
                     </label>
@@ -485,7 +485,7 @@ export function CareersPage() {
                       className={inputClass}
                     />
                     {errors.mobile && (
-                      <p role="alert" className="text-xs text-[#9E4B28] dark:text-[#EC743C] mt-1">
+                      <p role="alert" className="text-xs text-brand dark:text-[#69C5F5] mt-1">
                         {errors.mobile}
                       </p>
                     )}
@@ -495,7 +495,7 @@ export function CareersPage() {
                 <div>
                   <label
                     htmlFor="career-email"
-                    className="block text-xs font-semibold text-[#141618] dark:text-[#F3F0E9] mb-1.5"
+                    className="block text-xs font-semibold text-[#10243A] dark:text-[#F4F8FC] mb-1.5"
                   >
                     Email Address
                   </label>
@@ -509,7 +509,7 @@ export function CareersPage() {
                     className={inputClass}
                   />
                   {errors.email && (
-                    <p role="alert" className="text-xs text-[#9E4B28] dark:text-[#EC743C] mt-1">
+                    <p role="alert" className="text-xs text-brand dark:text-[#69C5F5] mt-1">
                       {errors.email}
                     </p>
                   )}
@@ -518,7 +518,7 @@ export function CareersPage() {
                 <div>
                   <label
                     htmlFor="career-cv"
-                    className="block text-xs font-semibold text-[#141618] dark:text-[#F3F0E9] mb-1.5"
+                    className="block text-xs font-semibold text-[#10243A] dark:text-[#F4F8FC] mb-1.5"
                   >
                     Attach CV (PDF, DOCX, JPG, PNG · Max {maxMb} MB)
                   </label>
@@ -535,17 +535,17 @@ export function CareersPage() {
                       }));
                     }}
                     aria-invalid={Boolean(errors.cv)}
-                    className="block w-full text-xs text-[#4A5054] dark:text-[#A1A7AB] file:mr-4 file:min-h-[40px] file:py-2 file:px-4 file:border-0 file:text-xs file:font-semibold file:bg-[#ECE8DF] file:text-[#141618] hover:file:bg-[#D8D1C3] dark:file:bg-[#191C20] dark:file:text-[#F3F0E9]"
+                    className="block w-full text-xs text-[#465C72] dark:text-[#B5C5D7] file:mr-4 file:min-h-[40px] file:py-2 file:px-4 file:border-0 file:text-xs file:font-semibold file:bg-[#F1F6FB] file:text-[#10243A] hover:file:bg-[#D4DFEB] dark:file:bg-[#0D1B2E] dark:file:text-[#F4F8FC]"
                   />
                   {errors.cv && (
-                    <p role="alert" className="text-xs text-[#9E4B28] dark:text-[#EC743C] mt-1">
+                    <p role="alert" className="text-xs text-brand dark:text-[#69C5F5] mt-1">
                       {errors.cv}
                     </p>
                   )}
                 </div>
 
                 <div className="pt-2 space-y-2.5">
-                  <p className="text-[11px] text-[#4A5054] dark:text-[#A1A7AB]">
+                  <p className="text-[11px] text-[#465C72] dark:text-[#B5C5D7]">
                     Demo Notice: Submitting validates fields locally only; no information is sent or persisted.
                   </p>
                   <IndustrialButton type="submit" variant="primary">

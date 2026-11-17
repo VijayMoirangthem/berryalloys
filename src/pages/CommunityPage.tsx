@@ -20,28 +20,28 @@ export function CommunityPage() {
   const [leadStory, ...otherStories] = CSR_STORIES;
 
   return (
-    <div className="bg-[#F6F4EF] dark:bg-[#121417] text-[#141618] dark:text-[#F3F0E9]">
+    <div className="bg-[#FFFFFF] dark:bg-[#07111F] text-[#10243A] dark:text-[#F4F8FC]">
       <SubNav links={CORPORATE_SUBNAV_LINKS} ariaLabel="Company and governance navigation" />
 
       <div className="max-w-[1360px] mx-auto px-4 sm:px-6 lg:px-8 py-12 lg:py-16 space-y-14">
         <div className="max-w-3xl space-y-4">
           <Breadcrumbs items={[{ label: 'Community & CSR' }]} />
 
-          <p className="text-xs font-mono-tabular uppercase tracking-widest text-[#9E4B28] dark:text-[#EC743C]">
+          <p className="text-xs font-mono-tabular uppercase tracking-widest text-brand dark:text-[#69C5F5]">
             Corporate Social Responsibility
           </p>
           <SplitText
             text="Health, education, water access & local stewardship."
             as="h1"
-            className="font-display fluid-section-title font-bold uppercase tracking-tight text-[#141618] dark:text-[#F3F0E9]"
+            className="font-display fluid-section-title font-bold uppercase tracking-tight text-[#10243A] dark:text-[#F4F8FC]"
           />
-          <p className="text-base text-[#4A5054] dark:text-[#A1A7AB] leading-relaxed">
+          <p className="text-base text-[#465C72] dark:text-[#B5C5D7] leading-relaxed">
             Berry Alloys Limited documents grassroots social responsibility initiatives around its Andhra Pradesh and Jharkhand operations—spanning employee family education, medical camps, clean drinking water, school infrastructure, elder care, and animal welfare.
           </p>
         </div>
 
         {/* Lead CSR Feature with Authentic Camp Photo */}
-        <article className="bg-[#141618] text-[#F3F0E9] border border-[#141618] dark:border-[#F3F0E9]/14 grid grid-cols-1 lg:grid-cols-12 overflow-hidden">
+        <article className="bg-[#10243A] text-[#F4F8FC] border border-[#10243A] dark:border-[#F4F8FC]/14 grid grid-cols-1 lg:grid-cols-12 overflow-hidden">
           <div className="lg:col-span-5 aspect-video lg:aspect-auto min-h-[260px]">
             <ResilientImage
               src={ASSETS.csrMedicalCamp.src}
@@ -52,15 +52,15 @@ export function CommunityPage() {
           <div className="lg:col-span-7 p-8 sm:p-10 space-y-4 flex flex-col justify-between">
             <div className="space-y-3">
               <div className="flex flex-wrap items-center justify-between gap-2 text-xs font-mono-tabular">
-                <span className="text-[#EC743C]">01 · {leadStory.category}</span>
-                <span className="text-[#A1A7AB]">{leadStory.dateOrLocation}</span>
+                <span className="text-[#69C5F5]">01 · {leadStory.category}</span>
+                <span className="text-[#B5C5D7]">{leadStory.dateOrLocation}</span>
               </div>
-              <h2 className="font-display text-3xl sm:text-4xl font-bold uppercase text-[#F3F0E9]">
+              <h2 className="font-display text-3xl sm:text-4xl font-bold uppercase text-[#F4F8FC]">
                 {leadStory.title}
               </h2>
-              <p className="text-base text-[#F3F0E9]/85 leading-relaxed">{leadStory.summary}</p>
+              <p className="text-base text-[#F4F8FC]/85 leading-relaxed">{leadStory.summary}</p>
             </div>
-            <ul className="pt-4 border-t border-[#F3F0E9]/12 space-y-1.5 text-xs text-[#A1A7AB]">
+            <ul className="pt-4 border-t border-[#F4F8FC]/12 space-y-1.5 text-xs text-[#B5C5D7]">
               {leadStory.details.map((d) => (
                 <li key={d}>— {d}</li>
               ))}
@@ -78,17 +78,17 @@ export function CommunityPage() {
         <section aria-labelledby="community-scatter-heading" className="pt-4 space-y-6">
           <div className="flex flex-col sm:flex-row sm:items-end justify-between gap-2">
             <div>
-              <p className="text-xs font-mono-tabular uppercase tracking-widest text-[#9E4B28] dark:text-[#EC743C]">
+              <p className="text-xs font-mono-tabular uppercase tracking-widest text-brand dark:text-[#69C5F5]">
                 Life & Community Fieldwork
               </p>
               <h2
                 id="community-scatter-heading"
-                className="font-display text-3xl font-bold uppercase text-[#141618] dark:text-[#F3F0E9]"
+                className="font-display text-3xl font-bold uppercase text-[#10243A] dark:text-[#F4F8FC]"
               >
                 Plant Culture, Health & Ecological Programs
               </h2>
             </div>
-            <p className="text-xs text-[#4A5054] dark:text-[#A1A7AB]">
+            <p className="text-xs text-[#465C72] dark:text-[#B5C5D7]">
               Switch sets or pause playback to inspect each community field archive.
             </p>
           </div>
@@ -100,7 +100,7 @@ export function CommunityPage() {
           <h2 id="csr-stories-heading" className="sr-only">
             Documented CSR Stories
           </h2>
-          <div className="divide-y divide-[#141618]/15 dark:divide-[#F3F0E9]/14 border-t border-b border-[#141618]/15 dark:border-[#F3F0E9]/14">
+          <div className="divide-y divide-[#10243A]/15 dark:divide-[#F4F8FC]/14 border-t border-b border-[#10243A]/15 dark:border-[#F4F8FC]/14">
             {otherStories.map((story, idx) => {
               const photo = CSR_PHOTO_MAP[story.id];
               return (
@@ -109,12 +109,12 @@ export function CommunityPage() {
                   className="py-8 grid grid-cols-1 lg:grid-cols-12 gap-6 items-start"
                 >
                   <div className="lg:col-span-3 space-y-2">
-                    <p className="font-mono-tabular text-xs text-[#9E4B28] dark:text-[#EC743C] font-semibold">
+                    <p className="font-mono-tabular text-xs text-brand dark:text-[#69C5F5] font-semibold">
                       0{idx + 2} · {story.category}
                     </p>
-                    <p className="text-xs text-[#4A5054] dark:text-[#A1A7AB]">{story.dateOrLocation}</p>
+                    <p className="text-xs text-[#465C72] dark:text-[#B5C5D7]">{story.dateOrLocation}</p>
                     {photo && (
-                      <div className="aspect-[16/10] bg-[#141618] border border-[#141618]/12 overflow-hidden mt-3">
+                      <div className="aspect-[16/10] bg-[#10243A] border border-[#10243A]/12 overflow-hidden mt-3">
                         <ResilientImage
                           src={photo.src}
                           alt={photo.alt}
@@ -125,15 +125,15 @@ export function CommunityPage() {
                   </div>
 
                   <div className="lg:col-span-6 space-y-2">
-                    <h3 className="font-display text-2xl font-bold uppercase text-[#141618] dark:text-[#F3F0E9]">
+                    <h3 className="font-display text-2xl font-bold uppercase text-[#10243A] dark:text-[#F4F8FC]">
                       {story.title}
                     </h3>
-                    <p className="text-sm text-[#4A5054] dark:text-[#A1A7AB] leading-relaxed">
+                    <p className="text-sm text-[#465C72] dark:text-[#B5C5D7] leading-relaxed">
                       {story.summary}
                     </p>
                   </div>
 
-                  <ul className="lg:col-span-3 space-y-1.5 text-xs text-[#4A5054] dark:text-[#A1A7AB]">
+                  <ul className="lg:col-span-3 space-y-1.5 text-xs text-[#465C72] dark:text-[#B5C5D7]">
                     {story.details.map((detail) => (
                       <li key={detail} className="leading-relaxed">
                         — {detail}
@@ -147,18 +147,18 @@ export function CommunityPage() {
         </section>
 
         {/* Link to Statutory CSR Policy */}
-        <aside className="bg-[#ECE8DF] dark:bg-[#191C20] border border-[#141618]/15 dark:border-[#F3F0E9]/14 p-6 sm:p-8 flex flex-col sm:flex-row sm:items-center justify-between gap-6">
+        <aside className="bg-[#F1F6FB] dark:bg-[#0D1B2E] border border-[#10243A]/15 dark:border-[#F4F8FC]/14 p-6 sm:p-8 flex flex-col sm:flex-row sm:items-center justify-between gap-6">
           <div className="space-y-1.5">
-            <h2 className="font-display text-2xl font-bold uppercase text-[#141618] dark:text-[#F3F0E9]">
+            <h2 className="font-display text-2xl font-bold uppercase text-[#10243A] dark:text-[#F4F8FC]">
               CSR Policy, Committee Composition & Annual Project Schedules
             </h2>
-            <p className="text-xs text-[#4A5054] dark:text-[#A1A7AB]">
+            <p className="text-xs text-[#465C72] dark:text-[#B5C5D7]">
               Statutory CSR records covering FY 2021–22 through FY 2025–26 are indexed in the Corporate Documents archive.
             </p>
           </div>
           <Link
             to="/documents"
-            className="inline-flex items-center gap-1.5 min-h-[44px] px-5 py-2.5 text-xs font-semibold bg-[#141618] text-[#F6F4EF] hover:bg-[#9E4B28] dark:bg-[#A95632] dark:text-[#F3F0E9] dark:hover:bg-[#823B1D] transition-colors whitespace-nowrap shrink-0"
+            className="inline-flex items-center gap-1.5 min-h-[44px] px-5 py-2.5 text-xs font-semibold bg-[#10243A] text-[#FFFFFF] hover:bg-brand dark:bg-[#0A6AA1] dark:text-[#F4F8FC] dark:hover:bg-[#004C73] transition-colors whitespace-nowrap shrink-0"
           >
             View CSR Documents
             <ArrowRight className="w-3.5 h-3.5" aria-hidden="true" />

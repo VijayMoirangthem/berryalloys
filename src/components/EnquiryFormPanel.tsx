@@ -128,24 +128,24 @@ export function EnquiryFormPanel({
   const isForcedDark = variant === 'dark';
 
   const cardSurface = isForcedDark
-    ? 'bg-[#1B1E21] border border-[#F3F0E9]/14 text-[#F3F0E9]'
-    : 'bg-white border border-[#141618]/15 text-[#141618] dark:bg-[#20242A] dark:border-[#F3F0E9]/16 dark:text-[#F3F0E9]';
+    ? 'bg-[#0D1B2E] border border-[#F4F8FC]/14 text-[#F4F8FC]'
+    : 'bg-white border border-[#10243A]/15 text-[#10243A] dark:bg-[#12243B] dark:border-[#F4F8FC]/16 dark:text-[#F4F8FC]';
 
   const labelClass = isForcedDark
-    ? 'block text-xs font-semibold text-[#F3F0E9] mb-1.5'
-    : 'block text-xs font-semibold text-[#141618] dark:text-[#F3F0E9] mb-1.5';
+    ? 'block text-xs font-semibold text-[#F4F8FC] mb-1.5'
+    : 'block text-xs font-semibold text-[#10243A] dark:text-[#F4F8FC] mb-1.5';
 
   const inputClass = isForcedDark
-    ? 'w-full min-h-[44px] px-3 py-2.5 text-sm bg-[#141618] border border-[#F3F0E9]/20 text-[#F3F0E9] placeholder:text-[#A1A7AB]/70 focus:border-[#EC743C] focus:outline-none'
-    : 'w-full min-h-[44px] px-3 py-2.5 text-sm bg-[#F6F4EF] border border-[#141618]/20 text-[#141618] placeholder:text-[#4A5054]/70 focus:border-[#9E4B28] focus:outline-none dark:bg-[#121417] dark:border-[#F3F0E9]/20 dark:text-[#F3F0E9] dark:placeholder:text-[#A1A7AB]/70 dark:focus:border-[#EC743C]';
+    ? 'w-full min-h-[44px] px-3 py-2.5 text-sm bg-[#10243A] border border-[#F4F8FC]/20 text-[#F4F8FC] placeholder:text-[#B5C5D7]/70 focus:border-[#69C5F5] focus:outline-none'
+    : 'w-full min-h-[44px] px-3 py-2.5 text-sm bg-[#FFFFFF] border border-[#10243A]/20 text-[#10243A] placeholder:text-[#465C72]/70 focus:border-brand focus:outline-none dark:bg-[#07111F] dark:border-[#F4F8FC]/20 dark:text-[#F4F8FC] dark:placeholder:text-[#B5C5D7]/70 dark:focus:border-[#69C5F5]';
 
   const selectClass = isForcedDark
-    ? 'w-full min-h-[44px] px-3 py-2.5 text-sm bg-[#1B1E21] border border-[#F3F0E9]/20 text-[#F3F0E9] focus:border-[#EC743C] focus:outline-none'
-    : 'w-full min-h-[44px] px-3 py-2.5 text-sm bg-white border border-[#141618]/20 text-[#141618] focus:border-[#9E4B28] focus:outline-none dark:bg-[#121417] dark:border-[#F3F0E9]/20 dark:text-[#F3F0E9] dark:focus:border-[#EC743C]';
+    ? 'w-full min-h-[44px] px-3 py-2.5 text-sm bg-[#0D1B2E] border border-[#F4F8FC]/20 text-[#F4F8FC] focus:border-[#69C5F5] focus:outline-none'
+    : 'w-full min-h-[44px] px-3 py-2.5 text-sm bg-white border border-[#10243A]/20 text-[#10243A] focus:border-brand focus:outline-none dark:bg-[#07111F] dark:border-[#F4F8FC]/20 dark:text-[#F4F8FC] dark:focus:border-[#69C5F5]';
 
   const errorTextClass = isForcedDark
-    ? 'text-xs text-[#EC743C] mt-1'
-    : 'text-xs text-[#9E4B28] dark:text-[#EC743C] mt-1';
+    ? 'text-xs text-[#69C5F5] mt-1'
+    : 'text-xs text-brand dark:text-[#69C5F5] mt-1';
 
   return (
     <div className={`${cardSurface} p-6 sm:p-8 space-y-6`}>
@@ -153,7 +153,7 @@ export function EnquiryFormPanel({
         role="tablist"
         aria-label="Enquiry type"
         className={`flex flex-wrap items-center gap-2 pb-4 border-b ${
-          isForcedDark ? 'border-[#F3F0E9]/12' : 'border-[#141618]/12 dark:border-[#F3F0E9]/12'
+          isForcedDark ? 'border-[#F4F8FC]/12' : 'border-[#10243A]/12 dark:border-[#F4F8FC]/12'
         }`}
       >
         <button
@@ -164,11 +164,11 @@ export function EnquiryFormPanel({
           className={`min-h-[44px] px-5 py-2.5 text-xs font-semibold transition-colors cursor-pointer whitespace-nowrap ${
             tab === 'quote'
               ? isForcedDark
-                ? 'bg-[#A95632] text-[#F3F0E9]'
-                : 'bg-[#141618] text-[#F6F4EF] dark:bg-[#A95632] dark:text-[#F3F0E9]'
+                ? 'bg-[#0A6AA1] text-[#F4F8FC]'
+                : 'bg-[#10243A] text-[#FFFFFF] dark:bg-[#0A6AA1] dark:text-[#F4F8FC]'
               : isForcedDark
-              ? 'bg-[#141618] text-[#A1A7AB] hover:text-[#F3F0E9]'
-              : 'bg-[#ECE8DF] text-[#4A5054] hover:bg-[#D8D1C3] dark:bg-[#121417] dark:text-[#A1A7AB] dark:hover:text-[#F3F0E9]'
+              ? 'bg-[#10243A] text-[#B5C5D7] hover:text-[#F4F8FC]'
+              : 'bg-[#F1F6FB] text-[#465C72] hover:bg-[#D4DFEB] dark:bg-[#07111F] dark:text-[#B5C5D7] dark:hover:text-[#F4F8FC]'
           }`}
         >
           Product Quotation
@@ -181,11 +181,11 @@ export function EnquiryFormPanel({
           className={`min-h-[44px] px-5 py-2.5 text-xs font-semibold transition-colors cursor-pointer whitespace-nowrap ${
             tab === 'general'
               ? isForcedDark
-                ? 'bg-[#A95632] text-[#F3F0E9]'
-                : 'bg-[#141618] text-[#F6F4EF] dark:bg-[#A95632] dark:text-[#F3F0E9]'
+                ? 'bg-[#0A6AA1] text-[#F4F8FC]'
+                : 'bg-[#10243A] text-[#FFFFFF] dark:bg-[#0A6AA1] dark:text-[#F4F8FC]'
               : isForcedDark
-              ? 'bg-[#141618] text-[#A1A7AB] hover:text-[#F3F0E9]'
-              : 'bg-[#ECE8DF] text-[#4A5054] hover:bg-[#D8D1C3] dark:bg-[#121417] dark:text-[#A1A7AB] dark:hover:text-[#F3F0E9]'
+              ? 'bg-[#10243A] text-[#B5C5D7] hover:text-[#F4F8FC]'
+              : 'bg-[#F1F6FB] text-[#465C72] hover:bg-[#D4DFEB] dark:bg-[#07111F] dark:text-[#B5C5D7] dark:hover:text-[#F4F8FC]'
           }`}
         >
           General Enquiry
@@ -195,13 +195,13 @@ export function EnquiryFormPanel({
       <div
         className={`p-4 flex items-start gap-3 text-xs border ${
           isForcedDark
-            ? 'bg-[#141618] border-[#F3F0E9]/14 text-[#F3F0E9]/85'
-            : 'bg-[#ECE8DF] border-[#141618]/12 text-[#141618] dark:bg-[#121417] dark:border-[#F3F0E9]/14 dark:text-[#F3F0E9]/85'
+            ? 'bg-[#10243A] border-[#F4F8FC]/14 text-[#F4F8FC]/85'
+            : 'bg-[#F1F6FB] border-[#10243A]/12 text-[#10243A] dark:bg-[#07111F] dark:border-[#F4F8FC]/14 dark:text-[#F4F8FC]/85'
         }`}
       >
         <Info
           className={`w-4 h-4 shrink-0 mt-0.5 ${
-            isForcedDark ? 'text-[#EC743C]' : 'text-[#9E4B28] dark:text-[#EC743C]'
+            isForcedDark ? 'text-[#69C5F5]' : 'text-brand dark:text-[#69C5F5]'
           }`}
           aria-hidden="true"
         />
@@ -215,7 +215,7 @@ export function EnquiryFormPanel({
           <div className="flex items-center gap-2.5">
             <CheckCircle2
               className={`w-5 h-5 ${
-                isForcedDark ? 'text-[#EC743C]' : 'text-[#9E4B28] dark:text-[#EC743C]'
+                isForcedDark ? 'text-[#69C5F5]' : 'text-brand dark:text-[#69C5F5]'
               }`}
               aria-hidden="true"
             />
@@ -225,13 +225,13 @@ export function EnquiryFormPanel({
           </div>
           <p
             className={`text-sm leading-relaxed ${
-              isForcedDark ? 'text-[#A1A7AB]' : 'text-[#4A5054] dark:text-[#A1A7AB]'
+              isForcedDark ? 'text-[#B5C5D7]' : 'text-[#465C72] dark:text-[#B5C5D7]'
             }`}
           >
             All required fields were validated. In production, this payload routes to{' '}
             <span
               className={`font-mono-tabular ${
-                isForcedDark ? 'text-[#F3F0E9]' : 'text-[#141618] dark:text-[#F3F0E9]'
+                isForcedDark ? 'text-[#F4F8FC]' : 'text-[#10243A] dark:text-[#F4F8FC]'
               }`}
             >
               marketing@berryalloys.in
@@ -242,12 +242,12 @@ export function EnquiryFormPanel({
           <dl
             className={`p-4 space-y-2 text-xs border ${
               isForcedDark
-                ? 'bg-[#141618] border-[#F3F0E9]/12'
-                : 'bg-[#F6F4EF] border-[#141618]/12 dark:bg-[#121417] dark:border-[#F3F0E9]/14'
+                ? 'bg-[#10243A] border-[#F4F8FC]/12'
+                : 'bg-[#FFFFFF] border-[#10243A]/12 dark:bg-[#07111F] dark:border-[#F4F8FC]/14'
             }`}
           >
             <div className="flex justify-between gap-4">
-              <dt className={isForcedDark ? 'text-[#A1A7AB]' : 'text-[#4A5054] dark:text-[#A1A7AB]'}>
+              <dt className={isForcedDark ? 'text-[#B5C5D7]' : 'text-[#465C72] dark:text-[#B5C5D7]'}>
                 Contact
               </dt>
               <dd className="font-medium text-right">
@@ -255,7 +255,7 @@ export function EnquiryFormPanel({
               </dd>
             </div>
             <div className="flex justify-between gap-4">
-              <dt className={isForcedDark ? 'text-[#A1A7AB]' : 'text-[#4A5054] dark:text-[#A1A7AB]'}>
+              <dt className={isForcedDark ? 'text-[#B5C5D7]' : 'text-[#465C72] dark:text-[#B5C5D7]'}>
                 Phone / Mobile
               </dt>
               <dd className="font-mono-tabular text-right">{submittedReceipt.phone}</dd>
@@ -265,7 +265,7 @@ export function EnquiryFormPanel({
                 <div className="flex justify-between gap-4">
                   <dt
                     className={
-                      isForcedDark ? 'text-[#A1A7AB]' : 'text-[#4A5054] dark:text-[#A1A7AB]'
+                      isForcedDark ? 'text-[#B5C5D7]' : 'text-[#465C72] dark:text-[#B5C5D7]'
                     }
                   >
                     Selected Product
@@ -277,7 +277,7 @@ export function EnquiryFormPanel({
                 <div className="flex justify-between gap-4">
                   <dt
                     className={
-                      isForcedDark ? 'text-[#A1A7AB]' : 'text-[#4A5054] dark:text-[#A1A7AB]'
+                      isForcedDark ? 'text-[#B5C5D7]' : 'text-[#465C72] dark:text-[#B5C5D7]'
                     }
                   >
                     Grade Reference
@@ -287,7 +287,7 @@ export function EnquiryFormPanel({
               </>
             ) : (
               <div className="flex justify-between gap-4">
-                <dt className={isForcedDark ? 'text-[#A1A7AB]' : 'text-[#4A5054] dark:text-[#A1A7AB]'}>
+                <dt className={isForcedDark ? 'text-[#B5C5D7]' : 'text-[#465C72] dark:text-[#B5C5D7]'}>
                   Subject
                 </dt>
                 <dd className="font-medium text-right">{submittedReceipt.subject}</dd>
@@ -309,8 +309,8 @@ export function EnquiryFormPanel({
             <div
               className={`p-4 border space-y-4 ${
                 isForcedDark
-                  ? 'bg-[#141618] border-[#F3F0E9]/12'
-                  : 'bg-[#F6F4EF] border-[#141618]/12 dark:bg-[#121417] dark:border-[#F3F0E9]/12'
+                  ? 'bg-[#10243A] border-[#F4F8FC]/12'
+                  : 'bg-[#FFFFFF] border-[#10243A]/12 dark:bg-[#07111F] dark:border-[#F4F8FC]/12'
               }`}
             >
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">

@@ -94,6 +94,7 @@ export function GuideProvider({ children }: { children: ReactNode }) {
   const customReturnFocusRef = useRef<HTMLElement | null>(null);
   const prepTimerRef = useRef<number | null>(null);
   const requestSeqRef = useRef(0);
+  const isPreparingRef = useRef(false);
 
   const cancelPendingPreparation = useCallback(() => {
     requestSeqRef.current += 1;
@@ -101,14 +102,17 @@ export function GuideProvider({ children }: { children: ReactNode }) {
       window.clearTimeout(prepTimerRef.current);
       prepTimerRef.current = null;
     }
+    isPreparingRef.current = false;
     setIsPreparing(false);
     setPreparingAnnouncement('');
   }, []);
 
   useEffect(() => {
     return () => {
+      requestSeqRef.current += 1;
       if (prepTimerRef.current !== null) {
         window.clearTimeout(prepTimerRef.current);
+        prepTimerRef.current = null;
       }
     };
   }, []);
@@ -136,6 +140,10 @@ export function GuideProvider({ children }: { children: ReactNode }) {
       payload: GuideAnswerPayload,
       options?: { immediate?: boolean }
     ) => {
+      // A second question while a reply is being prepared is ignored (the UI disables input),
+      // so every answer stays attached to the question that produced it. Immediate turns
+      // (opening from search, quote start) supersede any pending preparation.
+      if (isPreparingRef.current && !options?.immediate) return;
       cancelPendingPreparation();
 
       if (userText) {
@@ -159,12 +167,14 @@ export function GuideProvider({ children }: { children: ReactNode }) {
       }
 
       const seq = requestSeqRef.current;
+      isPreparingRef.current = true;
       setIsPreparing(true);
       setPreparingAnnouncement(PREPARATION_STATUS_TEXT);
 
       prepTimerRef.current = window.setTimeout(() => {
         prepTimerRef.current = null;
         if (requestSeqRef.current !== seq) return;
+        isPreparingRef.current = false;
         setIsPreparing(false);
         commitPreparedPayload(payload);
       }, PREPARATION_DELAY_MS);

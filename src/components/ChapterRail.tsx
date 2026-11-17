@@ -206,12 +206,12 @@ export function ChapterRail() {
             exit={prefersReduced ? undefined : { opacity: 0, x: 8 }}
             transition={{ duration: 0.18, ease: [0.16, 1, 0.3, 1] }}
             onAnimationComplete={() => handleRailEntered('expand')}
-            className="pointer-events-auto w-[42px] bg-[#F6F4EF]/78 dark:bg-[#141618]/78 backdrop-blur-xl border border-[#141618]/18 dark:border-[#F3F0E9]/20 shadow-[0_12px_36px_rgba(18,20,23,0.18)] flex flex-col items-center relative"
+            className="pointer-events-auto w-[42px] bg-[#FFFFFF]/78 dark:bg-[#10243A]/78 backdrop-blur-xl border border-[#10243A]/18 dark:border-[#F4F8FC]/20 shadow-[0_12px_36px_rgba(18,20,23,0.18)] flex flex-col items-center relative"
           >
             {/* Subtle Glass Top Specular Line */}
             <span
               aria-hidden="true"
-              className="pointer-events-none absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-[#EC743C]/60 to-transparent"
+              className="pointer-events-none absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-[#69C5F5]/60 to-transparent"
             />
 
             {/* Expand Trigger */}
@@ -223,14 +223,14 @@ export function ChapterRail() {
               aria-controls="chapter-rail-nav"
               aria-label="Expand story chapter navigation"
               title="Expand GlassDock Chapter Index"
-              className="group relative w-full h-9 flex items-center justify-center border-b border-[#141618]/12 dark:border-[#F3F0E9]/14 text-[#141618] dark:text-[#F3F0E9] hover:bg-[#ECE8DF]/75 dark:hover:bg-[#20242A]/85 hover:text-[#9E4B28] dark:hover:text-[#EC743C] transition-colors cursor-pointer"
+              className="group relative w-full h-9 flex items-center justify-center border-b border-[#10243A]/12 dark:border-[#F4F8FC]/14 text-[#10243A] dark:text-[#F4F8FC] hover:bg-[#F1F6FB]/75 dark:hover:bg-[#12243B]/85 hover:text-brand dark:hover:text-[#69C5F5] transition-colors cursor-pointer"
             >
               <PanelRightOpen className="w-4 h-4 transition-transform group-hover:scale-110" aria-hidden="true" />
               <span
                 role="tooltip"
-                className="pointer-events-none opacity-0 group-hover:opacity-100 group-focus-visible:opacity-100 translate-x-1 group-hover:translate-x-0 group-focus-visible:translate-x-0 transition-all duration-150 absolute right-full mr-2.5 px-2.5 py-1 bg-[#141618] text-[#F3F0E9] dark:bg-[#F3F0E9] dark:text-[#141618] text-[11px] font-medium whitespace-nowrap shadow-md border border-[#141618]/20 dark:border-[#F3F0E9]/20 flex items-center gap-1"
+                className="pointer-events-none opacity-0 group-hover:opacity-100 group-focus-visible:opacity-100 translate-x-1 group-hover:translate-x-0 group-focus-visible:translate-x-0 transition-all duration-150 absolute right-full mr-2.5 px-2.5 py-1 bg-[#10243A] text-[#F4F8FC] dark:bg-[#F4F8FC] dark:text-[#10243A] text-[11px] font-medium whitespace-nowrap shadow-md border border-[#10243A]/20 dark:border-[#F4F8FC]/20 flex items-center gap-1"
               >
-                <ChevronLeft className="w-3 h-3 text-[#EC743C] dark:text-[#9E4B28]" aria-hidden="true" />
+                <ChevronLeft className="w-3 h-3 text-[#69C5F5] dark:text-brand" aria-hidden="true" />
                 Expand Index
               </span>
             </button>
@@ -241,12 +241,12 @@ export function ChapterRail() {
               onClick={openSearch}
               aria-label="Open global search palette (Cmd+K)"
               title="Quick Search (⌘K)"
-              className="group relative w-full h-9 flex items-center justify-center border-b border-[#141618]/12 dark:border-[#F3F0E9]/14 text-[#4A5054] dark:text-[#A1A7AB] hover:bg-[#ECE8DF]/75 dark:hover:bg-[#20242A]/85 hover:text-[#9E4B28] dark:hover:text-[#EC743C] transition-colors cursor-pointer"
+              className="group relative w-full h-9 flex items-center justify-center border-b border-[#10243A]/12 dark:border-[#F4F8FC]/14 text-[#465C72] dark:text-[#B5C5D7] hover:bg-[#F1F6FB]/75 dark:hover:bg-[#12243B]/85 hover:text-brand dark:hover:text-[#69C5F5] transition-colors cursor-pointer"
             >
               <Search className="w-3.5 h-3.5 transition-transform group-hover:scale-110" aria-hidden="true" />
               <span
                 role="tooltip"
-                className="pointer-events-none opacity-0 group-hover:opacity-100 group-focus-visible:opacity-100 translate-x-1 group-hover:translate-x-0 group-focus-visible:translate-x-0 transition-all duration-150 absolute right-full mr-2.5 px-2.5 py-1 bg-[#141618] text-[#F3F0E9] dark:bg-[#F3F0E9] dark:text-[#141618] text-[11px] font-medium whitespace-nowrap shadow-md border border-[#141618]/20 dark:border-[#F3F0E9]/20 flex items-center gap-1.5"
+                className="pointer-events-none opacity-0 group-hover:opacity-100 group-focus-visible:opacity-100 translate-x-1 group-hover:translate-x-0 group-focus-visible:translate-x-0 transition-all duration-150 absolute right-full mr-2.5 px-2.5 py-1 bg-[#10243A] text-[#F4F8FC] dark:bg-[#F4F8FC] dark:text-[#10243A] text-[11px] font-medium whitespace-nowrap shadow-md border border-[#10243A]/20 dark:border-[#F4F8FC]/20 flex items-center gap-1.5"
               >
                 <span>Quick Search</span>
                 <span className="font-mono-tabular text-[10px] opacity-75">⌘K</span>
@@ -271,7 +271,7 @@ export function ChapterRail() {
                       onClick={(e) => handleAnchorClick(e, chapter.id)}
                       aria-current={isActive ? 'location' : undefined}
                       aria-label={`${chapter.number}. ${chapter.label} — ${chapter.summary}`}
-                      className="group relative w-full py-1.5 px-1.5 flex items-center justify-end pr-2 focus-visible:outline-2 focus-visible:outline-[#EC743C] focus-visible:outline-offset-[-2px]"
+                      className="group relative w-full py-1.5 px-1.5 flex items-center justify-end pr-2 focus-visible:outline-2 focus-visible:outline-[#69C5F5] focus-visible:outline-offset-[-2px]"
                     >
                       <motion.span
                         aria-hidden="true"
@@ -281,23 +281,23 @@ export function ChapterRail() {
                         className={cn(
                           'block h-[2.5px] transition-colors duration-150',
                           isActive
-                            ? 'bg-[#9E4B28] dark:bg-[#EC743C]'
+                            ? 'bg-accent-red'
                             : hoveredIdx === idx
-                            ? 'bg-[#141618] dark:bg-[#F3F0E9]'
-                            : 'bg-[#141618]/28 dark:bg-[#F3F0E9]/28'
+                            ? 'bg-[#10243A] dark:bg-[#F4F8FC]'
+                            : 'bg-[#10243A]/28 dark:bg-[#F4F8FC]/28'
                         )}
                       />
 
                       {/* Floating Spring Dock Tooltip */}
                       <span
                         aria-hidden="true"
-                        className="pointer-events-none opacity-0 group-hover:opacity-100 group-focus-visible:opacity-100 translate-x-1.5 group-hover:translate-x-0 group-focus-visible:translate-x-0 transition-all duration-150 absolute right-full mr-2.5 px-2.5 py-1.5 bg-[#FFFFFF]/95 dark:bg-[#191C20]/95 backdrop-blur-md text-[#141618] dark:text-[#F3F0E9] border border-[#141618]/18 dark:border-[#F3F0E9]/18 shadow-xl text-[11px] whitespace-nowrap flex items-center gap-2"
+                        className="pointer-events-none opacity-0 group-hover:opacity-100 group-focus-visible:opacity-100 translate-x-1.5 group-hover:translate-x-0 group-focus-visible:translate-x-0 transition-all duration-150 absolute right-full mr-2.5 px-2.5 py-1.5 bg-[#FFFFFF]/95 dark:bg-[#0D1B2E]/95 backdrop-blur-md text-[#10243A] dark:text-[#F4F8FC] border border-[#10243A]/18 dark:border-[#F4F8FC]/18 shadow-xl text-[11px] whitespace-nowrap flex items-center gap-2"
                       >
-                        <span className="font-mono-tabular text-[10px] font-semibold text-[#9E4B28] dark:text-[#EC743C]">
+                        <span className="font-mono-tabular text-[10px] font-semibold text-brand dark:text-[#69C5F5]">
                           {chapter.number}
                         </span>
                         <span className="font-semibold">{chapter.label}</span>
-                        <span className="text-[#4A5054] dark:text-[#A1A7AB] text-[10px]">
+                        <span className="text-[#465C72] dark:text-[#B5C5D7] text-[10px]">
                           · {chapter.summary}
                         </span>
                       </span>
@@ -312,10 +312,10 @@ export function ChapterRail() {
               type="button"
               onClick={() => handleToggleExpand(true)}
               aria-label={`Current chapter ${activeChapter.number} of ${HOME_CHAPTERS.length}. Click to open chapter drawer.`}
-              className="w-full py-2 border-t border-[#141618]/12 dark:border-[#F3F0E9]/14 flex flex-col items-center justify-center text-[10px] font-mono-tabular font-semibold text-[#9E4B28] dark:text-[#EC743C] hover:bg-[#ECE8DF]/75 dark:hover:bg-[#20242A]/85 transition-colors cursor-pointer"
+              className="w-full py-2 border-t border-[#10243A]/12 dark:border-[#F4F8FC]/14 flex flex-col items-center justify-center text-[10px] font-mono-tabular font-semibold text-brand dark:text-[#69C5F5] hover:bg-[#F1F6FB]/75 dark:hover:bg-[#12243B]/85 transition-colors cursor-pointer"
             >
               <span>{activeChapter.number}</span>
-              <span className="text-[9px] font-normal text-[#4A5054] dark:text-[#A1A7AB]">
+              <span className="text-[9px] font-normal text-[#465C72] dark:text-[#B5C5D7]">
                 /{HOME_CHAPTERS.length}
               </span>
             </button>
@@ -330,21 +330,21 @@ export function ChapterRail() {
             exit={prefersReduced ? undefined : { opacity: 0, x: 16 }}
             transition={{ duration: 0.22, ease: [0.16, 1, 0.3, 1] }}
             onAnimationComplete={() => handleRailEntered('collapse')}
-            className="pointer-events-auto w-[252px] bg-[#F6F4EF]/88 dark:bg-[#141618]/88 backdrop-blur-xl border border-[#141618]/20 dark:border-[#F3F0E9]/22 shadow-2xl flex flex-col relative"
+            className="pointer-events-auto w-[252px] bg-[#FFFFFF]/88 dark:bg-[#10243A]/88 backdrop-blur-xl border border-[#10243A]/20 dark:border-[#F4F8FC]/22 shadow-2xl flex flex-col relative"
           >
             {/* Subtle Glass Top Specular Line */}
             <span
               aria-hidden="true"
-              className="pointer-events-none absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-[#EC743C]/65 to-transparent"
+              className="pointer-events-none absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-[#69C5F5]/65 to-transparent"
             />
 
             {/* Header Bar */}
-            <div className="flex items-center justify-between gap-2 px-3 py-2.5 border-b border-[#141618]/12 dark:border-[#F3F0E9]/14 bg-[#ECE8DF]/65 dark:bg-[#191C20]/75">
+            <div className="flex items-center justify-between gap-2 px-3 py-2.5 border-b border-[#10243A]/12 dark:border-[#F4F8FC]/14 bg-[#F1F6FB]/65 dark:bg-[#0D1B2E]/75">
               <div className="flex items-center gap-2 min-w-0">
-                <span className="font-mono-tabular text-[10px] uppercase tracking-widest font-semibold text-[#9E4B28] dark:text-[#EC743C]">
+                <span className="font-mono-tabular text-[10px] uppercase tracking-widest font-semibold text-brand dark:text-[#69C5F5]">
                   GlassDock Index
                 </span>
-                <span className="font-mono-tabular text-[10px] text-[#4A5054] dark:text-[#A1A7AB]">
+                <span className="font-mono-tabular text-[10px] text-[#465C72] dark:text-[#B5C5D7]">
                   {activeChapter.number}/{HOME_CHAPTERS.length}
                 </span>
               </div>
@@ -356,7 +356,7 @@ export function ChapterRail() {
                 aria-controls="chapter-rail-nav"
                 aria-label="Collapse story chapter navigation"
                 title="Collapse Chapter Index (Esc)"
-                className="inline-flex items-center gap-1 px-2 py-1 text-[11px] font-medium text-[#4A5054] dark:text-[#A1A7AB] hover:text-[#141618] dark:hover:text-[#F3F0E9] hover:bg-[#FFFFFF] dark:hover:bg-[#20242A] border border-transparent hover:border-[#141618]/14 dark:hover:border-[#F3F0E9]/14 transition-colors cursor-pointer"
+                className="inline-flex items-center gap-1 px-2 py-1 text-[11px] font-medium text-[#465C72] dark:text-[#B5C5D7] hover:text-[#10243A] dark:hover:text-[#F4F8FC] hover:bg-[#FFFFFF] dark:hover:bg-[#12243B] border border-transparent hover:border-[#10243A]/14 dark:hover:border-[#F4F8FC]/14 transition-colors cursor-pointer"
               >
                 <span>Hide</span>
                 <PanelRightClose className="w-3.5 h-3.5" aria-hidden="true" />
@@ -374,10 +374,10 @@ export function ChapterRail() {
                       onClick={(e) => handleAnchorClick(e, chapter.id)}
                       aria-current={isActive ? 'location' : undefined}
                       className={cn(
-                        'group flex items-center justify-between gap-2.5 px-2.5 py-1.5 transition-colors duration-150 focus-visible:outline-2 focus-visible:outline-[#EC743C] focus-visible:outline-offset-1',
+                        'group flex items-center justify-between gap-2.5 px-2.5 py-1.5 transition-colors duration-150 focus-visible:outline-2 focus-visible:outline-[#69C5F5] focus-visible:outline-offset-1',
                         isActive
-                          ? 'bg-[#FFFFFF]/90 text-[#141618] dark:bg-[#20242A]/95 dark:text-[#F3F0E9] border border-[#141618]/10 dark:border-[#F3F0E9]/10'
-                          : 'text-[#4A5054] hover:text-[#141618] hover:bg-[#FFFFFF]/55 dark:text-[#A1A7AB] dark:hover:text-[#F3F0E9] dark:hover:bg-[#20242A]/55 border border-transparent'
+                          ? 'bg-[#FFFFFF]/90 text-[#10243A] dark:bg-[#12243B]/95 dark:text-[#F4F8FC] border border-[#10243A]/10 dark:border-[#F4F8FC]/10'
+                          : 'text-[#465C72] hover:text-[#10243A] hover:bg-[#FFFFFF]/55 dark:text-[#B5C5D7] dark:hover:text-[#F4F8FC] dark:hover:bg-[#12243B]/55 border border-transparent'
                       )}
                     >
                       <div className="min-w-0 flex-1">
@@ -386,8 +386,8 @@ export function ChapterRail() {
                             className={cn(
                               'font-mono-tabular text-[10px] shrink-0',
                               isActive
-                                ? 'font-semibold text-[#9E4B28] dark:text-[#EC743C]'
-                                : 'text-[#4A5054] dark:text-[#A1A7AB] group-hover:text-[#9E4B28] dark:group-hover:text-[#EC743C]'
+                                ? 'font-semibold text-brand dark:text-[#69C5F5]'
+                                : 'text-[#465C72] dark:text-[#B5C5D7] group-hover:text-brand dark:group-hover:text-[#69C5F5]'
                             )}
                           >
                             {chapter.number}
@@ -401,7 +401,7 @@ export function ChapterRail() {
                             {chapter.label}
                           </span>
                         </div>
-                        <p className="text-[10px] text-[#4A5054] dark:text-[#A1A7AB] truncate pl-5">
+                        <p className="text-[10px] text-[#465C72] dark:text-[#B5C5D7] truncate pl-5">
                           {chapter.summary}
                         </p>
                       </div>
@@ -410,8 +410,8 @@ export function ChapterRail() {
                         className={cn(
                           'h-[2px] shrink-0 transition-all duration-200',
                           isActive
-                            ? 'w-4 bg-[#9E4B28] dark:bg-[#EC743C]'
-                            : 'w-2 bg-[#141618]/20 group-hover:w-3 group-hover:bg-[#141618]/60 dark:bg-[#F3F0E9]/25 dark:group-hover:bg-[#F3F0E9]/70'
+                            ? 'w-4 bg-accent-red'
+                            : 'w-2 bg-[#10243A]/20 group-hover:w-3 group-hover:bg-[#10243A]/60 dark:bg-[#F4F8FC]/25 dark:group-hover:bg-[#F4F8FC]/70'
                         )}
                       />
                     </a>
@@ -421,11 +421,11 @@ export function ChapterRail() {
             </ol>
 
             {/* Quick Actions Dock Footer */}
-            <div className="px-2.5 py-2 border-t border-[#141618]/12 dark:border-[#F3F0E9]/14 bg-[#ECE8DF]/55 dark:bg-[#191C20]/70 flex items-center justify-between gap-1.5">
+            <div className="px-2.5 py-2 border-t border-[#10243A]/12 dark:border-[#F4F8FC]/14 bg-[#F1F6FB]/55 dark:bg-[#0D1B2E]/70 flex items-center justify-between gap-1.5">
               <button
                 type="button"
                 onClick={handleScrollTop}
-                className="inline-flex items-center gap-1 px-2 py-1 text-[11px] font-medium text-[#4A5054] dark:text-[#A1A7AB] hover:text-[#141618] dark:hover:text-[#F3F0E9] transition-colors cursor-pointer"
+                className="inline-flex items-center gap-1 px-2 py-1 text-[11px] font-medium text-[#465C72] dark:text-[#B5C5D7] hover:text-[#10243A] dark:hover:text-[#F4F8FC] transition-colors cursor-pointer"
               >
                 <ArrowUp className="w-3 h-3" aria-hidden="true" />
                 Top
@@ -434,7 +434,7 @@ export function ChapterRail() {
                 type="button"
                 onClick={openSearch}
                 title="Search Site (⌘K)"
-                className="inline-flex items-center gap-1 px-2 py-1 text-[11px] font-medium text-[#4A5054] dark:text-[#A1A7AB] hover:text-[#9E4B28] dark:hover:text-[#EC743C] transition-colors cursor-pointer"
+                className="inline-flex items-center gap-1 px-2 py-1 text-[11px] font-medium text-[#465C72] dark:text-[#B5C5D7] hover:text-brand dark:hover:text-[#69C5F5] transition-colors cursor-pointer"
               >
                 <Search className="w-3 h-3" aria-hidden="true" />
                 <span>⌘K</span>
@@ -442,7 +442,7 @@ export function ChapterRail() {
               <a
                 href="#enquiry"
                 onClick={(e) => handleAnchorClick(e, 'enquiry')}
-                className="inline-flex items-center gap-1 px-2.5 py-1 text-[11px] font-semibold bg-[#9E4B28] text-[#F6F4EF] hover:bg-[#823B1D] dark:bg-[#A95632] dark:text-[#F3F0E9] dark:hover:bg-[#EC743C] dark:hover:text-[#141618] transition-colors"
+                className="inline-flex items-center gap-1 px-2.5 py-1 text-[11px] font-semibold bg-brand text-[#FFFFFF] hover:bg-brand-hover dark:bg-[#0A6AA1] dark:text-[#F4F8FC] dark:hover:bg-[#69C5F5] dark:hover:text-[#10243A] transition-colors"
               >
                 Quote
                 <ArrowUpRight className="w-3 h-3" aria-hidden="true" />

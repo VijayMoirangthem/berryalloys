@@ -17,6 +17,7 @@ import { PRODUCTS } from '../data/products';
 import { useSearch } from '../context/SearchContext';
 import { BrandLockup } from './BrandLockup';
 import { ThemeToggle } from './ThemeToggle';
+import { AmbientMotionToggle } from './AmbientMotionToggle';
 import { AnimatedFooterCanvas } from './ui/AnimatedFooterCanvas';
 import { SocialFlipButton } from './ui/SocialFlipButton';
 
@@ -232,7 +233,8 @@ export function Layout({ children }: LayoutProps) {
   const closeMegaTimerRef = useRef<number | null>(null);
 
   const isHome = pathname === '/';
-  const darkHeroOverlayHeader = isHome && !scrolledPastHero;
+  // The particle hero now follows the active theme, so the header never needs a forced-dark overlay state.
+  const darkHeroOverlayHeader = false;
 
   const activeMegaItem =
     PRIMARY_NAV.find((item) => item.key === activeMegaKey && item.columns) ?? null;
@@ -394,10 +396,10 @@ export function Layout({ children }: LayoutProps) {
   };
 
   return (
-    <div className="min-h-screen flex flex-col bg-[#F6F4EF] text-[#141618] dark:bg-[#121417] dark:text-[#F3F0E9] transition-colors duration-200">
+    <div className="min-h-screen flex flex-col bg-[#FFFFFF] text-[#10243A] dark:bg-[#07111F] dark:text-[#F4F8FC] transition-colors duration-200">
       <a
         href="#main-content"
-        className="sr-only focus:not-sr-only focus:fixed focus:top-3 focus:left-3 focus:z-50 focus:bg-[#141618] focus:text-[#F3F0E9] focus:px-4 focus:py-2 focus:text-sm focus:font-semibold"
+        className="sr-only focus:not-sr-only focus:fixed focus:top-3 focus:left-3 focus:z-50 focus:bg-[#10243A] focus:text-[#F4F8FC] focus:px-4 focus:py-2 focus:text-sm focus:font-semibold"
       >
         Skip to main content
       </a>
@@ -408,8 +410,8 @@ export function Layout({ children }: LayoutProps) {
         onMouseLeave={scheduleCloseMegaMenu}
         className={`sticky top-0 z-40 transition-colors duration-200 border-b ${
           darkHeroOverlayHeader
-            ? 'bg-[#121417]/92 backdrop-blur-sm border-[#F3F0E9]/14 text-[#F3F0E9]'
-            : 'bg-[#F6F4EF]/95 dark:bg-[#121417]/95 backdrop-blur-sm border-[#141618]/12 dark:border-[#F3F0E9]/14 text-[#141618] dark:text-[#F3F0E9]'
+            ? 'bg-[#07111F]/92 backdrop-blur-sm border-[#F4F8FC]/14 text-[#F4F8FC]'
+            : 'bg-[#FFFFFF]/95 dark:bg-[#07111F]/95 backdrop-blur-sm border-[#10243A]/12 dark:border-[#F4F8FC]/14 text-[#10243A] dark:text-[#F4F8FC]'
         }`}
       >
         <div className="max-w-[1360px] mx-auto px-3 sm:px-6 lg:px-8 h-16 flex items-center justify-between gap-2 sm:gap-5 relative">
@@ -417,7 +419,7 @@ export function Layout({ children }: LayoutProps) {
           <Link
             to="/"
             aria-label="Berry Alloys Limited — Home"
-            className="whitespace-nowrap shrink-0 flex items-center focus-visible:outline-2 focus-visible:outline-[#EC743C] focus-visible:outline-offset-2"
+            className="whitespace-nowrap shrink-0 flex items-center focus-visible:outline-2 focus-visible:outline-[#69C5F5] focus-visible:outline-offset-2"
           >
             <BrandLockup
               variant="header"
@@ -443,11 +445,11 @@ export function Layout({ children }: LayoutProps) {
                       `group relative py-1 text-sm font-medium whitespace-nowrap shrink-0 transition-colors duration-150 ${
                         isActive || megaOpen
                           ? darkHeroOverlayHeader
-                            ? 'text-[#EC743C]'
-                            : 'text-[#9E4B28] dark:text-[#EC743C]'
+                            ? 'text-[#69C5F5]'
+                            : 'text-brand dark:text-[#69C5F5]'
                           : darkHeroOverlayHeader
-                          ? 'text-[#F3F0E9]/85 hover:text-[#F3F0E9]'
-                          : 'text-[#4A5054] hover:text-[#141618] dark:text-[#A1A7AB] dark:hover:text-[#F3F0E9]'
+                          ? 'text-[#F4F8FC]/85 hover:text-[#F4F8FC]'
+                          : 'text-[#465C72] hover:text-[#10243A] dark:text-[#B5C5D7] dark:hover:text-[#F4F8FC]'
                       }`
                     }
                   >
@@ -458,8 +460,8 @@ export function Layout({ children }: LayoutProps) {
                           aria-hidden="true"
                           className={`absolute inset-x-0 -bottom-0.5 h-[2px] origin-left transition-transform duration-350 ease-[cubic-bezier(0.22,1,0.36,1)] ${
                             darkHeroOverlayHeader
-                              ? 'bg-[#EC743C]'
-                              : 'bg-[#9E4B28] dark:bg-[#EC743C]'
+                              ? 'bg-[#69C5F5]'
+                              : 'bg-brand dark:bg-[#69C5F5]'
                           } ${
                             isActive || megaOpen
                               ? 'scale-x-100'
@@ -477,7 +479,7 @@ export function Layout({ children }: LayoutProps) {
                       aria-label={`Toggle ${item.label} submenu`}
                       onClick={() => openMegaMenu(megaOpen ? null : item.key)}
                       className={`p-0.5 transition-transform duration-150 cursor-pointer ${
-                        megaOpen ? 'rotate-180 text-[#9E4B28] dark:text-[#EC743C]' : 'opacity-70 hover:opacity-100'
+                        megaOpen ? 'rotate-180 text-brand dark:text-[#69C5F5]' : 'opacity-70 hover:opacity-100'
                       }`}
                     >
                       <ChevronDown className="w-3.5 h-3.5" aria-hidden="true" />
@@ -497,8 +499,8 @@ export function Layout({ children }: LayoutProps) {
               title="Search Alloys, FAQs & Filings (⌘K)"
               className={`inline-flex items-center justify-center gap-1.5 min-h-[40px] px-2.5 sm:px-3 py-1.5 text-xs font-medium border transition-colors whitespace-nowrap shrink-0 cursor-pointer ${
                 darkHeroOverlayHeader
-                  ? 'border-[#F3F0E9]/22 bg-[#121417]/60 text-[#F3F0E9] hover:border-[#EC743C] hover:text-[#EC743C]'
-                  : 'border-[#141618]/20 bg-[#FFFFFF]/70 text-[#141618] hover:border-[#9E4B28] hover:text-[#9E4B28] dark:border-[#F3F0E9]/22 dark:bg-[#191C20] dark:text-[#F3F0E9] dark:hover:border-[#EC743C] dark:hover:text-[#EC743C]'
+                  ? 'border-[#F4F8FC]/22 bg-[#07111F]/60 text-[#F4F8FC] hover:border-[#69C5F5] hover:text-[#69C5F5]'
+                  : 'border-[#10243A]/20 bg-[#FFFFFF]/70 text-[#10243A] hover:border-brand hover:text-brand dark:border-[#F4F8FC]/22 dark:bg-[#0D1B2E] dark:text-[#F4F8FC] dark:hover:border-[#69C5F5] dark:hover:text-[#69C5F5]'
               }`}
             >
               <Search className="w-3.5 h-3.5" aria-hidden="true" />
@@ -516,15 +518,15 @@ export function Layout({ children }: LayoutProps) {
               aria-controls="explore-sections-menu"
               className={`xl:hidden inline-flex items-center gap-1 sm:gap-1.5 min-h-[40px] px-2 sm:px-3 py-1.5 text-xs font-medium border transition-colors whitespace-nowrap shrink-0 cursor-pointer ${
                 darkHeroOverlayHeader
-                  ? 'border-[#F3F0E9]/22 text-[#F3F0E9] hover:border-[#EC743C]'
-                  : 'border-[#141618]/20 text-[#141618] hover:border-[#9E4B28] dark:border-[#F3F0E9]/22 dark:text-[#F3F0E9] dark:hover:border-[#EC743C]'
+                  ? 'border-[#F4F8FC]/22 text-[#F4F8FC] hover:border-[#69C5F5]'
+                  : 'border-[#10243A]/20 text-[#10243A] hover:border-brand dark:border-[#F4F8FC]/22 dark:text-[#F4F8FC] dark:hover:border-[#69C5F5]'
               }`}
             >
               <Compass
                 className={`w-3.5 h-3.5 ${
                   darkHeroOverlayHeader
-                    ? 'text-[#EC743C]'
-                    : 'text-[#9E4B28] dark:text-[#EC743C]'
+                    ? 'text-[#69C5F5]'
+                    : 'text-brand dark:text-[#69C5F5]'
                 }`}
                 aria-hidden="true"
               />
@@ -548,8 +550,8 @@ export function Layout({ children }: LayoutProps) {
               }}
               className={`hidden sm:inline-flex items-center gap-1.5 min-h-[40px] px-4 py-2 text-xs font-semibold tracking-wide transition-colors duration-150 whitespace-nowrap shrink-0 ${
                 darkHeroOverlayHeader
-                  ? 'bg-[#A95632] text-[#F3F0E9] hover:bg-[#EC743C] hover:text-[#141618]'
-                  : 'bg-[#141618] text-[#F6F4EF] hover:bg-[#9E4B28] dark:bg-[#A95632] dark:text-[#F3F0E9] dark:hover:bg-[#EC743C] dark:hover:text-[#141618]'
+                  ? 'bg-[#0A6AA1] text-[#F4F8FC] hover:bg-[#004C73] hover:text-[#F4F8FC]'
+                  : 'bg-brand text-on-brand hover:bg-brand-hover'
               }`}
             >
               Request Quote
@@ -565,8 +567,8 @@ export function Layout({ children }: LayoutProps) {
               aria-label="Open navigation menu"
               className={`lg:hidden inline-flex items-center justify-center w-10 h-10 transition-colors cursor-pointer ${
                 darkHeroOverlayHeader
-                  ? 'text-[#F3F0E9] hover:bg-[#191C20]'
-                  : 'text-[#141618] hover:bg-[#ECE8DF] dark:text-[#F3F0E9] dark:hover:bg-[#191C20]'
+                  ? 'text-[#F4F8FC] hover:bg-[#0D1B2E]'
+                  : 'text-[#10243A] hover:bg-[#F1F6FB] dark:text-[#F4F8FC] dark:hover:bg-[#0D1B2E]'
               }`}
             >
               <Menu className="w-5 h-5" aria-hidden="true" />
@@ -585,26 +587,26 @@ export function Layout({ children }: LayoutProps) {
                 animate={{ opacity: 1, y: 0 }}
                 exit={{ opacity: 0, y: -6 }}
                 transition={{ duration: 0.3, ease: [0.22, 1, 0.36, 1] }}
-                className="xl:hidden absolute right-4 sm:right-6 lg:right-8 top-full mt-1 w-76 max-w-[calc(100vw-2rem)] bg-[#FFFFFF] dark:bg-[#141618] text-[#141618] dark:text-[#F3F0E9] border border-[#141618]/18 dark:border-[#F3F0E9]/18 shadow-2xl p-3 z-50 max-h-[75vh] overflow-y-auto"
+                className="xl:hidden absolute right-4 sm:right-6 lg:right-8 top-full mt-1 w-76 max-w-[calc(100vw-2rem)] bg-[#FFFFFF] dark:bg-[#10243A] text-[#10243A] dark:text-[#F4F8FC] border border-[#10243A]/18 dark:border-[#F4F8FC]/18 shadow-2xl p-3 z-50 max-h-[75vh] overflow-y-auto"
               >
-                <p className="px-2 py-1.5 text-[11px] font-mono-tabular uppercase tracking-wider text-[#9E4B28] dark:text-[#EC743C] border-b border-[#141618]/12 dark:border-[#F3F0E9]/12">
+                <p className="px-2 py-1.5 text-[11px] font-mono-tabular uppercase tracking-wider text-brand dark:text-[#69C5F5] border-b border-[#10243A]/12 dark:border-[#F4F8FC]/12">
                   Story Chapters ({HOME_CHAPTERS.length})
                 </p>
-                <ul className="py-1.5 divide-y divide-[#141618]/8 dark:divide-[#F3F0E9]/8">
+                <ul className="py-1.5 divide-y divide-[#10243A]/8 dark:divide-[#F4F8FC]/8">
                   {HOME_CHAPTERS.map((chapter) => (
                     <li key={chapter.id}>
                       <Link
                         to={`/#${chapter.id}`}
                         onClick={() => handleSectionSelect(chapter.id)}
-                        className="flex items-center justify-between gap-3 px-2 py-2 min-h-[40px] text-xs hover:bg-[#ECE8DF] dark:hover:bg-[#20242A] transition-colors"
+                        className="flex items-center justify-between gap-3 px-2 py-2 min-h-[40px] text-xs hover:bg-[#F1F6FB] dark:hover:bg-[#12243B] transition-colors"
                       >
-                        <span className="flex items-center gap-2.5 font-medium text-[#141618] dark:text-[#F3F0E9]">
-                          <span className="font-mono-tabular text-[11px] text-[#9E4B28] dark:text-[#EC743C]">
+                        <span className="flex items-center gap-2.5 font-medium text-[#10243A] dark:text-[#F4F8FC]">
+                          <span className="font-mono-tabular text-[11px] text-brand dark:text-[#69C5F5]">
                             {chapter.number}
                           </span>
                           <span>{chapter.label}</span>
                         </span>
-                        <span className="text-[11px] text-[#4A5054] dark:text-[#A1A7AB] truncate max-w-[135px]">
+                        <span className="text-[11px] text-[#465C72] dark:text-[#B5C5D7] truncate max-w-[135px]">
                           {chapter.summary}
                         </span>
                       </Link>
@@ -627,13 +629,13 @@ export function Layout({ children }: LayoutProps) {
               animate={{ opacity: 1, y: 0 }}
               exit={{ opacity: 0, y: -6 }}
               transition={{ duration: 0.32, ease: [0.22, 1, 0.36, 1] }}
-              className="hidden lg:block absolute inset-x-0 top-full border-b border-[#141618]/15 dark:border-[#F3F0E9]/14 bg-[#FFFFFF]/96 dark:bg-[#141618]/96 backdrop-blur-xl text-[#141618] dark:text-[#F3F0E9] shadow-2xl z-50"
+              className="hidden lg:block absolute inset-x-0 top-full border-b border-[#10243A]/15 dark:border-[#F4F8FC]/14 bg-[#FFFFFF]/96 dark:bg-[#10243A]/96 backdrop-blur-xl text-[#10243A] dark:text-[#F4F8FC] shadow-2xl z-50"
             >
               <div className="max-w-[1360px] mx-auto px-6 lg:px-8 py-7 grid grid-cols-12 gap-8 items-start">
                 <div className="col-span-8 grid grid-cols-2 gap-8">
                   {activeMegaItem.columns?.map((col) => (
                     <div key={col.heading} className="space-y-3">
-                      <p className="font-mono-tabular text-[11px] uppercase tracking-wider text-[#9E4B28] dark:text-[#EC743C] pb-2 border-b border-[#141618]/10 dark:border-[#F3F0E9]/10">
+                      <p className="font-mono-tabular text-[11px] uppercase tracking-wider text-brand dark:text-[#69C5F5] pb-2 border-b border-[#10243A]/10 dark:border-[#F4F8FC]/10">
                         {col.heading}
                       </p>
                       <ul className="space-y-1.5">
@@ -647,15 +649,15 @@ export function Layout({ children }: LayoutProps) {
                                   handleSectionSelect(link.to.replace('/#', ''));
                                 }
                               }}
-                              className="group block px-3 py-2 border border-transparent hover:border-[#141618]/12 dark:hover:border-[#F3F0E9]/14 hover:bg-[#F6F4EF] dark:hover:bg-[#20242A] transition-colors"
+                              className="group block px-3 py-2 border border-transparent hover:border-[#10243A]/12 dark:hover:border-[#F4F8FC]/14 hover:bg-[#FFFFFF] dark:hover:bg-[#12243B] transition-colors"
                             >
                               <div className="flex items-center justify-between gap-2">
-                                <span className="text-sm font-semibold text-[#141618] dark:text-[#F3F0E9] group-hover:text-[#9E4B28] dark:group-hover:text-[#EC743C] transition-colors">
+                                <span className="text-sm font-semibold text-[#10243A] dark:text-[#F4F8FC] group-hover:text-brand dark:group-hover:text-[#69C5F5] transition-colors">
                                   {link.label}
                                 </span>
-                                <ArrowRight className="w-3.5 h-3.5 opacity-0 group-hover:opacity-100 text-[#9E4B28] dark:text-[#EC743C] transition-all -translate-x-1 group-hover:translate-x-0" aria-hidden="true" />
+                                <ArrowRight className="w-3.5 h-3.5 opacity-0 group-hover:opacity-100 text-brand dark:text-[#69C5F5] transition-all -translate-x-1 group-hover:translate-x-0" aria-hidden="true" />
                               </div>
-                              <p className="text-[11px] text-[#4A5054] dark:text-[#A1A7AB] mt-0.5">
+                              <p className="text-[11px] text-[#465C72] dark:text-[#B5C5D7] mt-0.5">
                                 {link.meta}
                               </p>
                             </Link>
@@ -667,21 +669,21 @@ export function Layout({ children }: LayoutProps) {
                 </div>
 
                 {/* Mega Menu Editorial Callout Box */}
-                <div className="col-span-4 bg-[#ECE8DF]/75 dark:bg-[#20242A]/90 border border-[#141618]/14 dark:border-[#F3F0E9]/14 p-5 space-y-3">
-                  <p className="font-mono-tabular text-[10px] uppercase tracking-widest text-[#9E4B28] dark:text-[#EC743C]">
+                <div className="col-span-4 bg-[#F1F6FB]/75 dark:bg-[#12243B]/90 border border-[#10243A]/14 dark:border-[#F4F8FC]/14 p-5 space-y-3">
+                  <p className="font-mono-tabular text-[10px] uppercase tracking-widest text-brand dark:text-[#69C5F5]">
                     Berry Alloys Reference
                   </p>
-                  <p className="font-display text-2xl font-bold uppercase tracking-tight text-[#141618] dark:text-[#F3F0E9]">
+                  <p className="font-display text-2xl font-bold uppercase tracking-tight text-[#10243A] dark:text-[#F4F8FC]">
                     {activeMegaItem.spotlightTitle}
                   </p>
-                  <p className="text-xs text-[#4A5054] dark:text-[#A1A7AB] leading-relaxed">
+                  <p className="text-xs text-[#465C72] dark:text-[#B5C5D7] leading-relaxed">
                     {activeMegaItem.spotlightSummary}
                   </p>
                   {activeMegaItem.spotlightCta && (
                     <Link
                       to={activeMegaItem.spotlightCta.to}
                       onClick={() => setActiveMegaKey(null)}
-                      className="inline-flex items-center gap-1.5 pt-1 text-xs font-semibold text-[#9E4B28] dark:text-[#EC743C] hover:underline"
+                      className="inline-flex items-center gap-1.5 pt-1 text-xs font-semibold text-brand dark:text-[#69C5F5] hover:underline"
                     >
                       <span>{activeMegaItem.spotlightCta.label}</span>
                       <ArrowRight className="w-3.5 h-3.5" aria-hidden="true" />
@@ -706,7 +708,7 @@ export function Layout({ children }: LayoutProps) {
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
             transition={{ duration: 0.3 }}
-            className="fixed inset-0 z-50 lg:hidden bg-[#141618]/65 backdrop-blur-xs flex justify-end"
+            className="fixed inset-0 z-50 lg:hidden bg-[#10243A]/65 backdrop-blur-xs flex justify-end"
             onClick={(e) => {
               if (e.target === e.currentTarget) {
                 setMobileMenuOpen(false);
@@ -719,10 +721,10 @@ export function Layout({ children }: LayoutProps) {
               animate={{ x: 0 }}
               exit={{ x: '100%' }}
               transition={{ duration: 0.4, ease: [0.22, 1, 0.36, 1] }}
-              className="w-full max-w-sm bg-[#F6F4EF] dark:bg-[#141618] text-[#141618] dark:text-[#F3F0E9] h-full overflow-y-auto p-6 flex flex-col justify-between border-l border-[#141618]/15 dark:border-[#F3F0E9]/14"
+              className="w-full max-w-sm bg-[#FFFFFF] dark:bg-[#10243A] text-[#10243A] dark:text-[#F4F8FC] h-full overflow-y-auto p-6 flex flex-col justify-between border-l border-[#10243A]/15 dark:border-[#F4F8FC]/14"
             >
               <div className="space-y-4">
-                <div className="flex items-center justify-between pb-4 border-b border-[#141618]/12 dark:border-[#F3F0E9]/12">
+                <div className="flex items-center justify-between pb-4 border-b border-[#10243A]/12 dark:border-[#F4F8FC]/12">
                   <BrandLockup variant="drawer" surface="auto" />
                   <button
                     ref={closeButtonRef}
@@ -732,7 +734,7 @@ export function Layout({ children }: LayoutProps) {
                       menuButtonRef.current?.focus();
                     }}
                     aria-label="Close navigation menu"
-                    className="inline-flex items-center justify-center w-11 h-11 text-[#141618] dark:text-[#F3F0E9] hover:bg-[#ECE8DF] dark:hover:bg-[#20242A] transition-colors cursor-pointer"
+                    className="inline-flex items-center justify-center w-11 h-11 text-[#10243A] dark:text-[#F4F8FC] hover:bg-[#F1F6FB] dark:hover:bg-[#12243B] transition-colors cursor-pointer"
                   >
                     <X className="w-5 h-5" aria-hidden="true" />
                   </button>
@@ -745,10 +747,10 @@ export function Layout({ children }: LayoutProps) {
                     setMobileMenuOpen(false);
                     openSearch();
                   }}
-                  className="w-full min-h-[44px] px-3.5 py-2.5 flex items-center justify-between bg-[#FFFFFF] dark:bg-[#20242A] border border-[#141618]/16 dark:border-[#F3F0E9]/18 text-xs font-medium text-[#4A5054] dark:text-[#A1A7AB] cursor-pointer"
+                  className="w-full min-h-[44px] px-3.5 py-2.5 flex items-center justify-between bg-[#FFFFFF] dark:bg-[#12243B] border border-[#10243A]/16 dark:border-[#F4F8FC]/18 text-xs font-medium text-[#465C72] dark:text-[#B5C5D7] cursor-pointer"
                 >
                   <span className="inline-flex items-center gap-2">
-                    <Search className="w-4 h-4 text-[#9E4B28] dark:text-[#EC743C]" aria-hidden="true" />
+                    <Search className="w-4 h-4 text-brand dark:text-[#69C5F5]" aria-hidden="true" />
                     Search Alloys, FAQs & Filings…
                   </span>
                   <span className="font-mono-tabular text-[10px] opacity-75">⌘K</span>
@@ -758,10 +760,10 @@ export function Layout({ children }: LayoutProps) {
                   <NavLink
                     to="/"
                     className={({ isActive }) =>
-                      `min-h-[44px] flex items-center px-3 py-2 text-sm font-semibold border-b border-[#141618]/8 dark:border-[#F3F0E9]/8 ${
+                      `min-h-[44px] flex items-center px-3 py-2 text-sm font-semibold border-b border-[#10243A]/8 dark:border-[#F4F8FC]/8 ${
                         isActive
-                          ? 'text-[#9E4B28] dark:text-[#EC743C]'
-                          : 'text-[#141618] dark:text-[#F3F0E9]'
+                          ? 'text-brand dark:text-[#69C5F5]'
+                          : 'text-[#10243A] dark:text-[#F4F8FC]'
                       }`
                     }
                   >
@@ -773,18 +775,18 @@ export function Layout({ children }: LayoutProps) {
                     return (
                       <div
                         key={group.id}
-                        className="border-b border-[#141618]/10 dark:border-[#F3F0E9]/10"
+                        className="border-b border-[#10243A]/10 dark:border-[#F4F8FC]/10"
                       >
                         <button
                           type="button"
                           aria-expanded={isOpen}
                           onClick={() => setOpenMobileGroup(isOpen ? null : group.id)}
-                          className="w-full min-h-[44px] px-3 py-2.5 flex items-center justify-between text-sm font-semibold text-[#141618] dark:text-[#F3F0E9] cursor-pointer"
+                          className="w-full min-h-[44px] px-3 py-2.5 flex items-center justify-between text-sm font-semibold text-[#10243A] dark:text-[#F4F8FC] cursor-pointer"
                         >
                           <span>{group.label}</span>
                           <ChevronDown
                             className={`w-4 h-4 transition-transform duration-150 ${
-                              isOpen ? 'rotate-180 text-[#9E4B28] dark:text-[#EC743C]' : ''
+                              isOpen ? 'rotate-180 text-brand dark:text-[#69C5F5]' : ''
                             }`}
                             aria-hidden="true"
                           />
@@ -798,8 +800,8 @@ export function Layout({ children }: LayoutProps) {
                                 className={({ isActive }) =>
                                   `block px-3 py-2 text-xs font-medium ${
                                     isActive
-                                      ? 'text-[#9E4B28] bg-[#ECE8DF] dark:text-[#EC743C] dark:bg-[#20242A]'
-                                      : 'text-[#4A5054] hover:text-[#141618] dark:text-[#A1A7AB] dark:hover:text-[#F3F0E9]'
+                                      ? 'text-brand bg-[#F1F6FB] dark:text-[#69C5F5] dark:bg-[#12243B]'
+                                      : 'text-[#465C72] hover:text-[#10243A] dark:text-[#B5C5D7] dark:hover:text-[#F4F8FC]'
                                   }`
                                 }
                               >
@@ -814,16 +816,16 @@ export function Layout({ children }: LayoutProps) {
                 </nav>
               </div>
 
-              <div className="pt-6 border-t border-[#141618]/12 dark:border-[#F3F0E9]/12 space-y-4">
+              <div className="pt-6 border-t border-[#10243A]/12 dark:border-[#F4F8FC]/12 space-y-4">
                 <Link
                   to="/#enquiry"
                   onClick={() => setMobileMenuOpen(false)}
-                  className="w-full min-h-[44px] inline-flex items-center justify-center gap-2 px-4 py-3 text-sm font-semibold bg-[#9E4B28] dark:bg-[#A95632] text-[#F3F0E9] hover:bg-[#823B1D] transition-colors"
+                  className="w-full min-h-[44px] inline-flex items-center justify-center gap-2 px-4 py-3 text-sm font-semibold bg-brand dark:bg-[#0A6AA1] text-[#F4F8FC] hover:bg-brand-hover transition-colors"
                 >
                   Request Alloy Quotation
                   <ArrowUpRight className="w-4 h-4" aria-hidden="true" />
                 </Link>
-                <p className="text-xs text-[#4A5054] dark:text-[#A1A7AB] font-mono-tabular">
+                <p className="text-xs text-[#465C72] dark:text-[#B5C5D7] font-mono-tabular">
                   CIN: {COMPANY_INFO.cin}
                 </p>
               </div>
@@ -838,19 +840,19 @@ export function Layout({ children }: LayoutProps) {
       </main>
 
       {/* Dual-Theme Architectural Footer + Animated ASCII Reveal */}
-      <footer className="bg-[#ECE8DF] text-[#141618] dark:bg-[#0D0F12] dark:text-[#F3F0E9] border-t border-[#141618]/15 dark:border-[#F3F0E9]/14 transition-colors duration-200">
+      <footer className="bg-[#F1F6FB] text-[#10243A] dark:bg-[#07111F] dark:text-[#F4F8FC] border-t border-[#10243A]/15 dark:border-[#F4F8FC]/14 transition-colors duration-200">
         <AnimatedFooterCanvas />
 
         <div className="max-w-[1360px] mx-auto px-4 sm:px-6 lg:px-8 xl:px-14 2xl:px-8 py-14">
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-12 gap-10 lg:gap-8 pb-12 border-b border-[#141618]/14 dark:border-[#F3F0E9]/12">
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-12 gap-10 lg:gap-8 pb-12 border-b border-[#10243A]/14 dark:border-[#F4F8FC]/12">
             <div className="lg:col-span-4 space-y-4">
               <div className="flex items-center">
                 <BrandLockup variant="footer" surface="auto" />
               </div>
-              <p className="text-sm text-[#4A5054] dark:text-[#A1A7AB] leading-relaxed max-w-sm">
+              <p className="text-sm text-[#465C72] dark:text-[#B5C5D7] leading-relaxed max-w-sm">
                 DKG Group flagship ferro alloy producer delivering Manganese, Silicon, and Chromium grades from eastern and coastal India to global steelmakers.
               </p>
-              <div className="pt-2 space-y-1 text-xs font-mono-tabular text-[#4A5054] dark:text-[#A1A7AB]">
+              <div className="pt-2 space-y-1 text-xs font-mono-tabular text-[#465C72] dark:text-[#B5C5D7]">
                 <p>CIN: {COMPANY_INFO.cin}</p>
                 <p>Commercial Desk: marketing@berryalloys.in</p>
               </div>
@@ -861,7 +863,7 @@ export function Layout({ children }: LayoutProps) {
               <div className="pt-2">
                 <Link
                   to="/contact?tab=quote"
-                  className="inline-flex items-center gap-2 min-h-[44px] px-5 py-2.5 text-xs font-semibold bg-[#141618] text-[#F6F4EF] hover:bg-[#9E4B28] dark:bg-[#A95632] dark:text-[#F3F0E9] dark:hover:bg-[#823B1D] transition-colors"
+                  className="inline-flex items-center gap-2 min-h-[44px] px-5 py-2.5 text-xs font-semibold bg-[#10243A] text-[#FFFFFF] hover:bg-brand dark:bg-[#0A6AA1] dark:text-[#F4F8FC] dark:hover:bg-[#004C73] transition-colors"
                 >
                   Open Dedicated Quotation Page
                   <ArrowUpRight className="w-3.5 h-3.5" aria-hidden="true" />
@@ -870,15 +872,15 @@ export function Layout({ children }: LayoutProps) {
             </div>
 
             <div className="lg:col-span-2 space-y-3">
-              <h2 className="font-mono-tabular text-xs font-medium tracking-wider uppercase text-[#9E4B28] dark:text-[#EC743C]">
+              <h2 className="font-mono-tabular text-xs font-medium tracking-wider uppercase text-brand dark:text-[#69C5F5]">
                 Homepage Story
               </h2>
-              <ul className="space-y-1.5 text-xs text-[#4A5054] dark:text-[#F3F0E9]/80">
+              <ul className="space-y-1.5 text-xs text-[#465C72] dark:text-[#F4F8FC]/80">
                 {HOME_CHAPTERS.map((ch) => (
                   <li key={ch.id}>
                     <Link
                       to={`/#${ch.id}`}
-                      className="hover:text-[#141618] dark:hover:text-[#F3F0E9] transition-colors"
+                      className="hover:text-[#10243A] dark:hover:text-[#F4F8FC] transition-colors"
                     >
                       {ch.number}. {ch.label}
                     </Link>
@@ -888,52 +890,52 @@ export function Layout({ children }: LayoutProps) {
             </div>
 
             <div className="lg:col-span-2 space-y-3">
-              <h2 className="font-mono-tabular text-xs font-medium tracking-wider uppercase text-[#9E4B28] dark:text-[#EC743C]">
+              <h2 className="font-mono-tabular text-xs font-medium tracking-wider uppercase text-brand dark:text-[#69C5F5]">
                 Detailed Pages
               </h2>
-              <ul className="space-y-2.5 text-sm text-[#4A5054] dark:text-[#F3F0E9]/80">
+              <ul className="space-y-2.5 text-sm text-[#465C72] dark:text-[#F4F8FC]/80">
                 <li>
-                  <Link to="/products" className="hover:text-[#141618] dark:hover:text-[#F3F0E9] transition-colors">
+                  <Link to="/products" className="hover:text-[#10243A] dark:hover:text-[#F4F8FC] transition-colors">
                     All Product Specs
                   </Link>
                 </li>
                 <li>
-                  <Link to="/about" className="hover:text-[#141618] dark:hover:text-[#F3F0E9] transition-colors">
+                  <Link to="/about" className="hover:text-[#10243A] dark:hover:text-[#F4F8FC] transition-colors">
                     Company & Leadership
                   </Link>
                 </li>
                 <li>
-                  <Link to="/manufacturing" className="hover:text-[#141618] dark:hover:text-[#F3F0E9] transition-colors">
+                  <Link to="/manufacturing" className="hover:text-[#10243A] dark:hover:text-[#F4F8FC] transition-colors">
                     Manufacturing & Quality
                   </Link>
                 </li>
                 <li>
-                  <Link to="/sustainability" className="hover:text-[#141618] dark:hover:text-[#F3F0E9] transition-colors">
+                  <Link to="/sustainability" className="hover:text-[#10243A] dark:hover:text-[#F4F8FC] transition-colors">
                     Sustainability
                   </Link>
                 </li>
                 <li>
-                  <Link to="/community" className="hover:text-[#141618] dark:hover:text-[#F3F0E9] transition-colors">
+                  <Link to="/community" className="hover:text-[#10243A] dark:hover:text-[#F4F8FC] transition-colors">
                     Community & CSR
                   </Link>
                 </li>
                 <li>
-                  <Link to="/news" className="hover:text-[#141618] dark:hover:text-[#F3F0E9] transition-colors">
+                  <Link to="/news" className="hover:text-[#10243A] dark:hover:text-[#F4F8FC] transition-colors">
                     News & Media
                   </Link>
                 </li>
                 <li>
-                  <Link to="/careers" className="hover:text-[#141618] dark:hover:text-[#F3F0E9] transition-colors">
+                  <Link to="/careers" className="hover:text-[#10243A] dark:hover:text-[#F4F8FC] transition-colors">
                     Careers
                   </Link>
                 </li>
                 <li>
-                  <Link to="/documents" className="hover:text-[#141618] dark:hover:text-[#F3F0E9] transition-colors">
+                  <Link to="/documents" className="hover:text-[#10243A] dark:hover:text-[#F4F8FC] transition-colors">
                     Corporate Documents
                   </Link>
                 </li>
                 <li>
-                  <Link to="/faq" className="hover:text-[#141618] dark:hover:text-[#F3F0E9] transition-colors">
+                  <Link to="/faq" className="hover:text-[#10243A] dark:hover:text-[#F4F8FC] transition-colors">
                     FAQs & Product Guide
                   </Link>
                 </li>
@@ -941,21 +943,21 @@ export function Layout({ children }: LayoutProps) {
             </div>
 
             <div className="lg:col-span-4 space-y-4">
-              <h2 className="font-mono-tabular text-xs font-medium tracking-wider uppercase text-[#9E4B28] dark:text-[#EC743C]">
+              <h2 className="font-mono-tabular text-xs font-medium tracking-wider uppercase text-brand dark:text-[#69C5F5]">
                 Offices & Works
               </h2>
-              <div className="space-y-4 text-xs text-[#4A5054] dark:text-[#A1A7AB] leading-relaxed">
+              <div className="space-y-4 text-xs text-[#465C72] dark:text-[#B5C5D7] leading-relaxed">
                 {OFFICES.map((office) => (
                   <div key={office.id}>
-                    <p className="font-semibold text-[#141618] dark:text-[#F3F0E9]">{office.label}</p>
+                    <p className="font-semibold text-[#10243A] dark:text-[#F4F8FC]">{office.label}</p>
                     <p>{office.address}</p>
-                    <p className="font-mono-tabular text-[#141618]/75 dark:text-[#F3F0E9]/70 mt-0.5">{office.phone}</p>
+                    <p className="font-mono-tabular text-[#10243A]/75 dark:text-[#F4F8FC]/70 mt-0.5">{office.phone}</p>
                   </div>
                 ))}
-                <div className="pt-2 border-t border-[#141618]/12 dark:border-[#F3F0E9]/10">
-                  <p className="font-semibold text-[#141618] dark:text-[#F3F0E9]/90">{UPCOMING_OFFICE_NOTICE.title}</p>
+                <div className="pt-2 border-t border-[#10243A]/12 dark:border-[#F4F8FC]/10">
+                  <p className="font-semibold text-[#10243A] dark:text-[#F4F8FC]/90">{UPCOMING_OFFICE_NOTICE.title}</p>
                   <p>{UPCOMING_OFFICE_NOTICE.address}</p>
-                  <p className="text-[#4A5054] dark:text-[#A1A7AB] mt-0.5">
+                  <p className="text-[#465C72] dark:text-[#B5C5D7] mt-0.5">
                     Move timeline pending formal confirmation.
                   </p>
                 </div>
@@ -963,18 +965,19 @@ export function Layout({ children }: LayoutProps) {
             </div>
           </div>
 
-          <div className="pt-8 flex flex-col sm:flex-row sm:items-center justify-between gap-4 text-xs text-[#4A5054] dark:text-[#A1A7AB]">
+          <div className="pt-8 flex flex-col sm:flex-row sm:items-center justify-between gap-4 text-xs text-[#465C72] dark:text-[#B5C5D7]">
             <p>© 2026 Berry Alloys Limited. Presentation prototype.</p>
             <div className="flex flex-wrap items-center gap-4">
-              <Link to="/faq" className="hover:text-[#141618] dark:hover:text-[#F3F0E9] transition-colors">
+              <AmbientMotionToggle />
+              <Link to="/faq" className="hover:text-[#10243A] dark:hover:text-[#F4F8FC] transition-colors">
                 FAQs
               </Link>
               <span aria-hidden="true">·</span>
-              <Link to="/documents" className="hover:text-[#141618] dark:hover:text-[#F3F0E9] transition-colors">
+              <Link to="/documents" className="hover:text-[#10243A] dark:hover:text-[#F4F8FC] transition-colors">
                 Statutory Disclosures
               </Link>
               <span aria-hidden="true">·</span>
-              <Link to="/contact" className="hover:text-[#141618] dark:hover:text-[#F3F0E9] transition-colors">
+              <Link to="/contact" className="hover:text-[#10243A] dark:hover:text-[#F4F8FC] transition-colors">
                 Dedicated Contact Page
               </Link>
             </div>

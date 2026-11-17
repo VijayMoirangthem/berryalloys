@@ -247,8 +247,8 @@ export function BooksShowcase({
       x.fillStyle = g;
       x.fillRect(0, 0, 512, 256);
       envBlob(x, 140, 66, 95, '255,255,255', 0.95);
-      envBlob(x, 405, 84, 55, '236,116,60', 0.52);
-      envBlob(x, 256, 150, 120, '243,240,233', 0.25);
+      envBlob(x, 405, 84, 55, '40,148,204', 0.52);
+      envBlob(x, 256, 150, 120, '244,248,252', 0.25);
       const tx = new THREE.CanvasTexture(c);
       tx.mapping = THREE.EquirectangularReflectionMapping;
       const pmrem = new THREE.PMREMGenerator(renderer);
@@ -351,7 +351,7 @@ export function BooksShowcase({
       const s = 512;
       const c = mkCanvas(s, s);
       const x = c.getContext('2d')!;
-      x.fillStyle = '#ece4d2';
+      x.fillStyle = '#E7F3FA';
       x.fillRect(0, 0, s, s);
       let p = 0;
       while (p < s) {
@@ -376,7 +376,7 @@ export function BooksShowcase({
       const s = 512;
       const c = mkCanvas(s, s);
       const x = c.getContext('2d')!;
-      x.fillStyle = '#f3edde';
+      x.fillStyle = '#F1F6FB';
       x.fillRect(0, 0, s, s);
       for (let i = 0; i < 1200; i++) {
         x.fillStyle = 'rgba(120,105,70,' + (0.04 + Math.random() * 0.08).toFixed(3) + ')';
@@ -414,18 +414,18 @@ export function BooksShowcase({
       x.fillRect(0, 0, w, h);
 
       // Subtle architectural grid rules
-      x.strokeStyle = 'rgba(236,116,60,0.22)';
+      x.strokeStyle = 'rgba(40,148,204,0.22)';
       x.lineWidth = 2;
       x.strokeRect(56, 56, w - 112, h - 112);
 
       // Top metadata label
-      x.fillStyle = '#EC743C';
+      x.fillStyle = '#69C5F5';
       x.textAlign = 'left';
       x.font = '600 30px "IBM Plex Mono", monospace';
       x.fillText(`BERRY ALLOYS · ${o.year}`, 104, 148);
 
       // Title block
-      x.fillStyle = '#F3F0E9';
+      x.fillStyle = '#F4F8FC';
       x.textAlign = 'left';
       x.font = '700 84px "Barlow Condensed", Georgia, sans-serif';
       const words = o.title.toUpperCase().split(' ');
@@ -445,10 +445,10 @@ export function BooksShowcase({
       lines.forEach((l, i) => x.fillText(l, 104, startY + i * 94));
 
       // Divider copper bar
-      x.fillStyle = '#EC743C';
+      x.fillStyle = '#69C5F5';
       x.fillRect(104, startY + lines.length * 94 + 34, 140, 8);
 
-      x.fillStyle = 'rgba(243,240,233,0.78)';
+      x.fillStyle = 'rgba(244,248,252,0.78)';
       x.font = '500 36px "Plus Jakarta Sans", Arial, sans-serif';
       x.fillText(o.author, 104, h - 140);
     }
@@ -505,7 +505,7 @@ export function BooksShowcase({
       drawSpaced(x, o.author.toUpperCase().slice(0, 20), h * 0.325, 9, 3);
       x.globalAlpha = 1;
       x.restore();
-      x.fillStyle = '#EC743C';
+      x.fillStyle = '#69C5F5';
       x.globalAlpha = 0.75;
       x.fillRect(w / 2 - 26, 92, 52, 4);
       x.fillRect(w / 2 - 26, h - 95, 52, 4);
@@ -524,15 +524,15 @@ export function BooksShowcase({
       const h = 1536;
       const c = mkCanvas(w, h);
       const x = c.getContext('2d')!;
-      x.fillStyle = '#f4efdf';
+      x.fillStyle = '#F1F6FB';
       x.fillRect(0, 0, w, h);
       x.fillStyle = 'rgba(130,110,80,0.07)';
       for (let i = 0; i < 1400; i++) x.fillRect(Math.random() * w, Math.random() * h, 1.1, 1.1);
-      x.fillStyle = '#141618';
+      x.fillStyle = '#10243A';
       x.textAlign = 'center';
       x.font = '700 76px "Barlow Condensed", Georgia, sans-serif';
       x.fillText('CONTENTS INDEX', w / 2, 190);
-      x.fillStyle = '#9E4B28';
+      x.fillStyle = '#006393';
       x.fillRect(220, 225, w - 440, 4);
 
       const list =
@@ -546,14 +546,14 @@ export function BooksShowcase({
         const n = String(i + 1).padStart(2, '0');
         const pageNo = String(4 + i * 8).padStart(3, ' ');
         const left = n + '. ' + trimToWidth(x, list[i], 650);
-        x.fillStyle = '#141618';
+        x.fillStyle = '#10243A';
         x.fillText(left, 140, y);
         x.textAlign = 'right';
-        x.fillStyle = '#9E4B28';
+        x.fillStyle = '#006393';
         x.fillText(pageNo, w - 140, y);
         x.textAlign = 'left';
         x.globalAlpha = 0.22;
-        x.fillStyle = '#141618';
+        x.fillStyle = '#10243A';
         x.fillRect(140, y + 16, w - 280, 2);
         x.globalAlpha = 1;
         y += 112;
@@ -638,7 +638,7 @@ export function BooksShowcase({
 
       const indexPageMat = std({ map: makeIndexPageTex(cfg.chapters), roughness: 0.92, envMapIntensity: 0.2, side: THREE.DoubleSide });
 
-      const edgeColor = cfg.edge ?? '#eee4cf';
+      const edgeColor = cfg.edge ?? '#E7F3FA';
       const mEdge = std({ color: edgeColor, bumpMap: laminateBump, bumpScale: 0.0035, roughness: 0.68, envMapIntensity: 0.3 });
       const mFront = std({ bumpMap: laminateBump, bumpScale: 0.0035, roughness: 0.48, envMapIntensity: 0.32 });
       const mBack = std({ bumpMap: laminateBump, bumpScale: 0.0035, roughness: 0.56, envMapIntensity: 0.28 });
@@ -652,7 +652,7 @@ export function BooksShowcase({
           paintDefaultFront(ctx, 1024, 1536, {
             title: cfg.title,
             author: cfg.author,
-            bg: cfg.spineBg ?? cfg.backBg ?? '#191C20',
+            bg: cfg.spineBg ?? cfg.backBg ?? '#0D1B2E',
             year: cfg.year,
           });
         return c;
@@ -661,7 +661,7 @@ export function BooksShowcase({
         const c = mkCanvas(1024, 1536);
         const ctx = c.getContext('2d')!;
         if (cfg.back) cfg.back(ctx, 1024, 1536);
-        else paintBack(ctx, 1024, 1536, { backBg: cfg.backBg ?? '#191C20', backInk: cfg.backInk ?? '243,240,233' });
+        else paintBack(ctx, 1024, 1536, { backBg: cfg.backBg ?? '#0D1B2E', backInk: cfg.backInk ?? '244,248,252' });
         return c;
       });
       loadOrPaint(mSpine, cfg.images?.spine ?? null, () => {
@@ -670,8 +670,8 @@ export function BooksShowcase({
         if (cfg.spine) cfg.spine(ctx, 220, 1536);
         else
           paintSpine(ctx, 220, 1536, {
-            spineBg: cfg.spineBg ?? cfg.backBg ?? '#191C20',
-            spineInk: cfg.spineInk ?? '#F3F0E9',
+            spineBg: cfg.spineBg ?? cfg.backBg ?? '#0D1B2E',
+            spineInk: cfg.spineInk ?? '#F4F8FC',
             spineFont: cfg.spineFont ?? '700 36px "Barlow Condensed", Georgia',
             title: cfg.title,
             author: cfg.author,
@@ -1568,15 +1568,15 @@ export function BooksShowcase({
   }, [books, showDetailPanel]);
 
   const themeVars = {
-    '--bs-navy': themeColors?.navy ?? '#141618',
-    '--bs-pink': themeColors?.pink ?? '#EC743C',
-    '--bs-cream': themeColors?.cream ?? '#F6F4EF',
-    '--bs-lav': themeColors?.lav ?? '#D8D1C3',
-    '--bs-peri': themeColors?.peri ?? '#A95632',
-    '--bs-bg-light': themeColors?.bgLight ?? themeColors?.bg ?? '#ECE8DF',
-    '--bs-bg-dark': themeColors?.bgDark ?? themeColors?.bg ?? '#191C20',
-    '--bs-fg-light': themeColors?.foregroundLight ?? '#141618',
-    '--bs-fg-dark': themeColors?.foregroundDark ?? '#F3F0E9',
+    '--bs-navy': themeColors?.navy ?? '#10243A',
+    '--bs-pink': themeColors?.pink ?? '#69C5F5',
+    '--bs-cream': themeColors?.cream ?? '#FFFFFF',
+    '--bs-lav': themeColors?.lav ?? '#D4DFEB',
+    '--bs-peri': themeColors?.peri ?? '#0A6AA1',
+    '--bs-bg-light': themeColors?.bgLight ?? themeColors?.bg ?? '#F1F6FB',
+    '--bs-bg-dark': themeColors?.bgDark ?? themeColors?.bg ?? '#0D1B2E',
+    '--bs-fg-light': themeColors?.foregroundLight ?? '#10243A',
+    '--bs-fg-dark': themeColors?.foregroundDark ?? '#F4F8FC',
   } as React.CSSProperties;
 
   const panelVisible = uiMode === 'detail';
@@ -1604,8 +1604,8 @@ export function BooksShowcase({
       aria-label={`${heroTitle} interactive volume showcase`}
       data-state={uiMode}
       className={cn(
-        'book-showcase relative isolate h-[540px] sm:h-[620px] overflow-hidden border border-[#141618]/15 dark:border-[#F3F0E9]/14 outline-none [container-type:size]',
-        'focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-[#EC743C]',
+        'book-showcase relative isolate h-[540px] sm:h-[620px] overflow-hidden border border-[#10243A]/15 dark:border-[#F4F8FC]/14 outline-none [container-type:size]',
+        'focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-[#69C5F5]',
         'transition-colors duration-500 ease-out',
         uiMode === 'hero'
           ? 'bg-[var(--bs-bg-light)] text-[var(--bs-fg-light)] dark:bg-[var(--bs-bg-dark)] dark:text-[var(--bs-fg-dark)]'
@@ -1635,10 +1635,10 @@ export function BooksShowcase({
             uiMode === 'hero' ? 'opacity-100' : 'opacity-0'
           )}
         >
-          <p className="font-mono-tabular text-xs uppercase tracking-widest text-[#9E4B28] dark:text-[#EC743C]">
+          <p className="font-mono-tabular text-xs uppercase tracking-widest text-brand dark:text-[#69C5F5]">
             {navTitle}
           </p>
-          <p className="hidden sm:block font-mono-tabular text-[11px] text-[#4A5054] dark:text-[#A1A7AB]">
+          <p className="hidden sm:block font-mono-tabular text-[11px] text-[#465C72] dark:text-[#B5C5D7]">
             Click any 3D volume to inspect contents index
           </p>
         </div>
@@ -1650,7 +1650,7 @@ export function BooksShowcase({
             type="button"
             aria-label="Previous volumes"
             onClick={() => shiftCarouselRef.current(-1)}
-            className={`absolute left-3 top-1/2 z-30 -translate-y-1/2 inline-flex h-11 w-11 items-center justify-center border border-[#141618]/20 bg-[#F6F4EF]/90 text-[#141618] shadow-lg transition-all duration-200 hover:border-[#9E4B28] cursor-pointer ${
+            className={`absolute left-3 top-1/2 z-30 -translate-y-1/2 inline-flex h-11 w-11 items-center justify-center border border-[#10243A]/20 bg-[#FFFFFF]/90 text-[#10243A] shadow-lg transition-all duration-200 hover:border-brand cursor-pointer ${
               uiMode === 'hero' ? 'pointer-events-auto opacity-100' : 'pointer-events-none opacity-0'
             }`}
           >
@@ -1660,7 +1660,7 @@ export function BooksShowcase({
             type="button"
             aria-label="Next volumes"
             onClick={() => shiftCarouselRef.current(1)}
-            className={`absolute right-3 top-1/2 z-30 -translate-y-1/2 inline-flex h-11 w-11 items-center justify-center border border-[#141618]/20 bg-[#F6F4EF]/90 text-[#141618] shadow-lg transition-all duration-200 hover:border-[#9E4B28] cursor-pointer ${
+            className={`absolute right-3 top-1/2 z-30 -translate-y-1/2 inline-flex h-11 w-11 items-center justify-center border border-[#10243A]/20 bg-[#FFFFFF]/90 text-[#10243A] shadow-lg transition-all duration-200 hover:border-brand cursor-pointer ${
               uiMode === 'hero' ? 'pointer-events-auto opacity-100' : 'pointer-events-none opacity-0'
             }`}
           >
@@ -1676,7 +1676,7 @@ export function BooksShowcase({
         aria-hidden="true"
         className={
           'absolute left-0 top-0 z-30 -translate-x-1/2 -translate-y-1/2 px-4 py-2 ' +
-          'text-xs font-mono-tabular font-bold uppercase tracking-widest text-[#F3F0E9] bg-[#9E4B28] shadow-xl pointer-events-none ' +
+          'text-xs font-mono-tabular font-bold uppercase tracking-widest text-on-brand bg-brand shadow-xl pointer-events-none ' +
           'transition-[opacity,transform] duration-200 will-change-[left,top,opacity,transform] ' +
           OPEN_BTN_OFF.join(' ')
         }
@@ -1691,7 +1691,7 @@ export function BooksShowcase({
         aria-hidden={uiMode !== 'detail'}
         tabIndex={uiMode === 'detail' ? 0 : -1}
         aria-label="Close volume inspection"
-        className={`absolute right-5 top-5 z-40 inline-flex h-11 px-4 items-center justify-center gap-2 border border-[#F3F0E9]/35 bg-[#121417]/90 text-xs font-mono-tabular uppercase tracking-wider text-[#F3F0E9] transition-opacity duration-300 hover:border-[#EC743C] hover:text-[#EC743C] cursor-pointer ${
+        className={`absolute right-5 top-5 z-40 inline-flex h-11 px-4 items-center justify-center gap-2 border border-[#F4F8FC]/35 bg-[#07111F]/90 text-xs font-mono-tabular uppercase tracking-wider text-[#F4F8FC] transition-opacity duration-300 hover:border-[#69C5F5] hover:text-[#69C5F5] cursor-pointer ${
           uiMode === 'detail' ? 'visible pointer-events-auto opacity-100' : 'invisible pointer-events-none opacity-0'
         }`}
       >
@@ -1706,7 +1706,7 @@ export function BooksShowcase({
               key={bk.id}
               type="button"
               onClick={() => openBookIndexRef.current(idx)}
-              className="min-h-[34px] px-3 py-1 text-[11px] font-mono-tabular bg-[#F6F4EF]/92 dark:bg-[#121417]/92 text-[#141618] dark:text-[#F3F0E9] border border-[#141618]/20 dark:border-[#F3F0E9]/22 hover:border-[#9E4B28] hover:text-[#9E4B28] dark:hover:border-[#EC743C] dark:hover:text-[#EC743C] transition-colors cursor-pointer whitespace-nowrap shrink-0"
+              className="min-h-[34px] px-3 py-1 text-[11px] font-mono-tabular bg-[#FFFFFF]/92 dark:bg-[#07111F]/92 text-[#10243A] dark:text-[#F4F8FC] border border-[#10243A]/20 dark:border-[#F4F8FC]/22 hover:border-brand hover:text-brand dark:hover:border-[#69C5F5] dark:hover:text-[#69C5F5] transition-colors cursor-pointer whitespace-nowrap shrink-0"
             >
               0{idx + 1} · {bk.title}
             </button>
@@ -1726,15 +1726,15 @@ export function BooksShowcase({
           <p className={`font-mono-tabular text-xs uppercase tracking-widest text-[var(--bs-pink)] mb-2 ${dpChild(50)}`}>
             {selectedCfg?.categoryLabel ?? 'Berry Alloys Compendium'} · {selectedCfg?.year}
           </p>
-          <h2 className={`font-display m-0 uppercase text-[#F3F0E9] text-[clamp(32px,4cqw,56px)] font-bold leading-[0.98] ${dpChild(50)}`}>
+          <h2 className={`font-display m-0 uppercase text-[#F4F8FC] text-[clamp(32px,4cqw,56px)] font-bold leading-[0.98] ${dpChild(50)}`}>
             {selectedCfg?.title}
           </h2>
-          <p className={`mt-4 max-w-[54ch] text-[#D8D1C3] text-sm sm:text-base leading-relaxed @max-[760px]:line-clamp-3 ${dpChild(130)}`}>
+          <p className={`mt-4 max-w-[54ch] text-[#D4DFEB] text-sm sm:text-base leading-relaxed @max-[760px]:line-clamp-3 ${dpChild(130)}`}>
             {selectedCfg?.desc}
           </p>
-          <div className={`mt-5 pt-4 border-t border-[#F3F0E9]/16 text-xs font-mono-tabular text-[#A1A7AB] flex flex-wrap items-center justify-between gap-2 ${dpChild(210)}`}>
+          <div className={`mt-5 pt-4 border-t border-[#F4F8FC]/16 text-xs font-mono-tabular text-[#B5C5D7] flex flex-wrap items-center justify-between gap-2 ${dpChild(210)}`}>
             <span>Author / Scope: {selectedCfg?.author}</span>
-            <span className="text-[#EC743C]">CIN {selectedCfg?.year === 'FY 2019–2026' ? 'U27310WB2006PLC145016' : 'Published Record'}</span>
+            <span className="text-[#69C5F5]">CIN {selectedCfg?.year === 'FY 2019–2026' ? 'U27310WB2006PLC145016' : 'Published Record'}</span>
           </div>
 
           <div className={`pointer-events-auto mt-6 flex flex-wrap items-center gap-3 ${dpChild(330)}`}>
@@ -1743,14 +1743,14 @@ export function BooksShowcase({
                 <button
                   type="button"
                   onClick={() => onPrimaryAction?.(selectedCfg)}
-                  className="inline-flex min-h-[44px] items-center gap-2 bg-[#A95632] px-5 py-2.5 text-xs font-semibold text-[#F3F0E9] hover:bg-[#EC743C] hover:text-[#141618] transition-colors cursor-pointer whitespace-nowrap"
+                  className="inline-flex min-h-[44px] items-center gap-2 bg-[#0A6AA1] px-5 py-2.5 text-xs font-semibold text-[#F4F8FC] hover:bg-[#004C73] hover:text-[#F4F8FC] transition-colors cursor-pointer whitespace-nowrap"
                 >
                   {selectedCfg.primaryActionLabel ?? 'Open Reference'}
                 </button>
                 <button
                   type="button"
                   onClick={() => onSecondaryAction?.(selectedCfg)}
-                  className="inline-flex min-h-[44px] items-center gap-2 border border-[#F3F0E9]/30 bg-[#191C20] px-5 py-2.5 text-xs font-semibold text-[#F3F0E9] hover:border-[#EC743C] transition-colors cursor-pointer whitespace-nowrap"
+                  className="inline-flex min-h-[44px] items-center gap-2 border border-[#F4F8FC]/30 bg-[#0D1B2E] px-5 py-2.5 text-xs font-semibold text-[#F4F8FC] hover:border-[#69C5F5] transition-colors cursor-pointer whitespace-nowrap"
                 >
                   {selectedCfg.secondaryActionLabel ?? 'Request Quote'}
                 </button>

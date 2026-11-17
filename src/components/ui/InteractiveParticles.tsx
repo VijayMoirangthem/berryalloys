@@ -1,6 +1,7 @@
 import { useEffect, useRef, useState } from 'react';
 import * as THREE from 'three';
 import { cn } from '../../lib/utils';
+import { useTheme } from '../../context/ThemeContext';
 
 const VERTEX_SHADER = `
   precision highp float;
@@ -16,6 +17,7 @@ const VERTEX_SHADER = `
   uniform float uRandom;
   uniform float uDepth;
   uniform float uSize;
+  uniform float uIntro;
   uniform vec2 uTextureSize;
   uniform sampler2D uTexture;
   uniform sampler2D uTouch;
@@ -89,6 +91,12 @@ const VERTEX_SHADER = `
     displaced.z += rndz * (random(pindex) * 2.0 * uDepth);
     displaced.xy -= uTextureSize * 0.5;
 
+    // Entrance: particles converge from scattered positions into the typography
+    float inv = 1.0 - uIntro;
+    float inv2 = inv * inv;
+    displaced.xy += vec2(cos(angle), sin(angle)) * inv2 * (140.0 + 220.0 * random(pindex + 3.0));
+    displaced.z += inv2 * 90.0 * (random(pindex + 7.0) - 0.5);
+
     float t = texture2D(uTouch, puv).r;
     displaced.z += t * 22.0 * rndz;
     displaced.x += cos(angle) * t * 18.0 * rndz;
@@ -96,7 +104,7 @@ const VERTEX_SHADER = `
 
     float psize = (snoise(vec3(uTime * 0.35, puv * 3.0)) + 2.0);
     psize *= max(grey, 0.25);
-    psize *= uSize;
+    psize *= uSize * mix(0.4, 1.0, uIntro);
 
     vec4 mvPosition = modelViewMatrix * vec4(displaced, 1.0);
     mvPosition.xyz += position * psize;
@@ -122,7 +130,7 @@ const FRAGMENT_SHADER = `
     float t = smoothstep(0.0, 0.5, 0.5 - dist);
     float radius = max(0.0, 0.5 - dist) * 2.0;
 
-    // Subtle ember edge highlight mixed with primary copper/ivory tint
+    // Brand-blue edge highlight mixed with the primary typography tint
     vec3 tint = mix(uAccentColor, uColor, smoothstep(0.35, 0.95, grey));
     vec4 color = vec4(tint, grey * radius * t);
     if (color.a < 0.05) discard;
@@ -279,7 +287,7 @@ function createTypographySampleDataUrl(
 
     if (subtitle) {
       ctx.font = '600 22px "IBM Plex Mono", monospace';
-      ctx.fillStyle = '#D8D1C3';
+      ctx.fillStyle = '#D4DFEB';
       ctx.fillText(subtitle.toUpperCase(), canvas.width / 2, canvas.height * 0.78);
     }
   }
@@ -296,12 +304,18 @@ export function InteractiveParticles({
   lines,
   subtitle = 'FROM HEAT TO PRECISION · EST. 2006',
   className,
-  particleColor = '#F3F0E9',
-  accentColor = '#EC743C',
+  particleColor,
+  accentColor,
   particleSize = 1.85,
 }: InteractiveParticlesProps) {
   const containerRef = useRef<HTMLDivElement>(null);
+  const { theme } = useTheme();
   const [fallback, setFallback] = useState(false);
+  const resolvedPrimary = particleColor ?? (theme === 'dark' ? '#F4F8FC' : '#10243A');
+  const resolvedAccent = accentColor ?? (theme === 'dark' ? '#69C5F5' : '#006393');
+  const colorsRef = useRef({ primary: resolvedPrimary, accent: resolvedAccent });
+  colorsRef.current = { primary: resolvedPrimary, accent: resolvedAccent };
+  const applyColorsRef = useRef<(() => void) | null>(null);
 
   const linesKey = lines ? lines.join('|') : '';
   const displayLines = lines && lines.length > 0 ? lines : [text];
@@ -362,6 +376,7 @@ export function InteractiveParticles({
     let rafId = 0;
     let timeoutId = 0;
     const clock = new THREE.Clock();
+    let introStart = 0;
 
     const computeFitScale = (w: number, h: number, imgW: number, imgH: number) => {
       const fovRad = (camera.fov * Math.PI) / 180;
@@ -455,8 +470,9 @@ export function InteractiveParticles({
             uTextureSize: { value: new THREE.Vector2(imgW, imgH) },
             uTexture: { value: texture },
             uTouch: { value: touch.texture },
-            uColor: { value: new THREE.Color(particleColor) },
-            uAccentColor: { value: new THREE.Color(accentColor) },
+            uIntro: { value: prefersReduced ? 1 : 0 },
+            uColor: { value: new THREE.Color(colorsRef.current.primary) },
+            uAccentColor: { value: new THREE.Color(colorsRef.current.accent) },
           },
           vertexShader: VERTEX_SHADER,
           fragmentShader: FRAGMENT_SHADER,
@@ -498,23 +514,23 @@ export function InteractiveParticles({
       scatterAtClientPoint(e.clientX, e.clientY);
     };
 
-    const onTouchStart = (e: TouchEvent) => {
-      const pt = e.touches[0];
-      if (pt) scatterAtClientPoint(pt.clientX, pt.clientY);
-    };
-
-    const onTouchMove = (e: TouchEvent) => {
-      const pt = e.touches[0];
-      if (pt) scatterAtClientPoint(pt.clientX, pt.clientY);
-    };
-
+    // Pointer events cover mouse, pen and touch; one handler means a gesture is never processed twice.
+    // The container uses touch-action: pan-y so vertical page scrolling always wins on phones.
     container.addEventListener('pointermove', onPointerMove, { passive: true });
-    container.addEventListener('touchstart', onTouchStart, { passive: true });
-    container.addEventListener('touchmove', onTouchMove, { passive: true });
+    container.addEventListener('pointerdown', onPointerMove, { passive: true });
+
+    // Live theme change: update uniforms only, keep particle positions.
+    applyColorsRef.current = () => {
+      if (!particlesMesh) return;
+      const u = particlesMesh.material.uniforms;
+      u.uColor.value.set(colorsRef.current.primary);
+      u.uAccentColor.value.set(colorsRef.current.accent);
+      if (prefersReduced) renderer?.render(scene, camera);
+    };
 
     const observer = new IntersectionObserver(
       (entries) => {
-        isVisible = entries[0]?.isIntersecting ?? true;
+        isVisible = entries[entries.length - 1]?.isIntersecting ?? true;
       },
       { threshold: 0.02 }
     );
@@ -582,6 +598,13 @@ export function InteractiveParticles({
         const dt = Math.min(clock.getDelta(), 0.05);
         touch.update();
         particlesMesh.material.uniforms.uTime.value += dt;
+        const intro = particlesMesh.material.uniforms.uIntro;
+        if (intro.value < 1) {
+          // Wall-clock progress, so the formation takes ~1.5s even when frames are slow.
+          if (introStart === 0) introStart = performance.now();
+          const p = Math.min(1, (performance.now() - introStart) / 1500);
+          intro.value = 1 - Math.pow(1 - p, 3);
+        }
         renderer?.render(scene, camera);
       }
       afterDraw();
@@ -598,8 +621,8 @@ export function InteractiveParticles({
       observer.disconnect();
       resizeObserver.disconnect();
       container.removeEventListener('pointermove', onPointerMove);
-      container.removeEventListener('touchstart', onTouchStart);
-      container.removeEventListener('touchmove', onTouchMove);
+      container.removeEventListener('pointerdown', onPointerMove);
+      applyColorsRef.current = null;
       window.removeEventListener('resize', onResize);
 
       hitGeo.dispose();
@@ -616,7 +639,11 @@ export function InteractiveParticles({
         container.removeChild(canvasEl);
       }
     };
-  }, [accentColor, linesKey, particleColor, particleSize, subtitle, text]);
+  }, [linesKey, particleSize, subtitle, text]);
+
+  useEffect(() => {
+    applyColorsRef.current?.();
+  }, [resolvedPrimary, resolvedAccent]);
 
   if (fallback) {
     return (
@@ -625,15 +652,15 @@ export function InteractiveParticles({
           <p
             key={line}
             className={cn(
-              'font-display font-bold uppercase tracking-tight text-[#F3F0E9] leading-[0.92]',
-              i === 0 ? 'text-5xl sm:text-7xl md:text-8xl' : 'text-3xl sm:text-5xl md:text-6xl text-[#F3F0E9]/88 mt-1'
+              'font-display font-bold uppercase tracking-tight text-ink leading-[0.92]',
+              i === 0 ? 'text-5xl sm:text-7xl md:text-8xl' : 'text-3xl sm:text-5xl md:text-6xl text-ink/85 mt-1'
             )}
           >
             {line}
           </p>
         ))}
         {subtitle && (
-          <p className="font-mono-tabular text-xs sm:text-sm uppercase tracking-[0.28em] text-[#EC743C] mt-4">
+          <p className="font-mono-tabular text-xs sm:text-sm uppercase tracking-[0.28em] text-brand mt-4">
             {subtitle}
           </p>
         )}
@@ -646,7 +673,7 @@ export function InteractiveParticles({
       ref={containerRef}
       role="img"
       aria-label={`${displayLines.join(' ')} — ${subtitle ?? 'interactive metallurgical particle typography'}`}
-      className={cn('relative w-full h-full min-h-[260px] sm:min-h-[340px] select-none overflow-hidden cursor-crosshair', className)}
+      className={cn('relative w-full h-full min-h-[260px] sm:min-h-[340px] select-none overflow-hidden cursor-crosshair touch-pan-y', className)}
     />
   );
 }

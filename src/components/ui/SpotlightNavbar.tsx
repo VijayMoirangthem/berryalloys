@@ -50,14 +50,14 @@ export function SpotlightNavbar({
     <nav
       aria-label={ariaLabel}
       className={cn(
-        'border-b border-[#141618]/12 dark:border-[#F3F0E9]/12 bg-[#ECE8DF]/88 dark:bg-[#191C20]/95 backdrop-blur-md transition-colors',
+        'border-b border-[#10243A]/12 dark:border-[#F4F8FC]/12 bg-[#F1F6FB]/88 dark:bg-[#0D1B2E]/95 backdrop-blur-md transition-colors',
         className
       )}
     >
       <div className="max-w-[1360px] mx-auto px-4 sm:px-6 lg:px-8 py-1.5 overflow-x-auto">
         <div
           ref={navRef}
-          className="relative inline-flex min-w-full sm:min-w-0 items-center gap-1.5 border border-[#141618]/12 dark:border-[#F3F0E9]/14 bg-[#F6F4EF]/75 dark:bg-[#121417]/75 px-2 py-1 overflow-hidden"
+          className="relative inline-flex min-w-full sm:min-w-0 items-center gap-1.5 border border-[#10243A]/12 dark:border-[#F4F8FC]/14 bg-[#FFFFFF]/75 dark:bg-[#07111F]/75 px-2 py-1 overflow-hidden"
           style={{ ['--spotlight-x' as string]: '-160px' }}
         >
           {/* Ambient Pointer Spotlight Wash */}
@@ -66,7 +66,7 @@ export function SpotlightNavbar({
             className="pointer-events-none absolute inset-0 transition-opacity duration-300"
             style={{
               background:
-                'radial-gradient(110px circle at var(--spotlight-x, -160px) 50%, rgba(236, 116, 60, 0.16), transparent 72%)',
+                'radial-gradient(110px circle at var(--spotlight-x, -160px) 50%, rgba(40,148,204, 0.16), transparent 72%)',
             }}
           />
 
@@ -80,10 +80,10 @@ export function SpotlightNavbar({
                 cn(
                   'relative z-10 min-h-[38px] flex items-center px-3.5 py-1.5 text-xs font-medium whitespace-nowrap shrink-0 transition-colors border',
                   isActive
-                    ? 'bg-[#FFFFFF] dark:bg-[#20242A] text-[#141618] dark:text-[#F3F0E9] font-semibold border-[#9E4B28]/45 dark:border-[#EC743C]/45 shadow-xs'
+                    ? 'bg-[#FFFFFF] dark:bg-[#12243B] text-[#10243A] dark:text-[#F4F8FC] font-semibold border-brand/45 dark:border-[#69C5F5]/45 shadow-xs'
                     : hoveredIndex === idx
-                    ? 'bg-[#FFFFFF]/55 dark:bg-[#20242A]/55 text-[#141618] dark:text-[#F3F0E9] border-transparent'
-                    : 'text-[#4A5054] dark:text-[#A1A7AB] border-transparent hover:text-[#141618] dark:hover:text-[#F3F0E9]'
+                    ? 'bg-[#FFFFFF]/55 dark:bg-[#12243B]/55 text-[#10243A] dark:text-[#F4F8FC] border-transparent'
+                    : 'text-[#465C72] dark:text-[#B5C5D7] border-transparent hover:text-[#10243A] dark:hover:text-[#F4F8FC]'
                 )
               }
             >
@@ -93,7 +93,7 @@ export function SpotlightNavbar({
                   {isActive && (
                     <span
                       aria-hidden="true"
-                      className="absolute inset-x-2 -bottom-px h-[2px] bg-[#9E4B28] dark:bg-[#EC743C]"
+                      className="absolute inset-x-2 -bottom-px h-[2px] bg-brand dark:bg-[#69C5F5]"
                     />
                   )}
                 </>

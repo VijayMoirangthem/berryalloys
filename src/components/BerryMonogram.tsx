@@ -26,24 +26,24 @@ export function BerryMonogram({
 }: BerryMonogramProps) {
   const frameBg =
     surface === 'dark'
-      ? 'bg-[#121417] border-[#F3F0E9]/22'
+      ? 'bg-[#07111F] border-[#F4F8FC]/22'
       : surface === 'light'
-      ? 'bg-[#F6F4EF] border-[#141618]/20'
-      : 'bg-[#F6F4EF] border-[#141618]/20 dark:bg-[#121417] dark:border-[#F3F0E9]/22';
+      ? 'bg-[#FFFFFF] border-[#10243A]/20'
+      : 'bg-[#FFFFFF] border-[#10243A]/20 dark:bg-[#07111F] dark:border-[#F4F8FC]/22';
 
   const letterFill =
     surface === 'dark'
-      ? 'fill-[#F3F0E9]'
+      ? 'fill-[#F4F8FC]'
       : surface === 'light'
-      ? 'fill-[#141618]'
-      : 'fill-[#141618] dark:fill-[#F3F0E9]';
+      ? 'fill-[#10243A]'
+      : 'fill-[#10243A] dark:fill-[#F4F8FC]';
 
   const emberFill =
     surface === 'dark'
-      ? 'fill-[#EC743C]'
+      ? 'fill-[#69C5F5]'
       : surface === 'light'
-      ? 'fill-[#9E4B28]'
-      : 'fill-[#9E4B28] dark:fill-[#EC743C]';
+      ? 'fill-brand'
+      : 'fill-brand dark:fill-[#69C5F5]';
 
   const svg = (
     <svg

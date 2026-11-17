@@ -70,20 +70,20 @@ export function PerspectiveCarousel({
   return (
     <div
       className={cn(
-        'bg-[#121417] text-[#F3F0E9] border border-[#141618]/20 dark:border-[#F3F0E9]/14 p-5 sm:p-8 overflow-hidden select-none',
+        'bg-[#07111F] text-[#F4F8FC] border border-[#10243A]/20 dark:border-[#F4F8FC]/14 p-5 sm:p-8 overflow-hidden select-none',
         className
       )}
       onMouseEnter={() => setPaused(true)}
       onMouseLeave={() => setPaused(false)}
     >
       {/* Top Deck Bar */}
-      <div className="flex flex-wrap items-center justify-between gap-3 pb-4 border-b border-[#F3F0E9]/12">
+      <div className="flex flex-wrap items-center justify-between gap-3 pb-4 border-b border-[#F4F8FC]/12">
         <div className="flex items-center gap-2.5 text-[11px] font-mono-tabular uppercase tracking-widest">
-          <span className="text-[#EC743C]">{heading}</span>
-          <span aria-hidden="true" className="text-[#F3F0E9]/30">
+          <span className="text-[#69C5F5]">{heading}</span>
+          <span aria-hidden="true" className="text-[#F4F8FC]/30">
             /
           </span>
-          <span className="text-[#A1A7AB]">
+          <span className="text-[#B5C5D7]">
             Plate 0{currentIndex + 1} of 0{total}
           </span>
         </div>
@@ -93,7 +93,7 @@ export function PerspectiveCarousel({
             type="button"
             onClick={() => setPaused((p) => !p)}
             aria-label={paused ? 'Resume deck rotation' : 'Pause deck rotation'}
-            className="inline-flex items-center gap-1.5 min-h-[34px] px-2.5 py-1 text-[11px] font-mono-tabular uppercase tracking-wider border border-[#F3F0E9]/18 bg-[#191C20] text-[#F3F0E9] hover:border-[#EC743C] transition-colors cursor-pointer"
+            className="inline-flex items-center gap-1.5 min-h-[34px] px-2.5 py-1 text-[11px] font-mono-tabular uppercase tracking-wider border border-[#F4F8FC]/18 bg-[#0D1B2E] text-[#F4F8FC] hover:border-[#69C5F5] transition-colors cursor-pointer"
           >
             {paused ? <Play className="w-3 h-3" aria-hidden="true" /> : <Pause className="w-3 h-3" aria-hidden="true" />}
             <span>{paused ? 'Play' : 'Pause'}</span>
@@ -102,7 +102,7 @@ export function PerspectiveCarousel({
             type="button"
             onClick={() => step(-1)}
             aria-label="Previous 3D inspection plate"
-            className="inline-flex items-center justify-center w-9 h-9 border border-[#F3F0E9]/18 bg-[#191C20] text-[#F3F0E9] hover:border-[#EC743C] hover:text-[#EC743C] transition-colors cursor-pointer"
+            className="inline-flex items-center justify-center w-9 h-9 border border-[#F4F8FC]/18 bg-[#0D1B2E] text-[#F4F8FC] hover:border-[#69C5F5] hover:text-[#69C5F5] transition-colors cursor-pointer"
           >
             <ChevronLeft className="w-4 h-4" aria-hidden="true" />
           </button>
@@ -110,7 +110,7 @@ export function PerspectiveCarousel({
             type="button"
             onClick={() => step(1)}
             aria-label="Next 3D inspection plate"
-            className="inline-flex items-center justify-center w-9 h-9 border border-[#F3F0E9]/18 bg-[#191C20] text-[#F3F0E9] hover:border-[#EC743C] hover:text-[#EC743C] transition-colors cursor-pointer"
+            className="inline-flex items-center justify-center w-9 h-9 border border-[#F4F8FC]/18 bg-[#0D1B2E] text-[#F4F8FC] hover:border-[#69C5F5] hover:text-[#69C5F5] transition-colors cursor-pointer"
           >
             <ChevronRight className="w-4 h-4" aria-hidden="true" />
           </button>
@@ -161,11 +161,11 @@ export function PerspectiveCarousel({
               className={cn(
                 'absolute w-[84%] max-w-[430px] aspect-[16/10] border overflow-hidden text-left transition-shadow cursor-pointer',
                 isCenter
-                  ? 'border-[#EC743C]/70 shadow-2xl ring-1 ring-[#EC743C]/25'
-                  : 'border-[#F3F0E9]/16 opacity-60 hover:opacity-90'
+                  ? 'border-[#69C5F5]/70 shadow-2xl ring-1 ring-[#69C5F5]/25'
+                  : 'border-[#F4F8FC]/16 opacity-60 hover:opacity-90'
               )}
               style={{
-                backgroundColor: slide.specimenPlate ? '#FFFFFF' : '#191C20',
+                backgroundColor: slide.specimenPlate ? '#FFFFFF' : '#0D1B2E',
                 pointerEvents: prefersReduced && !isCenter ? 'none' : 'auto',
               }}
             >
@@ -181,7 +181,7 @@ export function PerspectiveCarousel({
               />
               <span
                 aria-hidden="true"
-                className="absolute top-2.5 left-2.5 bg-[#121417]/88 border border-[#F3F0E9]/18 px-2 py-0.5 text-[10px] font-mono-tabular uppercase tracking-wider text-[#EC743C]"
+                className="absolute top-2.5 left-2.5 bg-[#07111F]/88 border border-[#F4F8FC]/18 px-2 py-0.5 text-[10px] font-mono-tabular uppercase tracking-wider text-[#69C5F5]"
               >
                 {slide.badge}
               </span>
@@ -191,19 +191,19 @@ export function PerspectiveCarousel({
       </div>
 
       {/* Bottom Synchronized Caption & Direct Action */}
-      <div className="pt-4 border-t border-[#F3F0E9]/12 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+      <div className="pt-4 border-t border-[#F4F8FC]/12 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div className="space-y-1 max-w-xl">
-          <p className="font-display text-xl sm:text-2xl font-bold uppercase text-[#F3F0E9]">
+          <p className="font-display text-xl sm:text-2xl font-bold uppercase text-[#F4F8FC]">
             {activeSlide.title}
           </p>
-          <p className="text-xs text-[#A1A7AB] leading-relaxed">{activeSlide.subtitle}</p>
+          <p className="text-xs text-[#B5C5D7] leading-relaxed">{activeSlide.subtitle}</p>
         </div>
 
         {onSlideSelect ? (
           <button
             type="button"
             onClick={() => onSlideSelect(activeSlide)}
-            className="inline-flex items-center gap-1.5 min-h-[40px] px-4 py-2 text-xs font-semibold uppercase tracking-wider bg-[#A95632] text-[#F3F0E9] hover:bg-[#EC743C] hover:text-[#141618] transition-colors whitespace-nowrap shrink-0 cursor-pointer"
+            className="inline-flex items-center gap-1.5 min-h-[40px] px-4 py-2 text-xs font-semibold uppercase tracking-wider bg-[#0A6AA1] text-[#F4F8FC] hover:bg-[#004C73] hover:text-[#F4F8FC] transition-colors whitespace-nowrap shrink-0 cursor-pointer"
           >
             <span>{activeSlide.actionLabel ?? 'Select Alloy Family'}</span>
             <ArrowUpRight className="w-3.5 h-3.5" aria-hidden="true" />
@@ -211,7 +211,7 @@ export function PerspectiveCarousel({
         ) : activeSlide.to ? (
           <Link
             to={activeSlide.to}
-            className="inline-flex items-center gap-1.5 min-h-[40px] px-4 py-2 text-xs font-semibold uppercase tracking-wider bg-[#A95632] text-[#F3F0E9] hover:bg-[#EC743C] hover:text-[#141618] transition-colors whitespace-nowrap shrink-0"
+            className="inline-flex items-center gap-1.5 min-h-[40px] px-4 py-2 text-xs font-semibold uppercase tracking-wider bg-[#0A6AA1] text-[#F4F8FC] hover:bg-[#004C73] hover:text-[#F4F8FC] transition-colors whitespace-nowrap shrink-0"
           >
             <span>{activeSlide.actionLabel ?? 'Inspect Record'}</span>
             <ArrowUpRight className="w-3.5 h-3.5" aria-hidden="true" />

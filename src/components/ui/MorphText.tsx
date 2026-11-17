@@ -153,7 +153,7 @@ export function MorphText({
       {subtext && (
         <p
           className={cn(
-            'mt-2 uppercase tracking-[0.2em] text-xs text-[#A1A7AB]',
+            'mt-2 uppercase tracking-[0.2em] text-xs text-[#B5C5D7]',
             subtextClassName
           )}
         >

@@ -236,7 +236,7 @@ export function ImageScatter({
   return (
     <div
       className={cn(
-        'relative w-full overflow-hidden border border-[#141618]/14 dark:border-[#F3F0E9]/14 bg-[#ECE8DF] dark:bg-[#191C20] flex flex-col justify-between',
+        'relative w-full overflow-hidden border border-[#10243A]/14 dark:border-[#F4F8FC]/14 bg-[#F1F6FB] dark:bg-[#0D1B2E] flex flex-col justify-between',
         className
       )}
     >
@@ -252,7 +252,7 @@ export function ImageScatter({
       />
 
       {/* Top Bar: Theme selector tabs & Pause control */}
-      <div className="relative z-20 flex flex-wrap items-center justify-between gap-3 px-4 sm:px-6 py-3.5 border-b border-[#141618]/12 dark:border-[#F3F0E9]/12 bg-[#FFFFFF]/88 dark:bg-[#121417]/88 backdrop-blur-xs">
+      <div className="relative z-20 flex flex-wrap items-center justify-between gap-3 px-4 sm:px-6 py-3.5 border-b border-[#10243A]/12 dark:border-[#F4F8FC]/12 bg-[#FFFFFF]/88 dark:bg-[#07111F]/88 backdrop-blur-xs">
         <div
           role="tablist"
           aria-label="Culture and community photo sets"
@@ -270,8 +270,8 @@ export function ImageScatter({
                 className={cn(
                   'min-h-[34px] px-3 py-1 text-[11px] font-mono-tabular font-medium transition-colors cursor-pointer whitespace-nowrap shrink-0',
                   active
-                    ? 'bg-[#141618] text-[#F6F4EF] dark:bg-[#A95632] dark:text-[#F3F0E9]'
-                    : 'bg-[#ECE8DF] text-[#4A5054] hover:text-[#141618] dark:bg-[#20242A] dark:text-[#A1A7AB] dark:hover:text-[#F3F0E9]'
+                    ? 'bg-[#10243A] text-[#FFFFFF] dark:bg-[#0A6AA1] dark:text-[#F4F8FC]'
+                    : 'bg-[#F1F6FB] text-[#465C72] hover:text-[#10243A] dark:bg-[#12243B] dark:text-[#B5C5D7] dark:hover:text-[#F4F8FC]'
                 )}
               >
                 0{idx + 1} · {set.label}
@@ -285,7 +285,7 @@ export function ImageScatter({
             type="button"
             onClick={() => stepSet(-1)}
             aria-label="Previous culture photo set"
-            className="inline-flex items-center justify-center w-9 h-9 border border-[#141618]/18 dark:border-[#F3F0E9]/18 bg-white dark:bg-[#20242A] text-[#141618] dark:text-[#F3F0E9] hover:border-[#9E4B28] cursor-pointer"
+            className="inline-flex items-center justify-center w-9 h-9 border border-[#10243A]/18 dark:border-[#F4F8FC]/18 bg-white dark:bg-[#12243B] text-[#10243A] dark:text-[#F4F8FC] hover:border-brand cursor-pointer"
           >
             <ChevronLeft className="w-4 h-4" aria-hidden="true" />
           </button>
@@ -293,7 +293,7 @@ export function ImageScatter({
             type="button"
             onClick={() => setPaused((p) => !p)}
             aria-label={paused ? 'Resume auto rotation' : 'Pause auto rotation'}
-            className="inline-flex items-center justify-center w-9 h-9 border border-[#141618]/18 dark:border-[#F3F0E9]/18 bg-white dark:bg-[#20242A] text-[#141618] dark:text-[#F3F0E9] hover:border-[#9E4B28] cursor-pointer"
+            className="inline-flex items-center justify-center w-9 h-9 border border-[#10243A]/18 dark:border-[#F4F8FC]/18 bg-white dark:bg-[#12243B] text-[#10243A] dark:text-[#F4F8FC] hover:border-brand cursor-pointer"
           >
             {paused ? (
               <Play className="w-3.5 h-3.5" aria-hidden="true" />
@@ -305,7 +305,7 @@ export function ImageScatter({
             type="button"
             onClick={() => stepSet(1)}
             aria-label="Next culture photo set"
-            className="inline-flex items-center justify-center w-9 h-9 border border-[#141618]/18 dark:border-[#F3F0E9]/18 bg-white dark:bg-[#20242A] text-[#141618] dark:text-[#F3F0E9] hover:border-[#9E4B28] cursor-pointer"
+            className="inline-flex items-center justify-center w-9 h-9 border border-[#10243A]/18 dark:border-[#F4F8FC]/18 bg-white dark:bg-[#12243B] text-[#10243A] dark:text-[#F4F8FC] hover:border-brand cursor-pointer"
           >
             <ChevronRight className="w-4 h-4" aria-hidden="true" />
           </button>
@@ -333,16 +333,16 @@ export function ImageScatter({
                 }
                 style={{ width: `${cardGeometry.cardW}px` }}
                 className={cn(
-                  'pointer-events-auto absolute flex flex-col border bg-[#FFFFFF] dark:bg-[#20242A] p-2 shadow-[0_18px_40px_rgba(0,0,0,0.2)] transition-shadow duration-200 cursor-pointer',
+                  'pointer-events-auto absolute flex flex-col border bg-[#FFFFFF] dark:bg-[#12243B] p-2 shadow-[0_18px_40px_rgba(0,0,0,0.2)] transition-shadow duration-200 cursor-pointer',
                   isFocused
-                    ? 'z-30 border-[#9E4B28] dark:border-[#EC743C] shadow-[0_26px_58px_rgba(0,0,0,0.34)]'
-                    : 'z-10 border-[#141618]/18 dark:border-[#F3F0E9]/20 hover:z-30 hover:border-[#9E4B28]'
+                    ? 'z-30 border-brand dark:border-[#69C5F5] shadow-[0_26px_58px_rgba(0,0,0,0.34)]'
+                    : 'z-10 border-[#10243A]/18 dark:border-[#F4F8FC]/20 hover:z-30 hover:border-brand'
                 )}
               >
                 <div
                   className={cn(
                     'aspect-[16/10] w-full overflow-hidden',
-                    item.isEmblem ? 'bg-[#F6F4EF] p-2' : 'bg-[#141618]'
+                    item.isEmblem ? 'bg-[#FFFFFF] p-2' : 'bg-[#10243A]'
                   )}
                 >
                   <img
@@ -354,9 +354,9 @@ export function ImageScatter({
                     )}
                   />
                 </div>
-                <figcaption className="pt-2 pb-0.5 px-0.5 flex items-center justify-between gap-2 text-[11px] font-mono-tabular text-[#141618] dark:text-[#F3F0E9]">
+                <figcaption className="pt-2 pb-0.5 px-0.5 flex items-center justify-between gap-2 text-[11px] font-mono-tabular text-[#10243A] dark:text-[#F4F8FC]">
                   <span className="truncate font-medium">{item.caption}</span>
-                  <span className="text-[10px] text-[#9E4B28] dark:text-[#EC743C] shrink-0">
+                  <span className="text-[10px] text-brand dark:text-[#69C5F5] shrink-0">
                     0{idx + 1}
                   </span>
                 </figcaption>
@@ -368,20 +368,20 @@ export function ImageScatter({
         {/* Center Editorial Title Lockup — Always Unobstructed */}
         <div
           ref={labelRef}
-          className="relative z-20 pointer-events-none text-center max-w-[270px] lg:max-w-[330px] px-5 lg:px-6 py-4 lg:py-5 bg-[#F6F4EF]/96 dark:bg-[#121417]/96 border border-[#141618]/20 dark:border-[#F3F0E9]/22 shadow-2xl"
+          className="relative z-20 pointer-events-none text-center max-w-[270px] lg:max-w-[330px] px-5 lg:px-6 py-4 lg:py-5 bg-[#FFFFFF]/96 dark:bg-[#07111F]/96 border border-[#10243A]/20 dark:border-[#F4F8FC]/22 shadow-2xl"
         >
-          <p className="text-[10px] font-mono-tabular uppercase tracking-widest text-[#9E4B28] dark:text-[#EC743C]">
+          <p className="text-[10px] font-mono-tabular uppercase tracking-widest text-brand dark:text-[#69C5F5]">
             Life & Culture at Berry Alloys
           </p>
-          <h3 className="font-display text-2xl lg:text-3xl font-bold uppercase text-[#141618] dark:text-[#F3F0E9] mt-1 leading-tight">
+          <h3 className="font-display text-2xl lg:text-3xl font-bold uppercase text-[#10243A] dark:text-[#F4F8FC] mt-1 leading-tight">
             {currentSet.label}
           </h3>
           {currentSet.subtitle && (
-            <p className="text-xs text-[#4A5054] dark:text-[#A1A7AB] mt-1.5 leading-relaxed">
+            <p className="text-xs text-[#465C72] dark:text-[#B5C5D7] mt-1.5 leading-relaxed">
               {currentSet.subtitle}
             </p>
           )}
-          <p className="mt-2.5 pt-2 border-t border-[#141618]/10 dark:border-[#F3F0E9]/10 text-[10px] font-mono-tabular uppercase tracking-wider text-[#4A5054] dark:text-[#A1A7AB]">
+          <p className="mt-2.5 pt-2 border-t border-[#10243A]/10 dark:border-[#F4F8FC]/10 text-[10px] font-mono-tabular uppercase tracking-wider text-[#465C72] dark:text-[#B5C5D7]">
             {currentSet.images.length} Field Plates · Hover Frame To Focus
           </p>
         </div>
@@ -389,15 +389,15 @@ export function ImageScatter({
 
       {/* Mobile Clean 2-Column Archival Polaroid Grid (< md) */}
       <div className="md:hidden relative z-10 p-4 space-y-4">
-        <div className="text-center px-4 py-4 bg-[#F6F4EF]/96 dark:bg-[#121417]/96 border border-[#141618]/18 dark:border-[#F3F0E9]/18">
-          <p className="text-[10px] font-mono-tabular uppercase tracking-widest text-[#9E4B28] dark:text-[#EC743C]">
+        <div className="text-center px-4 py-4 bg-[#FFFFFF]/96 dark:bg-[#07111F]/96 border border-[#10243A]/18 dark:border-[#F4F8FC]/18">
+          <p className="text-[10px] font-mono-tabular uppercase tracking-widest text-brand dark:text-[#69C5F5]">
             Life & Culture at Berry Alloys
           </p>
-          <h3 className="font-display text-2xl font-bold uppercase text-[#141618] dark:text-[#F3F0E9] mt-0.5">
+          <h3 className="font-display text-2xl font-bold uppercase text-[#10243A] dark:text-[#F4F8FC] mt-0.5">
             {currentSet.label}
           </h3>
           {currentSet.subtitle && (
-            <p className="text-xs text-[#4A5054] dark:text-[#A1A7AB] mt-1 leading-relaxed">
+            <p className="text-xs text-[#465C72] dark:text-[#B5C5D7] mt-1 leading-relaxed">
               {currentSet.subtitle}
             </p>
           )}
@@ -407,12 +407,12 @@ export function ImageScatter({
           {currentSet.images.map((item, idx) => (
             <figure
               key={`${currentSet.id}-mobile-${idx}`}
-              className="flex flex-col border border-[#141618]/16 dark:border-[#F3F0E9]/18 bg-[#FFFFFF] dark:bg-[#20242A] p-1.5 shadow-md"
+              className="flex flex-col border border-[#10243A]/16 dark:border-[#F4F8FC]/18 bg-[#FFFFFF] dark:bg-[#12243B] p-1.5 shadow-md"
             >
               <div
                 className={cn(
                   'aspect-[16/10] w-full overflow-hidden',
-                  item.isEmblem ? 'bg-[#F6F4EF] p-1.5' : 'bg-[#141618]'
+                  item.isEmblem ? 'bg-[#FFFFFF] p-1.5' : 'bg-[#10243A]'
                 )}
               >
                 <img
@@ -424,7 +424,7 @@ export function ImageScatter({
                   )}
                 />
               </div>
-              <figcaption className="pt-1.5 pb-0.5 px-0.5 text-[10px] font-mono-tabular text-[#141618] dark:text-[#F3F0E9] truncate">
+              <figcaption className="pt-1.5 pb-0.5 px-0.5 text-[10px] font-mono-tabular text-[#10243A] dark:text-[#F4F8FC] truncate">
                 {item.caption}
               </figcaption>
             </figure>

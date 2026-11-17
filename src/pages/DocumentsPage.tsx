@@ -43,22 +43,22 @@ export function DocumentsPage() {
   );
 
   return (
-    <div className="bg-[#F6F4EF] dark:bg-[#121417] text-[#141618] dark:text-[#F3F0E9]">
+    <div className="bg-[#FFFFFF] dark:bg-[#07111F] text-[#10243A] dark:text-[#F4F8FC]">
       <SubNav links={CORPORATE_SUBNAV_LINKS} ariaLabel="Company and governance navigation" />
 
       <div className="max-w-[1360px] mx-auto px-4 sm:px-6 lg:px-8 py-12 lg:py-16 space-y-12">
         <div className="max-w-3xl space-y-4">
           <Breadcrumbs items={[{ label: 'Corporate Documents' }]} />
 
-          <p className="text-xs font-mono-tabular uppercase tracking-widest text-[#9E4B28] dark:text-[#EC743C]">
+          <p className="text-xs font-mono-tabular uppercase tracking-widest text-brand dark:text-[#69C5F5]">
             Statutory Disclosures · CIN {COMPANY_INFO.cin}
           </p>
           <SplitText
             text="Annual returns, CSR governance & policies."
             as="h1"
-            className="font-display fluid-section-title font-bold uppercase tracking-tight text-[#141618] dark:text-[#F3F0E9]"
+            className="font-display fluid-section-title font-bold uppercase tracking-tight text-[#10243A] dark:text-[#F4F8FC]"
           />
-          <p className="text-base text-[#4A5054] dark:text-[#A1A7AB] leading-relaxed">
+          <p className="text-base text-[#465C72] dark:text-[#B5C5D7] leading-relaxed">
             Statutory filings and governance policies organized by category and financial year. Individual PDF binaries were not downloaded into this prototype bundle; each section links directly to the verified index page on the company website rather than providing placeholder files.
           </p>
         </div>
@@ -67,21 +67,21 @@ export function DocumentsPage() {
         <section aria-labelledby="books-compendium-heading" className="space-y-4">
           <div className="flex flex-col sm:flex-row sm:items-end justify-between gap-2">
             <div>
-              <p className="text-xs font-mono-tabular uppercase tracking-widest text-[#9E4B28] dark:text-[#EC743C]">
+              <p className="text-xs font-mono-tabular uppercase tracking-widest text-brand dark:text-[#69C5F5]">
                 3D Technical & Statutory Archive
               </p>
               <h2
                 id="books-compendium-heading"
-                className="font-display text-3xl font-bold uppercase text-[#141618] dark:text-[#F3F0E9]"
+                className="font-display text-3xl font-bold uppercase text-[#10243A] dark:text-[#F4F8FC]"
               >
                 Inspect Bound Reference Dossiers
               </h2>
             </div>
-            <p className="text-xs text-[#4A5054] dark:text-[#A1A7AB]">
+            <p className="text-xs text-[#465C72] dark:text-[#B5C5D7]">
               Select any hardcover spine or click Open Volume to inspect tables of contents.
             </p>
           </div>
-          <div className="border border-[#141618]/15 dark:border-[#F3F0E9]/15 overflow-hidden">
+          <div className="border border-[#10243A]/15 dark:border-[#F4F8FC]/15 overflow-hidden">
             <BooksShowcase
               books={BERRY_COMPENDIUM_BOOKS}
               heroTitle="Compendia"
@@ -97,7 +97,7 @@ export function DocumentsPage() {
           id="doc-directory"
           role="tablist"
           aria-label="Filter corporate documents by category"
-          className="scroll-mt-24 flex flex-wrap items-center gap-1.5 pb-6 border-b border-[#141618]/15 dark:border-[#F3F0E9]/14"
+          className="scroll-mt-24 flex flex-wrap items-center gap-1.5 pb-6 border-b border-[#10243A]/15 dark:border-[#F4F8FC]/14"
         >
           {(
             [
@@ -117,8 +117,8 @@ export function DocumentsPage() {
                 onClick={() => setFilter(type)}
                 className={`min-h-[40px] px-4 py-2 text-xs font-semibold transition-colors whitespace-nowrap shrink-0 cursor-pointer ${
                   active
-                    ? 'bg-[#141618] text-[#F6F4EF] dark:bg-[#A95632] dark:text-[#F3F0E9]'
-                    : 'bg-[#ECE8DF] text-[#4A5054] hover:bg-[#D8D1C3] hover:text-[#141618] dark:bg-[#20242A] dark:text-[#A1A7AB] dark:hover:text-[#F3F0E9]'
+                    ? 'bg-[#10243A] text-[#FFFFFF] dark:bg-[#0A6AA1] dark:text-[#F4F8FC]'
+                    : 'bg-[#F1F6FB] text-[#465C72] hover:bg-[#D4DFEB] hover:text-[#10243A] dark:bg-[#12243B] dark:text-[#B5C5D7] dark:hover:text-[#F4F8FC]'
                 }`}
               >
                 {type}
@@ -133,14 +133,14 @@ export function DocumentsPage() {
             <section
               key={group.id}
               aria-labelledby={`group-${group.id}`}
-              className="bg-white dark:bg-[#20242A] border border-[#141618]/15 dark:border-[#F3F0E9]/14 overflow-hidden"
+              className="bg-white dark:bg-[#12243B] border border-[#10243A]/15 dark:border-[#F4F8FC]/14 overflow-hidden"
             >
-              <div className="p-6 sm:p-8 bg-[#ECE8DF]/75 dark:bg-[#191C20] border-b border-[#141618]/12 dark:border-[#F3F0E9]/12 flex flex-col md:flex-row md:items-center justify-between gap-4">
+              <div className="p-6 sm:p-8 bg-[#F1F6FB]/75 dark:bg-[#0D1B2E] border-b border-[#10243A]/12 dark:border-[#F4F8FC]/12 flex flex-col md:flex-row md:items-center justify-between gap-4">
                 <div className="space-y-1.5">
-                  <h2 id={`group-${group.id}`} className="font-display text-2xl font-bold uppercase text-[#141618] dark:text-[#F3F0E9]">
+                  <h2 id={`group-${group.id}`} className="font-display text-2xl font-bold uppercase text-[#10243A] dark:text-[#F4F8FC]">
                     {group.type}
                   </h2>
-                  <p className="text-xs text-[#4A5054] dark:text-[#A1A7AB] max-w-2xl">
+                  <p className="text-xs text-[#465C72] dark:text-[#B5C5D7] max-w-2xl">
                     {group.description}
                   </p>
                 </div>
@@ -149,14 +149,14 @@ export function DocumentsPage() {
                   href={group.sourcePageUrl}
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="inline-flex items-center gap-1.5 min-h-[40px] px-4 py-2 text-xs font-semibold bg-[#141618] text-[#F6F4EF] hover:bg-[#9E4B28] dark:bg-[#A95632] dark:text-[#F3F0E9] dark:hover:bg-[#823B1D] transition-colors duration-300 whitespace-nowrap shrink-0"
+                  className="inline-flex items-center gap-1.5 min-h-[40px] px-4 py-2 text-xs font-semibold bg-[#10243A] text-[#FFFFFF] hover:bg-brand dark:bg-[#0A6AA1] dark:text-[#F4F8FC] dark:hover:bg-[#004C73] transition-colors duration-300 whitespace-nowrap shrink-0"
                 >
                   <span>Open Live Portal Index</span>
                   <ExternalLink className="w-3.5 h-3.5" aria-hidden="true" />
                 </a>
               </div>
 
-              <ul className="divide-y divide-[#141618]/12 dark:divide-[#F3F0E9]/12">
+              <ul className="divide-y divide-[#10243A]/12 dark:divide-[#F4F8FC]/12">
                 {group.items.map((item) => (
                   <li
                     key={`${item.title}-${item.yearOrScope}`}
@@ -164,28 +164,28 @@ export function DocumentsPage() {
                   >
                     <div className="flex items-start gap-3">
                       <FileText
-                        className="w-4 h-4 text-[#9E4B28] dark:text-[#EC743C] shrink-0 mt-0.5"
+                        className="w-4 h-4 text-brand dark:text-[#69C5F5] shrink-0 mt-0.5"
                         aria-hidden="true"
                       />
                       <div>
-                        <p className="text-sm font-medium text-[#141618] dark:text-[#F3F0E9]">
+                        <p className="text-sm font-medium text-[#10243A] dark:text-[#F4F8FC]">
                           {item.title}
                         </p>
-                        <p className="text-xs font-mono-tabular text-[#4A5054] dark:text-[#A1A7AB]">
+                        <p className="text-xs font-mono-tabular text-[#465C72] dark:text-[#B5C5D7]">
                           {item.yearOrScope}
                         </p>
                       </div>
                     </div>
 
                     <div className="flex items-center gap-4 pl-7 sm:pl-0">
-                      <span className="text-xs text-[#4A5054] dark:text-[#A1A7AB]">
+                      <span className="text-xs text-[#465C72] dark:text-[#B5C5D7]">
                         {item.status}
                       </span>
                       <a
                         href={group.sourcePageUrl}
                         target="_blank"
                         rel="noopener noreferrer"
-                        className="text-xs font-semibold text-[#9E4B28] dark:text-[#EC743C] hover:underline underline-offset-4 transition-colors duration-300 whitespace-nowrap"
+                        className="text-xs font-semibold text-brand dark:text-[#69C5F5] hover:underline underline-offset-4 transition-colors duration-300 whitespace-nowrap"
                       >
                         Portal Link
                       </a>

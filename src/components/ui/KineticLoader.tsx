@@ -60,7 +60,7 @@ export function KineticLoader() {
           aria-label="Loading Berry Alloys Limited presentation"
           initial={{ opacity: 1 }}
           exit={{ opacity: 0, transition: { duration: 0.35, ease: [0.16, 1, 0.3, 1] } }}
-          className="fixed inset-0 z-[70] bg-[#121417] text-[#F3F0E9] flex flex-col items-center justify-center px-6 select-none"
+          className="fixed inset-0 z-[70] bg-[#07111F] text-[#F4F8FC] flex flex-col items-center justify-center px-6 select-none"
         >
           {/* Subtle architectural blueprint hairlines */}
           <div
@@ -68,7 +68,7 @@ export function KineticLoader() {
             className="pointer-events-none absolute inset-0 opacity-20"
             style={{
               backgroundImage:
-                'linear-gradient(to right, rgba(243,240,233,0.08) 1px, transparent 1px), linear-gradient(to bottom, rgba(243,240,233,0.08) 1px, transparent 1px)',
+                'linear-gradient(to right, rgba(244,248,252,0.08) 1px, transparent 1px), linear-gradient(to bottom, rgba(244,248,252,0.08) 1px, transparent 1px)',
               backgroundSize: '72px 72px',
             }}
           />
@@ -81,22 +81,22 @@ export function KineticLoader() {
               className="flex flex-wrap items-center justify-center gap-3.5"
             >
               <BrandLockup variant="loader" surface="dark" />
-              <span className="font-mono-tabular text-[11px] uppercase tracking-[0.26em] text-[#EC743C]">
+              <span className="font-mono-tabular text-[11px] uppercase tracking-[0.26em] text-[#69C5F5]">
                 DKG Group Enterprise · Est. 2006
               </span>
             </motion.div>
 
             {/* Kinetic Orbit 'B' Monogram + Full Company Wordmark */}
             <div className="flex items-center gap-3 sm:gap-5">
-              <div className="relative w-12 h-12 sm:w-14 sm:h-14 border border-[#F3F0E9]/25 bg-[#191C20] flex items-center justify-center">
+              <div className="relative w-12 h-12 sm:w-14 sm:h-14 border border-[#F4F8FC]/25 bg-[#0D1B2E] flex items-center justify-center">
                 <motion.span
                   aria-hidden="true"
                   animate={{ rotate: 360 }}
                   transition={{ repeat: Infinity, duration: 2.2, ease: 'linear' }}
                   className="block w-full h-full relative"
                 >
-                  <span className="absolute -top-1 left-1/2 -translate-x-1/2 w-2 h-2 bg-[#EC743C]" />
-                  <span className="absolute -bottom-1 left-1/2 -translate-x-1/2 w-2 h-2 bg-[#F3F0E9]" />
+                  <span className="absolute -top-1 left-1/2 -translate-x-1/2 w-2 h-2 bg-[#69C5F5]" />
+                  <span className="absolute -bottom-1 left-1/2 -translate-x-1/2 w-2 h-2 bg-[#F4F8FC]" />
                 </motion.span>
                 <span className="absolute flex items-center justify-center">
                   <BerryMonogram size="sm" surface="dark" />
@@ -107,7 +107,7 @@ export function KineticLoader() {
                 initial={{ letterSpacing: '0.18em', opacity: 0 }}
                 animate={{ letterSpacing: '0.04em', opacity: 1 }}
                 transition={{ duration: 0.55, ease: [0.16, 1, 0.3, 1] }}
-                className="font-display text-3xl sm:text-5xl md:text-6xl font-bold uppercase tracking-tight text-[#F3F0E9]"
+                className="font-display text-3xl sm:text-5xl md:text-6xl font-bold uppercase tracking-tight text-[#F4F8FC]"
               >
                 Berry Alloys Limited
               </motion.p>
@@ -117,10 +117,10 @@ export function KineticLoader() {
               initial={{ scaleX: 0 }}
               animate={{ scaleX: 1 }}
               transition={{ duration: 0.75, ease: [0.16, 1, 0.3, 1] }}
-              className="w-52 h-[2px] origin-left bg-gradient-to-r from-[#9E4B28] via-[#EC743C] to-[#F3F0E9]"
+              className="w-52 h-[2px] origin-left bg-gradient-to-r from-brand via-[#69C5F5] to-[#F4F8FC]"
             />
 
-            <p className="font-mono-tabular text-[11px] uppercase tracking-[0.22em] text-[#A1A7AB]">
+            <p className="font-mono-tabular text-[11px] uppercase tracking-[0.22em] text-[#B5C5D7]">
               From Heat to Precision · Ferro Alloys
             </p>
           </div>
@@ -128,7 +128,7 @@ export function KineticLoader() {
           <button
             type="button"
             onClick={dismissNow}
-            className="absolute bottom-8 right-8 px-3.5 py-2 text-[11px] font-mono-tabular uppercase tracking-wider text-[#A1A7AB] hover:text-[#F3F0E9] border border-[#F3F0E9]/18 hover:border-[#EC743C] transition-colors cursor-pointer"
+            className="absolute bottom-8 right-8 px-3.5 py-2 text-[11px] font-mono-tabular uppercase tracking-wider text-[#B5C5D7] hover:text-[#F4F8FC] border border-[#F4F8FC]/18 hover:border-[#69C5F5] transition-colors cursor-pointer"
           >
             Enter Site →
           </button>

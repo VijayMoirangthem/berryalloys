@@ -133,23 +133,23 @@ export function SocialFlipButton({
 
   return (
     <div className={cn('space-y-2.5', className)}>
-      <p className="text-[10px] font-mono-tabular uppercase tracking-widest text-[#9E4B28] dark:text-[#EC743C]">
+      <p className="text-[10px] font-mono-tabular uppercase tracking-widest text-brand dark:text-[#69C5F5]">
         {heading}
       </p>
 
       <div
-        className="inline-flex flex-wrap items-center gap-1.5 p-1.5 bg-white dark:bg-[#191C20] border border-[#141618]/15 dark:border-[#F3F0E9]/14"
+        className="inline-flex flex-wrap items-center gap-1.5 p-1.5 bg-white dark:bg-[#0D1B2E] border border-[#10243A]/15 dark:border-[#F4F8FC]/14"
         style={{ perspective: '1000px' }}
       >
         {CONNECT_TILES.map((item) => {
           const tileContent = (
             <span className="relative block w-9 h-9 preserve-3d transition-transform duration-500 ease-[cubic-bezier(0.16,1,0.3,1)] group-hover:rotate-y-180 group-focus-visible:rotate-y-180 motion-reduce:transition-none motion-reduce:group-hover:rotate-y-0">
               {/* Front Face — Letter */}
-              <span className="backface-hidden absolute inset-0 flex items-center justify-center bg-[#ECE8DF] dark:bg-[#20242A] border border-[#141618]/12 dark:border-[#F3F0E9]/12 font-display text-sm font-bold uppercase text-[#141618] dark:text-[#F3F0E9]">
+              <span className="backface-hidden absolute inset-0 flex items-center justify-center bg-[#F1F6FB] dark:bg-[#12243B] border border-[#10243A]/12 dark:border-[#F4F8FC]/12 font-display text-sm font-bold uppercase text-[#10243A] dark:text-[#F4F8FC]">
                 {item.letter}
               </span>
               {/* Back Face — Social / Contact Glyph */}
-              <span className="backface-hidden rotate-y-180 absolute inset-0 flex items-center justify-center bg-[#9E4B28] dark:bg-[#EC743C] text-[#F6F4EF] dark:text-[#141618]">
+              <span className="backface-hidden rotate-y-180 absolute inset-0 flex items-center justify-center bg-brand dark:bg-[#69C5F5] text-[#FFFFFF] dark:text-[#10243A]">
                 {item.icon}
               </span>
             </span>
@@ -167,7 +167,7 @@ export function SocialFlipButton({
                 onMouseEnter={() => setActiveNote(item.note)}
                 onFocus={() => setActiveNote(item.note)}
                 onClick={() => setActiveNote(item.note)}
-                className="group block cursor-pointer focus-visible:outline-2 focus-visible:outline-[#EC743C]"
+                className="group block cursor-pointer focus-visible:outline-2 focus-visible:outline-[#69C5F5]"
               >
                 {tileContent}
               </a>
@@ -183,7 +183,7 @@ export function SocialFlipButton({
               onMouseEnter={() => setActiveNote(item.note)}
               onFocus={() => setActiveNote(item.note)}
               onClick={() => setActiveNote(item.note)}
-              className="group block cursor-pointer focus-visible:outline-2 focus-visible:outline-[#EC743C]"
+              className="group block cursor-pointer focus-visible:outline-2 focus-visible:outline-[#69C5F5]"
             >
               {tileContent}
             </Link>
@@ -192,7 +192,7 @@ export function SocialFlipButton({
       </div>
 
       {activeNote && (
-        <p className="text-[11px] text-[#4A5054] dark:text-[#A1A7AB] leading-snug max-w-sm">
+        <p className="text-[11px] text-[#465C72] dark:text-[#B5C5D7] leading-snug max-w-sm">
           {activeNote}
         </p>
       )}

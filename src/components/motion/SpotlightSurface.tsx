@@ -25,9 +25,9 @@ export function SpotlightSurface({
 
   const resolvedFill =
     spotlightColor ??
-    (theme === 'dark' ? 'rgba(236, 116, 60, 0.14)' : 'rgba(158, 75, 40, 0.08)');
+    (theme === 'dark' ? 'rgba(40,148,204, 0.14)' : 'rgba(158, 75, 40, 0.08)');
   const resolvedBorderGlow =
-    theme === 'dark' ? 'rgba(236, 116, 60, 0.42)' : 'rgba(158, 75, 40, 0.28)';
+    theme === 'dark' ? 'rgba(40,148,204, 0.42)' : 'rgba(158, 75, 40, 0.28)';
 
   const handleMouseMove = (e: React.MouseEvent<HTMLDivElement>) => {
     if (!divRef.current) return;

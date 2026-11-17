@@ -16,14 +16,14 @@ export function Breadcrumbs({ items, dark = false }: BreadcrumbsProps) {
     <nav aria-label="Breadcrumb" className="mb-6">
       <ol
         className={`flex flex-wrap items-center gap-1.5 text-xs ${
-          dark ? 'text-[#A1A7AB]' : 'text-[#4A5054] dark:text-[#A1A7AB]'
+          dark ? 'text-[#B5C5D7]' : 'text-[#465C72] dark:text-[#B5C5D7]'
         }`}
       >
         <li>
           <Link
             to="/"
             className={`transition-colors hover:underline ${
-              dark ? 'hover:text-[#F3F0E9]' : 'hover:text-[#141618] dark:hover:text-[#F3F0E9]'
+              dark ? 'hover:text-[#F4F8FC]' : 'hover:text-[#10243A] dark:hover:text-[#F4F8FC]'
             }`}
           >
             Home
@@ -36,7 +36,7 @@ export function Breadcrumbs({ items, dark = false }: BreadcrumbsProps) {
               <Link
                 to={item.to}
                 className={`transition-colors hover:underline ${
-                  dark ? 'hover:text-[#F3F0E9]' : 'hover:text-[#141618] dark:hover:text-[#F3F0E9]'
+                  dark ? 'hover:text-[#F4F8FC]' : 'hover:text-[#10243A] dark:hover:text-[#F4F8FC]'
                 }`}
               >
                 {item.label}
@@ -44,7 +44,7 @@ export function Breadcrumbs({ items, dark = false }: BreadcrumbsProps) {
             ) : (
               <span
                 aria-current="page"
-                className={`font-medium ${dark ? 'text-[#F3F0E9]' : 'text-[#141618] dark:text-[#F3F0E9]'}`}
+                className={`font-medium ${dark ? 'text-[#F4F8FC]' : 'text-[#10243A] dark:text-[#F4F8FC]'}`}
               >
                 {item.label}
               </span>

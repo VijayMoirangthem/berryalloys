@@ -46,7 +46,7 @@ export function ImageRevealList({ items, className }: ImageRevealListProps) {
       onMouseLeave={() => setHoveredId(null)}
       className={cn('relative', className)}
     >
-      <ul className="divide-y divide-[#141618]/14 dark:divide-[#F3F0E9]/14 border-t border-b border-[#141618]/14 dark:border-[#F3F0E9]/14">
+      <ul className="divide-y divide-[#10243A]/14 dark:divide-[#F4F8FC]/14 border-t border-b border-[#10243A]/14 dark:border-[#F4F8FC]/14">
         {items.map((item, idx) => {
           const isHovered = hoveredId === item.id;
           const RowTag = item.to ? Link : 'div';
@@ -67,31 +67,31 @@ export function ImageRevealList({ items, className }: ImageRevealListProps) {
                 className={cn(
                   'group grid grid-cols-12 items-center gap-4 py-4 px-2 sm:px-4 transition-colors duration-300 focus-visible:outline-none',
                   isHovered
-                    ? 'bg-[#ECE8DF]/75 dark:bg-[#20242A]/90'
-                    : 'hover:bg-[#ECE8DF]/50 dark:hover:bg-[#191C20]'
+                    ? 'bg-[#F1F6FB]/75 dark:bg-[#12243B]/90'
+                    : 'hover:bg-[#F1F6FB]/50 dark:hover:bg-[#0D1B2E]'
                 )}
               >
-                <div className="col-span-2 sm:col-span-1 font-mono-tabular text-xs font-semibold text-[#9E4B28] dark:text-[#EC743C]">
+                <div className="col-span-2 sm:col-span-1 font-mono-tabular text-xs font-semibold text-brand dark:text-[#69C5F5]">
                   {item.index ?? String(idx + 1).padStart(2, '0')}
                 </div>
 
                 <div className="col-span-8 sm:col-span-6 space-y-0.5">
-                  <p className="font-display text-xl sm:text-2xl font-bold uppercase tracking-tight text-[#141618] dark:text-[#F3F0E9] group-hover:text-[#9E4B28] dark:group-hover:text-[#EC743C] transition-colors">
+                  <p className="font-display text-xl sm:text-2xl font-bold uppercase tracking-tight text-[#10243A] dark:text-[#F4F8FC] group-hover:text-brand dark:group-hover:text-[#69C5F5] transition-colors">
                     {item.label}
                   </p>
                   {item.subtitle && (
-                    <p className="text-xs text-[#4A5054] dark:text-[#A1A7AB] line-clamp-1">
+                    <p className="text-xs text-[#465C72] dark:text-[#B5C5D7] line-clamp-1">
                       {item.subtitle}
                     </p>
                   )}
                 </div>
 
-                <div className="hidden sm:block sm:col-span-4 text-xs font-mono-tabular text-[#4A5054] dark:text-[#A1A7AB]">
+                <div className="hidden sm:block sm:col-span-4 text-xs font-mono-tabular text-[#465C72] dark:text-[#B5C5D7]">
                   {item.category}
                 </div>
 
                 <div className="col-span-2 sm:col-span-1 flex items-center justify-end gap-2">
-                  <div className="md:hidden w-12 h-9 shrink-0 overflow-hidden bg-[#141618] border border-[#141618]/15">
+                  <div className="md:hidden w-12 h-9 shrink-0 overflow-hidden bg-[#10243A] border border-[#10243A]/15">
                     <img
                       src={item.image}
                       alt={item.alt}
@@ -99,7 +99,7 @@ export function ImageRevealList({ items, className }: ImageRevealListProps) {
                     />
                   </div>
                   <ArrowUpRight
-                    className="hidden md:block w-4 h-4 text-[#9E4B28] dark:text-[#EC743C] opacity-60 group-hover:opacity-100 group-hover:translate-x-0.5 group-hover:-translate-y-0.5 transition-all"
+                    className="hidden md:block w-4 h-4 text-brand dark:text-[#69C5F5] opacity-60 group-hover:opacity-100 group-hover:translate-x-0.5 group-hover:-translate-y-0.5 transition-all"
                     aria-hidden="true"
                   />
                 </div>
@@ -116,24 +116,24 @@ export function ImageRevealList({ items, className }: ImageRevealListProps) {
           transform: `translate3d(0, ${previewY}px, 0)`,
         }}
         className={cn(
-          'hidden md:block pointer-events-none absolute right-6 top-0 z-20 w-[290px] lg:w-[330px] border border-[#141618]/20 dark:border-[#F3F0E9]/20 bg-[#FFFFFF] dark:bg-[#191C20] shadow-[0_24px_60px_rgba(0,0,0,0.22)] transition-all duration-500 ease-[cubic-bezier(0.22,1,0.36,1)]',
+          'hidden md:block pointer-events-none absolute right-6 top-0 z-20 w-[290px] lg:w-[330px] border border-[#10243A]/20 dark:border-[#F4F8FC]/20 bg-[#FFFFFF] dark:bg-[#0D1B2E] shadow-[0_24px_60px_rgba(0,0,0,0.22)] transition-all duration-500 ease-[cubic-bezier(0.22,1,0.36,1)]',
           activeItem ? 'opacity-100 scale-100' : 'opacity-0 scale-95'
         )}
       >
         {activeItem && (
           <div>
-            <div className="aspect-[16/10] w-full overflow-hidden bg-[#141618]">
+            <div className="aspect-[16/10] w-full overflow-hidden bg-[#10243A]">
               <img
                 src={activeItem.image}
                 alt={activeItem.alt}
                 className="w-full h-full object-cover"
               />
             </div>
-            <div className="px-3.5 py-2.5 border-t border-[#141618]/10 dark:border-[#F3F0E9]/10 flex items-center justify-between gap-2 text-[11px] font-mono-tabular">
-              <span className="text-[#9E4B28] dark:text-[#EC743C] truncate">
+            <div className="px-3.5 py-2.5 border-t border-[#10243A]/10 dark:border-[#F4F8FC]/10 flex items-center justify-between gap-2 text-[11px] font-mono-tabular">
+              <span className="text-brand dark:text-[#69C5F5] truncate">
                 {activeItem.category ?? 'Operational Visual'}
               </span>
-              <span className="text-[#4A5054] dark:text-[#A1A7AB] shrink-0">
+              <span className="text-[#465C72] dark:text-[#B5C5D7] shrink-0">
                 {activeItem.index ?? 'Inspect'}
               </span>
             </div>

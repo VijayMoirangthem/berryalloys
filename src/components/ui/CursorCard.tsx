@@ -120,7 +120,7 @@ export function CursorCard({
         className={cn(
           variant === 'block'
             ? 'relative block'
-            : 'relative inline font-semibold text-[#141618] dark:text-[#F3F0E9] border-b border-dashed border-[#9E4B28] dark:border-[#EC743C] hover:text-[#9E4B28] dark:hover:text-[#EC743C] transition-colors cursor-help focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-[#EC743C]',
+            : 'relative inline font-semibold text-[#10243A] dark:text-[#F4F8FC] border-b border-dashed border-brand dark:border-[#69C5F5] hover:text-brand dark:hover:text-[#69C5F5] transition-colors cursor-help focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-[#69C5F5]',
           className
         )}
       >
@@ -150,11 +150,11 @@ export function CursorCard({
                   willChange: 'transform, opacity',
                 }}
                 className={cn(
-                  'fixed z-[9990] w-[300px] sm:w-[320px] overflow-hidden border border-[#141618]/20 dark:border-[#F3F0E9]/22 bg-[#FFFFFF] dark:bg-[#191C20] shadow-[0_24px_60px_rgba(0,0,0,0.28)]',
+                  'fixed z-[9990] w-[300px] sm:w-[320px] overflow-hidden border border-[#10243A]/20 dark:border-[#F4F8FC]/22 bg-[#FFFFFF] dark:bg-[#0D1B2E] shadow-[0_24px_60px_rgba(0,0,0,0.28)]',
                   cardClassName
                 )}
               >
-                <div className="relative h-40 w-full overflow-hidden bg-[#141618]">
+                <div className="relative h-40 w-full overflow-hidden bg-[#10243A]">
                   <img
                     src={imageSrc}
                     alt={imageAlt || description}
@@ -162,13 +162,13 @@ export function CursorCard({
                     className="w-full h-full object-cover"
                   />
                   {caption && (
-                    <span className="absolute left-3 bottom-2.5 bg-[#121417]/88 px-2 py-0.5 text-[10px] font-mono-tabular uppercase tracking-wider text-[#EC743C]">
+                    <span className="absolute left-3 bottom-2.5 bg-[#07111F]/88 px-2 py-0.5 text-[10px] font-mono-tabular uppercase tracking-wider text-[#69C5F5]">
                       {caption}
                     </span>
                   )}
                 </div>
-                <div className="p-3.5 border-t border-[#141618]/10 dark:border-[#F3F0E9]/12">
-                  <p className="text-xs leading-relaxed text-[#4A5054] dark:text-[#F3F0E9]/88">
+                <div className="p-3.5 border-t border-[#10243A]/10 dark:border-[#F4F8FC]/12">
+                  <p className="text-xs leading-relaxed text-[#465C72] dark:text-[#F4F8FC]/88">
                     {description}
                   </p>
                 </div>

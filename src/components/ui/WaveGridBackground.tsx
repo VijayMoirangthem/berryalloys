@@ -115,7 +115,7 @@ export function WaveGridBackground({
     let isVisible = true;
     const observer = new IntersectionObserver(
       (entries) => {
-        isVisible = entries[0]?.isIntersecting ?? true;
+        isVisible = entries[entries.length - 1]?.isIntersecting ?? true;
       },
       { threshold: 0.02 }
     );
@@ -239,7 +239,7 @@ export function WaveGridBackground({
         )}
         style={{
           backgroundImage:
-            'linear-gradient(to right, rgba(236,116,60,0.18) 1px, transparent 1px), linear-gradient(to bottom, rgba(236,116,60,0.18) 1px, transparent 1px)',
+            'linear-gradient(to right, rgba(40,148,204,0.18) 1px, transparent 1px), linear-gradient(to bottom, rgba(40,148,204,0.18) 1px, transparent 1px)',
           backgroundSize: '40px 40px',
         }}
       />

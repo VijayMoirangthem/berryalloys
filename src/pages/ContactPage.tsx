@@ -25,20 +25,20 @@ export function ContactPage() {
   };
 
   return (
-    <div className="bg-[#F6F4EF] dark:bg-[#121417] text-[#141618] dark:text-[#F3F0E9] py-12 lg:py-16">
+    <div className="bg-[#FFFFFF] dark:bg-[#07111F] text-[#10243A] dark:text-[#F4F8FC] py-12 lg:py-16">
       <div className="max-w-[1360px] mx-auto px-4 sm:px-6 lg:px-8 space-y-14">
         <div className="max-w-3xl space-y-4">
           <Breadcrumbs items={[{ label: 'Contact & Quotation' }]} />
 
-          <p className="text-xs font-mono-tabular uppercase tracking-widest text-[#9E4B28] dark:text-[#EC743C]">
+          <p className="text-xs font-mono-tabular uppercase tracking-widest text-brand dark:text-[#69C5F5]">
             Commercial & Office Directory
           </p>
           <SplitText
             text="Product quotations & commercial enquiries."
             as="h1"
-            className="font-display fluid-section-title font-bold uppercase tracking-tight text-[#141618] dark:text-[#F3F0E9]"
+            className="font-display fluid-section-title font-bold uppercase tracking-tight text-[#10243A] dark:text-[#F4F8FC]"
           />
-          <p className="text-base text-[#4A5054] dark:text-[#A1A7AB] leading-relaxed">
+          <p className="text-base text-[#465C72] dark:text-[#B5C5D7] leading-relaxed">
             Configure an alloy quotation request with your preferred grade, sizing, and packaging requirements, or reach Berry Alloys Limited’s offices in Kolkata, Visakhapatnam, and Dhalbhumgarh.
           </p>
         </div>
@@ -57,9 +57,9 @@ export function ContactPage() {
 
           {/* Sourced Office Directory */}
           <aside className="lg:col-span-5 space-y-6">
-            <div className="bg-[#141618] text-[#F3F0E9] border border-[#141618] dark:border-[#F3F0E9]/14 p-6 sm:p-8 space-y-6">
+            <div className="bg-[#10243A] text-[#F4F8FC] border border-[#10243A] dark:border-[#F4F8FC]/14 p-6 sm:p-8 space-y-6">
               <div>
-                <p className="text-xs font-mono-tabular uppercase tracking-widest text-[#EC743C] mb-1">
+                <p className="text-xs font-mono-tabular uppercase tracking-widest text-[#69C5F5] mb-1">
                   Published Office Contacts
                 </p>
                 <h2 className="font-display text-3xl font-bold uppercase">
@@ -67,24 +67,24 @@ export function ContactPage() {
                 </h2>
               </div>
 
-              <div className="divide-y divide-[#F3F0E9]/12">
+              <div className="divide-y divide-[#F4F8FC]/12">
                 {OFFICES.map((office) => (
                   <div key={office.id} className="py-5 first:pt-0 last:pb-0 space-y-2">
-                    <h3 className="font-display text-xl font-bold uppercase text-[#F3F0E9]">
+                    <h3 className="font-display text-xl font-bold uppercase text-[#F4F8FC]">
                       {office.label}
                     </h3>
-                    <p className="text-xs text-[#A1A7AB] leading-relaxed flex items-start gap-2">
-                      <MapPin className="w-3.5 h-3.5 text-[#EC743C] shrink-0 mt-0.5" aria-hidden="true" />
+                    <p className="text-xs text-[#B5C5D7] leading-relaxed flex items-start gap-2">
+                      <MapPin className="w-3.5 h-3.5 text-[#69C5F5] shrink-0 mt-0.5" aria-hidden="true" />
                       <span>{office.address}</span>
                     </p>
-                    <p className="text-xs font-mono-tabular text-[#F3F0E9]/85 flex items-center gap-2">
-                      <Phone className="w-3.5 h-3.5 text-[#EC743C] shrink-0" aria-hidden="true" />
+                    <p className="text-xs font-mono-tabular text-[#F4F8FC]/85 flex items-center gap-2">
+                      <Phone className="w-3.5 h-3.5 text-[#69C5F5] shrink-0" aria-hidden="true" />
                       <a href={`tel:${office.phone.replace(/\s+/g, '')}`} className="hover:underline">
                         {office.phone}
                       </a>
                     </p>
-                    <p className="text-xs font-mono-tabular text-[#F3F0E9]/85 flex items-center gap-2">
-                      <Mail className="w-3.5 h-3.5 text-[#EC743C] shrink-0" aria-hidden="true" />
+                    <p className="text-xs font-mono-tabular text-[#F4F8FC]/85 flex items-center gap-2">
+                      <Mail className="w-3.5 h-3.5 text-[#69C5F5] shrink-0" aria-hidden="true" />
                       <a href={`mailto:${office.email}`} className="hover:underline">
                         {office.email}
                       </a>
@@ -94,19 +94,19 @@ export function ContactPage() {
               </div>
             </div>
 
-            <div className="bg-[#ECE8DF] dark:bg-[#191C20] border border-[#141618]/15 dark:border-[#F3F0E9]/14 p-6 space-y-2 text-xs text-[#141618] dark:text-[#F3F0E9]">
-              <h3 className="font-display text-lg font-bold uppercase text-[#141618] dark:text-[#F3F0E9]">
+            <div className="bg-[#F1F6FB] dark:bg-[#0D1B2E] border border-[#10243A]/15 dark:border-[#F4F8FC]/14 p-6 space-y-2 text-xs text-[#10243A] dark:text-[#F4F8FC]">
+              <h3 className="font-display text-lg font-bold uppercase text-[#10243A] dark:text-[#F4F8FC]">
                 {UPCOMING_OFFICE_NOTICE.title}
               </h3>
-              <p className="font-medium text-[#141618] dark:text-[#F3F0E9]">
+              <p className="font-medium text-[#10243A] dark:text-[#F4F8FC]">
                 {UPCOMING_OFFICE_NOTICE.address}
               </p>
-              <p className="leading-relaxed text-[#4A5054] dark:text-[#A1A7AB]">
+              <p className="leading-relaxed text-[#465C72] dark:text-[#B5C5D7]">
                 {UPCOMING_OFFICE_NOTICE.note}
               </p>
             </div>
 
-            <div className="bg-white dark:bg-[#20242A] border border-[#141618]/15 dark:border-[#F3F0E9]/14 p-6">
+            <div className="bg-white dark:bg-[#12243B] border border-[#10243A]/15 dark:border-[#F4F8FC]/14 p-6">
               <SocialFlipButton heading="Direct & Social Channels" />
             </div>
           </aside>

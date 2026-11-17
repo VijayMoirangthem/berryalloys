@@ -1,5 +1,6 @@
 import { BrowserRouter, Route, Routes } from 'react-router-dom';
 import { ThemeProvider } from './context/ThemeContext';
+import { MotionProvider } from './context/MotionContext';
 import { GuideProvider } from './context/GuideContext';
 import { SearchProvider } from './context/SearchContext';
 import { Layout } from './components/Layout';
@@ -24,6 +25,7 @@ import { NotFoundPage } from './pages/NotFoundPage';
 export default function App() {
   return (
     <ThemeProvider>
+      <MotionProvider>
       <BrowserRouter>
         <SearchProvider>
           <GuideProvider>
@@ -51,6 +53,7 @@ export default function App() {
           </GuideProvider>
         </SearchProvider>
       </BrowserRouter>
+      </MotionProvider>
     </ThemeProvider>
   );
 }

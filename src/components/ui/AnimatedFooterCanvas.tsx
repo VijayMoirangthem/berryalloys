@@ -109,9 +109,9 @@ function AsciiStructureCluster({
     return () => window.clearInterval(id);
   }, [hovered]);
 
-  const dimColor = isDark ? '#323842' : '#B8B0A0';
-  const midColor = isDark ? '#8B4A2B' : '#9E4B28';
-  const brightColor = isDark ? '#EC743C' : '#B5471C';
+  const dimColor = isDark ? '#29435F' : '#B5C5D7';
+  const midColor = isDark ? '#2F7FB0' : '#006393';
+  const brightColor = isDark ? '#69C5F5' : '#C9233B';
 
   return (
     <pre
@@ -185,7 +185,7 @@ export function AnimatedFooterCanvas() {
       ref={containerRef}
       onMouseEnter={() => setIsHovered(true)}
       onMouseLeave={() => setIsHovered(false)}
-      className="relative border-b border-[#141618]/14 dark:border-[#F3F0E9]/12 overflow-hidden py-10 sm:py-12"
+      className="relative border-b border-[#10243A]/14 dark:border-[#F4F8FC]/12 overflow-hidden py-10 sm:py-12"
     >
       <div className="max-w-[1360px] mx-auto px-4 sm:px-6 lg:px-8 xl:px-14 2xl:px-8 relative">
         {/* Left & Right Procedural ASCII Silhouettes */}
@@ -199,10 +199,10 @@ export function AnimatedFooterCanvas() {
           ref={headlineRef}
           className="lg:absolute lg:inset-0 flex flex-col items-center justify-center text-center px-4"
         >
-          <p className="font-mono-tabular text-[11px] uppercase tracking-[0.22em] text-[#9E4B28] dark:text-[#EC743C] mb-2">
+          <p className="font-mono-tabular text-[11px] uppercase tracking-[0.22em] text-brand dark:text-[#69C5F5] mb-2">
             From Heat to Precision · Bobbili · Dhalbhumgarh · Visakhapatnam
           </p>
-          <p className="font-display text-4xl sm:text-6xl lg:text-7xl font-bold uppercase tracking-tight text-[#141618] dark:text-[#F3F0E9] leading-none">
+          <p className="font-display text-4xl sm:text-6xl lg:text-7xl font-bold uppercase tracking-tight text-[#10243A] dark:text-[#F4F8FC] leading-none">
             Berry Alloys
           </p>
         </div>

@@ -123,7 +123,7 @@ export function ManufacturingScrollStory() {
       id="process"
       ref={sectionRef}
       aria-labelledby={prefersReducedMotion ? 'process-story-heading-static' : 'process-story-heading'}
-      className="scroll-mt-20 bg-[#F6F4EF] text-[#141618] dark:bg-[#191C20] dark:text-[#F3F0E9] border-t border-[#141618]/12 dark:border-[#F3F0E9]/10"
+      className="scroll-mt-20 bg-[#FFFFFF] text-[#10243A] dark:bg-[#0D1B2E] dark:text-[#F4F8FC] border-t border-[#10243A]/12 dark:border-[#F4F8FC]/10"
     >
       {/* Desktop Pinned Stage (lg+, disabled automatically under prefers-reduced-motion) */}
       {!prefersReducedMotion && (
@@ -132,9 +132,9 @@ export function ManufacturingScrollStory() {
           className="hidden lg:flex min-h-[calc(100vh-4rem)] flex-col justify-center py-12"
         >
           <div className="max-w-[1360px] w-full mx-auto px-8 xl:px-14 2xl:px-8 space-y-8">
-            <div className="flex items-end justify-between gap-6 pb-5 border-b border-[#141618]/14 dark:border-[#F3F0E9]/12">
+            <div className="flex items-end justify-between gap-6 pb-5 border-b border-[#10243A]/14 dark:border-[#F4F8FC]/12">
               <div className="space-y-2">
-                <p className="text-xs font-mono-tabular uppercase tracking-widest text-[#9E4B28] dark:text-[#EC743C]">
+                <p className="text-xs font-mono-tabular uppercase tracking-widest text-brand dark:text-[#69C5F5]">
                   06 / Manufacturing Process
                 </p>
                 <h2
@@ -148,20 +148,20 @@ export function ManufacturingScrollStory() {
               <div className="flex items-end gap-8 shrink-0">
                 <Link
                   to="/manufacturing"
-                  className="inline-flex items-center gap-1.5 text-xs font-semibold uppercase tracking-wider text-[#141618] hover:text-[#9E4B28] dark:text-[#F3F0E9]/85 dark:hover:text-[#EC743C] transition-colors pb-0.5 whitespace-nowrap"
+                  className="inline-flex items-center gap-1.5 text-xs font-semibold uppercase tracking-wider text-[#10243A] hover:text-brand dark:text-[#F4F8FC]/85 dark:hover:text-[#69C5F5] transition-colors pb-0.5 whitespace-nowrap"
                 >
                   Process & Quality Detail
                   <ArrowRight className="w-3.5 h-3.5" aria-hidden="true" />
                 </Link>
                 <div className="w-48 space-y-2">
-                  <div className="flex items-center justify-between text-xs font-mono-tabular text-[#4A5054] dark:text-[#A1A7AB]">
+                  <div className="flex items-center justify-between text-xs font-mono-tabular text-[#465C72] dark:text-[#B5C5D7]">
                     <span>Stage {current.number}</span>
                     <span>04</span>
                   </div>
-                  <div className="h-[2px] w-full bg-[#141618]/14 dark:bg-[#F3F0E9]/15 overflow-hidden">
+                  <div className="h-[2px] w-full bg-[#10243A]/14 dark:bg-[#F4F8FC]/15 overflow-hidden">
                     <div
                       ref={progressBarRef}
-                      className="h-full w-full bg-[#9E4B28] dark:bg-[#EC743C] origin-left transition-transform duration-150"
+                      className="h-full w-full bg-brand dark:bg-[#69C5F5] origin-left transition-transform duration-150"
                       style={{ transform: `scaleX(${(activeStage + 1) / PROCESS_STAGES.length})` }}
                     />
                   </div>
@@ -183,8 +183,8 @@ export function ManufacturingScrollStory() {
                         aria-pressed={isActive}
                         className={`w-full text-left px-4 py-3.5 border transition-colors duration-200 cursor-pointer ${
                           isActive
-                            ? 'bg-white border-[#9E4B28] dark:bg-[#20242A] dark:border-[#EC743C]/70'
-                            : 'bg-transparent border-[#141618]/12 hover:border-[#141618]/35 dark:border-[#F3F0E9]/10 dark:hover:border-[#F3F0E9]/30'
+                            ? 'bg-white border-brand dark:bg-[#12243B] dark:border-[#69C5F5]/70'
+                            : 'bg-transparent border-[#10243A]/12 hover:border-[#10243A]/35 dark:border-[#F4F8FC]/10 dark:hover:border-[#F4F8FC]/30'
                         }`}
                       >
                         <div className="flex items-baseline justify-between gap-3">
@@ -192,8 +192,8 @@ export function ManufacturingScrollStory() {
                             <span
                               className={`font-mono-tabular text-xs ${
                                 isActive
-                                  ? 'text-[#9E4B28] dark:text-[#EC743C]'
-                                  : 'text-[#4A5054] dark:text-[#A1A7AB]'
+                                  ? 'text-brand dark:text-[#69C5F5]'
+                                  : 'text-[#465C72] dark:text-[#B5C5D7]'
                               }`}
                             >
                               {stage.number}
@@ -201,14 +201,14 @@ export function ManufacturingScrollStory() {
                             <span
                               className={`font-display text-xl font-bold uppercase tracking-tight ${
                                 isActive
-                                  ? 'text-[#141618] dark:text-[#F3F0E9]'
-                                  : 'text-[#141618]/60 dark:text-[#F3F0E9]/60'
+                                  ? 'text-[#10243A] dark:text-[#F4F8FC]'
+                                  : 'text-[#10243A]/60 dark:text-[#F4F8FC]/60'
                               }`}
                             >
                               {stage.title}
                             </span>
                           </div>
-                          <span className="text-[11px] font-mono-tabular text-[#9E4B28] dark:text-[#EC743C]">
+                          <span className="text-[11px] font-mono-tabular text-brand dark:text-[#69C5F5]">
                             {isActive ? 'Active' : ''}
                           </span>
                         </div>
@@ -217,14 +217,14 @@ export function ManufacturingScrollStory() {
                   })}
                 </div>
 
-                <div className="bg-white dark:bg-[#20242A] border border-[#141618]/14 dark:border-[#F3F0E9]/12 p-6 space-y-3">
-                  <p className="text-xs font-mono-tabular text-[#9E4B28] dark:text-[#EC743C]">
+                <div className="bg-white dark:bg-[#12243B] border border-[#10243A]/14 dark:border-[#F4F8FC]/12 p-6 space-y-3">
+                  <p className="text-xs font-mono-tabular text-brand dark:text-[#69C5F5]">
                     {current.subtitle}
                   </p>
-                  <p className="text-sm text-[#141618]/85 dark:text-[#F3F0E9]/85 leading-relaxed">
+                  <p className="text-sm text-[#10243A]/85 dark:text-[#F4F8FC]/85 leading-relaxed">
                     {current.description}
                   </p>
-                  <p className="text-xs text-[#4A5054] dark:text-[#A1A7AB] pt-3 border-t border-[#141618]/10 dark:border-[#F3F0E9]/10">
+                  <p className="text-xs text-[#465C72] dark:text-[#B5C5D7] pt-3 border-t border-[#10243A]/10 dark:border-[#F4F8FC]/10">
                     {current.fact}
                   </p>
                 </div>
@@ -232,7 +232,7 @@ export function ManufacturingScrollStory() {
 
               {/* Coordinated Large Media Viewport */}
               <div className="col-span-7 flex flex-col">
-                <div className="relative flex-1 min-h-[420px] bg-[#141618] border border-[#141618]/20 dark:border-[#F3F0E9]/14 overflow-hidden">
+                <div className="relative flex-1 min-h-[420px] bg-[#10243A] border border-[#10243A]/20 dark:border-[#F4F8FC]/14 overflow-hidden">
                   {PROCESS_STAGES.map((stage, idx) => {
                     const isActive = activeStage === idx;
                     return (
@@ -254,8 +254,8 @@ export function ManufacturingScrollStory() {
                       </div>
                     );
                   })}
-                  <div className="absolute inset-x-0 bottom-0 h-28 bg-gradient-to-t from-[#121417]/92 via-[#121417]/45 to-transparent z-20 pointer-events-none" />
-                  <p className="absolute bottom-4 left-5 right-5 z-30 text-xs font-mono-tabular text-[#F3F0E9]/90">
+                  <div className="absolute inset-x-0 bottom-0 h-28 bg-gradient-to-t from-[#07111F]/92 via-[#07111F]/45 to-transparent z-20 pointer-events-none" />
+                  <p className="absolute bottom-4 left-5 right-5 z-30 text-xs font-mono-tabular text-[#F4F8FC]/90">
                     Stage {current.number} — {current.image.caption}
                   </p>
                 </div>
@@ -271,9 +271,9 @@ export function ManufacturingScrollStory() {
           prefersReducedMotion ? 'block' : 'lg:hidden'
         } max-w-[1360px] mx-auto py-16 px-4 sm:px-6 lg:px-8 xl:px-14 2xl:px-8 space-y-10`}
       >
-        <div className="flex flex-col sm:flex-row sm:items-end justify-between gap-4 pb-5 border-b border-[#141618]/14 dark:border-[#F3F0E9]/12">
+        <div className="flex flex-col sm:flex-row sm:items-end justify-between gap-4 pb-5 border-b border-[#10243A]/14 dark:border-[#F4F8FC]/12">
           <div className="space-y-2">
-            <p className="text-xs font-mono-tabular uppercase tracking-widest text-[#9E4B28] dark:text-[#EC743C]">
+            <p className="text-xs font-mono-tabular uppercase tracking-widest text-brand dark:text-[#69C5F5]">
               06 / Manufacturing Process
             </p>
             <h2
@@ -285,7 +285,7 @@ export function ManufacturingScrollStory() {
           </div>
           <Link
             to="/manufacturing"
-            className="inline-flex items-center gap-1.5 text-xs font-semibold uppercase tracking-wider text-[#141618] hover:text-[#9E4B28] dark:text-[#F3F0E9]/85 dark:hover:text-[#EC743C] transition-colors whitespace-nowrap"
+            className="inline-flex items-center gap-1.5 text-xs font-semibold uppercase tracking-wider text-[#10243A] hover:text-brand dark:text-[#F4F8FC]/85 dark:hover:text-[#69C5F5] transition-colors whitespace-nowrap"
           >
             Process & Quality Detail
             <ArrowRight className="w-3.5 h-3.5" aria-hidden="true" />
@@ -296,9 +296,9 @@ export function ManufacturingScrollStory() {
           {PROCESS_STAGES.map((stage) => (
             <article
               key={stage.number}
-              className="bg-white dark:bg-[#20242A] border border-[#141618]/14 dark:border-[#F3F0E9]/12 overflow-hidden flex flex-col"
+              className="bg-white dark:bg-[#12243B] border border-[#10243A]/14 dark:border-[#F4F8FC]/12 overflow-hidden flex flex-col"
             >
-              <div className="aspect-video overflow-hidden bg-[#141618]">
+              <div className="aspect-video overflow-hidden bg-[#10243A]">
                 <ResilientImage
                   src={stage.image.src}
                   alt={stage.image.alt}
@@ -309,21 +309,21 @@ export function ManufacturingScrollStory() {
               <div className="p-5 sm:p-6 space-y-2.5 flex-1 flex flex-col justify-between">
                 <div className="space-y-2.5">
                   <div className="flex items-baseline gap-2.5">
-                    <span className="font-mono-tabular text-xs text-[#9E4B28] dark:text-[#EC743C]">
+                    <span className="font-mono-tabular text-xs text-brand dark:text-[#69C5F5]">
                       {stage.number}
                     </span>
-                    <h3 className="font-display text-2xl font-bold uppercase tracking-tight text-[#141618] dark:text-[#F3F0E9]">
+                    <h3 className="font-display text-2xl font-bold uppercase tracking-tight text-[#10243A] dark:text-[#F4F8FC]">
                       {stage.title}
                     </h3>
                   </div>
-                  <p className="text-xs font-mono-tabular text-[#4A5054] dark:text-[#A1A7AB]">
+                  <p className="text-xs font-mono-tabular text-[#465C72] dark:text-[#B5C5D7]">
                     {stage.subtitle}
                   </p>
-                  <p className="text-sm text-[#4A5054] dark:text-[#F3F0E9]/85 leading-relaxed">
+                  <p className="text-sm text-[#465C72] dark:text-[#F4F8FC]/85 leading-relaxed">
                     {stage.description}
                   </p>
                 </div>
-                <p className="text-xs text-[#4A5054] dark:text-[#A1A7AB] pt-3 border-t border-[#141618]/10 dark:border-[#F3F0E9]/10">
+                <p className="text-xs text-[#465C72] dark:text-[#B5C5D7] pt-3 border-t border-[#10243A]/10 dark:border-[#F4F8FC]/10">
                   {stage.fact}
                 </p>
               </div>

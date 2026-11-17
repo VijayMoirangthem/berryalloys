@@ -37,24 +37,24 @@ export function BrandLockup({
 
   const dividerColorClass =
     surface === 'dark'
-      ? 'bg-[#F3F0E9]/28'
+      ? 'bg-[#F4F8FC]/28'
       : surface === 'light'
-      ? 'bg-[#141618]/22'
-      : 'bg-[#141618]/22 dark:bg-[#F3F0E9]/26';
+      ? 'bg-[#10243A]/22'
+      : 'bg-[#10243A]/22 dark:bg-[#F4F8FC]/26';
 
   const primaryWordmarkColor =
     surface === 'dark'
-      ? 'text-[#F3F0E9]'
+      ? 'text-[#F4F8FC]'
       : surface === 'light'
-      ? 'text-[#141618]'
-      : 'text-[#141618] dark:text-[#F3F0E9]';
+      ? 'text-[#10243A]'
+      : 'text-[#10243A] dark:text-[#F4F8FC]';
 
   const secondaryWordmarkColor =
     surface === 'dark'
-      ? 'text-[#EC743C]'
+      ? 'text-[#69C5F5]'
       : surface === 'light'
-      ? 'text-[#9E4B28]'
-      : 'text-[#9E4B28] dark:text-[#EC743C]';
+      ? 'text-brand'
+      : 'text-brand dark:text-[#69C5F5]';
 
   const primaryWordmarkSize = isFooter
     ? 'text-[21px] sm:text-[23px]'

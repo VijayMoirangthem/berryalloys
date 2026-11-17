@@ -62,20 +62,20 @@ export function DiagonalCarousel({
   return (
     <div
       className={cn(
-        'relative overflow-hidden bg-white dark:bg-[#20242A] border border-[#141618]/14 dark:border-[#F3F0E9]/14',
+        'relative overflow-hidden bg-white dark:bg-[#12243B] border border-[#10243A]/14 dark:border-[#F4F8FC]/14',
         className
       )}
     >
       {/* Subtle diagonal copper drafting hairline backdrop */}
       <div
         aria-hidden="true"
-        className="pointer-events-none absolute -right-24 -top-24 w-72 h-72 border border-[#9E4B28]/15 dark:border-[#EC743C]/18 rotate-12"
+        className="pointer-events-none absolute -right-24 -top-24 w-72 h-72 border border-brand/15 dark:border-[#69C5F5]/18 rotate-12"
       />
 
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 lg:gap-10 p-6 sm:p-8 lg:p-10 items-center relative z-10">
         {/* Left: Diagonal Canted Image Stage */}
         <div className="lg:col-span-6 py-3 px-2 sm:px-4">
-          <div className="relative overflow-hidden bg-[#121417] border border-[#141618]/18 dark:border-[#F3F0E9]/16 shadow-lg">
+          <div className="relative overflow-hidden bg-[#07111F] border border-[#10243A]/18 dark:border-[#F4F8FC]/16 shadow-lg">
             <AnimatePresence mode="wait" custom={direction}>
               <motion.div
                 key={active.id}
@@ -127,13 +127,13 @@ export function DiagonalCarousel({
                 </div>
                 <div
                   aria-hidden="true"
-                  className="pointer-events-none absolute inset-x-0 bottom-0 h-20 bg-gradient-to-t from-[#121417]/80 via-[#121417]/20 to-transparent"
+                  className="pointer-events-none absolute inset-x-0 bottom-0 h-20 bg-gradient-to-t from-[#07111F]/80 via-[#07111F]/20 to-transparent"
                 />
-                <div className="absolute bottom-3 left-3 right-3 flex items-center justify-between gap-2 text-[11px] font-mono-tabular uppercase tracking-wider text-[#F3F0E9]">
-                  <span className="bg-[#141618]/85 border border-[#F3F0E9]/18 px-2.5 py-1">
+                <div className="absolute bottom-3 left-3 right-3 flex items-center justify-between gap-2 text-[11px] font-mono-tabular uppercase tracking-wider text-[#F4F8FC]">
+                  <span className="bg-[#10243A]/85 border border-[#F4F8FC]/18 px-2.5 py-1">
                     {active.category}
                   </span>
-                  <span className="bg-[#9E4B28]/90 text-[#F3F0E9] px-2 py-1">
+                  <span className="bg-brand/90 text-[#F4F8FC] px-2 py-1">
                     0{index + 1} / 0{total}
                   </span>
                 </div>
@@ -145,10 +145,10 @@ export function DiagonalCarousel({
         {/* Right: Structured Editorial Narrative & Controls */}
         <div className="lg:col-span-6 flex flex-col justify-between space-y-6">
           <div className="space-y-3">
-            <div className="flex flex-wrap items-center justify-between gap-2 text-[11px] font-mono-tabular uppercase tracking-widest text-[#9E4B28] dark:text-[#EC743C]">
+            <div className="flex flex-wrap items-center justify-between gap-2 text-[11px] font-mono-tabular uppercase tracking-widest text-brand dark:text-[#69C5F5]">
               <span>{eyebrow}</span>
               {active.location && (
-                <span className="text-[#4A5054] dark:text-[#A1A7AB]">{active.location}</span>
+                <span className="text-[#465C72] dark:text-[#B5C5D7]">{active.location}</span>
               )}
             </div>
 
@@ -161,10 +161,10 @@ export function DiagonalCarousel({
                 transition={{ duration: 0.5, ease: [0.22, 1, 0.36, 1] }}
                 className="space-y-3"
               >
-                <h3 className="font-display text-2xl sm:text-3xl font-bold uppercase tracking-tight text-[#141618] dark:text-[#F3F0E9]">
+                <h3 className="font-display text-2xl sm:text-3xl font-bold uppercase tracking-tight text-[#10243A] dark:text-[#F4F8FC]">
                   {active.title}
                 </h3>
-                <p className="text-sm text-[#4A5054] dark:text-[#F3F0E9]/82 leading-relaxed max-w-[58ch]">
+                <p className="text-sm text-[#465C72] dark:text-[#F4F8FC]/82 leading-relaxed max-w-[58ch]">
                   {active.summary}
                 </p>
               </motion.div>
@@ -172,13 +172,13 @@ export function DiagonalCarousel({
           </div>
 
           {/* Stepper & Action Bar */}
-          <div className="pt-4 border-t border-[#141618]/12 dark:border-[#F3F0E9]/12 flex flex-wrap items-center justify-between gap-4">
+          <div className="pt-4 border-t border-[#10243A]/12 dark:border-[#F4F8FC]/12 flex flex-wrap items-center justify-between gap-4">
             <div className="flex items-center gap-2">
               <button
                 type="button"
                 onClick={() => step(-1)}
                 aria-label="Previous initiative slide"
-                className="inline-flex items-center justify-center w-11 h-11 border border-[#141618]/20 dark:border-[#F3F0E9]/22 bg-[#F6F4EF] dark:bg-[#191C20] text-[#141618] dark:text-[#F3F0E9] hover:border-[#9E4B28] hover:text-[#9E4B28] dark:hover:border-[#EC743C] dark:hover:text-[#EC743C] transition-colors cursor-pointer"
+                className="inline-flex items-center justify-center w-11 h-11 border border-[#10243A]/20 dark:border-[#F4F8FC]/22 bg-[#FFFFFF] dark:bg-[#0D1B2E] text-[#10243A] dark:text-[#F4F8FC] hover:border-brand hover:text-brand dark:hover:border-[#69C5F5] dark:hover:text-[#69C5F5] transition-colors cursor-pointer"
               >
                 <ArrowLeft className="w-4 h-4" aria-hidden="true" />
               </button>
@@ -186,7 +186,7 @@ export function DiagonalCarousel({
                 type="button"
                 onClick={() => step(1)}
                 aria-label="Next initiative slide"
-                className="inline-flex items-center justify-center w-11 h-11 border border-[#141618]/20 dark:border-[#F3F0E9]/22 bg-[#F6F4EF] dark:bg-[#191C20] text-[#141618] dark:text-[#F3F0E9] hover:border-[#9E4B28] hover:text-[#9E4B28] dark:hover:border-[#EC743C] dark:hover:text-[#EC743C] transition-colors cursor-pointer"
+                className="inline-flex items-center justify-center w-11 h-11 border border-[#10243A]/20 dark:border-[#F4F8FC]/22 bg-[#FFFFFF] dark:bg-[#0D1B2E] text-[#10243A] dark:text-[#F4F8FC] hover:border-brand hover:text-brand dark:hover:border-[#69C5F5] dark:hover:text-[#69C5F5] transition-colors cursor-pointer"
               >
                 <ArrowRight className="w-4 h-4" aria-hidden="true" />
               </button>
@@ -205,8 +205,8 @@ export function DiagonalCarousel({
                       className={cn(
                         'h-2 transition-all duration-400 cursor-pointer',
                         isCurrent
-                          ? 'w-7 bg-[#9E4B28] dark:bg-[#EC743C]'
-                          : 'w-2.5 bg-[#141618]/20 hover:bg-[#141618]/45 dark:bg-[#F3F0E9]/20 dark:hover:bg-[#F3F0E9]/45'
+                          ? 'w-7 bg-brand dark:bg-[#69C5F5]'
+                          : 'w-2.5 bg-[#10243A]/20 hover:bg-[#10243A]/45 dark:bg-[#F4F8FC]/20 dark:hover:bg-[#F4F8FC]/45'
                       )}
                     />
                   );
@@ -217,7 +217,7 @@ export function DiagonalCarousel({
             {active.to && (
               <Link
                 to={active.to}
-                className="inline-flex items-center gap-1.5 text-xs font-semibold uppercase tracking-wider text-[#9E4B28] dark:text-[#EC743C] hover:underline whitespace-nowrap"
+                className="inline-flex items-center gap-1.5 text-xs font-semibold uppercase tracking-wider text-brand dark:text-[#69C5F5] hover:underline whitespace-nowrap"
               >
                 <span>{active.actionLabel ?? 'View Full Record'}</span>
                 <ArrowUpRight className="w-3.5 h-3.5" aria-hidden="true" />

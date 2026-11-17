@@ -135,7 +135,7 @@ export function FaqPage() {
         id={entry.id}
         className={cn(
           'scroll-mt-24 transition-colors duration-200',
-          isDirectHit || isOpen ? 'bg-[#ECE8DF]/45 dark:bg-[#191C20]/75' : ''
+          isDirectHit || isOpen ? 'bg-[#F1F6FB]/45 dark:bg-[#0D1B2E]/75' : ''
         )}
       >
         <h3>
@@ -145,13 +145,13 @@ export function FaqPage() {
             aria-expanded={isOpen}
             aria-controls={panelId}
             onClick={() => toggleEntry(entry.id)}
-            className="w-full text-left px-5 sm:px-7 py-5 min-h-[58px] flex items-start justify-between gap-4 hover:bg-[#F6F4EF]/75 dark:hover:bg-[#191C20]/80 transition-colors cursor-pointer"
+            className="w-full text-left px-5 sm:px-7 py-5 min-h-[58px] flex items-start justify-between gap-4 hover:bg-[#FFFFFF]/75 dark:hover:bg-[#0D1B2E]/80 transition-colors cursor-pointer"
           >
             <div className="space-y-1">
-              <span className="block text-[10px] font-mono-tabular uppercase tracking-wider text-[#9E4B28] dark:text-[#EC743C]">
+              <span className="block text-[10px] font-mono-tabular uppercase tracking-wider text-brand dark:text-[#69C5F5]">
                 {entry.category}
               </span>
-              <span className="font-display text-xl sm:text-2xl font-bold uppercase tracking-tight text-[#141618] dark:text-[#F3F0E9] block">
+              <span className="font-display text-xl sm:text-2xl font-bold uppercase tracking-tight text-[#10243A] dark:text-[#F4F8FC] block">
                 {entry.question}
               </span>
             </div>
@@ -160,8 +160,8 @@ export function FaqPage() {
               className={cn(
                 'w-7 h-7 shrink-0 mt-1 border flex items-center justify-center transition-colors duration-200',
                 isOpen
-                  ? 'bg-[#9E4B28] border-[#9E4B28] text-[#F6F4EF] dark:bg-[#EC743C] dark:border-[#EC743C] dark:text-[#141618]'
-                  : 'border-[#141618]/18 dark:border-[#F3F0E9]/18 text-[#4A5054] dark:text-[#A1A7AB]'
+                  ? 'bg-brand border-brand text-[#FFFFFF] dark:bg-[#69C5F5] dark:border-[#69C5F5] dark:text-[#10243A]'
+                  : 'border-[#10243A]/18 dark:border-[#F4F8FC]/18 text-[#465C72] dark:text-[#B5C5D7]'
               )}
             >
               <Plus
@@ -186,12 +186,12 @@ export function FaqPage() {
         >
           <div className="overflow-hidden">
             <div className="px-5 sm:px-7 pb-7 pt-1 space-y-4">
-              <p className="text-sm sm:text-base text-[#141618]/90 dark:text-[#F3F0E9]/88 leading-relaxed max-w-[68ch]">
+              <p className="text-sm sm:text-base text-[#10243A]/90 dark:text-[#F4F8FC]/88 leading-relaxed max-w-[68ch]">
                 {entry.answer}
               </p>
 
               {entry.expandedExplanation && (
-                <p className="text-xs sm:text-sm text-[#4A5054] dark:text-[#A1A7AB] leading-relaxed max-w-[68ch]">
+                <p className="text-xs sm:text-sm text-[#465C72] dark:text-[#B5C5D7] leading-relaxed max-w-[68ch]">
                   {entry.expandedExplanation}
                 </p>
               )}
@@ -210,8 +210,8 @@ export function FaqPage() {
                     }}
                     className={`inline-flex items-center gap-1.5 min-h-[40px] px-4 py-2 text-xs font-semibold transition-colors ${
                       action.variant === 'primary'
-                        ? 'bg-[#141618] text-[#F6F4EF] hover:bg-[#9E4B28] dark:bg-[#A95632] dark:text-[#F3F0E9] dark:hover:bg-[#EC743C] dark:hover:text-[#141618]'
-                        : 'bg-[#ECE8DF] text-[#141618] hover:bg-[#D8D1C3] dark:bg-[#141618] dark:text-[#F3F0E9] dark:border dark:border-[#F3F0E9]/18 dark:hover:border-[#EC743C]'
+                        ? 'bg-[#10243A] text-[#FFFFFF] hover:bg-brand dark:bg-[#0A6AA1] dark:text-[#F4F8FC] dark:hover:bg-[#69C5F5] dark:hover:text-[#10243A]'
+                        : 'bg-[#F1F6FB] text-[#10243A] hover:bg-[#D4DFEB] dark:bg-[#10243A] dark:text-[#F4F8FC] dark:border dark:border-[#F4F8FC]/18 dark:hover:border-[#69C5F5]'
                     }`}
                   >
                     {action.label}
@@ -228,7 +228,7 @@ export function FaqPage() {
                       returnFocusEl: e.currentTarget,
                     })
                   }
-                  className="inline-flex items-center gap-1.5 min-h-[40px] px-3.5 py-2 text-xs font-medium text-[#9E4B28] dark:text-[#EC743C] border border-[#141618]/18 dark:border-[#F3F0E9]/18 hover:border-[#9E4B28] dark:hover:border-[#EC743C] transition-colors cursor-pointer"
+                  className="inline-flex items-center gap-1.5 min-h-[40px] px-3.5 py-2 text-xs font-medium text-brand dark:text-[#69C5F5] border border-[#10243A]/18 dark:border-[#F4F8FC]/18 hover:border-brand dark:hover:border-[#69C5F5] transition-colors cursor-pointer"
                 >
                   <MessageSquare className="w-3.5 h-3.5" aria-hidden="true" />
                   Ask Berry Compass about this
@@ -239,11 +239,11 @@ export function FaqPage() {
                   tabIndex={isOpen ? 0 : -1}
                   onClick={() => copyDirectLink(entry.id)}
                   aria-label={`Copy direct link to "${entry.question}"`}
-                  className="inline-flex items-center gap-1.5 min-h-[40px] px-3 py-2 text-xs text-[#4A5054] dark:text-[#A1A7AB] hover:text-[#141618] dark:hover:text-[#F3F0E9] transition-colors cursor-pointer ml-auto"
+                  className="inline-flex items-center gap-1.5 min-h-[40px] px-3 py-2 text-xs text-[#465C72] dark:text-[#B5C5D7] hover:text-[#10243A] dark:hover:text-[#F4F8FC] transition-colors cursor-pointer ml-auto"
                 >
                   {copiedId === entry.id ? (
                     <>
-                      <Check className="w-3.5 h-3.5 text-[#9E4B28] dark:text-[#EC743C]" aria-hidden="true" />
+                      <Check className="w-3.5 h-3.5 text-brand dark:text-[#69C5F5]" aria-hidden="true" />
                       <span>Link copied</span>
                     </>
                   ) : (
@@ -262,23 +262,23 @@ export function FaqPage() {
   };
 
   return (
-    <div className="bg-[#F6F4EF] dark:bg-[#121417] text-[#141618] dark:text-[#F3F0E9]">
+    <div className="bg-[#FFFFFF] dark:bg-[#07111F] text-[#10243A] dark:text-[#F4F8FC]">
       <SubNav links={CORPORATE_SUBNAV_LINKS} ariaLabel="Corporate navigation" />
 
       <div className="max-w-[1360px] mx-auto px-4 sm:px-6 lg:px-8 py-12 lg:py-16 space-y-12">
         {/* Editorial Intro Header */}
-        <header className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-end pb-8 border-b border-[#141618]/14 dark:border-[#F3F0E9]/14">
+        <header className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-end pb-8 border-b border-[#10243A]/14 dark:border-[#F4F8FC]/14">
           <div className="lg:col-span-8 space-y-4">
             <Breadcrumbs items={[{ label: 'FAQs & Product Guide' }]} />
-            <p className="text-xs font-mono-tabular uppercase tracking-widest text-[#9E4B28] dark:text-[#EC743C]">
+            <p className="text-xs font-mono-tabular uppercase tracking-widest text-brand dark:text-[#69C5F5]">
               Frequently Asked Questions · Prepared Reference
             </p>
             <SplitText
               text="Clear answers. Better decisions."
               as="h1"
-              className="font-display fluid-section-title font-bold uppercase tracking-tight text-[#141618] dark:text-[#F3F0E9]"
+              className="font-display fluid-section-title font-bold uppercase tracking-tight text-[#10243A] dark:text-[#F4F8FC]"
             />
-            <p className="text-base text-[#4A5054] dark:text-[#A1A7AB] leading-relaxed max-w-[65ch]">
+            <p className="text-base text-[#465C72] dark:text-[#B5C5D7] leading-relaxed max-w-[65ch]">
               Structured answers across Berry Alloys’ manufacturing operations, bulk alloy families, quality frameworks, commercial quotation process, sustainability records, and statutory filings.
             </p>
           </div>
@@ -303,7 +303,7 @@ export function FaqPage() {
                 Search frequently asked questions
               </label>
               <Search
-                className="w-4 h-4 text-[#4A5054] dark:text-[#A1A7AB] absolute left-3.5 top-1/2 -translate-y-1/2 pointer-events-none"
+                className="w-4 h-4 text-[#465C72] dark:text-[#B5C5D7] absolute left-3.5 top-1/2 -translate-y-1/2 pointer-events-none"
                 aria-hidden="true"
               />
               <input
@@ -312,14 +312,14 @@ export function FaqPage() {
                 value={searchTerm}
                 onChange={(e) => setSearchTerm(e.target.value)}
                 placeholder="Search by alloy, specification, plant, ISO standard, or enquiry topic…"
-                className="w-full min-h-[46px] pl-10 pr-10 py-2.5 text-sm bg-white dark:bg-[#20242A] border border-[#141618]/20 dark:border-[#F3F0E9]/20 text-[#141618] dark:text-[#F3F0E9] placeholder:text-[#4A5054]/70 dark:placeholder:text-[#A1A7AB]/70 focus:border-[#9E4B28] dark:focus:border-[#EC743C] focus:outline-none"
+                className="w-full min-h-[46px] pl-10 pr-10 py-2.5 text-sm bg-white dark:bg-[#12243B] border border-[#10243A]/20 dark:border-[#F4F8FC]/20 text-[#10243A] dark:text-[#F4F8FC] placeholder:text-[#465C72]/70 dark:placeholder:text-[#B5C5D7]/70 focus:border-brand dark:focus:border-[#69C5F5] focus:outline-none"
               />
               {searchTerm && (
                 <button
                   type="button"
                   onClick={() => setSearchTerm('')}
                   aria-label="Clear search query"
-                  className="absolute right-2 top-1/2 -translate-y-1/2 w-8 h-8 inline-flex items-center justify-center text-[#4A5054] hover:text-[#141618] dark:text-[#A1A7AB] dark:hover:text-[#F3F0E9] cursor-pointer"
+                  className="absolute right-2 top-1/2 -translate-y-1/2 w-8 h-8 inline-flex items-center justify-center text-[#465C72] hover:text-[#10243A] dark:text-[#B5C5D7] dark:hover:text-[#F4F8FC] cursor-pointer"
                 >
                   <X className="w-4 h-4" aria-hidden="true" />
                 </button>
@@ -330,7 +330,7 @@ export function FaqPage() {
               <span
                 role="status"
                 aria-live="polite"
-                className="font-mono-tabular text-[#4A5054] dark:text-[#A1A7AB]"
+                className="font-mono-tabular text-[#465C72] dark:text-[#B5C5D7]"
               >
                 Showing {filteredEntries.length} of {KNOWLEDGE_BASE.length} answers
               </span>
@@ -339,7 +339,7 @@ export function FaqPage() {
                 <button
                   type="button"
                   onClick={resetFilters}
-                  className="inline-flex items-center gap-1.5 min-h-[38px] px-3 py-1.5 font-semibold text-[#9E4B28] dark:text-[#EC743C] border border-[#141618]/18 dark:border-[#F3F0E9]/18 hover:border-[#9E4B28] dark:hover:border-[#EC743C] transition-colors cursor-pointer"
+                  className="inline-flex items-center gap-1.5 min-h-[38px] px-3 py-1.5 font-semibold text-brand dark:text-[#69C5F5] border border-[#10243A]/18 dark:border-[#F4F8FC]/18 hover:border-brand dark:hover:border-[#69C5F5] transition-colors cursor-pointer"
                 >
                   <RotateCcw className="w-3.5 h-3.5" aria-hidden="true" />
                   Reset filters
@@ -361,8 +361,8 @@ export function FaqPage() {
               onClick={() => setSelectedCategory('All')}
               className={`min-h-[40px] px-4 py-2 text-xs font-semibold border transition-colors whitespace-nowrap shrink-0 cursor-pointer ${
                 selectedCategory === 'All'
-                  ? 'bg-[#141618] text-[#F6F4EF] border-[#141618] dark:bg-[#A95632] dark:text-[#F3F0E9] dark:border-[#A95632]'
-                  : 'bg-white text-[#4A5054] border-[#141618]/15 hover:text-[#141618] dark:bg-[#20242A] dark:text-[#A1A7AB] dark:border-[#F3F0E9]/14 dark:hover:text-[#F3F0E9]'
+                  ? 'bg-[#10243A] text-[#FFFFFF] border-[#10243A] dark:bg-[#0A6AA1] dark:text-[#F4F8FC] dark:border-[#0A6AA1]'
+                  : 'bg-white text-[#465C72] border-[#10243A]/15 hover:text-[#10243A] dark:bg-[#12243B] dark:text-[#B5C5D7] dark:border-[#F4F8FC]/14 dark:hover:text-[#F4F8FC]'
               }`}
             >
               All Topics ({KNOWLEDGE_BASE.length})
@@ -380,8 +380,8 @@ export function FaqPage() {
                   onClick={() => setSelectedCategory(cat)}
                   className={`min-h-[40px] px-4 py-2 text-xs font-semibold border transition-colors whitespace-nowrap shrink-0 cursor-pointer ${
                     active
-                      ? 'bg-[#141618] text-[#F6F4EF] border-[#141618] dark:bg-[#A95632] dark:text-[#F3F0E9] dark:border-[#A95632]'
-                      : 'bg-white text-[#4A5054] border-[#141618]/15 hover:text-[#141618] dark:bg-[#20242A] dark:text-[#A1A7AB] dark:border-[#F3F0E9]/14 dark:hover:text-[#F3F0E9]'
+                      ? 'bg-[#10243A] text-[#FFFFFF] border-[#10243A] dark:bg-[#0A6AA1] dark:text-[#F4F8FC] dark:border-[#0A6AA1]'
+                      : 'bg-white text-[#465C72] border-[#10243A]/15 hover:text-[#10243A] dark:bg-[#12243B] dark:text-[#B5C5D7] dark:border-[#F4F8FC]/14 dark:hover:text-[#F4F8FC]'
                   }`}
                 >
                   {cat} ({count})
@@ -394,11 +394,11 @@ export function FaqPage() {
         {/* FAQ Accordion List or Helpful No-Results State */}
         <section aria-label="FAQ results">
           {filteredEntries.length === 0 ? (
-            <div className="bg-white dark:bg-[#20242A] border border-[#141618]/14 dark:border-[#F3F0E9]/14 p-8 sm:p-12 text-center space-y-5">
-              <h2 className="font-display text-2xl sm:text-3xl font-bold uppercase text-[#141618] dark:text-[#F3F0E9]">
+            <div className="bg-white dark:bg-[#12243B] border border-[#10243A]/14 dark:border-[#F4F8FC]/14 p-8 sm:p-12 text-center space-y-5">
+              <h2 className="font-display text-2xl sm:text-3xl font-bold uppercase text-[#10243A] dark:text-[#F4F8FC]">
                 No prepared answers matched your search.
               </h2>
-              <p className="text-sm text-[#4A5054] dark:text-[#A1A7AB] max-w-xl mx-auto leading-relaxed">
+              <p className="text-sm text-[#465C72] dark:text-[#B5C5D7] max-w-xl mx-auto leading-relaxed">
                 Try broader metallurgy terms, reset your category filter, or check with Berry Compass or our commercial quotation desk for bespoke requirements.
               </p>
               <div className="pt-2 flex flex-wrap justify-center gap-3">
@@ -424,7 +424,7 @@ export function FaqPage() {
               </div>
             </div>
           ) : (
-            <div className="bg-white dark:bg-[#20242A] border border-[#141618]/14 dark:border-[#F3F0E9]/14 divide-y divide-[#141618]/12 dark:divide-[#F3F0E9]/12">
+            <div className="bg-white dark:bg-[#12243B] border border-[#10243A]/14 dark:border-[#F4F8FC]/14 divide-y divide-[#10243A]/12 dark:divide-[#F4F8FC]/12">
               {filteredEntries.map((entry) => renderEntryCard(entry))}
             </div>
           )}
@@ -433,19 +433,19 @@ export function FaqPage() {
         {/* Bottom Contact Invitation */}
         <section
           aria-labelledby="faq-contact-cta"
-          className="bg-[#ECE8DF] dark:bg-[#191C20] border border-[#141618]/14 dark:border-[#F3F0E9]/14 p-6 sm:p-10 grid grid-cols-1 lg:grid-cols-12 gap-8 items-center"
+          className="bg-[#F1F6FB] dark:bg-[#0D1B2E] border border-[#10243A]/14 dark:border-[#F4F8FC]/14 p-6 sm:p-10 grid grid-cols-1 lg:grid-cols-12 gap-8 items-center"
         >
           <div className="lg:col-span-8 space-y-2">
-            <p className="text-xs font-mono-tabular uppercase tracking-widest text-[#9E4B28] dark:text-[#EC743C]">
+            <p className="text-xs font-mono-tabular uppercase tracking-widest text-brand dark:text-[#69C5F5]">
               Direct Commercial Requirements
             </p>
             <h2
               id="faq-contact-cta"
-              className="font-display text-2xl sm:text-3xl font-bold uppercase text-[#141618] dark:text-[#F3F0E9]"
+              className="font-display text-2xl sm:text-3xl font-bold uppercase text-[#10243A] dark:text-[#F4F8FC]"
             >
               Need specific lot tonnage, sizing, or dispatch confirmation?
             </h2>
-            <p className="text-sm text-[#4A5054] dark:text-[#A1A7AB] leading-relaxed max-w-2xl">
+            <p className="text-sm text-[#465C72] dark:text-[#B5C5D7] leading-relaxed max-w-2xl">
               Commercial terms including pricing, MOQs, stock availability, lead times, and bespoke chemistry checks are handled directly by the commercial desk via quotation enquiry.
             </p>
           </div>

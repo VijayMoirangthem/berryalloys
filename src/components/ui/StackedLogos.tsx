@@ -61,7 +61,7 @@ export const StackedLogos: React.FC<StackedLogosProps> = ({
     <div
       ref={containerRef}
       className={cn(
-        'stacked-logos grid grid-cols-2 sm:grid-cols-4 border border-[#141618]/14 dark:border-[#F3F0E9]/14 bg-[#ECE8DF]/40 dark:bg-[#191C20]/60',
+        'stacked-logos grid grid-cols-2 sm:grid-cols-4 border border-[#10243A]/14 dark:border-[#F4F8FC]/14 bg-[#F1F6FB]/40 dark:bg-[#0D1B2E]/60',
         className
       )}
       style={{ '--duration': `${duration}s` } as React.CSSProperties}
@@ -74,7 +74,7 @@ export const StackedLogos: React.FC<StackedLogosProps> = ({
           <div
             key={`stacked-cell-${cellIdx}`}
             className={cn(
-              'stacked-logos__item min-h-[112px] sm:min-h-[128px] border-b border-r border-[#141618]/12 dark:border-[#F3F0E9]/12 bg-white dark:bg-[#20242A] flex items-center justify-center p-4',
+              'stacked-logos__item min-h-[112px] sm:min-h-[128px] border-b border-r border-[#10243A]/12 dark:border-[#F4F8FC]/12 bg-white dark:bg-[#12243B] flex items-center justify-center p-4',
               itemClassName
             )}
           >
