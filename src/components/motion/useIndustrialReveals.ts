@@ -71,9 +71,12 @@ export function useIndustrialReveals(rootRef: RefObject<HTMLElement | null>, ski
             (c): c is HTMLElement => c instanceof HTMLElement && !c.hasAttribute('data-no-reveal') && c.offsetHeight < 900
           );
           if (items.length < 2 || items.length > 16) return;
+          // On narrow screens cards alternate in from the left and right, so a single column still feels choreographed.
+          const narrow = window.innerWidth < 1024;
           gsap.from(items, {
             opacity: 0,
             y: 28,
+            x: narrow ? (i: number) => (i % 2 === 0 ? -26 : 26) : 0,
             duration: 0.7,
             ease: 'power2.out',
             stagger: 0.08,

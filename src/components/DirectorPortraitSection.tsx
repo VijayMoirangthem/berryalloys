@@ -191,6 +191,46 @@ export function DirectorPortraitSection({ variant = 'home' }: DirectorPortraitSe
     };
   }, []);
 
+  // Touch screens have no hover, so the five layers move on scroll instead: they drift at different speeds as the section passes,
+  // and a horizontal drag on the portrait tilts it a few degrees. The face is only ever translated, tilted or scaled uniformly;
+  // it is never warped, and no device-orientation permission is needed.
+  useEffect(() => {
+    const stage = stageRef.current;
+    if (!stage) return;
+    if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
+    const mm = gsap.matchMedia();
+    mm.add('(max-width: 1023px), (hover: none)', () => {
+      const tl = gsap.timeline({ scrollTrigger: { trigger: stage, start: 'top 92%', end: 'bottom 12%', scrub: 0.7 } });
+      if (portraitLayerRef.current) tl.fromTo(portraitLayerRef.current, { y: 40, scale: 0.97 }, { y: -10, scale: 1.02, ease: 'none' }, 0);
+      if (frameLayerRef.current) tl.fromTo(frameLayerRef.current, { y: 58 }, { y: -20, ease: 'none' }, 0);
+      if (shadowLayerRef.current) tl.fromTo(shadowLayerRef.current, { y: 76, x: 12 }, { y: -6, x: -6, ease: 'none' }, 0);
+      if (accentLayerRef.current) tl.fromTo(accentLayerRef.current, { y: -34, x: -20 }, { y: 20, x: 10, ease: 'none' }, 0);
+
+      const portrait = portraitLayerRef.current;
+      const onMove = (e: PointerEvent) => {
+        if (e.pointerType === 'mouse' || !portrait) return;
+        const r = stage.getBoundingClientRect();
+        const nx = Math.max(-1, Math.min(1, ((e.clientX - r.left) / Math.max(1, r.width)) * 2 - 1));
+        gsap.to(portrait, { rotationY: nx * 7, transformPerspective: 900, duration: 0.45, ease: 'power3.out', overwrite: 'auto' });
+      };
+      const onEnd = () => {
+        if (portrait) gsap.to(portrait, { rotationY: 0, duration: 0.9, ease: 'elastic.out(1, 0.6)', overwrite: 'auto' });
+      };
+      stage.style.touchAction = 'pan-y';
+      stage.addEventListener('pointermove', onMove, { passive: true });
+      stage.addEventListener('pointerup', onEnd, { passive: true });
+      stage.addEventListener('pointercancel', onEnd, { passive: true });
+      stage.addEventListener('pointerleave', onEnd, { passive: true });
+      return () => {
+        stage.removeEventListener('pointermove', onMove);
+        stage.removeEventListener('pointerup', onEnd);
+        stage.removeEventListener('pointercancel', onEnd);
+        stage.removeEventListener('pointerleave', onEnd);
+      };
+    });
+    return () => mm.revert();
+  }, []);
+
   return (
     <div ref={rootRef} className="grid grid-cols-1 lg:grid-cols-12 gap-10 lg:gap-14 items-center">
       {/* Left: Sculptural 5-Layer Architectural Portrait Composition */}

@@ -14,6 +14,8 @@ export interface LogoSliderProps extends React.HTMLAttributes<HTMLDivElement> {
   logoHeight?: string;
   pauseOnHover?: boolean;
   showBlur?: boolean;
+  /** Fade the first and last items into the edges with a mask. Off by default: logos stay crisp right up to the edge. */
+  edgeFade?: boolean;
   blurLayers?: number;
   blurWidth?: number;
   /** CSS background color for progressive edge masks */
@@ -31,7 +33,8 @@ export function LogoSlider({
   gap = '2.5rem',
   logoHeight = '3.5rem',
   pauseOnHover = true,
-  showBlur = true,
+  showBlur = false,
+  edgeFade = false,
   blurLayers = 6,
   blurWidth = 14,
   edgeBackground,
@@ -47,6 +50,7 @@ export function LogoSlider({
       className={cn('logo-slider', className)}
       data-direction={direction}
       data-pause-on-hover={String(pauseOnHover)}
+      data-edge-fade={String(edgeFade)}
       style={
         {
           '--duration': `${safeSpeed}s`,

@@ -36,6 +36,8 @@ import { ResilientImage } from '../components/ResilientImage';
 import { ImageReveal } from '../components/motion/ImageReveal';
 import { ScrollReveal } from '../components/motion/ScrollReveal';
 import { useIndustrialReveals } from '../components/motion/useIndustrialReveals';
+import { useMobileMotion } from '../components/motion/useMobileMotion';
+import { ScrollCue } from '../components/motion/ScrollCue';
 import { SplitText } from '../components/motion/SplitText';
 import { SpotlightSurface } from '../components/motion/SpotlightSurface';
 import { AnimatedTooltip } from '../components/ui/AnimatedTooltip';
@@ -121,6 +123,7 @@ export function HomePage() {
   };
 
   useIndustrialReveals(pageRootRef, ['overview', 'process']);
+  useMobileMotion(pageRootRef);
 
   const featuredCamp = CSR_STORIES[0];
   const csrSecondaryStories = [CSR_STORIES[1], CSR_STORIES[4]];
@@ -201,6 +204,7 @@ export function HomePage() {
 
         {/* Center Monumental Interactive Particle Stage */}
         <div className="relative z-10 flex-1 flex items-center justify-center max-w-[1440px] w-full mx-auto px-2 sm:px-6 lg:px-8 py-2">
+          <ScrollCue />
           <InteractiveParticles
             className="w-full h-[54svh] sm:h-[60svh] lg:h-[64svh] min-h-[320px] max-h-[620px]"
             lines={
@@ -696,7 +700,7 @@ export function HomePage() {
             <div className="grid grid-cols-2 lg:grid-cols-4 border-t border-b border-[#10243A]/12 dark:border-[#F4F8FC]/12 divide-y sm:divide-y-0 sm:divide-x divide-[#10243A]/12 dark:divide-[#F4F8FC]/12 bg-white dark:bg-[#12243B]">
               {COMPANY_INFO.workforceStory.highlights.map((item) => (
                 <div key={item.metric} className="p-4 sm:p-5 space-y-1">
-                  <p className="font-display text-xl sm:text-2xl font-bold uppercase text-brand dark:text-[#69C5F5]">
+                  <p data-countup className="font-display text-xl sm:text-2xl font-bold uppercase text-brand dark:text-[#69C5F5]">
                     {item.metric}
                   </p>
                   <p className="text-xs text-[#465C72] dark:text-[#B5C5D7] leading-relaxed">

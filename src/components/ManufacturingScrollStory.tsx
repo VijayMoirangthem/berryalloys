@@ -60,6 +60,7 @@ export function ManufacturingScrollStory() {
   const sectionRef = useRef<HTMLElement>(null);
   const pinTargetRef = useRef<HTMLDivElement>(null);
   const progressBarRef = useRef<HTMLDivElement>(null);
+  const mobileListRef = useRef<HTMLDivElement>(null);
   const lastStageRef = useRef(0);
   const [activeStage, setActiveStage] = useState(0);
   const [prefersReducedMotion, setPrefersReducedMotion] = useState(() =>
@@ -106,6 +107,37 @@ export function ManufacturingScrollStory() {
     document.fonts?.ready?.then(() => ScrollTrigger.refresh());
 
     return () => ctx.revert();
+  }, [prefersReducedMotion]);
+
+  // Phones and tablets: the desktop pin is skipped, so the stages get their own scroll-driven story instead of a plain list.
+  useEffect(() => {
+    const list = mobileListRef.current;
+    if (prefersReducedMotion || !list) return;
+    const mm = gsap.matchMedia();
+    mm.add('(max-width: 1023px)', () => {
+      const fill = list.querySelector<HTMLElement>('[data-rail-fill]');
+      if (fill) {
+        gsap.fromTo(fill, { scaleY: 0 }, { scaleY: 1, ease: 'none', scrollTrigger: { trigger: list, start: 'top 72%', end: 'bottom 72%', scrub: 0.4 } });
+      }
+      list.querySelectorAll<HTMLElement>('[data-stage-card]').forEach((card) => {
+        const media = card.querySelector<HTMLElement>('[data-stage-media]');
+        const img = media?.querySelector('img');
+        const body = card.querySelectorAll<HTMLElement>('[data-stage-body] > *');
+        if (media) {
+          gsap.fromTo(media, { clipPath: 'inset(0 0 100% 0)' }, { clipPath: 'inset(0 0 0% 0)', duration: 1.1, ease: 'power3.out', clearProps: 'clipPath', scrollTrigger: { trigger: card, start: 'top 84%', once: true } });
+        }
+        if (img) {
+          gsap.fromTo(img, { scale: 1.3, yPercent: -4 }, { scale: 1.04, yPercent: 4, ease: 'none', scrollTrigger: { trigger: card, start: 'top bottom', end: 'bottom top', scrub: 0.6 } });
+        }
+        if (body.length) {
+          gsap.from(body, { opacity: 0, y: 22, duration: 0.7, stagger: 0.1, ease: 'power2.out', clearProps: 'transform,opacity', scrollTrigger: { trigger: card, start: 'top 70%', once: true } });
+        }
+        ScrollTrigger.create({ trigger: card, start: 'top 62%', end: 'bottom 62%', toggleClass: { targets: card, className: 'is-active' } });
+      });
+      const t = window.setTimeout(() => ScrollTrigger.refresh(), 1200);
+      return () => window.clearTimeout(t);
+    });
+    return () => mm.revert();
   }, [prefersReducedMotion]);
 
   const handleManualStageSelect = (idx: number) => {
@@ -292,13 +324,18 @@ export function ManufacturingScrollStory() {
           </Link>
         </div>
 
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+        <div ref={mobileListRef} className="relative">
+        <div aria-hidden="true" className="absolute start-[7px] top-2 bottom-2 w-[2px] bg-subtle lg:hidden">
+          <div data-rail-fill className="h-full w-full origin-top scale-y-0 bg-accent-red" />
+        </div>
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 ps-8 lg:ps-0">
           {PROCESS_STAGES.map((stage) => (
+            <div key={stage.number} data-stage-card className="stage-card relative">
+            <span aria-hidden="true" className="stage-dot absolute -start-[30px] top-7 z-10 h-4 w-4 rounded-full border-2 border-control bg-card lg:hidden" />
             <article
-              key={stage.number}
               className="bg-white dark:bg-[#12243B] border border-[#10243A]/14 dark:border-[#F4F8FC]/12 overflow-hidden flex flex-col"
             >
-              <div className="aspect-video overflow-hidden bg-[#10243A]">
+              <div data-stage-media className="aspect-video overflow-hidden bg-[#10243A]">
                 <ResilientImage
                   src={stage.image.src}
                   alt={stage.image.alt}
@@ -306,10 +343,10 @@ export function ManufacturingScrollStory() {
                   containerClassName="w-full h-full"
                 />
               </div>
-              <div className="p-5 sm:p-6 space-y-2.5 flex-1 flex flex-col justify-between">
+              <div data-stage-body className="p-5 sm:p-6 space-y-2.5 flex-1 flex flex-col justify-between">
                 <div className="space-y-2.5">
                   <div className="flex items-baseline gap-2.5">
-                    <span className="font-mono-tabular text-xs text-brand dark:text-[#69C5F5]">
+                    <span className="stage-num font-mono-tabular text-xs text-brand dark:text-[#69C5F5]">
                       {stage.number}
                     </span>
                     <h3 className="font-display text-2xl font-bold uppercase tracking-tight text-[#10243A] dark:text-[#F4F8FC]">
@@ -328,7 +365,9 @@ export function ManufacturingScrollStory() {
                 </p>
               </div>
             </article>
+            </div>
           ))}
+        </div>
         </div>
       </div>
     </section>

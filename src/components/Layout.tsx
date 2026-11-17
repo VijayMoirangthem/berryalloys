@@ -19,6 +19,7 @@ import { BrandLockup } from './BrandLockup';
 import { ThemeToggle } from './ThemeToggle';
 import { AmbientMotionToggle } from './AmbientMotionToggle';
 import { LanguageSelector } from './localized/LanguageSelector';
+import { ScrollProgress } from './motion/ScrollProgress';
 import { AnimatedFooterCanvas } from './ui/AnimatedFooterCanvas';
 import { SocialFlipButton } from './ui/SocialFlipButton';
 
@@ -398,6 +399,7 @@ export function Layout({ children }: LayoutProps) {
 
   return (
     <div className="min-h-screen flex flex-col bg-[#FFFFFF] text-[#10243A] dark:bg-[#07111F] dark:text-[#F4F8FC] transition-colors duration-200">
+      <ScrollProgress />
       <a
         href="#main-content"
         className="sr-only focus:not-sr-only focus:fixed focus:top-3 focus:left-3 focus:z-50 focus:bg-[#10243A] focus:text-[#F4F8FC] focus:px-4 focus:py-2 focus:text-sm focus:font-semibold"
