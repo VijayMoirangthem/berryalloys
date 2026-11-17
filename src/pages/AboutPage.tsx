@@ -182,9 +182,58 @@ export function AboutPage() {
         {/* Promoters & Managing Director Profile */}
         <section
           aria-labelledby="leadership-heading"
-          className="pt-12 border-t border-[#141618]/15 dark:border-[#F3F0E9]/14"
+          className="pt-12 border-t border-[#141618]/15 dark:border-[#F3F0E9]/14 space-y-12"
         >
           <DirectorPortraitSection variant="about" />
+
+          <div className="pt-10 border-t border-[#141618]/14 dark:border-[#F3F0E9]/14 space-y-6">
+            <div className="flex flex-col sm:flex-row sm:items-end justify-between gap-4">
+              <div className="space-y-1.5 max-w-2xl">
+                <p className="text-xs font-mono-tabular uppercase tracking-widest text-[#9E4B28] dark:text-[#EC743C]">
+                  People & Culture · {COMPANY_INFO.workforceStory.motto}
+                </p>
+                <h3 className="font-display text-2xl sm:text-3xl font-bold uppercase text-[#141618] dark:text-[#F3F0E9]">
+                  {COMPANY_INFO.workforceStory.headline}
+                </h3>
+              </div>
+              <Link
+                to="/careers"
+                className="inline-flex items-center gap-1.5 text-xs font-semibold text-[#9E4B28] dark:text-[#EC743C] hover:underline whitespace-nowrap"
+              >
+                Explore Teams & Careers
+                <ArrowRight className="w-3.5 h-3.5" aria-hidden="true" />
+              </Link>
+            </div>
+
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-5">
+              {[
+                { asset: ASSETS.teamFurnaceEngineers, label: 'Smelting Floor Engineering' },
+                { asset: ASSETS.teamMetallurgyLab, label: 'QA & Chemical Assurance' },
+                { asset: ASSETS.teamSafetyHuddle, label: 'ISO 45001 Shift Briefings' },
+              ].map((item) => (
+                <figure
+                  key={item.asset.id}
+                  className="bg-white dark:bg-[#20242A] border border-[#141618]/12 dark:border-[#F3F0E9]/14 overflow-hidden"
+                >
+                  <div className="aspect-[16/10] bg-[#141618] overflow-hidden">
+                    <ResilientImage
+                      src={item.asset.src}
+                      alt={item.asset.alt}
+                      containerClassName="w-full h-full"
+                    />
+                  </div>
+                  <figcaption className="p-4 space-y-1 text-xs">
+                    <p className="font-mono-tabular uppercase text-[11px] text-[#9E4B28] dark:text-[#EC743C]">
+                      {item.label}
+                    </p>
+                    <p className="text-[#4A5054] dark:text-[#A1A7AB] leading-relaxed">
+                      {item.asset.caption}
+                    </p>
+                  </figcaption>
+                </figure>
+              ))}
+            </div>
+          </div>
         </section>
 
         {/* Full Interactive Growth Story */}

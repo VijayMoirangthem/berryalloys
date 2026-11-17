@@ -1,8 +1,10 @@
 import { FormEvent, useState } from 'react';
 import { CheckCircle2, Info } from 'lucide-react';
-import { GALLERY_ITEMS } from '../data/assets';
+import { ASSETS, GALLERY_ITEMS } from '../data/assets';
+import { COMPANY_INFO } from '../data/company';
 import { CAREERS_DEPARTMENTS, JOB_VACANCIES } from '../data/communityNewsCareersDocs';
 import { Breadcrumbs } from '../components/Breadcrumbs';
+import { ResilientImage } from '../components/ResilientImage';
 import { CORPORATE_SUBNAV_LINKS, SubNav } from '../components/SubNav';
 import { SplitText } from '../components/motion/SplitText';
 import { CreepyButton } from '../components/ui/CreepyButton';
@@ -93,7 +95,7 @@ export function CareersPage() {
           <Breadcrumbs items={[{ label: 'Careers' }]} />
 
           <p className="text-xs font-mono-tabular uppercase tracking-widest text-[#9E4B28] dark:text-[#EC743C]">
-            People & Workplace
+            People & Workplace · {COMPANY_INFO.workforceStory.motto}
           </p>
           <SplitText
             text="Engineering, plant operations & commercial teams."
@@ -101,9 +103,74 @@ export function CareersPage() {
             className="font-display fluid-section-title font-bold uppercase tracking-tight text-[#141618] dark:text-[#F3F0E9]"
           />
           <p className="text-base text-[#4A5054] dark:text-[#A1A7AB] leading-relaxed">
-            Berry Alloys Limited’s workplace framework emphasizes practical technical training, mentorship, structured safety programs, annual employee health checks, equal-opportunity hiring, and work-life balance across Kolkata, Visakhapatnam, and Jharkhand operations.
+            {COMPANY_INFO.workforceStory.narrative}
           </p>
         </div>
+
+        {/* People Behind the Furnaces Photo Showcase */}
+        <section aria-labelledby="workforce-showcase-heading" className="space-y-6">
+          <div className="grid grid-cols-2 lg:grid-cols-4 border-t border-b border-[#141618]/14 dark:border-[#F3F0E9]/14 divide-y sm:divide-y-0 sm:divide-x divide-[#141618]/14 dark:divide-[#F3F0E9]/14 bg-white dark:bg-[#20242A]">
+            {COMPANY_INFO.workforceStory.highlights.map((item) => (
+              <div key={item.metric} className="p-4 sm:p-5 space-y-1">
+                <p className="font-display text-xl sm:text-2xl font-bold uppercase text-[#9E4B28] dark:text-[#EC743C]">
+                  {item.metric}
+                </p>
+                <p className="text-xs text-[#4A5054] dark:text-[#A1A7AB] leading-relaxed">
+                  {item.label}
+                </p>
+              </div>
+            ))}
+          </div>
+
+          <div className="space-y-4">
+            <h2 id="workforce-showcase-heading" className="font-display text-2xl sm:text-3xl font-bold uppercase text-[#141618] dark:text-[#F3F0E9]">
+              People Behind the Furnaces
+            </h2>
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-5">
+              {[
+                {
+                  asset: ASSETS.teamFurnaceEngineers,
+                  tag: 'Furnace Operations',
+                  title: 'Submerged-Arc & AOD Crew',
+                },
+                {
+                  asset: ASSETS.teamMetallurgyLab,
+                  tag: 'Quality & Assay',
+                  title: 'Spectrometry & QA Chemists',
+                },
+                {
+                  asset: ASSETS.teamSafetyHuddle,
+                  tag: 'Occupational Safety',
+                  title: 'ISO 45001 Shift Briefings',
+                },
+              ].map((card) => (
+                <figure
+                  key={card.asset.id}
+                  className="bg-white dark:bg-[#20242A] border border-[#141618]/12 dark:border-[#F3F0E9]/14 overflow-hidden flex flex-col"
+                >
+                  <div className="aspect-[16/10] bg-[#141618] overflow-hidden">
+                    <ResilientImage
+                      src={card.asset.src}
+                      alt={card.asset.alt}
+                      containerClassName="w-full h-full"
+                    />
+                  </div>
+                  <figcaption className="p-4 space-y-1">
+                    <p className="text-[11px] font-mono-tabular uppercase tracking-wider text-[#9E4B28] dark:text-[#EC743C]">
+                      {card.tag}
+                    </p>
+                    <h3 className="font-display text-xl font-bold uppercase text-[#141618] dark:text-[#F3F0E9]">
+                      {card.title}
+                    </h3>
+                    <p className="text-xs text-[#4A5054] dark:text-[#A1A7AB] leading-relaxed">
+                      {card.asset.caption}
+                    </p>
+                  </figcaption>
+                </figure>
+              ))}
+            </div>
+          </div>
+        </section>
 
         {/* Workplace Pillars */}
         <section aria-labelledby="culture-heading" className="pt-8 border-t border-[#141618]/15 dark:border-[#F3F0E9]/14">
@@ -148,10 +215,10 @@ export function CareersPage() {
             <div className="p-6 sm:p-8 space-y-2">
               <p className="font-mono-tabular text-xs text-[#9E4B28] dark:text-[#EC743C]">02</p>
               <h3 className="font-display text-2xl font-bold uppercase text-[#141618] dark:text-[#F3F0E9]">
-                Zero Harm Safety & Health
+                Occupational Safety & Health
               </h3>
               <p className="text-sm text-[#4A5054] dark:text-[#A1A7AB] leading-relaxed">
-                Dedicated Zero Harm seminars for permanent and contract crews paired with periodic multi-specialty employee medical camps.
+                Plant safety protocols paired with periodic multi-specialty employee medical camps and regular occupational health screening.
               </p>
             </div>
             <div className="p-6 sm:p-8 space-y-2">
@@ -163,32 +230,6 @@ export function CareersPage() {
                 Equal-opportunity hiring across eleven operational and corporate functions, alongside recognition of women employees and families.
               </p>
             </div>
-          </div>
-
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5 mt-8">
-            {[
-              GALLERY_ITEMS[3],
-              GALLERY_ITEMS[4],
-              GALLERY_ITEMS[5],
-              GALLERY_ITEMS[6],
-            ].map((asset) => (
-              <figure
-                key={asset.id}
-                className="bg-white dark:bg-[#20242A] border border-[#141618]/14 dark:border-[#F3F0E9]/14 overflow-hidden flex flex-col"
-              >
-                <div className="aspect-[16/10] bg-[#141618] overflow-hidden">
-                  <img
-                    src={asset.src}
-                    alt={asset.alt}
-                    loading="lazy"
-                    className="w-full h-full object-cover"
-                  />
-                </div>
-                <figcaption className="px-4 py-3 text-xs text-[#4A5054] dark:text-[#A1A7AB] leading-relaxed">
-                  {asset.caption}
-                </figcaption>
-              </figure>
-            ))}
           </div>
 
           <PixelatedImageTrail

@@ -86,28 +86,28 @@ export function KineticLoader() {
               </span>
             </motion.div>
 
-            {/* Kinetic Orbit Monogram + Wordmark */}
+            {/* Kinetic Orbit 'B' Monogram + Full Company Wordmark */}
             <div className="flex items-center gap-3 sm:gap-5">
-              <div className="relative w-14 h-14 sm:w-16 sm:h-16 flex items-center justify-center">
+              <div className="relative w-12 h-12 sm:w-14 sm:h-14 border border-[#F3F0E9]/25 bg-[#191C20] flex items-center justify-center">
                 <motion.span
                   aria-hidden="true"
                   animate={{ rotate: 360 }}
-                  transition={{ repeat: Infinity, duration: 2.6, ease: 'linear' }}
-                  className="block w-full h-full border border-[#F3F0E9]/22 relative"
+                  transition={{ repeat: Infinity, duration: 2.2, ease: 'linear' }}
+                  className="block w-full h-full relative"
                 >
                   <span className="absolute -top-1 left-1/2 -translate-x-1/2 w-2 h-2 bg-[#EC743C]" />
                   <span className="absolute -bottom-1 left-1/2 -translate-x-1/2 w-2 h-2 bg-[#F3F0E9]" />
                 </motion.span>
-                <div className="absolute inset-0 flex items-center justify-center">
-                  <BerryMonogram size={42} title="Berry Alloys Limited" />
-                </div>
+                <span className="absolute flex items-center justify-center">
+                  <BerryMonogram size="sm" surface="dark" />
+                </span>
               </div>
 
               <motion.p
                 initial={{ letterSpacing: '0.18em', opacity: 0 }}
                 animate={{ letterSpacing: '0.04em', opacity: 1 }}
                 transition={{ duration: 0.55, ease: [0.16, 1, 0.3, 1] }}
-                className="font-display text-3xl sm:text-5xl font-bold uppercase tracking-tight text-[#F3F0E9]"
+                className="font-display text-3xl sm:text-5xl md:text-6xl font-bold uppercase tracking-tight text-[#F3F0E9]"
               >
                 Berry Alloys Limited
               </motion.p>

@@ -107,8 +107,9 @@ export function PlantMediaGallery({ embedded = false }: PlantMediaGalleryProps) 
 
   return (
     <Wrapper
+      id="plant-gallery"
       aria-labelledby="gallery-heading"
-      className={`${
+      className={`scroll-mt-20 ${
         embedded
           ? 'py-20 lg:py-24 bg-[#ECE8DF] dark:bg-[#191C20]'
           : 'py-20 lg:py-28 bg-[#F6F4EF] dark:bg-[#121417]'

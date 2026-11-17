@@ -7,6 +7,8 @@ import heroSolarRoofImg from '../assets/images/official/hero_slide_2.jpg';
 import heroGreenBeltImg from '../assets/images/official/hero_slide_3.jpg';
 import plantOverviewWideImg from '../assets/images/official/plant_overview_9.jpg';
 import berryBuildingImg from '../assets/images/official/berry_building.png';
+import heroNewOfficeImg from '../assets/images/official/hero_new_office.jpg';
+import sustainabilityFeatureImg from '../assets/images/official/sustainability_feature.jpg';
 import vijayGuptaMdImg from '../assets/images/official/vijay_gupta_md_clean.png';
 import prodFeMnImg from '../assets/images/official/prod_femn_hc.jpg';
 import prodSiMnImg from '../assets/images/official/prod_simn_hc.jpg';
@@ -30,10 +32,9 @@ import ferroChromeImg from '../assets/images/ferro_chrome_crystals_1794773263273
 import ferroSiliconImg from '../assets/images/ferro_silicon_granules_1794773263704.jpg';
 import silicoManganeseImg from '../assets/images/silico_manganese_ingots_1794773266157.jpg';
 import solarPlantImg from '../assets/images/solar_industrial_plant_1794767506553.jpg';
-import teamFurnaceEngineersImg from '../assets/images/team_furnace_engineers_1794873970636.jpg';
-import teamQaMetallurgistsImg from '../assets/images/team_qa_metallurgists_1794873971080.jpg';
-import teamZeroHarmBriefingImg from '../assets/images/team_zero_harm_briefing_1794873970938.jpg';
-import teamDispatchCrewImg from '../assets/images/team_dispatch_crew_1794873972811.jpg';
+import teamFurnaceEngineersImg from '../assets/images/team_furnace_engineers_1794897562809.jpg';
+import teamMetallurgyLabImg from '../assets/images/team_metallurgy_lab_1794897574115.jpg';
+import teamSafetyHuddleImg from '../assets/images/team_safety_huddle_1794897549727.jpg';
 
 export interface VisualAsset {
   id: string;
@@ -47,8 +48,8 @@ export interface VisualAsset {
     | 'Quality Lab'
     | 'Logistics'
     | 'Energy'
+    | 'People & Teams'
     | 'Community & CSR'
-    | 'Workforce & People'
     | 'Corporate';
   isOfficialPhoto?: boolean;
   specimenPlate?: boolean;
@@ -277,33 +278,42 @@ export const ASSETS = {
     caption: 'Illustrative industrial solar power generation adjacent to alloy manufacturing',
     category: 'Energy',
   },
+  newCorporateOffice: {
+    id: 'new-corporate-office',
+    src: heroNewOfficeImg,
+    alt: 'Berry Alloys Limited corporate office announcement featuring 56 Chowringhee Road, Kolkata',
+    caption: 'Announced upcoming corporate office at 56, Chowringhee Road, Kolkata',
+    category: 'Corporate',
+    isOfficialPhoto: true,
+  },
+  sustainabilityFeature: {
+    id: 'sustainability-feature',
+    src: sustainabilityFeatureImg,
+    alt: 'Berry Alloys Limited sustainability and clean-energy carbon footprint disclosure graphic',
+    caption: 'Berry Alloys sustainability stewardship — ISO 14067:2018 & renewable integration',
+    category: 'Energy',
+    isOfficialPhoto: true,
+  },
   teamFurnaceEngineers: {
     id: 'team-furnace-engineers',
     src: teamFurnaceEngineersImg,
-    alt: 'Illustrative scene of Indian metallurgical furnace engineers in hard hats and fire-retardant jackets overseeing submerged-arc furnace operations',
-    caption: 'Illustrative smelting shift engineers monitoring submerged-arc reduction bays',
-    category: 'Workforce & People',
+    alt: 'Metallurgical furnace engineers and plant operators reviewing submerged-arc gauges on the smelting bay control desk',
+    caption: 'Smelting engineering crew inspecting submerged-arc furnace instrumentation and charge logs',
+    category: 'People & Teams',
   },
-  teamQaMetallurgists: {
-    id: 'team-qa-metallurgists',
-    src: teamQaMetallurgistsImg,
-    alt: 'Illustrative scene of metallurgical quality assurance analysts examining crystalline ferro-manganese specimens beside an optical emission spectrometer',
-    caption: 'Illustrative QA/QC laboratory chemists conducting batch alloy specimen verification',
-    category: 'Workforce & People',
+  teamMetallurgyLab: {
+    id: 'team-metallurgy-lab',
+    src: teamMetallurgyLabImg,
+    alt: 'Quality assurance chemists and metallurgical analysts testing ferro manganese lumps beside an optical emission spectrometer',
+    caption: 'Metallurgical QA/QC laboratory analysts verifying batch chemistry prior to dispatch',
+    category: 'People & Teams',
   },
-  teamZeroHarmBriefing: {
-    id: 'team-zero-harm-briefing',
-    src: teamZeroHarmBriefingImg,
-    alt: 'Illustrative Zero Harm morning safety briefing with Indian plant technicians and supervisors wearing helmets and high-visibility vests',
-    caption: 'Illustrative Zero Harm shift briefing reinforcing ISO 45001 shopfloor safety protocols',
-    category: 'Workforce & People',
-  },
-  teamDispatchCrew: {
-    id: 'team-dispatch-crew',
-    src: teamDispatchCrewImg,
-    alt: 'Illustrative plant export logistics crew inspecting FIBC jumbo bags of crushed ferro alloys prior to dispatch',
-    caption: 'Illustrative dispatch & logistics team inspecting screened alloy jumbo bags',
-    category: 'Workforce & People',
+  teamSafetyHuddle: {
+    id: 'team-safety-huddle',
+    src: teamSafetyHuddleImg,
+    alt: 'Plant safety officer, women engineers, and shopfloor technicians conducting an ISO 45001 shift safety briefing',
+    caption: 'Cross-functional shift safety briefing upholding ISO 45001 shopfloor protocols',
+    category: 'People & Teams',
   },
 } as const satisfies Record<string, VisualAsset>;
 
@@ -312,9 +322,8 @@ export const GALLERY_ITEMS: VisualAsset[] = [
   ASSETS.officialAerialComplex,
   ASSETS.officialPlantOverview,
   ASSETS.teamFurnaceEngineers,
-  ASSETS.teamZeroHarmBriefing,
-  ASSETS.teamQaMetallurgists,
-  ASSETS.teamDispatchCrew,
+  ASSETS.teamMetallurgyLab,
+  ASSETS.teamSafetyHuddle,
   ASSETS.heroSmelting,
   ASSETS.furnaceElectrodes,
   ASSETS.officialProdFeMn,
@@ -324,6 +333,7 @@ export const GALLERY_ITEMS: VisualAsset[] = [
   ASSETS.qualityLab,
   ASSETS.portLogistics,
   ASSETS.officialSolarRoof,
+  ASSETS.newCorporateOffice,
   ASSETS.csrMedicalCamp,
   ASSETS.csrSchool,
   ASSETS.csrPlantation,

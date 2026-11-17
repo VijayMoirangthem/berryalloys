@@ -27,8 +27,8 @@ export const HOME_CHAPTERS: HomeChapter[] = [
   {
     id: 'leadership',
     number: '04',
-    label: 'Leadership',
-    summary: 'Promoters, core values & governance',
+    label: 'People & Leadership',
+    summary: 'Promoters, workforce & core values',
   },
   {
     id: 'alloys',
@@ -51,8 +51,8 @@ export const HOME_CHAPTERS: HomeChapter[] = [
   {
     id: 'responsibility',
     number: '08',
-    label: 'People & CSR',
-    summary: 'Workforce, clean power & grassroots CSR',
+    label: 'Stewardship',
+    summary: 'Clean power disclosure & grassroots CSR',
   },
   {
     id: 'presence',

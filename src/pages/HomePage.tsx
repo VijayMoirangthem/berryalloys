@@ -16,6 +16,7 @@ import { CSR_STORIES, NEWS_ITEMS } from '../data/communityNewsCareersDocs';
 import { CredentialLogoMarquee, CredentialStackedMatrix } from '../data/CredentialMatrices';
 import { CORPORATE_DOSSIER_PAGES, CSR_DIAGONAL_SLIDES, LIFE_CULTURE_SCATTER_SETS, PLANT_REVEAL_ROWS, QA_PERSPECTIVE_SLIDES } from '../data/showcaseCollections';
 import { useGuide } from '../context/GuideContext';
+import { BerryMonogram } from '../components/BerryMonogram';
 import { BrandLockup } from '../components/BrandLockup';
 import { ChapterRail } from '../components/ChapterRail';
 import { DirectorPortraitSection } from '../components/DirectorPortraitSection';
@@ -69,10 +70,14 @@ export function HomePage() {
         y: 18,
         opacity: 0,
         duration: 0.65,
-        stagger: 0.1,
-        delay: 0.2,
+        stagger: 0.08,
         ease: 'power3.out',
         clearProps: 'transform,opacity',
+        scrollTrigger: {
+          trigger: heroSectionRef.current,
+          start: 'top 84%',
+          once: true,
+        },
       });
 
       if (heroMediaRef.current) {
@@ -82,7 +87,7 @@ export function HomePage() {
           ease: 'none',
           scrollTrigger: {
             trigger: heroSectionRef.current,
-            start: 'top top',
+            start: 'top bottom',
             end: 'bottom top',
             scrub: true,
           },
@@ -121,14 +126,135 @@ export function HomePage() {
     <div className="relative">
       <ChapterRail />
 
-      {/* 01 / OVERVIEW — Cinematic Plant Hero Opening */}
+      {/* 01 / OVERVIEW — Full-Viewport Monumental Particle Forging Field */}
       <section
         id="overview"
+        aria-labelledby="overview-particle-heading"
+        className="scroll-mt-16 relative bg-[#0B0D10] text-[#F3F0E9] min-h-[calc(100svh-4rem)] flex flex-col justify-between overflow-hidden border-b border-[#F3F0E9]/12"
+      >
+        <h1 id="overview-particle-heading" className="sr-only">
+          Berry Alloys Limited — From Heat to Precision
+        </h1>
+
+        {/* Ambient molten copper depth backdrop behind particle stage */}
+        <div
+          aria-hidden="true"
+          className="pointer-events-none absolute inset-0 bg-[radial-gradient(ellipse_70%_50%_at_50%_46%,rgba(236,116,60,0.12),rgba(158,75,40,0.04)_45%,transparent_75%)]"
+        />
+
+        {/* Top Identity & Statutory Telemetry Bar */}
+        <div className="relative z-10 max-w-[1360px] mx-auto w-full px-4 sm:px-6 lg:px-8 xl:px-14 2xl:px-8 pt-4 sm:pt-6 flex flex-wrap items-center justify-between gap-3">
+          <div className="flex items-center gap-3">
+            <BerryMonogram size="sm" surface="dark" framed />
+            <div className="space-y-0.5">
+              <p className="text-[11px] font-mono-tabular uppercase tracking-widest text-[#EC743C]">
+                01 / DKG Group Enterprise · Est. Sept 2006
+              </p>
+              <p className="text-[11px] font-mono-tabular text-[#A1A7AB]">
+                Bobbili · Dhalbhumgarh · Visakhapatnam Port
+              </p>
+            </div>
+          </div>
+
+          <div className="flex items-center gap-2 sm:gap-3 text-[11px] font-mono-tabular uppercase tracking-wider">
+            <span className="hidden md:inline text-[#A1A7AB]">
+              CIN {COMPANY_INFO.cin}
+            </span>
+            <div
+              className="flex items-center gap-1.5"
+              role="group"
+              aria-label="Switch particle typography phrase"
+            >
+              <button
+                type="button"
+                onClick={() => setParticleMode('brand')}
+                className={`min-h-[34px] px-3 py-1 text-[11px] font-mono-tabular uppercase tracking-wider border transition-colors cursor-pointer whitespace-nowrap shrink-0 ${
+                  particleMode === 'brand'
+                    ? 'bg-[#A95632] text-[#F3F0E9] border-[#A95632]'
+                    : 'bg-[#141618] text-[#A1A7AB] border-[#F3F0E9]/16 hover:text-[#F3F0E9]'
+                }`}
+              >
+                Berry Alloys Limited
+              </button>
+              <button
+                type="button"
+                onClick={() => setParticleMode('motto')}
+                className={`min-h-[34px] px-3 py-1 text-[11px] font-mono-tabular uppercase tracking-wider border transition-colors cursor-pointer whitespace-nowrap shrink-0 ${
+                  particleMode === 'motto'
+                    ? 'bg-[#A95632] text-[#F3F0E9] border-[#A95632]'
+                    : 'bg-[#141618] text-[#A1A7AB] border-[#F3F0E9]/16 hover:text-[#F3F0E9]'
+                }`}
+              >
+                Heat To Precision
+              </button>
+            </div>
+          </div>
+        </div>
+
+        {/* Center Monumental Interactive Particle Stage */}
+        <div className="relative z-10 flex-1 flex items-center justify-center max-w-[1440px] w-full mx-auto px-2 sm:px-6 lg:px-8 py-2">
+          <InteractiveParticles
+            className="w-full h-[54svh] sm:h-[60svh] lg:h-[64svh] min-h-[320px] max-h-[620px]"
+            lines={
+              particleMode === 'brand'
+                ? ['BERRY ALLOYS', 'LIMITED']
+                : ['FROM HEAT TO', 'PRECISION']
+            }
+            subtitle={
+              particleMode === 'brand'
+                ? 'FROM HEAT TO PRECISION · THREE STAR EXPORT HOUSE'
+                : 'SUBMERGED-ARC & AOD METALLURGY · EST. 2006'
+            }
+            particleSize={2.05}
+          />
+        </div>
+
+        {/* Bottom Interaction Cue & Chapter Descent Bar */}
+        <div className="relative z-10 max-w-[1360px] mx-auto w-full px-4 sm:px-6 lg:px-8 xl:px-14 2xl:px-8 pb-5 sm:pb-7 pt-3 border-t border-[#F3F0E9]/10 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+          <div className="space-y-1">
+            <p className="text-[11px] font-mono-tabular uppercase tracking-widest text-[#EC743C]">
+              Interactive Particle Forging Field
+            </p>
+            <p className="text-xs text-[#A1A7AB]">
+              Move cursor or swipe across the alloy typography to scatter particles · Bulk Ferro Alloys Manufacturer
+            </p>
+          </div>
+
+          <div className="flex flex-wrap items-center gap-3 shrink-0">
+            <IndustrialButton
+              href="#complex-hero"
+              variant="primary"
+              onClick={(e) => {
+                e.preventDefault();
+                scrollToChapter('complex-hero');
+              }}
+            >
+              Enter Complex & Story
+              <ArrowRight className="w-4 h-4" aria-hidden="true" />
+            </IndustrialButton>
+            <IndustrialButton
+              href="#alloys"
+              variant="outline-dark"
+              onClick={(e) => {
+                e.preventDefault();
+                scrollToChapter('alloys');
+              }}
+            >
+              Alloy Portfolio
+              <ArrowUpRight className="w-4 h-4" aria-hidden="true" />
+            </IndustrialButton>
+          </div>
+        </div>
+      </section>
+
+      {/* Secondary Smelting Complex Hero Directly Below Opening Field */}
+      <section
+        id="complex-hero"
         ref={heroSectionRef}
         aria-labelledby="hero-heading"
         className="scroll-mt-20 relative bg-[#121417] text-[#F3F0E9] overflow-hidden"
       >
-        <div className="relative min-h-[clamp(620px,calc(100vh-4rem),880px)] flex flex-col justify-between">
+        <div className="relative min-h-[clamp(560px,82vh,840px)] flex flex-col justify-between">
           <div ref={heroMediaRef} className="absolute inset-0 will-change-transform">
             <ResilientImage
               src={ASSETS.officialPlantGate.src}
@@ -149,17 +275,17 @@ export function HomePage() {
           />
 
           <div className="relative z-10 max-w-[1360px] mx-auto w-full px-4 sm:px-6 lg:px-8 xl:px-14 2xl:px-8 pt-8 sm:pt-12 flex flex-wrap items-center justify-between gap-4 text-[11px] font-mono-tabular uppercase tracking-widest text-[#F3F0E9]/80">
-            <span>01 / DKG Group Industrial Enterprise · Est. 2006</span>
-            <span>Bobbili · Dhalbhumgarh · Visakhapatnam Port</span>
+            <span>Bobbili Growth Centre & Dhalbhumgarh Smelting Works</span>
+            <span>Visakhapatnam Deep-Water Harbour Corridor</span>
           </div>
 
-          <div className="relative z-10 max-w-[1360px] mx-auto w-full px-4 sm:px-6 lg:px-8 xl:px-14 2xl:px-8 pt-10 pb-24 lg:pt-12 lg:pb-32">
+          <div className="relative z-10 max-w-[1360px] mx-auto w-full px-4 sm:px-6 lg:px-8 xl:px-14 2xl:px-8 pt-10 pb-20 lg:pt-12 lg:pb-28">
             <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-end">
               <div className="lg:col-span-8 space-y-6">
                 <SplitText
                   id="hero-heading"
                   text="Strength begins with precision."
-                  as="h1"
+                  as="h2"
                   className="font-display fluid-hero-title font-bold uppercase text-[#F3F0E9] max-w-4xl"
                 />
 
@@ -263,53 +389,6 @@ export function HomePage() {
             <span className="text-[#9E4B28] dark:text-[#EC743C]">Hover Ribbon To Pause</span>
           </div>
           <CredentialLogoMarquee />
-        </div>
-      </div>
-
-      {/* Theatrical WebGL Typography Signature Canvas */}
-      <div className="bg-[#121417] text-[#F3F0E9] border-b border-[#F3F0E9]/12">
-        <div className="max-w-[1360px] mx-auto px-4 sm:px-6 lg:px-8 xl:px-14 2xl:px-8 pt-6 pb-2 flex flex-wrap items-center justify-between gap-3">
-          <div className="flex items-center gap-3 text-[11px] font-mono-tabular uppercase tracking-widest text-[#A1A7AB]">
-            <span className="text-[#EC743C]">Particle Forging Field</span>
-            <span aria-hidden="true">/</span>
-            <span>Move cursor across field to scatter alloy particles</span>
-          </div>
-          <div className="flex items-center gap-1.5" role="group" aria-label="Switch particle typography phrase">
-            <button
-              type="button"
-              onClick={() => setParticleMode('brand')}
-              className={`min-h-[34px] px-3 py-1 text-[11px] font-mono-tabular uppercase tracking-wider border transition-colors cursor-pointer whitespace-nowrap shrink-0 ${
-                particleMode === 'brand'
-                  ? 'bg-[#A95632] text-[#F3F0E9] border-[#A95632]'
-                  : 'bg-[#191C20] text-[#A1A7AB] border-[#F3F0E9]/14 hover:text-[#F3F0E9]'
-              }`}
-            >
-              Berry Alloys
-            </button>
-            <button
-              type="button"
-              onClick={() => setParticleMode('motto')}
-              className={`min-h-[34px] px-3 py-1 text-[11px] font-mono-tabular uppercase tracking-wider border transition-colors cursor-pointer whitespace-nowrap shrink-0 ${
-                particleMode === 'motto'
-                  ? 'bg-[#A95632] text-[#F3F0E9] border-[#A95632]'
-                  : 'bg-[#191C20] text-[#A1A7AB] border-[#F3F0E9]/14 hover:text-[#F3F0E9]'
-              }`}
-            >
-              Heat To Precision
-            </button>
-          </div>
-        </div>
-        <div className="max-w-[1360px] mx-auto px-4 sm:px-6 lg:px-8 xl:px-14 2xl:px-8 pb-6">
-          <div className="border border-[#F3F0E9]/12 bg-[#0F1114] h-[220px] sm:h-[260px] w-full overflow-hidden">
-            <InteractiveParticles
-              text={particleMode === 'brand' ? 'BERRY ALLOYS' : 'FROM HEAT TO PRECISION'}
-              subtitle={
-                particleMode === 'brand'
-                  ? 'FROM HEAT TO PRECISION · EST. 2006'
-                  : 'SUBMERGED-ARC & AOD METALLURGY'
-              }
-            />
-          </div>
         </div>
       </div>
 
@@ -563,6 +642,100 @@ export function HomePage() {
       >
         <div className="max-w-[1360px] mx-auto px-4 sm:px-6 lg:px-8 xl:px-14 2xl:px-8 space-y-16">
           <DirectorPortraitSection variant="home" />
+
+          {/* People Behind the Furnaces — Workforce Culture & Teams Storytelling */}
+          <div className="pt-12 border-t border-[#141618]/14 dark:border-[#F3F0E9]/14 space-y-8">
+            <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 items-end">
+              <div className="lg:col-span-7 space-y-2.5">
+                <p className="text-[11px] font-mono-tabular uppercase tracking-widest text-[#9E4B28] dark:text-[#EC743C]">
+                  Workforce & Workplace Culture · {COMPANY_INFO.workforceStory.motto}
+                </p>
+                <h3 className="font-display text-3xl sm:text-4xl font-bold uppercase tracking-tight text-[#141618] dark:text-[#F3F0E9]">
+                  {COMPANY_INFO.workforceStory.headline}
+                </h3>
+              </div>
+              <div className="lg:col-span-5 space-y-3">
+                <p className="text-xs sm:text-sm text-[#4A5054] dark:text-[#A1A7AB] leading-relaxed">
+                  {COMPANY_INFO.workforceStory.narrative}
+                </p>
+                <div className="flex flex-wrap items-center gap-4 text-xs font-semibold">
+                  <Link
+                    to="/careers"
+                    className="inline-flex items-center gap-1.5 text-[#9E4B28] dark:text-[#EC743C] hover:underline"
+                  >
+                    Careers & Plant Teams
+                    <ArrowRight className="w-3.5 h-3.5" aria-hidden="true" />
+                  </Link>
+                  <Link
+                    to="/community"
+                    className="inline-flex items-center gap-1.5 text-[#141618] dark:text-[#F3F0E9] hover:underline"
+                  >
+                    Health Camps & Welfare
+                    <ArrowRight className="w-3.5 h-3.5" aria-hidden="true" />
+                  </Link>
+                </div>
+              </div>
+            </div>
+
+            <div className="grid grid-cols-2 lg:grid-cols-4 border-t border-b border-[#141618]/12 dark:border-[#F3F0E9]/12 divide-y sm:divide-y-0 sm:divide-x divide-[#141618]/12 dark:divide-[#F3F0E9]/12 bg-white dark:bg-[#20242A]">
+              {COMPANY_INFO.workforceStory.highlights.map((item) => (
+                <div key={item.metric} className="p-4 sm:p-5 space-y-1">
+                  <p className="font-display text-xl sm:text-2xl font-bold uppercase text-[#9E4B28] dark:text-[#EC743C]">
+                    {item.metric}
+                  </p>
+                  <p className="text-xs text-[#4A5054] dark:text-[#A1A7AB] leading-relaxed">
+                    {item.label}
+                  </p>
+                </div>
+              ))}
+            </div>
+
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-5">
+              {[
+                {
+                  asset: ASSETS.teamFurnaceEngineers,
+                  role: 'Smelting & Control Bay',
+                  title: 'Submerged-Arc Furnace Engineers',
+                },
+                {
+                  asset: ASSETS.teamMetallurgyLab,
+                  role: 'Assay & Traceability',
+                  title: 'QA Chemists & Laboratory Team',
+                },
+                {
+                  asset: ASSETS.teamSafetyHuddle,
+                  role: 'ISO 45001 · Zero Harm',
+                  title: 'Shift Safety & Shopfloor Supervisors',
+                },
+              ].map((card) => (
+                <figure
+                  key={card.asset.id}
+                  className="bg-white dark:bg-[#20242A] border border-[#141618]/12 dark:border-[#F3F0E9]/14 overflow-hidden flex flex-col"
+                >
+                  <div className="aspect-[16/10] bg-[#141618] overflow-hidden">
+                    <ResilientImage
+                      src={card.asset.src}
+                      alt={card.asset.alt}
+                      containerClassName="w-full h-full"
+                    />
+                  </div>
+                  <figcaption className="p-4 space-y-1 flex-1 flex flex-col justify-between">
+                    <div className="space-y-1">
+                      <p className="text-[11px] font-mono-tabular uppercase tracking-wider text-[#9E4B28] dark:text-[#EC743C]">
+                        {card.role}
+                      </p>
+                      <h4 className="font-display text-xl font-bold uppercase text-[#141618] dark:text-[#F3F0E9]">
+                        {card.title}
+                      </h4>
+                    </div>
+                    <p className="text-xs text-[#4A5054] dark:text-[#A1A7AB] leading-relaxed pt-1">
+                      {card.asset.caption}
+                    </p>
+                  </figcaption>
+                </figure>
+              ))}
+            </div>
+          </div>
 
           {/* 6 Core Values Ledger */}
           <div className="pt-10 border-t border-[#141618]/14 dark:border-[#F3F0E9]/14 space-y-6">
@@ -1105,13 +1278,17 @@ export function HomePage() {
                     Explore Workplace & Roles
                     <ArrowRight className="w-3.5 h-3.5" aria-hidden="true" />
                   </Link>
-                  <Link
-                    to="/gallery"
+                  <a
+                    href="#plant-gallery"
+                    onClick={(e) => {
+                      e.preventDefault();
+                      scrollToChapter('plant-gallery');
+                    }}
                     className="inline-flex items-center gap-1.5 text-xs font-semibold uppercase tracking-wider text-[#F3F0E9]/85 hover:underline"
                   >
                     Inspect Full Plant Gallery
                     <ArrowRight className="w-3.5 h-3.5" aria-hidden="true" />
-                  </Link>
+                  </a>
                 </div>
               </PixelatedImageTrail>
             </div>

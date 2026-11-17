@@ -238,7 +238,7 @@ export function HomeAlloyShowcase({ onEnquireAlloy }: HomeAlloyShowcaseProps) {
                       type="button"
                       onClick={() => setSelectedSlug(item.slug)}
                       aria-pressed={isSelected}
-                      className={`min-h-[40px] px-3.5 py-2 text-xs font-medium border transition-colors cursor-pointer text-left whitespace-normal sm:whitespace-nowrap ${
+                      className={`min-h-[40px] px-3.5 py-2 text-xs font-medium border transition-colors cursor-pointer whitespace-nowrap ${
                         isSelected
                           ? 'bg-[#141618] text-[#F6F4EF] border-[#141618] font-semibold dark:bg-[#F3F0E9] dark:text-[#141618] dark:border-[#F3F0E9]'
                           : 'bg-white text-[#141618] border-[#141618]/18 hover:border-[#9E4B28] dark:bg-[#20242A] dark:text-[#F3F0E9]/80 dark:border-[#F3F0E9]/16 dark:hover:border-[#EC743C]'
@@ -253,10 +253,10 @@ export function HomeAlloyShowcase({ onEnquireAlloy }: HomeAlloyShowcaseProps) {
 
             {/* Inline Comparison Bar */}
             <div className="bg-white dark:bg-[#20242A] border border-[#141618]/14 dark:border-[#F3F0E9]/14 p-4 space-y-3">
-              <div className="flex items-center justify-between gap-3">
+              <div className="flex flex-wrap items-center justify-between gap-2 sm:gap-3">
                 <span className="inline-flex items-center gap-2 text-xs font-semibold text-[#141618] dark:text-[#F3F0E9]">
                   <GitCompare
-                    className="w-4 h-4 text-[#9E4B28] dark:text-[#EC743C]"
+                    className="w-4 h-4 text-[#9E4B28] dark:text-[#EC743C] shrink-0"
                     aria-hidden="true"
                   />
                   Compare Alloys ({comparedProducts.length}/3)
@@ -265,7 +265,7 @@ export function HomeAlloyShowcase({ onEnquireAlloy }: HomeAlloyShowcaseProps) {
                   type="button"
                   disabled={comparedProducts.length < 2}
                   onClick={() => setCompareModalOpen(true)}
-                  className="px-3 py-1.5 text-xs font-semibold bg-[#9E4B28] text-[#F6F4EF] hover:bg-[#823B1D] dark:bg-[#A95632] dark:hover:bg-[#8D4323] disabled:opacity-40 disabled:cursor-not-allowed transition-colors cursor-pointer"
+                  className="px-3 py-1.5 text-xs font-semibold bg-[#9E4B28] text-[#F6F4EF] hover:bg-[#823B1D] dark:bg-[#A95632] dark:hover:bg-[#8D4323] disabled:opacity-40 disabled:cursor-not-allowed transition-colors cursor-pointer whitespace-nowrap shrink-0"
                 >
                   Open Matrix
                 </button>
@@ -311,7 +311,7 @@ export function HomeAlloyShowcase({ onEnquireAlloy }: HomeAlloyShowcaseProps) {
                 >
                   {/* Framed Official Specimen Plate (consistent studio tray in both themes) */}
                   <div className="p-4 sm:p-5 bg-[#F6F4EF] border-b border-[#141618]/14 dark:border-[#F3F0E9]/14">
-                    <div className="flex items-center justify-between gap-3 pb-3 text-[11px] font-mono-tabular uppercase tracking-wider text-[#4A5054]">
+                    <div className="flex flex-wrap items-center justify-between gap-2 pb-3 text-[11px] font-mono-tabular uppercase tracking-wider text-[#4A5054]">
                       <span>Official Alloy Specimen Plate · {activeProduct.family}</span>
                       <span>Berry Alloys Assay Series</span>
                     </div>
@@ -338,7 +338,7 @@ export function HomeAlloyShowcase({ onEnquireAlloy }: HomeAlloyShowcaseProps) {
                   </div>
 
                   {/* Product Technical Readout */}
-                  <div className="p-6 sm:p-8 space-y-6">
+                  <div className="p-5 sm:p-8 space-y-6">
                     <div className="flex flex-wrap items-start justify-between gap-4">
                       <div className="space-y-1.5">
                         <p className="text-xs font-mono-tabular text-[#9E4B28] dark:text-[#EC743C]">

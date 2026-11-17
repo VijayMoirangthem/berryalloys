@@ -107,7 +107,7 @@ const CONNECT_TILES: SocialChannelItem[] = [
     id: 'instagram',
     letter: 'C',
     label: 'Plant Photography Archive (Instagram)',
-    to: '/gallery',
+    to: '/#plant-gallery',
     note: 'Smelting complexes, solar roofs & alloy plates indexed in Media Gallery',
     icon: <InstagramGlyph />,
   },

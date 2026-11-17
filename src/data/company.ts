@@ -172,6 +172,31 @@ export const COMPANY_INFO = {
     recognitionClaim:
       'Named “Visionary & Outstanding Entrepreneur of the Year 2025 – India” in company disclosures (certificate archive pending independent confirmation).',
   },
+  workforceStory: {
+    motto: 'Empowered People. Inspired Performance.',
+    headline:
+      'Smelting consistency depends on the engineers, chemists, and shopfloor teams behind every heat.',
+    narrative:
+      'Across eleven functional departments—from submerged-arc furnace operations and AOD converter refining to QA/QC spectrometry, SAP MIS, and export logistics at Visakhapatnam Harbour—Berry Alloys Limited pairs structured mentorship and occupational safety training with preventive healthcare and family welfare.',
+    highlights: [
+      {
+        metric: '11 Departments',
+        label: 'Cross-functional plant, metallurgical assay, logistics & corporate teams',
+      },
+      {
+        metric: 'Zero Harm Focus',
+        label: 'ISO 45001:2018-aligned shopfloor protocols covering permanent & contract staff',
+      },
+      {
+        metric: '200+ Screened',
+        label: 'Annual multi-specialty medical camps in partnership with Abhaya Hospital',
+      },
+      {
+        metric: '813 New Roles',
+        label: 'Projected employment from the ₹1,200 Cr Bobbili Growth Centre allocation',
+      },
+    ],
+  },
 };
 
 export const OFFICES: OfficeLocation[] = [
@@ -337,65 +362,5 @@ export const SUSTAINABILITY_INITIATIVES: SustainabilityInitiative[] = [
     description:
       'Exploration of biomass-derived carbon alternatives to supplement conventional fossil reductants in metallurgical processes.',
     verificationNote: 'Explicitly categorized as an exploratory option; no commercial substitution volume claimed.',
-  },
-];
-
-export interface WorkforcePillar {
-  id: string;
-  index: string;
-  roleGroup: string;
-  title: string;
-  summary: string;
-  highlights: string[];
-}
-
-export const WORKFORCE_PILLARS: WorkforcePillar[] = [
-  {
-    id: 'smelting-operators',
-    index: '01',
-    roleGroup: 'Smelting & AOD Engineering Teams',
-    title: 'Shift Engineers Operating 24/7 Reduction & Converter Bays',
-    summary:
-      'Metallurgical engineers, electrical supervisors, and furnace crews across Bobbili Growth Centre and Dhalbhumgarh manage continuous submerged-arc smelting, 6,000 MT/month AOD refining, and furnace burden balance.',
-    highlights: [
-      'Cross-shift furnace control, tap scheduling, and electrode supervision',
-      'Projected 813 employment opportunities linked to the ₹1,200 Cr Bobbili project',
-    ],
-  },
-  {
-    id: 'zero-harm-safety',
-    index: '02',
-    roleGroup: 'Zero Harm Safety & Contract Crews',
-    title: 'Zero Harm Workshops & Multi-Specialty Employee Health Camps',
-    summary:
-      'Guided by ISO 45001:2018 occupational health practices, plant safety officers run "Zero Harm" seminars for both company staff and contractual teams, reinforced by annual health screening camps.',
-    highlights: [
-      '200+ employees screened at the 7 January 2026 Abhaya Hospital medical camp',
-      'Voluntary blood donation drives and occupational PPE compliance',
-    ],
-  },
-  {
-    id: 'qa-lab-logistics',
-    index: '03',
-    roleGroup: 'Assay Chemists, MIS & Port Dispatch Teams',
-    title: 'Spectrographic Assay, SAP Inventory & Export Coordination',
-    summary:
-      'Spanning eleven departments—from Quality Assurance, Quality Control, and R&D laboratories to MIS, Finance, Purchase, and Sales—teams verify every lot prior to crushing, FIBC jumbo-bagging, and Visakhapatnam Port dispatch.',
-    highlights: [
-      'Traceable batch chemistry across 10 bulk ferro alloy grade series',
-      'Structured on-the-job training, SAP onboarding, and functional mentorship',
-    ],
-  },
-  {
-    id: 'workplace-families',
-    index: '04',
-    roleGroup: 'ET Edge Best Organization to Work 2026',
-    title: 'Inclusive Workplace Culture, Women Recognition & Family Care',
-    summary:
-      'Recognised by ET Edge as Best Organization to Work 2026, Berry Alloys supports equal-opportunity hiring, performance recognition, women employee honours, and scholarships, bicycles, and supplies for employees’ children.',
-    highlights: [
-      'Equal-opportunity hiring across all eleven Indian plant & corporate offices',
-      'Employee-led native sapling plantation drives across operational complexes',
-    ],
   },
 ];
