@@ -26,7 +26,7 @@ import { KNOWLEDGE_BASE, KNOWLEDGE_CATEGORIES } from '../data/knowledgeBase';
 import { useGuide } from '../context/GuideContext';
 
 const MAX_INPUT_LENGTH = 360;
-const LAUNCHER_PREF_KEY = 'berry-guide-launcher-v1';
+const LAUNCHER_PREF_KEY = 'berry-compass-launcher-v1';
 const EDGE_SNAP_THRESHOLD = 22;
 const TOP_SAFE_MARGIN = 76;
 const BOTTOM_SAFE_MARGIN = 16;
@@ -43,7 +43,9 @@ interface LauncherState {
 
 function loadLauncherState(): LauncherState {
   try {
-    const raw = window.localStorage.getItem(LAUNCHER_PREF_KEY);
+    const raw =
+      window.localStorage.getItem(LAUNCHER_PREF_KEY) ??
+      window.localStorage.getItem('berry-guide-launcher-v1');
     if (raw) {
       const parsed = JSON.parse(raw) as Partial<LauncherState>;
       const docked: DockEdge =
@@ -55,13 +57,13 @@ function loadLauncherState(): LauncherState {
       const yRatio =
         typeof parsed.yRatio === 'number' && Number.isFinite(parsed.yRatio)
           ? Math.min(1, Math.max(0, parsed.yRatio))
-          : 0.9;
+          : 0.94;
       return { docked, xRatio, yRatio };
     }
   } catch {
     // Ignore storage read errors
   }
-  return { docked: null, xRatio: 1, yRatio: 0.9 };
+  return { docked: null, xRatio: 1, yRatio: 0.94 };
 }
 
 function clamp(val: number, min: number, max: number): number {
@@ -73,7 +75,9 @@ export function BerryAlloysGuide() {
   const prefersReduced = useReducedMotion();
   const {
     isOpen,
+    isPreparing,
     messages,
+    preparingAnnouncement,
     latestAnnouncement,
     launcherRef,
     openGuide,
@@ -122,7 +126,7 @@ export function BerryAlloysGuide() {
       const el = launcherDockRef.current;
       const vw = window.innerWidth;
       const vh = window.innerHeight;
-      const width = el?.offsetWidth || (vw < 640 ? 154 : 214);
+      const width = el?.offsetWidth || 168;
       const height = el?.offsetHeight || 46;
       const sideMargin = vw < 640 ? 16 : 24;
 
@@ -140,10 +144,10 @@ export function BerryAlloysGuide() {
         resolvedLeft = minLeft + pref.xRatio * (maxLeft - minLeft);
       }
 
-      // Default initial bottom resting height sits ~84px above bottom edge (clear of bottom-right watermarks & ChapterRail)
+      // Default initial bottom resting height sits cleanly near the bottom-right corner below ChapterRail
       const resolvedTop =
-        pref.yRatio === 0.9 && !pref.docked && pref.xRatio === 1
-          ? clamp(vh - height - (vw < 640 ? 72 : 84), minTop, maxTop)
+        pref.yRatio === 0.94 && !pref.docked && pref.xRatio === 1
+          ? clamp(vh - height - (vw < 640 ? 24 : 32), minTop, maxTop)
           : minTop + pref.yRatio * (maxTop - minTop);
 
       setCoords({
@@ -366,14 +370,14 @@ export function BerryAlloysGuide() {
     };
   }, [isOpen, closeGuide]);
 
-  // Smart scroll: scroll smoothly to new messages only if near bottom, else show affordance
+  // Smart scroll: keep bottom visible when new messages arrive or preparation bubble opens
   useEffect(() => {
     if (!isOpen) {
       prevMsgCountRef.current = messages.length;
       return;
     }
 
-    if (messages.length > prevMsgCountRef.current) {
+    if (messages.length > prevMsgCountRef.current || isPreparing) {
       const el = scrollContainerRef.current;
       if (el) {
         if (isNearBottomRef.current) {
@@ -384,13 +388,13 @@ export function BerryAlloysGuide() {
             });
           });
           setHasUnseenMessage(false);
-        } else {
+        } else if (messages.length > prevMsgCountRef.current) {
           setHasUnseenMessage(true);
         }
       }
     }
     prevMsgCountRef.current = messages.length;
-  }, [messages.length, isOpen, prefersReduced]);
+  }, [messages.length, isOpen, isPreparing, prefersReduced]);
 
   const handleScrollStream = () => {
     const el = scrollContainerRef.current;
@@ -497,7 +501,7 @@ export function BerryAlloysGuide() {
                 : { touchAction: 'none' }
             }
             className={`fixed z-40 flex items-stretch shadow-xl select-none ${
-              coords ? '' : 'bottom-[72px] sm:bottom-[84px] right-4 sm:right-6'
+              coords ? '' : 'bottom-[24px] sm:bottom-[32px] right-4 sm:right-6'
             } ${isDockedLeft ? 'flex-row-reverse' : 'flex-row'} ${tuckTransformClass} ${transitionClass}`}
           >
             {/* Invisible proximity hover halo when tucked at edge so moving cursor near edge slides it smoothly out */}
@@ -522,7 +526,7 @@ export function BerryAlloysGuide() {
               </span>
             )}
 
-            {/* Primary Guide Button (matches CSS selector button:nth-of-type(1)) */}
+            {/* Primary Berry Compass Launcher */}
             <button
               ref={launcherRef}
               type="button"
@@ -540,13 +544,17 @@ export function BerryAlloysGuide() {
               }}
               aria-label={
                 isTucked
-                  ? 'Reveal hidden Berry Alloys Guide launcher'
-                  : 'Open Berry Alloys Guide for product help and FAQs (drag to move)'
+                  ? 'Reveal hidden Berry Compass launcher'
+                  : 'Open Berry Compass for products, specifications and enquiries (drag to move)'
               }
-              title={isTucked ? 'Hover or tap to reveal Berry Alloys Guide' : 'Open Berry Alloys Guide · Drag to reposition'}
-              className={`group relative inline-flex items-center gap-2 min-h-[46px] pr-3.5 pl-2.5 py-2.5 bg-[#141618] text-[#F6F4EF] border border-[#141618] hover:bg-[#9E4B28] hover:border-[#9E4B28] dark:bg-[#20242A] dark:text-[#F3F0E9] dark:border-[#EC743C]/45 dark:hover:bg-[#A95632] dark:hover:border-[#EC743C] transition-colors duration-150 focus-visible:outline-2 focus-visible:outline-[#EC743C] focus-visible:outline-offset-2 ${
+              title={
+                isTucked
+                  ? 'Hover or tap to reveal Berry Compass'
+                  : 'Open Berry Compass · Drag to reposition'
+              }
+              className={`group relative inline-flex items-center gap-2 min-h-[46px] pr-3 pl-2.5 py-2.5 bg-[#141618] text-[#F6F4EF] border border-[#141618] hover:bg-[#9E4B28] hover:border-[#9E4B28] dark:bg-[#20242A] dark:text-[#F3F0E9] dark:border-[#EC743C]/45 dark:hover:bg-[#A95632] dark:hover:border-[#EC743C] transition-colors duration-150 focus-visible:outline-2 focus-visible:outline-[#EC743C] focus-visible:outline-offset-2 ${
                 isDragging ? 'cursor-grabbing ring-2 ring-[#EC743C]' : 'cursor-grab'
-              } ${isDockedLeft ? 'flex-row-reverse pl-3.5 pr-2.5' : ''}`}
+              } ${isDockedLeft ? 'flex-row-reverse pl-3 pr-2.5' : ''}`}
             >
               {/* Exposed Edge Peek Sliver Indicator (always visible 22px strip when docked) */}
               <span
@@ -583,8 +591,7 @@ export function BerryAlloysGuide() {
                 aria-hidden="true"
               />
               <span className="text-xs font-semibold tracking-wide whitespace-nowrap">
-                <span className="sm:hidden">Ask Berry</span>
-                <span className="hidden sm:inline">Berry Alloys Guide</span>
+                Berry Compass
               </span>
             </button>
 
@@ -595,8 +602,8 @@ export function BerryAlloysGuide() {
               onClick={() => (isDocked ? handleUnpinToCanvas() : handleHideToNearestEdge())}
               aria-label={
                 isDocked
-                  ? 'Pin Berry Alloys Guide back onto page'
-                  : 'Hide Berry Alloys Guide to nearest screen edge'
+                  ? 'Pin Berry Compass back onto page'
+                  : 'Hide Berry Compass to nearest screen edge'
               }
               title={isDocked ? 'Keep visible on page' : 'Hide to screen edge'}
               className={`inline-flex items-center justify-center min-w-[34px] min-h-[46px] px-2 bg-[#1E2228] text-[#A1A7AB] hover:text-[#F6F4EF] hover:bg-[#2E343B] border-y ${
@@ -646,19 +653,19 @@ export function BerryAlloysGuide() {
               <div className="shrink-0 px-4 sm:px-5 py-3.5 bg-[#141618] text-[#F3F0E9] border-b border-[#F3F0E9]/14 flex items-start justify-between gap-3 pt-[max(0.875rem,env(safe-area-inset-top))]">
                 <div className="min-w-0 space-y-1">
                   <p className="text-[10px] font-mono-tabular uppercase tracking-widest text-[#EC743C]">
-                    Automated Guide · Prepared Company Information
+                    Automated product assistant · Answers from prepared company information.
                   </p>
                   <h2
                     id="berry-guide-title"
                     className="font-display text-xl font-bold uppercase tracking-tight text-[#F3F0E9]"
                   >
-                    Berry Alloys Guide
+                    Berry Compass
                   </h2>
                   <p
                     id="berry-guide-disclosure"
                     className="text-[11px] text-[#A1A7AB] leading-snug"
                   >
-                    Helps navigate alloys, specs, plants, and enquiries using published records.
+                    Products, specifications and enquiries.
                   </p>
                 </div>
 
@@ -680,7 +687,7 @@ export function BerryAlloysGuide() {
                     ref={closeBtnRef}
                     type="button"
                     onClick={closeGuide}
-                    aria-label="Close Berry Alloys Guide"
+                    aria-label="Close Berry Compass"
                     title="Close (Esc)"
                     className="inline-flex items-center justify-center w-10 h-10 text-[#F3F0E9] hover:text-[#EC743C] hover:bg-[#20242A] transition-colors cursor-pointer"
                   >
@@ -689,7 +696,10 @@ export function BerryAlloysGuide() {
                 </div>
               </div>
 
-              {/* Polite Screen-Reader Live Region for Latest Response Only */}
+              {/* Polite Screen-Reader Statuses: announced once on preparation and once on final reply */}
+              <div className="sr-only" role="status" aria-live="polite" aria-atomic="true">
+                {preparingAnnouncement}
+              </div>
               <div className="sr-only" aria-live="polite" aria-atomic="true">
                 {latestAnnouncement}
               </div>
@@ -759,130 +769,208 @@ export function BerryAlloysGuide() {
                       })}
                     </div>
                   ) : (
-                    messages.map((msg, idx) => {
-                      const isLatestGuide =
-                        msg.sender === 'guide' && idx === messages.length - 1;
-                      const payload = msg.payload;
+                    <>
+                      {messages.map((msg, idx) => {
+                        const isLatestGuide =
+                          msg.sender === 'guide' && idx === messages.length - 1;
+                        const payload = msg.payload;
+                        const shouldAnimateIn = !prefersReduced && msg.id !== 'msg-welcome';
 
-                      if (msg.sender === 'user') {
+                        if (msg.sender === 'user') {
+                          return (
+                            <motion.div
+                              key={msg.id}
+                              initial={shouldAnimateIn ? { opacity: 0, y: 8 } : false}
+                              animate={{ opacity: 1, y: 0 }}
+                              transition={{ duration: 0.16, ease: [0.16, 1, 0.3, 1] }}
+                              className="flex justify-end"
+                            >
+                              <div className="max-w-[85%] bg-[#141618] text-[#F6F4EF] dark:bg-[#A95632] dark:text-[#F3F0E9] px-3.5 py-2.5 text-xs sm:text-sm leading-relaxed">
+                                {msg.text}
+                              </div>
+                            </motion.div>
+                          );
+                        }
+
                         return (
-                          <div key={msg.id} className="flex justify-end">
-                            <div className="max-w-[85%] bg-[#141618] text-[#F6F4EF] dark:bg-[#A95632] dark:text-[#F3F0E9] px-3.5 py-2.5 text-xs sm:text-sm leading-relaxed">
-                              {msg.text}
-                            </div>
-                          </div>
-                        );
-                      }
-
-                      return (
-                        <div key={msg.id} className="space-y-2.5">
-                          <div className="bg-white dark:bg-[#20242A] border border-[#141618]/14 dark:border-[#F3F0E9]/14 p-3.5 sm:p-4 space-y-2.5">
-                            {payload?.title && (
-                              <h3 className="font-display text-base font-bold uppercase tracking-tight text-[#141618] dark:text-[#F3F0E9]">
-                                {payload.title}
-                              </h3>
-                            )}
-
-                            <p className="text-xs sm:text-sm text-[#141618] dark:text-[#F3F0E9]/90 leading-relaxed">
-                              {msg.text}
-                            </p>
-
-                            {payload?.specHighlights &&
-                              payload.specHighlights.length > 0 && (
-                                <dl className="grid grid-cols-2 gap-2 pt-2 border-t border-[#141618]/10 dark:border-[#F3F0E9]/10 text-[11px]">
-                                  {payload.specHighlights.map((spec) => (
-                                    <div
-                                      key={spec.label}
-                                      className="bg-[#F6F4EF] dark:bg-[#141618] px-2.5 py-1.5"
-                                    >
-                                      <dt className="text-[#4A5054] dark:text-[#A1A7AB] truncate">
-                                        {spec.label}
-                                      </dt>
-                                      <dd className="font-mono-tabular font-semibold text-[#141618] dark:text-[#F3F0E9] mt-0.5">
-                                        {spec.value}
-                                      </dd>
-                                    </div>
-                                  ))}
-                                </dl>
+                          <motion.div
+                            key={msg.id}
+                            initial={shouldAnimateIn ? { opacity: 0, y: 8 } : false}
+                            animate={{ opacity: 1, y: 0 }}
+                            transition={{ duration: 0.2, ease: [0.16, 1, 0.3, 1] }}
+                            className="space-y-2.5"
+                          >
+                            <div className="bg-white dark:bg-[#20242A] border border-[#141618]/14 dark:border-[#F3F0E9]/14 p-3.5 sm:p-4 space-y-2.5">
+                              {payload?.title && (
+                                <h3 className="font-display text-base font-bold uppercase tracking-tight text-[#141618] dark:text-[#F3F0E9]">
+                                  {payload.title}
+                                </h3>
                               )}
 
-                            {payload?.detailNote && (
-                              <p className="text-[11px] text-[#4A5054] dark:text-[#A1A7AB] leading-relaxed">
-                                {payload.detailNote}
+                              <p className="text-xs sm:text-sm text-[#141618] dark:text-[#F3F0E9]/90 leading-relaxed">
+                                {msg.text}
                               </p>
-                            )}
 
-                            {payload?.checklist && payload.checklist.length > 0 && (
-                              <ul className="space-y-1 text-xs text-[#141618] dark:text-[#F3F0E9]/88 pt-1">
-                                {payload.checklist.map((item) => (
-                                  <li
-                                    key={item}
-                                    className="flex items-start gap-2"
-                                  >
-                                    <span
-                                      aria-hidden="true"
-                                      className="font-mono-tabular text-[#9E4B28] dark:text-[#EC743C] font-bold"
-                                    >
-                                      ·
-                                    </span>
-                                    <span>{item}</span>
-                                  </li>
-                                ))}
-                              </ul>
-                            )}
+                              {payload?.specHighlights &&
+                                payload.specHighlights.length > 0 && (
+                                  <dl className="grid grid-cols-2 gap-2 pt-2 border-t border-[#141618]/10 dark:border-[#F3F0E9]/10 text-[11px]">
+                                    {payload.specHighlights.map((spec) => (
+                                      <div
+                                        key={spec.label}
+                                        className="bg-[#F6F4EF] dark:bg-[#141618] px-2.5 py-1.5"
+                                      >
+                                        <dt className="text-[#4A5054] dark:text-[#A1A7AB] truncate">
+                                          {spec.label}
+                                        </dt>
+                                        <dd className="font-mono-tabular font-semibold text-[#141618] dark:text-[#F3F0E9] mt-0.5">
+                                          {spec.value}
+                                        </dd>
+                                      </div>
+                                    ))}
+                                  </dl>
+                                )}
 
-                            {payload?.actions && payload.actions.length > 0 && (
-                              <div className="pt-2 flex flex-wrap gap-2">
-                                {payload.actions.map((action) => (
-                                  <button
-                                    key={`${action.label}-${action.to}`}
-                                    type="button"
-                                    onClick={() => executeAction(action)}
-                                    className={`inline-flex items-center gap-1.5 min-h-[40px] px-3 py-1.5 text-xs font-semibold transition-colors cursor-pointer text-left ${
-                                      action.variant === 'primary'
-                                        ? 'bg-[#9E4B28] text-[#F6F4EF] hover:bg-[#823B1D] dark:bg-[#A95632] dark:hover:bg-[#EC743C] dark:hover:text-[#141618]'
-                                        : 'bg-[#ECE8DF] text-[#141618] hover:bg-[#D8D1C3] dark:bg-[#141618] dark:text-[#F3F0E9] dark:border dark:border-[#F3F0E9]/20 dark:hover:border-[#EC743C]'
-                                    }`}
-                                  >
-                                    <span>{action.label}</span>
-                                    <ArrowRight
-                                      className="w-3.5 h-3.5 shrink-0"
-                                      aria-hidden="true"
-                                    />
-                                  </button>
-                                ))}
-                              </div>
-                            )}
-                          </div>
-
-                          {/* Contextual Follow-Up & Starter Question Chips (Latest Guide Turn) */}
-                          {isLatestGuide &&
-                            payload?.followUps &&
-                            payload.followUps.length > 0 && (
-                              <div className="space-y-1.5 pt-0.5">
-                                <p className="text-[10px] font-mono-tabular uppercase tracking-wider text-[#4A5054] dark:text-[#A1A7AB]">
-                                  Suggested next
+                              {payload?.detailNote && (
+                                <p className="text-[11px] text-[#4A5054] dark:text-[#A1A7AB] leading-relaxed">
+                                  {payload.detailNote}
                                 </p>
-                                <div className="flex flex-wrap gap-1.5">
-                                  {payload.followUps.map((chip) => (
-                                    <button
-                                      key={chip.label}
-                                      type="button"
-                                      onClick={() => {
-                                        isNearBottomRef.current = true;
-                                        selectSuggestion(chip);
-                                      }}
-                                      className="min-h-[40px] px-3 py-2 text-left text-xs font-medium bg-[#ECE8DF]/80 hover:bg-[#ECE8DF] text-[#141618] border border-[#141618]/15 hover:border-[#9E4B28] dark:bg-[#191C20] dark:text-[#F3F0E9] dark:border-[#F3F0E9]/18 dark:hover:border-[#EC743C] transition-colors cursor-pointer"
+                              )}
+
+                              {payload?.checklist && payload.checklist.length > 0 && (
+                                <ul className="space-y-1 text-xs text-[#141618] dark:text-[#F3F0E9]/88 pt-1">
+                                  {payload.checklist.map((item) => (
+                                    <li
+                                      key={item}
+                                      className="flex items-start gap-2"
                                     >
-                                      {chip.label}
+                                      <span
+                                        aria-hidden="true"
+                                        className="font-mono-tabular text-[#9E4B28] dark:text-[#EC743C] font-bold"
+                                      >
+                                        ·
+                                      </span>
+                                      <span>{item}</span>
+                                    </li>
+                                  ))}
+                                </ul>
+                              )}
+
+                              {payload?.actions && payload.actions.length > 0 && (
+                                <div className="pt-2 flex flex-wrap gap-2">
+                                  {payload.actions.map((action) => (
+                                    <button
+                                      key={`${action.label}-${action.to}`}
+                                      type="button"
+                                      onClick={() => executeAction(action)}
+                                      className={`inline-flex items-center gap-1.5 min-h-[40px] px-3 py-1.5 text-xs font-semibold transition-colors cursor-pointer text-left ${
+                                        action.variant === 'primary'
+                                          ? 'bg-[#9E4B28] text-[#F6F4EF] hover:bg-[#823B1D] dark:bg-[#A95632] dark:hover:bg-[#EC743C] dark:hover:text-[#141618]'
+                                          : 'bg-[#ECE8DF] text-[#141618] hover:bg-[#D8D1C3] dark:bg-[#141618] dark:text-[#F3F0E9] dark:border dark:border-[#F3F0E9]/20 dark:hover:border-[#EC743C]'
+                                      }`}
+                                    >
+                                      <span>{action.label}</span>
+                                      <ArrowRight
+                                        className="w-3.5 h-3.5 shrink-0"
+                                        aria-hidden="true"
+                                      />
                                     </button>
                                   ))}
                                 </div>
-                              </div>
+                              )}
+                            </div>
+
+                            {/* Contextual Follow-Up & Starter Question Buttons (Latest Guide Turn) */}
+                            {!isPreparing &&
+                              isLatestGuide &&
+                              payload?.followUps &&
+                              payload.followUps.length > 0 && (
+                                <motion.div
+                                  initial={
+                                    shouldAnimateIn ? { opacity: 0, y: 6 } : false
+                                  }
+                                  animate={{ opacity: 1, y: 0 }}
+                                  transition={{
+                                    duration: 0.16,
+                                    delay: shouldAnimateIn ? 0.06 : 0,
+                                    ease: [0.16, 1, 0.3, 1],
+                                  }}
+                                  className="space-y-1.5 pt-0.5"
+                                >
+                                  <p className="text-[10px] font-mono-tabular uppercase tracking-wider text-[#4A5054] dark:text-[#A1A7AB]">
+                                    Suggested next
+                                  </p>
+                                  <div className="flex flex-wrap gap-1.5">
+                                    {payload.followUps.map((chip, chipIdx) => (
+                                      <motion.button
+                                        key={chip.label}
+                                        type="button"
+                                        initial={
+                                          shouldAnimateIn
+                                            ? { opacity: 0, y: 4 }
+                                            : false
+                                        }
+                                        animate={{ opacity: 1, y: 0 }}
+                                        transition={{
+                                          duration: 0.14,
+                                          delay: shouldAnimateIn
+                                            ? 0.08 + chipIdx * 0.035
+                                            : 0,
+                                          ease: [0.16, 1, 0.3, 1],
+                                        }}
+                                        onClick={() => {
+                                          isNearBottomRef.current = true;
+                                          selectSuggestion(chip);
+                                        }}
+                                        className="min-h-[40px] px-3 py-2 text-left text-xs font-medium bg-[#ECE8DF]/80 hover:bg-[#ECE8DF] text-[#141618] border border-[#141618]/15 hover:border-[#9E4B28] dark:bg-[#191C20] dark:text-[#F3F0E9] dark:border-[#F3F0E9]/18 dark:hover:border-[#EC743C] transition-colors cursor-pointer"
+                                      >
+                                        {chip.label}
+                                      </motion.button>
+                                    ))}
+                                  </div>
+                                </motion.div>
+                              )}
+                          </motion.div>
+                        );
+                      })}
+
+                      {/* Compact Preparation Bubble */}
+                      {isPreparing && (
+                        <motion.div
+                          key="berry-compass-preparing"
+                          initial={prefersReduced ? false : { opacity: 0, y: 6 }}
+                          animate={{ opacity: 1, y: 0 }}
+                          transition={{ duration: 0.16, ease: [0.16, 1, 0.3, 1] }}
+                          className="inline-flex items-center gap-2.5 bg-white dark:bg-[#20242A] border border-[#141618]/14 dark:border-[#F3F0E9]/14 px-3.5 py-2.5 text-xs text-[#4A5054] dark:text-[#A1A7AB]"
+                        >
+                          <span
+                            className="inline-flex items-center gap-1 shrink-0"
+                            aria-hidden="true"
+                          >
+                            {[0, 1, 2].map((dotIdx) =>
+                              prefersReduced ? (
+                                <span
+                                  key={dotIdx}
+                                  className="w-1.5 h-1.5 bg-[#9E4B28] dark:bg-[#EC743C] opacity-75"
+                                />
+                              ) : (
+                                <motion.span
+                                  key={dotIdx}
+                                  animate={{ opacity: [0.28, 1, 0.28] }}
+                                  transition={{
+                                    duration: 0.9,
+                                    repeat: Infinity,
+                                    delay: dotIdx * 0.16,
+                                    ease: 'easeInOut',
+                                  }}
+                                  className="w-1.5 h-1.5 bg-[#9E4B28] dark:bg-[#EC743C]"
+                                />
+                              )
                             )}
-                        </div>
-                      );
-                    })
+                          </span>
+                          <span>Finding the relevant information…</span>
+                        </motion.div>
+                      )}
+                    </>
                   )}
                 </div>
 
@@ -933,7 +1021,7 @@ export function BerryAlloysGuide() {
                 <form onSubmit={handleFormSubmit} className="flex items-end gap-2">
                   <div className="flex-1 relative">
                     <label htmlFor="berry-guide-input" className="sr-only">
-                      Ask a question about Berry Alloys products, specifications, or enquiries
+                      Ask Berry Compass about alloys, specifications, plants, or enquiries
                     </label>
                     <textarea
                       ref={inputRef}
@@ -946,13 +1034,14 @@ export function BerryAlloysGuide() {
                         if (inputNotice) setInputNotice(null);
                       }}
                       onKeyDown={handleTextareaKeyDown}
-                      placeholder="Ask about alloys, specs, plants, or quotes…"
+                      placeholder="Ask Berry Compass about alloys, specs, plants, or quotes…"
                       className="w-full min-h-[44px] max-h-28 px-3 py-2.5 text-sm bg-[#F6F4EF] dark:bg-[#121417] border border-[#141618]/20 dark:border-[#F3F0E9]/20 text-[#141618] dark:text-[#F3F0E9] placeholder:text-[#4A5054]/70 dark:placeholder:text-[#A1A7AB]/70 focus:border-[#9E4B28] dark:focus:border-[#EC743C] focus:outline-none resize-none"
                     />
                   </div>
                   <button
                     type="submit"
-                    aria-label="Send message"
+                    aria-label="Send message to Berry Compass"
+                    aria-busy={isPreparing}
                     className="inline-flex items-center justify-center min-w-[44px] min-h-[44px] px-3.5 bg-[#9E4B28] text-[#F6F4EF] hover:bg-[#823B1D] dark:bg-[#A95632] dark:text-[#F3F0E9] dark:hover:bg-[#EC743C] dark:hover:text-[#141618] transition-colors cursor-pointer shrink-0"
                   >
                     <Send className="w-4 h-4" aria-hidden="true" />

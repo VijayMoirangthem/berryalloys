@@ -319,7 +319,7 @@ export const KNOWLEDGE_BASE: KnowledgeEntry[] = [
       'specific product',
     ],
     answer:
-      'On any product detail page, the Homepage Alloy Explorer, or inside this Berry Alloys Guide, selecting a product’s quotation action pre-fills that alloy and its available grade options directly inside the Commercial Quotation Desk.',
+      'On any product detail page, the Homepage Alloy Explorer, or inside Berry Compass, selecting a product’s quotation action pre-fills that alloy and its available grade options directly inside the Commercial Quotation Desk.',
     expandedExplanation:
       'You can also specify preferred lump sizing, packing format, and tonnage directly in the quotation form alongside the pre-selected product.',
     relatedIds: [
@@ -600,7 +600,7 @@ export const KNOWLEDGE_BASE: KnowledgeEntry[] = [
       'custom specification',
     ],
     answer:
-      'Specific commercial pricing, minimum order quantities (MOQ), live stock availability, production lead times, payment terms, freight/shipping terms, physical sample dispatch rules, and custom non-standard chemistries are not published in this guide.',
+      'Specific commercial pricing, minimum order quantities (MOQ), live stock availability, production lead times, payment terms, freight/shipping terms, physical sample dispatch rules, and custom non-standard chemistries are not published in Berry Compass or on this website.',
     expandedExplanation:
       'Because ferro alloy contracts vary by market index, lot sizing, destination port (e.g., Visakhapatnam FOB vs. domestic ex-works), and customer trace tolerances, please submit a quotation enquiry with your requirement notes for confirmation by the commercial team.',
     relatedIds: ['how-request-quotation', 'what-to-include-enquiry', 'how-contact-company'],

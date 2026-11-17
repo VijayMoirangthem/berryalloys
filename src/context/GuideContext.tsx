@@ -4,6 +4,7 @@ import {
   RefObject,
   useCallback,
   useContext,
+  useEffect,
   useMemo,
   useRef,
   useState,
@@ -19,6 +20,9 @@ import {
   sanitizePlainText,
 } from '../services/guideEngine';
 
+const PREPARATION_DELAY_MS = 620;
+const PREPARATION_STATUS_TEXT = 'Finding the relevant information…';
+
 export interface GuideMessage {
   id: string;
   sender: 'guide' | 'user';
@@ -28,8 +32,10 @@ export interface GuideMessage {
 
 interface GuideContextValue {
   isOpen: boolean;
+  isPreparing: boolean;
   messages: GuideMessage[];
   contextState: GuideConversationContext;
+  preparingAnnouncement: string;
   latestAnnouncement: string;
   selectedEnquiryProductSlug: string;
   launcherRef: RefObject<HTMLButtonElement | null>;
@@ -71,12 +77,14 @@ export function GuideProvider({ children }: { children: ReactNode }) {
   const location = useLocation();
 
   const [isOpen, setIsOpen] = useState(false);
+  const [isPreparing, setIsPreparing] = useState(false);
   const [messages, setMessages] = useState<GuideMessage[]>(() => [
     createWelcomeMessage(),
   ]);
   const [contextState, setContextState] = useState<GuideConversationContext>({
     flowStage: { type: 'idle' },
   });
+  const [preparingAnnouncement, setPreparingAnnouncement] = useState('');
   const [latestAnnouncement, setLatestAnnouncement] = useState('');
   const [selectedEnquiryProductSlug, setSelectedEnquiryProductSlug] = useState<string>(
     PRODUCTS[0].slug
@@ -84,31 +92,84 @@ export function GuideProvider({ children }: { children: ReactNode }) {
 
   const launcherRef = useRef<HTMLButtonElement | null>(null);
   const customReturnFocusRef = useRef<HTMLElement | null>(null);
+  const prepTimerRef = useRef<number | null>(null);
+  const requestSeqRef = useRef(0);
 
-  const appendTurn = useCallback(
-    (userText: string | null, payload: GuideAnswerPayload) => {
-      const additions: GuideMessage[] = [];
-      if (userText) {
-        additions.push({
-          id: nextMsgId('user'),
-          sender: 'user',
-          text: userText,
-        });
+  const cancelPendingPreparation = useCallback(() => {
+    requestSeqRef.current += 1;
+    if (prepTimerRef.current !== null) {
+      window.clearTimeout(prepTimerRef.current);
+      prepTimerRef.current = null;
+    }
+    setIsPreparing(false);
+    setPreparingAnnouncement('');
+  }, []);
+
+  useEffect(() => {
+    return () => {
+      if (prepTimerRef.current !== null) {
+        window.clearTimeout(prepTimerRef.current);
       }
-      additions.push({
+    };
+  }, []);
+
+  const commitPreparedPayload = useCallback((payload: GuideAnswerPayload) => {
+    setMessages((prev) => [
+      ...prev,
+      {
         id: nextMsgId('guide'),
         sender: 'guide',
         text: payload.body,
         payload,
-      });
+      },
+    ]);
+    setContextState(payload.nextContext);
+    setPreparingAnnouncement('');
+    setLatestAnnouncement(
+      payload.title ? `${payload.title}. ${payload.body}` : payload.body
+    );
+  }, []);
 
-      setMessages((prev) => [...prev, ...additions]);
-      setContextState(payload.nextContext);
-      setLatestAnnouncement(
-        payload.title ? `${payload.title}. ${payload.body}` : payload.body
-      );
+  const appendTurn = useCallback(
+    (
+      userText: string | null,
+      payload: GuideAnswerPayload,
+      options?: { immediate?: boolean }
+    ) => {
+      cancelPendingPreparation();
+
+      if (userText) {
+        setMessages((prev) => [
+          ...prev,
+          {
+            id: nextMsgId('user'),
+            sender: 'user',
+            text: userText,
+          },
+        ]);
+      }
+
+      const prefersReduced =
+        typeof window !== 'undefined' &&
+        window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+      if (options?.immediate || prefersReduced) {
+        commitPreparedPayload(payload);
+        return;
+      }
+
+      const seq = requestSeqRef.current;
+      setIsPreparing(true);
+      setPreparingAnnouncement(PREPARATION_STATUS_TEXT);
+
+      prepTimerRef.current = window.setTimeout(() => {
+        prepTimerRef.current = null;
+        if (requestSeqRef.current !== seq) return;
+        setIsPreparing(false);
+        commitPreparedPayload(payload);
+      }, PREPARATION_DELAY_MS);
     },
-    []
+    [cancelPendingPreparation, commitPreparedPayload]
   );
 
   const openGuide = useCallback(
@@ -136,7 +197,7 @@ export function GuideProvider({ children }: { children: ReactNode }) {
             entry.id,
             contextState
           );
-          appendTurn(entry.question, payload);
+          appendTurn(entry.question, payload, { immediate: true });
         }
         return;
       }
@@ -146,7 +207,7 @@ export function GuideProvider({ children }: { children: ReactNode }) {
           contextState,
           options.productSlug
         );
-        appendTurn('Prepare a product quotation', payload);
+        appendTurn('Prepare a product quotation', payload, { immediate: true });
         return;
       }
 
@@ -156,7 +217,7 @@ export function GuideProvider({ children }: { children: ReactNode }) {
           product.slug,
           contextState
         );
-        appendTurn(`Specifications for ${product.name}`, payload);
+        appendTurn(`Specifications for ${product.name}`, payload, { immediate: true });
         return;
       }
 
@@ -184,18 +245,19 @@ export function GuideProvider({ children }: { children: ReactNode }) {
   }, []);
 
   const resetConversation = useCallback(() => {
+    cancelPendingPreparation();
     const welcome = createWelcomeMessage();
     setMessages([welcome]);
     setContextState({ flowStage: { type: 'idle' } });
     setLatestAnnouncement('Conversation reset. ' + welcome.text);
-  }, []);
+  }, [cancelPendingPreparation]);
 
   const sendMessage = useCallback(
     (rawText: string) => {
       const clean = sanitizePlainText(rawText).slice(0, 360);
       if (!clean) {
         const val = guideProvider.resolveQuery({ text: '', context: contextState });
-        appendTurn(null, val);
+        appendTurn(null, val, { immediate: true });
         return;
       }
       const payload = guideProvider.resolveQuery({
@@ -291,6 +353,7 @@ export function GuideProvider({ children }: { children: ReactNode }) {
 
   const executeAction = useCallback(
     (action: KnowledgeAction) => {
+      cancelPendingPreparation();
       if (action.enquiryProductSlug && getProductBySlug(action.enquiryProductSlug)) {
         setSelectedEnquiryProductSlug(action.enquiryProductSlug);
       }
@@ -311,14 +374,16 @@ export function GuideProvider({ children }: { children: ReactNode }) {
 
       navigate(action.to);
     },
-    [location.pathname, navigate]
+    [cancelPendingPreparation, location.pathname, navigate]
   );
 
   const value = useMemo<GuideContextValue>(
     () => ({
       isOpen,
+      isPreparing,
       messages,
       contextState,
+      preparingAnnouncement,
       latestAnnouncement,
       selectedEnquiryProductSlug,
       launcherRef,
@@ -335,9 +400,11 @@ export function GuideProvider({ children }: { children: ReactNode }) {
       contextState,
       executeAction,
       isOpen,
+      isPreparing,
       latestAnnouncement,
       messages,
       openGuide,
+      preparingAnnouncement,
       resetConversation,
       selectedEnquiryProductSlug,
       selectSuggestion,

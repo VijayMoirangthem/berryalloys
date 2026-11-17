@@ -356,6 +356,7 @@ export function InteractiveParticles({
 
     let particlesMesh: THREE.Mesh<THREE.InstancedBufferGeometry, THREE.RawShaderMaterial> | null = null;
     let sampledTexture: THREE.Texture | null = null;
+    const sampledDims = { width: SAMPLE_WIDTH, height: SAMPLE_HEIGHT };
     let disposed = false;
     let isVisible = true;
     let rafId = 0;
@@ -394,6 +395,8 @@ export function InteractiveParticles({
         const img = texture.image as HTMLImageElement;
         const imgW = img.width || SAMPLE_WIDTH;
         const imgH = img.height || SAMPLE_HEIGHT;
+        sampledDims.width = imgW;
+        sampledDims.height = imgH;
 
         const sampleCanvas = document.createElement('canvas');
         sampleCanvas.width = imgW;
@@ -495,12 +498,18 @@ export function InteractiveParticles({
       scatterAtClientPoint(e.clientX, e.clientY);
     };
 
+    const onTouchStart = (e: TouchEvent) => {
+      const pt = e.touches[0];
+      if (pt) scatterAtClientPoint(pt.clientX, pt.clientY);
+    };
+
     const onTouchMove = (e: TouchEvent) => {
       const pt = e.touches[0];
       if (pt) scatterAtClientPoint(pt.clientX, pt.clientY);
     };
 
     container.addEventListener('pointermove', onPointerMove, { passive: true });
+    container.addEventListener('touchstart', onTouchStart, { passive: true });
     container.addEventListener('touchmove', onTouchMove, { passive: true });
 
     const observer = new IntersectionObserver(
@@ -519,7 +528,9 @@ export function InteractiveParticles({
       camera.updateProjectionMatrix();
       renderer.setSize(w, h);
       if (particlesMesh) {
-        particlesMesh.scale.setScalar(computeFitScale(w, h, SAMPLE_WIDTH, SAMPLE_HEIGHT));
+        particlesMesh.scale.setScalar(
+          computeFitScale(w, h, sampledDims.width, sampledDims.height)
+        );
       }
       if (prefersReduced && particlesMesh) {
         renderer.render(scene, camera);
@@ -530,6 +541,41 @@ export function InteractiveParticles({
     resizeObserver.observe(container);
     window.addEventListener('resize', onResize);
 
+    const afterDraw = () => {
+      if (disposed || prefersReduced) return;
+      if (!isSoftwareGl) {
+        rafId = window.requestAnimationFrame(tick);
+        return;
+      }
+      const gl2 = gl as WebGL2RenderingContext;
+      if (typeof gl2.fenceSync === 'function') {
+        const sync = gl2.fenceSync(gl2.SYNC_GPU_COMMANDS_COMPLETE, 0);
+        if (!sync) {
+          rafId = window.requestAnimationFrame(tick);
+          return;
+        }
+        gl2.flush();
+        const poll = () => {
+          if (disposed) {
+            gl2.deleteSync(sync);
+            return;
+          }
+          const status = gl2.clientWaitSync(sync, 0, 0);
+          if (status === gl2.TIMEOUT_EXPIRED) {
+            timeoutId = window.setTimeout(poll, 4);
+          } else {
+            gl2.deleteSync(sync);
+            rafId = window.requestAnimationFrame(tick);
+          }
+        };
+        timeoutId = window.setTimeout(poll, 0);
+      } else {
+        timeoutId = window.setTimeout(() => {
+          if (!disposed) rafId = window.requestAnimationFrame(tick);
+        }, 32);
+      }
+    };
+
     const tick = () => {
       if (disposed || prefersReduced) return;
       if (isVisible && !document.hidden && particlesMesh) {
@@ -538,13 +584,7 @@ export function InteractiveParticles({
         particlesMesh.material.uniforms.uTime.value += dt;
         renderer?.render(scene, camera);
       }
-      if (isSoftwareGl) {
-        timeoutId = window.setTimeout(() => {
-          if (!disposed) rafId = window.requestAnimationFrame(tick);
-        }, 65);
-      } else {
-        rafId = window.requestAnimationFrame(tick);
-      }
+      afterDraw();
     };
 
     if (!prefersReduced) {
@@ -558,6 +598,7 @@ export function InteractiveParticles({
       observer.disconnect();
       resizeObserver.disconnect();
       container.removeEventListener('pointermove', onPointerMove);
+      container.removeEventListener('touchstart', onTouchStart);
       container.removeEventListener('touchmove', onTouchMove);
       window.removeEventListener('resize', onResize);
 

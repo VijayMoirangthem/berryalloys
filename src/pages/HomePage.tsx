@@ -289,7 +289,8 @@ export function HomePage() {
                   className="font-display fluid-hero-title font-bold uppercase text-[#F3F0E9] max-w-4xl"
                 />
 
-                <div className="hero-reveal border-l-2 border-[#EC743C] pl-4 py-0.5 max-w-xl">
+                <div className="hero-reveal space-y-2.5 max-w-xl">
+                  <span aria-hidden="true" className="block w-14 h-[1.5px] bg-[#EC743C]" />
                   <MorphText
                     words={[
                       'HEAT TO PRECISION',

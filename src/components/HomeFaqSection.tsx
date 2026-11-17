@@ -48,7 +48,7 @@ export function HomeFaqSection() {
                 onClick={(e) => openGuide({ returnFocusEl: e.currentTarget as HTMLElement })}
               >
                 <Compass className="w-4 h-4" aria-hidden="true" />
-                Open Berry Alloys Guide
+                Open Berry Compass
               </CreepyButton>
             </div>
           </div>
@@ -157,7 +157,7 @@ export function HomeFaqSection() {
                             className="inline-flex items-center gap-1.5 min-h-[38px] px-3 py-1.5 text-xs font-medium text-[#9E4B28] dark:text-[#EC743C] border border-[#141618]/15 dark:border-[#F3F0E9]/16 hover:border-[#9E4B28] dark:hover:border-[#EC743C] transition-colors cursor-pointer"
                           >
                             <MessageSquare className="w-3.5 h-3.5" aria-hidden="true" />
-                            Ask the guide about this
+                            Ask Berry Compass about this
                           </button>
 
                           <Link

@@ -327,7 +327,7 @@ export function SearchCommandModal() {
                     No direct matches for “{query}”
                   </p>
                   <p className="text-xs text-[#4A5054] dark:text-[#A1A7AB]">
-                    Try querying the interactive Berry Alloys Guide or resetting category filters.
+                    Try querying Berry Compass or resetting category filters.
                   </p>
                   <button
                     type="button"
@@ -339,7 +339,7 @@ export function SearchCommandModal() {
                     className="inline-flex items-center gap-2 px-4 py-2 text-xs font-semibold bg-[#9E4B28] text-[#F6F4EF] hover:bg-[#823B1D] transition-colors cursor-pointer"
                   >
                     <Compass className="w-3.5 h-3.5" aria-hidden="true" />
-                    Ask Berry Alloys Guide
+                    Ask Berry Compass
                   </button>
                 </div>
               ) : (
@@ -412,7 +412,7 @@ export function SearchCommandModal() {
                   className="inline-flex items-center gap-1.5 px-2.5 py-1 font-medium border border-[#141618]/18 dark:border-[#F3F0E9]/18 hover:border-[#9E4B28] dark:hover:border-[#EC743C] transition-colors cursor-pointer"
                 >
                   <Compass className="w-3 h-3 text-[#9E4B28] dark:text-[#EC743C]" aria-hidden="true" />
-                  Open Guide
+                  Berry Compass
                 </button>
                 <button
                   type="button"

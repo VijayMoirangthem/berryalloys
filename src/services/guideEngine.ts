@@ -526,7 +526,7 @@ class DeterministicGuideProvider implements GuideResponseProvider {
   getWelcomePayload(): GuideAnswerPayload {
     return {
       kind: 'welcome',
-      body: 'Welcome to Berry Alloys. I can help you explore products, find specifications and prepare an enquiry. Choose a topic or type a question.',
+      body: 'Welcome to Berry Compass. Explore our alloys, find technical information, or prepare an enquiry.',
       actions: [],
       followUps: STARTER_SUGGESTIONS,
       nextContext: { flowStage: { type: 'idle' } },
@@ -720,7 +720,7 @@ class DeterministicGuideProvider implements GuideResponseProvider {
     if (GREETING_PATTERN.test(cleaned)) {
       return {
         kind: 'greeting',
-        body: 'Hello. I am the automated Berry Alloys Guide using prepared company information. How can I assist you today?',
+        body: 'Hello. Welcome to Berry Compass — automated product assistant answering from prepared company information. How can I assist you today?',
         actions: [],
         followUps: STARTER_SUGGESTIONS,
         nextContext: context,
@@ -781,7 +781,7 @@ class DeterministicGuideProvider implements GuideResponseProvider {
           return {
             ...buildEntryPayload(entry, context),
             title: `About ${rule.topic.charAt(0).toUpperCase() + rule.topic.slice(1)}`,
-            body: `Information on ${rule.topic} is not available in this prepared guide. ${entry.answer}`,
+            body: `Information on ${rule.topic} is not available in Berry Compass. ${entry.answer}`,
           };
         }
       }
@@ -807,7 +807,7 @@ class DeterministicGuideProvider implements GuideResponseProvider {
       return {
         kind: 'clarify-candidates',
         title: `Clarify "${tok}"`,
-        body: `Your term "${tok}" relates to a few topics in our prepared guide. Which one would you like to view?`,
+        body: `Your term "${tok}" relates to a few prepared company topics. Which one would you like to view?`,
         actions: [{ label: 'Browse All FAQs', to: '/faq', variant: 'secondary' }],
         followUps:
           candidates.length > 0
@@ -890,7 +890,7 @@ class DeterministicGuideProvider implements GuideResponseProvider {
       return {
         kind: 'clarify-candidates',
         title: 'Choose the Closest Topic',
-        body: 'I found a few related topics in the prepared guide. Select one below to view the full answer:',
+        body: 'I found a few related topics in prepared company records. Select one below to view the full answer:',
         actions: [{ label: 'Search All FAQs', to: '/faq', variant: 'secondary' }],
         followUps: candidates.slice(0, 3).map((c) => ({
           label: c.entry.question,
@@ -903,8 +903,8 @@ class DeterministicGuideProvider implements GuideResponseProvider {
     // Unsupported or out-of-scope query -> honest limitation + working actions
     return {
       kind: 'unsupported',
-      title: 'Outside Prepared Guide Topics',
-      body: 'That specific information is not available in the prepared Berry Alloys Guide. You can explore our FAQs, browse documented specifications, or submit a commercial enquiry directly.',
+      title: 'Outside Prepared Topics',
+      body: 'That specific information is not available in Berry Compass. You can explore our FAQs, browse documented specifications, or submit a commercial enquiry directly.',
       actions: [
         { label: 'View All FAQs', to: '/faq', variant: 'secondary' },
         { label: 'Open Quotation / Contact Desk', to: '/contact?tab=general', variant: 'primary' },

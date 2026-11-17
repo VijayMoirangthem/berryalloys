@@ -231,7 +231,7 @@ export function FaqPage() {
                   className="inline-flex items-center gap-1.5 min-h-[40px] px-3.5 py-2 text-xs font-medium text-[#9E4B28] dark:text-[#EC743C] border border-[#141618]/18 dark:border-[#F3F0E9]/18 hover:border-[#9E4B28] dark:hover:border-[#EC743C] transition-colors cursor-pointer"
                 >
                   <MessageSquare className="w-3.5 h-3.5" aria-hidden="true" />
-                  Ask the guide about this
+                  Ask Berry Compass about this
                 </button>
 
                 <button
@@ -290,7 +290,7 @@ export function FaqPage() {
               onClick={(e) => openGuide({ returnFocusEl: e.currentTarget })}
             >
               <Compass className="w-4 h-4" aria-hidden="true" />
-              Open Berry Alloys Guide
+              Open Berry Compass
             </IndustrialButton>
           </div>
         </header>
@@ -399,7 +399,7 @@ export function FaqPage() {
                 No prepared answers matched your search.
               </h2>
               <p className="text-sm text-[#4A5054] dark:text-[#A1A7AB] max-w-xl mx-auto leading-relaxed">
-                Try broader metallurgy terms, reset your category filter, or check with our automated guide or commercial quotation desk for bespoke requirements.
+                Try broader metallurgy terms, reset your category filter, or check with Berry Compass or our commercial quotation desk for bespoke requirements.
               </p>
               <div className="pt-2 flex flex-wrap justify-center gap-3">
                 <IndustrialButton
@@ -419,7 +419,7 @@ export function FaqPage() {
                     })
                   }
                 >
-                  Ask Berry Alloys Guide
+                  Ask Berry Compass
                 </IndustrialButton>
               </div>
             </div>

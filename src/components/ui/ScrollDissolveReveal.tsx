@@ -345,6 +345,41 @@ export function ScrollDissolveReveal({
 
     renderer.render(scene, camera);
 
+    const afterDraw = () => {
+      if (disposed) return;
+      if (!isSoftwareGl) {
+        rafId = window.requestAnimationFrame(tick);
+        return;
+      }
+      const gl2 = gl as WebGL2RenderingContext;
+      if (typeof gl2.fenceSync === 'function') {
+        const sync = gl2.fenceSync(gl2.SYNC_GPU_COMMANDS_COMPLETE, 0);
+        if (!sync) {
+          rafId = window.requestAnimationFrame(tick);
+          return;
+        }
+        gl2.flush();
+        const poll = () => {
+          if (disposed) {
+            gl2.deleteSync(sync);
+            return;
+          }
+          const status = gl2.clientWaitSync(sync, 0, 0);
+          if (status === gl2.TIMEOUT_EXPIRED) {
+            timeoutId = window.setTimeout(poll, 4);
+          } else {
+            gl2.deleteSync(sync);
+            rafId = window.requestAnimationFrame(tick);
+          }
+        };
+        timeoutId = window.setTimeout(poll, 0);
+      } else {
+        timeoutId = window.setTimeout(() => {
+          if (!disposed) rafId = window.requestAnimationFrame(tick);
+        }, 32);
+      }
+    };
+
     const tick = () => {
       if (disposed) return;
       if (isVisible && !document.hidden) {
@@ -352,13 +387,7 @@ export function ScrollDissolveReveal({
         baseUniforms.uReveal.value = currentReveal;
         renderer?.render(scene, camera);
       }
-      if (isSoftwareGl) {
-        timeoutId = window.setTimeout(() => {
-          if (!disposed) rafId = window.requestAnimationFrame(tick);
-        }, 55);
-      } else {
-        rafId = window.requestAnimationFrame(tick);
-      }
+      afterDraw();
     };
 
     rafId = window.requestAnimationFrame(tick);
@@ -414,7 +443,7 @@ export function ScrollDissolveReveal({
           </div>
 
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6 items-end pb-4">
-            <div className="bg-[#121417]/78 border border-[#F3F0E9]/14 p-5 space-y-1.5 backdrop-blur-xs max-w-md">
+            <div className="bg-[#121417]/92 border border-[#F3F0E9]/16 p-5 space-y-1.5 max-w-md">
               <p className="text-[11px] font-mono-tabular uppercase tracking-wider text-[#EC743C]">
                 {leftKicker ?? 'Stage 01 · Integrated Complex'}
               </p>
@@ -426,7 +455,7 @@ export function ScrollDissolveReveal({
               </p>
             </div>
 
-            <div className="bg-[#121417]/78 border border-[#F3F0E9]/14 p-5 space-y-1.5 backdrop-blur-xs max-w-md md:ml-auto">
+            <div className="bg-[#121417]/92 border border-[#F3F0E9]/16 p-5 space-y-1.5 max-w-md md:ml-auto">
               <p className="text-[11px] font-mono-tabular uppercase tracking-wider text-[#EC743C]">
                 {rightKicker ?? 'Stage 02 · High-Temperature Reduction'}
               </p>

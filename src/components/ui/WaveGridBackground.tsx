@@ -160,6 +160,41 @@ export function WaveGridBackground({
     let disposed = false;
     const startTime = performance.now();
 
+    const afterDraw = () => {
+      if (disposed || prefersReduced) return;
+      if (!isSoftwareGl) {
+        rafId = window.requestAnimationFrame(loop);
+        return;
+      }
+      const gl2 = gl as WebGL2RenderingContext;
+      if (typeof gl2.fenceSync === 'function') {
+        const sync = gl2.fenceSync(gl2.SYNC_GPU_COMMANDS_COMPLETE, 0);
+        if (!sync) {
+          rafId = window.requestAnimationFrame(loop);
+          return;
+        }
+        gl2.flush();
+        const poll = () => {
+          if (disposed) {
+            gl2.deleteSync(sync);
+            return;
+          }
+          const status = gl2.clientWaitSync(sync, 0, 0);
+          if (status === gl2.TIMEOUT_EXPIRED) {
+            timeoutId = window.setTimeout(poll, 4);
+          } else {
+            gl2.deleteSync(sync);
+            rafId = window.requestAnimationFrame(loop);
+          }
+        };
+        timeoutId = window.setTimeout(poll, 0);
+      } else {
+        timeoutId = window.setTimeout(() => {
+          if (!disposed) rafId = window.requestAnimationFrame(loop);
+        }, 32);
+      }
+    };
+
     const loop = () => {
       if (disposed || prefersReduced) return;
       if (isVisible && !document.hidden) {
@@ -167,13 +202,7 @@ export function WaveGridBackground({
         updateWave(elapsed);
         renderer?.render(scene, camera);
       }
-      if (isSoftwareGl) {
-        timeoutId = window.setTimeout(() => {
-          if (!disposed) rafId = window.requestAnimationFrame(loop);
-        }, 65);
-      } else {
-        rafId = window.requestAnimationFrame(loop);
-      }
+      afterDraw();
     };
 
     if (!prefersReduced) {
