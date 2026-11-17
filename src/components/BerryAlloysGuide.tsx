@@ -24,6 +24,7 @@ import {
 import { AnimatePresence, motion, useReducedMotion } from 'motion/react';
 import { KNOWLEDGE_BASE, KNOWLEDGE_CATEGORIES } from '../data/knowledgeBase';
 import { useGuide } from '../context/GuideContext';
+import { CompassMark } from './CompassMark';
 
 const MAX_INPUT_LENGTH = 360;
 const LAUNCHER_PREF_KEY = 'berry-compass-launcher-v1';
@@ -105,6 +106,24 @@ export function BerryAlloysGuide() {
   const [snapPreviewEdge, setSnapPreviewEdge] = useState<DockEdge>(null);
   const [isPeekRevealed, setIsPeekRevealed] = useState(false);
   const [isFocusWithinLauncher, setIsFocusWithinLauncher] = useState(false);
+  // The label pill is shown briefly on the first visit of a session so the launcher introduces itself.
+  const [showIntroLabel, setShowIntroLabel] = useState(false);
+  useEffect(() => {
+    let seen = false;
+    try {
+      seen = window.sessionStorage.getItem('berry-compass-intro') === '1';
+      window.sessionStorage.setItem('berry-compass-intro', '1');
+    } catch {
+      /* ignore */
+    }
+    if (seen) return;
+    const on = window.setTimeout(() => setShowIntroLabel(true), 1400);
+    const off = window.setTimeout(() => setShowIntroLabel(false), 6200);
+    return () => {
+      window.clearTimeout(on);
+      window.clearTimeout(off);
+    };
+  }, []);
 
   const launcherDockRef = useRef<HTMLDivElement>(null);
   const justDraggedRef = useRef(false);
@@ -485,8 +504,8 @@ export function BerryAlloysGuide() {
 
         const tuckTransformClass = isTucked
           ? isDockedLeft
-            ? '-translate-x-[calc(100%-22px)]'
-            : 'translate-x-[calc(100%-22px)]'
+            ? '-translate-x-[calc(100%-24px)]'
+            : 'translate-x-[calc(100%-24px)]'
           : 'translate-x-0';
 
         const transitionClass =
@@ -526,9 +545,9 @@ export function BerryAlloysGuide() {
                 ? { left: `${coords.left}px`, top: `${coords.top}px`, touchAction: 'none' }
                 : { touchAction: 'none' }
             }
-            className={`fixed z-40 flex items-stretch shadow-xl select-none ${
+            className={`group/dock fixed z-40 flex items-center select-none ${
               coords ? '' : 'bottom-[24px] sm:bottom-[32px] right-4 sm:right-6'
-            } ${isDockedLeft ? 'flex-row-reverse' : 'flex-row'} ${tuckTransformClass} ${transitionClass}`}
+            } ${tuckTransformClass} ${transitionClass}`}
           >
             {/* Invisible proximity hover halo when tucked at edge so moving cursor near edge slides it smoothly out */}
             {isDocked && (
@@ -552,10 +571,14 @@ export function BerryAlloysGuide() {
               </span>
             )}
 
-            {/* Primary Berry Compass Launcher */}
-            <button
+            {/* Primary Berry Compass Launcher — circular, animated */}
+            <motion.button
               ref={launcherRef}
               type="button"
+              initial={prefersReduced ? false : { scale: 0.2, opacity: 0, rotate: -120 }}
+              animate={{ scale: 1, opacity: 1, rotate: 0 }}
+              transition={{ type: 'spring', stiffness: 260, damping: 18, mass: 0.9 }}
+              whileTap={prefersReduced ? undefined : { scale: 0.92 }}
               onClick={(e) => {
                 if (justDraggedRef.current) {
                   e.preventDefault();
@@ -573,72 +596,63 @@ export function BerryAlloysGuide() {
                   ? 'Reveal hidden Berry Compass launcher'
                   : 'Open Berry Compass for products, specifications and enquiries (drag to move)'
               }
-              title={
-                isTucked
-                  ? 'Hover or tap to reveal Berry Compass'
-                  : 'Open Berry Compass · Drag to reposition'
-              }
-              className={`group relative inline-flex items-center gap-2 min-h-[46px] pr-3 pl-2.5 py-2.5 bg-[#10243A] text-[#FFFFFF] border border-[#10243A] hover:bg-brand hover:border-brand dark:bg-[#12243B] dark:text-[#F4F8FC] dark:border-[#69C5F5]/45 dark:hover:bg-[#0A6AA1] dark:hover:border-[#69C5F5] transition-colors duration-150 focus-visible:outline-2 focus-visible:outline-[#69C5F5] focus-visible:outline-offset-2 ${
-                isDragging ? 'cursor-grabbing ring-2 ring-[#69C5F5]' : 'cursor-grab'
-              } ${isDockedLeft ? 'flex-row-reverse pl-3 pr-2.5' : ''}`}
+              title={isTucked ? 'Hover or tap to reveal Berry Compass' : 'Open Berry Compass · Drag to reposition'}
+              className={`group relative block h-[60px] w-[60px] sm:h-[66px] sm:w-[66px] rounded-full text-[#69C5F5] focus-visible:outline-2 focus-visible:outline-[#9AD9FA] focus-visible:outline-offset-4 ${
+                isDragging ? 'cursor-grabbing scale-105' : 'cursor-grab'
+              }`}
             >
-              {/* Exposed Edge Peek Sliver Indicator (always visible 22px strip when docked) */}
+              {/* Soft pulse halo */}
+              <span aria-hidden="true" className="compass-pulse pointer-events-none absolute inset-0 rounded-full border-2 border-[#69C5F5]/60" />
+              {/* Rotating gradient ring */}
               <span
                 aria-hidden="true"
-                className={`inline-flex items-center justify-center shrink-0 ${
-                  isTucked
-                    ? 'text-[#69C5F5]'
-                    : 'text-[#B5C5D7] group-hover:text-[#FFFFFF]'
-                }`}
-              >
-                {isTucked ? (
-                  isDockedLeft ? (
-                    <ChevronRight className="w-3.5 h-3.5" />
-                  ) : (
-                    <ChevronLeft className="w-3.5 h-3.5" />
-                  )
-                ) : (
-                  <GripVertical className="w-3.5 h-3.5" />
-                )}
-              </span>
+                className="compass-ring absolute inset-0 rounded-full bg-[conic-gradient(from_0deg,#006393,#69C5F5,#FFFFFF_18%,#69C5F5_34%,#C9233B_50%,#69C5F5_66%,#006393)] shadow-[0_10px_30px_-6px_rgba(0,99,147,0.7),0_2px_8px_rgba(7,17,31,0.45)] transition-shadow duration-300 group-hover:shadow-[0_14px_38px_-4px_rgba(105,197,245,0.75),0_2px_10px_rgba(7,17,31,0.5)]"
+              />
+              {/* Glossy disc */}
+              <span
+                aria-hidden="true"
+                className="absolute inset-[3px] rounded-full bg-[radial-gradient(circle_at_30%_22%,#1B5C8C_0%,#0B2A47_46%,#06131F_100%)] shadow-[inset_0_1px_2px_rgba(255,255,255,0.35),inset_0_-8px_14px_rgba(0,0,0,0.35)]"
+              />
+              <span aria-hidden="true" className="pointer-events-none absolute left-[13%] top-[9%] h-[30%] w-[52%] rounded-full bg-gradient-to-b from-white/35 to-transparent blur-[1px]" />
+              <CompassMark className="absolute inset-[8px] h-[calc(100%-16px)] w-[calc(100%-16px)] transition-transform duration-500 ease-[cubic-bezier(0.22,1,0.36,1)] group-hover:scale-110 group-active:scale-95" />
 
-              {/* Thin copper architectural edge line visible even at edge sliver */}
+              {/* Edge indicator while tucked */}
               {isTucked && (
-                <span
-                  aria-hidden="true"
-                  className={`absolute inset-y-0 w-[3px] bg-[#69C5F5] ${
-                    isDockedLeft ? 'right-0' : 'left-0'
-                  }`}
-                />
+                <span aria-hidden="true" className={`absolute top-1/2 -translate-y-1/2 text-white ${isDockedLeft ? 'right-[3px]' : 'left-[3px]'}`}>
+                  {isDockedLeft ? <ChevronRight className="w-3.5 h-3.5" /> : <ChevronLeft className="w-3.5 h-3.5" />}
+                </span>
               )}
 
-              <Compass
-                className="w-4 h-4 text-[#69C5F5] group-hover:text-[#FFFFFF] shrink-0 transition-colors"
+              {/* Label pill that slides out on hover, focus, and briefly on first load */}
+              <span
                 aria-hidden="true"
-              />
-              <span className="text-xs font-semibold tracking-wide whitespace-nowrap">
-                Berry Compass
+                className={`pointer-events-none absolute top-1/2 -translate-y-1/2 whitespace-nowrap border border-[#69C5F5]/45 bg-[#07111F]/95 px-3.5 py-2 text-left shadow-xl backdrop-blur-sm transition-all duration-300 ease-[cubic-bezier(0.22,1,0.36,1)] ${
+                  isLeftHalf ? 'left-full ml-3 origin-left' : 'right-full mr-3 origin-right'
+                } ${
+                  showIntroLabel || isDragging
+                    ? 'opacity-100 translate-x-0 scale-100'
+                    : `opacity-0 scale-95 ${isLeftHalf ? '-translate-x-2' : 'translate-x-2'} group-hover:opacity-100 group-hover:translate-x-0 group-hover:scale-100 group-focus-visible:opacity-100 group-focus-visible:translate-x-0 group-focus-visible:scale-100`
+                } ${isTucked ? 'hidden' : ''}`}
+              >
+                <span className="block text-xs font-semibold tracking-wide text-[#F4F8FC]">Berry Compass</span>
+                <span className="block text-[10px] text-[#9AD9FA]">Products, specs &amp; enquiries</span>
               </span>
-            </button>
+            </motion.button>
 
-            {/* Compact Dock / Pin Toggle Button */}
+            {/* Compact Dock / Pin satellite (desktop only) */}
             <button
               type="button"
               data-launcher-dock-btn="true"
               style={isCompactViewport() ? { display: 'none' } : undefined}
               onClick={() => (isDocked ? handleUnpinToCanvas() : handleHideToNearestEdge())}
-              aria-label={
-                isDocked
-                  ? 'Pin Berry Compass back onto page'
-                  : 'Hide Berry Compass to nearest screen edge'
-              }
+              aria-label={isDocked ? 'Pin Berry Compass back onto page' : 'Hide Berry Compass to nearest screen edge'}
               title={isDocked ? 'Keep visible on page' : 'Hide to screen edge'}
-              className={`inline-flex items-center justify-center min-w-[34px] min-h-[46px] px-2 bg-[#1E2228] text-[#B5C5D7] hover:text-[#FFFFFF] hover:bg-[#29435F] border-y ${
-                isDockedLeft ? 'border-l' : 'border-r'
-              } border-[#10243A] dark:bg-[#0D1B2E] dark:border-[#69C5F5]/45 dark:hover:bg-[#29435F] transition-colors cursor-pointer focus-visible:outline-2 focus-visible:outline-[#69C5F5] focus-visible:outline-offset-[-2px]`}
+              className={`absolute -top-1.5 inline-flex h-7 w-7 items-center justify-center rounded-full border border-[#69C5F5]/55 bg-[#07111F] text-[#9AD9FA] opacity-0 shadow-md transition-all duration-200 hover:bg-[#0A6AA1] hover:text-white focus-visible:opacity-100 group-hover/dock:opacity-100 cursor-pointer focus-visible:outline-2 focus-visible:outline-[#9AD9FA] ${
+                isLeftHalf ? '-right-2' : '-left-2'
+              } ${isTucked ? 'hidden' : ''}`}
             >
               {isDocked ? (
-                <Pin className="w-3.5 h-3.5 text-[#69C5F5]" aria-hidden="true" />
+                <Pin className="w-3.5 h-3.5" aria-hidden="true" />
               ) : isLeftHalf ? (
                 <ChevronLeft className="w-3.5 h-3.5" aria-hidden="true" />
               ) : (
@@ -670,16 +684,19 @@ export function BerryAlloysGuide() {
               aria-modal="true"
               aria-labelledby="berry-guide-title"
               aria-describedby="berry-guide-disclosure"
-              initial={prefersReduced ? false : { opacity: 0, y: 12 }}
-              animate={{ opacity: 1, y: 0 }}
-              exit={prefersReduced ? undefined : { opacity: 0, y: 8 }}
-              transition={{ duration: 0.14, ease: [0.16, 1, 0.3, 1] }}
-              style={{ '--guide-vh': visualHeight ? `${visualHeight}px` : '100dvh' } as React.CSSProperties}
+              initial={prefersReduced ? false : { opacity: 0, y: 24, scale: 0.9 }}
+              animate={{ opacity: 1, y: 0, scale: 1 }}
+              exit={prefersReduced ? undefined : { opacity: 0, y: 16, scale: 0.94 }}
+              transition={{ type: 'spring', stiffness: 320, damping: 28, mass: 0.9 }}
+              style={{ '--guide-vh': visualHeight ? `${visualHeight}px` : '100dvh', transformOrigin: 'bottom right' } as React.CSSProperties}
               className="w-full h-[var(--guide-vh)] sm:h-[min(660px,calc(100dvh-3rem))] sm:w-[420px] sm:max-w-[calc(100vw-3rem)] bg-[#FFFFFF] dark:bg-[#10243A] text-[#10243A] dark:text-[#F4F8FC] border-t sm:border border-[#10243A]/20 dark:border-[#F4F8FC]/20 shadow-2xl flex flex-col overflow-hidden"
             >
               {/* Header */}
               <div className="shrink-0 px-4 sm:px-5 py-3.5 bg-[#10243A] text-[#F4F8FC] border-b border-[#F4F8FC]/14 flex items-start justify-between gap-3 pt-[max(0.875rem,env(safe-area-inset-top))]">
-                <div className="min-w-0 space-y-1">
+                <span aria-hidden="true" className="group relative mt-0.5 hidden h-12 w-12 shrink-0 rounded-full bg-[radial-gradient(circle_at_30%_22%,#1B5C8C,#0B2A47_55%,#06131F)] text-[#69C5F5] ring-2 ring-[#69C5F5]/55 sm:block">
+                  <CompassMark className="absolute inset-[5px] h-[calc(100%-10px)] w-[calc(100%-10px)]" />
+                </span>
+                <div className="min-w-0 flex-1 space-y-1">
                   <p className="text-[10px] font-mono-tabular uppercase tracking-widest text-[#69C5F5]">
                     Automated product assistant · Answers from prepared company information.
                   </p>

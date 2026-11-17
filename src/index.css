@@ -447,3 +447,62 @@ html[data-ambient="paused"] .lj-disc {
 html[data-ambient="paused"] .hero-breathe {
   animation: none;
 }
+
+/* Berry Compass launcher */
+@keyframes compass-ring-spin {
+  to { transform: rotate(360deg); }
+}
+
+@keyframes compass-sway {
+  0%, 100% { transform: rotate(-14deg); }
+  25% { transform: rotate(10deg); }
+  50% { transform: rotate(-6deg); }
+  75% { transform: rotate(12deg); }
+}
+
+@keyframes compass-spin {
+  0% { transform: rotate(-14deg); }
+  100% { transform: rotate(706deg); }
+}
+
+@keyframes compass-pulse {
+  0% { transform: scale(1); opacity: 0.5; }
+  70%, 100% { transform: scale(1.7); opacity: 0; }
+}
+
+.compass-ring {
+  animation: compass-ring-spin 7s linear infinite;
+}
+
+.compass-pulse {
+  animation: compass-pulse 3.2s cubic-bezier(0.22, 1, 0.36, 1) infinite;
+}
+
+.compass-needle {
+  animation: compass-sway 5s ease-in-out infinite;
+}
+
+.group:hover .compass-needle,
+.group:focus-visible .compass-needle {
+  animation: compass-spin 1.25s cubic-bezier(0.22, 1, 0.36, 1) 1, compass-sway 5s ease-in-out 1.25s infinite;
+}
+
+html[data-ambient="paused"] .compass-ring,
+html[data-ambient="paused"] .compass-pulse,
+html[data-ambient="paused"] .compass-needle {
+  animation: none;
+}
+
+/* Floating country flags on the globe */
+@keyframes flag-float {
+  0%, 100% { transform: translateY(0) rotate(-2deg); }
+  50% { transform: translateY(-3px) rotate(2deg); }
+}
+
+.flag-float {
+  animation: flag-float 3.6s ease-in-out infinite;
+}
+
+html[data-ambient="paused"] .flag-float {
+  animation: none;
+}

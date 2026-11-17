@@ -30,6 +30,8 @@ export interface PresenceLocation {
   detail: string;
   /** Marker is drawn by another location when two sit too close to separate on the globe. */
   markerGroup?: string;
+  /** Short, public labels naming where this location or market is published. */
+  sources?: string[];
 }
 
 export interface PresenceRoute {
@@ -82,16 +84,71 @@ export const INDIA_LOCATIONS: PresenceLocation[] = FACILITY_NODES.filter((n) => 
   };
 });
 
+const WEBSITE = 'Berry Alloys website';
+const ICRA_2026 = 'ICRA rating report, Aug 2026';
+const ICRA_2025 = 'ICRA rating report, Apr 2025';
+const ICRA_2023 = 'ICRA rating report, Mar 2023';
+const TRADE = 'Published shipment records';
+
+function market(
+  id: string,
+  name: string,
+  countryCode: string,
+  region: string,
+  lat: number,
+  lng: number,
+  sources: string[],
+  detail: string
+): PresenceLocation {
+  return {
+    id,
+    name,
+    kind: 'export-market',
+    region,
+    country: name,
+    countryCode,
+    lat,
+    lng,
+    precision: 'country',
+    status: 'Export market',
+    role: 'Export destination named in published company and credit-rating sources.',
+    detail,
+    sources,
+  };
+}
+
 /**
- * Confirmed overseas export markets.
- *
- * Intentionally empty: no approved country list exists yet, and the site must not imply markets that
- * are not documented. When the company approves a list, add entries here with
- * `kind: 'export-market'`, `precision: 'country'` and a representative country position — the globe,
- * legend, selector, flags and port-to-market routes pick them up without further code changes.
- * Place the matching flag at `public/flags/<countryCode>.svg`.
+ * Confirmed overseas export markets: every country below is named in a published source (see `sources`, and the
+ * internal notes in globalPresence.sources.ts). Positions are representative country positions, not premises.
+ * ICRA reports the company exports to around 35 countries in total, so this list is deliberately not exhaustive:
+ * only countries named in published material are shown. Add further countries here once the company approves them,
+ * and place the flag at public/flags/<countryCode>.svg.
  */
-export const CONFIRMED_EXPORT_MARKETS: PresenceLocation[] = [];
+export const CONFIRMED_EXPORT_MARKETS: PresenceLocation[] = [
+  market('japan', 'Japan', 'jp', 'East Asia', 36.2, 138.3, [WEBSITE, ICRA_2026], 'Listed as an export destination on the Berry Alloys website, and cited by ICRA as a market behind the rise in export demand.'),
+  market('south-korea', 'South Korea', 'kr', 'East Asia', 36.4, 127.9, [WEBSITE, ICRA_2026, TRADE], 'Listed on the Berry Alloys website, cited by ICRA as a key export market, and present in published shipment records.'),
+  market('vietnam', 'Vietnam', 'vn', 'South-East Asia', 15.9, 107.9, [WEBSITE], 'Listed as an export destination on the Berry Alloys website.'),
+  market('thailand', 'Thailand', 'th', 'South-East Asia', 15.0, 101.0, [ICRA_2025], 'Named by ICRA among the company’s export markets.'),
+  market('australia', 'Australia', 'au', 'Oceania', -25.5, 134.0, [WEBSITE], 'Listed as an export destination on the Berry Alloys website.'),
+  market('uae', 'United Arab Emirates', 'ae', 'West Asia', 24.2, 54.4, [WEBSITE, ICRA_2026], 'Listed on the Berry Alloys website; ICRA also cites West Asia as a growing export region.'),
+  market('bangladesh', 'Bangladesh', 'bd', 'South Asia', 23.8, 90.3, [ICRA_2023], 'Named by ICRA as an export market (earlier rating report).'),
+  market('sri-lanka', 'Sri Lanka', 'lk', 'South Asia', 7.8, 80.7, [ICRA_2023], 'Named by ICRA as an export market (earlier rating report).'),
+  market('nigeria', 'Nigeria', 'ng', 'West Africa', 9.1, 8.7, [ICRA_2023], 'Named by ICRA as an export market (earlier rating report).'),
+  market('south-africa', 'South Africa', 'za', 'Southern Africa', -29.0, 24.7, [ICRA_2023], 'Named by ICRA as an export market (earlier rating report).'),
+  market('netherlands', 'Netherlands', 'nl', 'Europe', 52.2, 5.5, [WEBSITE, TRADE], 'Europe is a named export market on the Berry Alloys website and in ICRA reports; the Netherlands appears in published shipment records.'),
+  market('united-states', 'United States', 'us', 'North America', 39.5, -98.4, [WEBSITE], 'Listed on the Berry Alloys website as part of its USA & Canada export markets.'),
+  market('canada', 'Canada', 'ca', 'North America', 56.0, -105.5, [WEBSITE], 'Listed on the Berry Alloys website as part of its USA & Canada export markets.'),
+];
+
+/** Region-level references that cannot be pinned to a single country, so they are noted rather than plotted. */
+export const EXPORT_REGION_REFERENCES = ['Europe', 'West Asia', 'Middle East', 'North America'];
+
+/** Headline export statement, attributed to its source. */
+export const EXPORT_SUMMARY = {
+  approxCountries: 35,
+  source: 'ICRA rating report, 13 August 2026',
+  exportShare: 'about 56% of FY2026 sales',
+};
 
 export const PRESENCE_LOCATIONS: PresenceLocation[] = [...INDIA_LOCATIONS, ...CONFIRMED_EXPORT_MARKETS];
 

@@ -15,6 +15,7 @@ import {
   CORPORATE_DOCUMENT_GROUPS,
   JOB_VACANCIES,
 } from './communityNewsCareersDocs';
+import { CONFIRMED_EXPORT_MARKETS, EXPORT_SUMMARY } from './globalPresence';
 
 export type KnowledgeCategory =
   | 'Company'
@@ -174,6 +175,53 @@ export const KNOWLEDGE_BASE: KnowledgeEntry[] = [
     ],
     featuredOnHome: true,
     internalSourceNote: 'Derived from OFFICES, FACILITY_NODES, and UPCOMING_OFFICE_NOTICE in company.ts.',
+  },
+
+  {
+    id: 'export-markets-countries',
+    category: 'Company',
+    question: 'Which countries does Berry Alloys export to?',
+    alternativePhrases: [
+      'Export markets and destination countries',
+      'Does Berry Alloys export to Japan, Korea, Europe or the Middle East?',
+      'Where do you ship ferro alloys internationally?',
+    ],
+    keywords: [
+      'export',
+      'exports',
+      'exporting',
+      'countries',
+      'country',
+      'markets',
+      'international',
+      'overseas',
+      'global',
+      'abroad',
+      'destination',
+      'japan',
+      'korea',
+      'vietnam',
+      'thailand',
+      'australia',
+      'uae',
+      'europe',
+      'netherlands',
+      'bangladesh',
+      'nigeria',
+      'africa',
+      'canada',
+      'usa',
+    ],
+    answer: `Berry Alloys exports to around ${EXPORT_SUMMARY.approxCountries} countries (${EXPORT_SUMMARY.source}). Countries named in published company and credit-rating sources include ${CONFIRMED_EXPORT_MARKETS.map((m) => m.name).join(', ')}.`,
+    expandedExplanation: `Europe, West Asia and North America are also referenced at region level. The list reflects countries named in published material rather than every destination, and shipments leave through Visakhapatnam Harbour Port. For a specific destination or Incoterm, please send an enquiry.`,
+    relatedIds: ['facilities-offices-locations', 'how-request-quotation', 'how-contact-company'],
+    actions: [
+      { label: 'See Export Globe', to: '/#presence', variant: 'primary' },
+      { label: 'Request an Export Quotation', to: '/contact?tab=quote', variant: 'secondary' },
+    ],
+    featuredOnHome: false,
+    internalSourceNote:
+      'Countries named on berryalloys.com ferro-alloys page (self-reported), ICRA rationales (Mar 2023, Apr 2025, Dec 2025, Apr 2026, Aug 2026: ~35-38 countries) and Volza shipment records (Korea, Netherlands). See globalPresence.sources.ts.',
   },
 
   // =========================================================================

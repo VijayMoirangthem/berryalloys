@@ -1263,14 +1263,20 @@ export function HomePage() {
 
               <PixelatedImageTrail
                 images={GALLERY_ITEMS.slice(0, 8).map((a) => a.src)}
-                className="bg-[#07111F] text-[#F4F8FC] border border-[#10243A]/18 dark:border-[#F4F8FC]/14 p-8 sm:p-12 min-h-[260px] flex flex-col justify-between"
+                className="bg-[#07111F] text-[#F4F8FC] border border-[#10243A]/18 dark:border-[#F4F8FC]/14 bg-[radial-gradient(circle_at_20%_20%,rgba(40,148,204,0.16),transparent_55%),radial-gradient(circle_at_85%_85%,rgba(201,35,59,0.10),transparent_50%)] p-6 sm:p-10 lg:p-14 min-h-[480px] sm:min-h-[560px] lg:min-h-[680px] flex flex-col justify-between"
               >
                 <div className="flex flex-wrap items-center justify-between gap-4 text-[11px] font-mono-tabular uppercase tracking-widest text-[#69C5F5]">
                   <span>Interactive Archive Trail</span>
-                  <span className="text-[#B5C5D7]">Move cursor across surface to reveal works & people frames</span>
+                  <span className="inline-flex items-center gap-2 text-[#B5C5D7]">
+                    <span aria-hidden="true" className="relative inline-flex h-2 w-2">
+                      <span className="hero-breathe absolute inline-flex h-full w-full rounded-full bg-[#FF8091] opacity-75" />
+                      <span className="relative inline-flex h-2 w-2 rounded-full bg-[#FF8091]" />
+                    </span>
+                    Move your cursor or drag a finger across the surface to reveal works &amp; people frames
+                  </span>
                 </div>
-                <div className="py-6 space-y-3 max-w-2xl">
-                  <h4 className="font-display text-3xl sm:text-4xl font-bold uppercase tracking-tight text-[#F4F8FC]">
+                <div className="py-6 space-y-4 max-w-2xl bg-gradient-to-r from-[#07111F]/85 via-[#07111F]/60 to-transparent -mx-2 px-2">
+                  <h4 className="font-display text-4xl sm:text-5xl lg:text-6xl font-bold uppercase tracking-tight text-[#F4F8FC] leading-[0.95]">
                     People, Plant Infrastructure & Community Fieldwork
                   </h4>
                   <p className="text-sm text-[#F4F8FC]/82 leading-relaxed">
@@ -1323,7 +1329,7 @@ export function HomePage() {
               </h2>
             </div>
             <p className="text-xs sm:text-sm text-[#465C72] dark:text-[#B5C5D7] max-w-md leading-relaxed">
-              Documented Indian works, offices and the Visakhapatnam Harbour Port gateway, shown on a rotating globe. Overseas markets are listed only once approved for publication.
+              Berry Alloys manufactures in India and exports to around 35 countries (ICRA, August 2026). The globe shows the Indian works and port, plus every export country named in published sources.
             </p>
           </div>
 

@@ -350,7 +350,7 @@ export function FacilityCorridorMap() {
           Documented Facilities & Offices
         </h3>
         <p className="text-xs text-[#465C72] dark:text-[#B5C5D7] leading-relaxed">
-          Select any location to inspect its operational role. Overseas markets are listed only once they are approved for publication.
+          Select any location to inspect its operational role. Export countries are shown on the globe above.
         </p>
 
         <ul className="divide-y divide-[#10243A]/12 dark:divide-[#F4F8FC]/12 border-t border-b border-[#10243A]/12 dark:border-[#F4F8FC]/12">

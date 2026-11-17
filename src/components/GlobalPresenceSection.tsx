@@ -3,7 +3,9 @@ import { ArrowRight, Pause, Play } from 'lucide-react';
 import { useTheme } from '../context/ThemeContext';
 import { useMotion } from '../context/MotionContext';
 import {
-  HAS_EXPORT_MARKETS,
+  CONFIRMED_EXPORT_MARKETS,
+  EXPORT_REGION_REFERENCES,
+  EXPORT_SUMMARY,
   KIND_LABEL,
   PRESENCE_LOCATIONS,
   PRESENCE_ROUTES,
@@ -112,7 +114,12 @@ export function GlobalPresenceSection() {
     <div ref={wrapRef} className="grid grid-cols-1 lg:grid-cols-12 gap-8 lg:gap-10 items-start">
       {/* Globe */}
       <div className="lg:col-span-7 order-1 min-w-0">
-        <div className="relative mx-auto aspect-square w-full max-w-[640px] overflow-hidden border border-subtle bg-band lg:max-h-[640px]">
+        <div
+          className={cn(
+            'relative mx-auto w-full overflow-hidden border border-subtle bg-band',
+            useFallback ? 'aspect-[1000/620] max-w-[760px]' : 'aspect-square max-w-[640px] lg:max-h-[640px]'
+          )}
+        >
           <div
             aria-hidden="true"
             className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_50%_50%,color-mix(in_srgb,var(--brand-primary)_16%,transparent),transparent_68%)]"
@@ -187,18 +194,25 @@ export function GlobalPresenceSection() {
       {/* Selector, legend, details */}
       <div className="lg:col-span-5 order-2 space-y-6 min-w-0">
         <p className="text-sm sm:text-base text-ink-2 leading-relaxed max-w-xl">
-          Ferro alloys are smelted in Andhra Pradesh and Jharkhand and dispatched through Visakhapatnam Harbour Port. Choose a
-          location to see its role, or select its marker on the globe.
+          Ferro alloys are smelted in Andhra Pradesh and Jharkhand, dispatched through Visakhapatnam Harbour Port and exported to
+          around {EXPORT_SUMMARY.approxCountries} countries ({EXPORT_SUMMARY.source}). Choose a location or a flag to see its details.
         </p>
 
-        <div className="space-y-4" role="group" aria-label="Locations">
+        <div className="flex flex-wrap items-center gap-2 text-[11px]">
+          <span className="inline-flex items-center gap-1.5 border border-brand/50 bg-brand-soft px-2.5 py-1 font-semibold text-ink">
+            {CONFIRMED_EXPORT_MARKETS.length} export countries named below
+          </span>
+          <span className="text-ink-muted">Also referenced by region: {EXPORT_REGION_REFERENCES.join(' · ')}</span>
+        </div>
+
+        <div className="space-y-4 lg:max-h-[600px] lg:overflow-y-auto lg:pr-2" role="group" aria-label="Locations and export markets" tabIndex={0}>
           {grouped.map((g) => (
             <div key={g.kind} className="space-y-2">
               <h3 className="flex items-center gap-2 text-[11px] font-mono-tabular uppercase tracking-widest text-ink-2">
                 <span aria-hidden="true" className={cn('inline-block h-2.5 w-2.5 rounded-full', KIND_DOT[g.kind])} />
                 {KIND_LABEL[g.kind]}
               </h3>
-              <ul className="grid grid-cols-1 gap-2">
+              <ul className={cn('grid gap-2', g.kind === 'export-market' ? 'grid-cols-1 sm:grid-cols-2' : 'grid-cols-1')}>
                 {g.items.map((loc) => {
                   const isSel = selectedId === loc.id;
                   return (
@@ -237,7 +251,10 @@ export function GlobalPresenceSection() {
             <div className="space-y-3">
               <div className="flex items-start justify-between gap-3">
                 <div>
-                  <p className="text-[11px] font-mono-tabular uppercase tracking-widest text-brand">{KIND_LABEL[selected.kind]}</p>
+                  <p className="flex items-center gap-2 text-[11px] font-mono-tabular uppercase tracking-widest text-brand">
+                    {selected.kind === 'export-market' && <FlagIcon code={selected.countryCode} className="h-4 w-6" />}
+                    {KIND_LABEL[selected.kind]}
+                  </p>
                   <h3 className="font-display text-2xl font-bold uppercase tracking-tight text-ink">{selected.name}</h3>
                 </div>
                 <span className="shrink-0 border border-accent-red/60 bg-accent-red-soft px-2 py-1 text-[10px] font-mono-tabular uppercase tracking-wider text-accent-red-hover dark:text-accent-red">
@@ -247,12 +264,22 @@ export function GlobalPresenceSection() {
               <p className="text-sm text-ink leading-relaxed">{selected.role}</p>
               <p className="text-sm text-ink-2 leading-relaxed">{selected.detail}</p>
               <p className="text-[11px] text-ink-muted">{PRECISION_NOTE[selected.precision]}</p>
+              {selected.sources && selected.sources.length > 0 && (
+                <p className="flex flex-wrap items-center gap-1.5 text-[11px] text-ink-2">
+                  <span className="font-mono-tabular uppercase tracking-wider text-ink-muted">Published in</span>
+                  {selected.sources.map((src) => (
+                    <span key={src} className="border border-subtle bg-band px-2 py-0.5">
+                      {src}
+                    </span>
+                  ))}
+                </p>
+              )}
               <button
                 type="button"
                 onClick={goEnquiry}
                 className="inline-flex min-h-[44px] items-center gap-2 bg-brand px-5 text-xs font-semibold text-on-brand hover:bg-brand-hover transition-colors cursor-pointer"
               >
-                Enquire about {selected.kind === 'port' ? 'dispatch from this port' : 'this location'}
+                Enquire about {selected.kind === 'port' ? 'dispatch from this port' : selected.kind === 'export-market' ? `supply to ${selected.name}` : 'this location'}
                 <ArrowRight className="h-3.5 w-3.5" aria-hidden="true" />
               </button>
             </div>
@@ -269,13 +296,12 @@ export function GlobalPresenceSection() {
         <div className="space-y-1.5 text-[11px] text-ink-muted leading-relaxed">
           <p className="flex items-center gap-2">
             <span aria-hidden="true" className="inline-block h-0.5 w-6 bg-brand" />
-            Route lines join plants to the dispatch port named in company records. They are schematic, not shipping lanes.
+            Route lines join the plants to the dispatch port, and the port to each export country. They are schematic, not shipping lanes.
           </p>
           <p>
-            Markers show towns or areas, not exact premises.{' '}
-            {HAS_EXPORT_MARKETS
-              ? 'Market markers are country-level representations.'
-              : 'Overseas markets appear here once they are approved for publication.'}
+            Plant, office and port markers show towns or areas, not exact premises. Floating flags mark export countries at a
+            representative position; they do not indicate company premises. ICRA reports around {EXPORT_SUMMARY.approxCountries} export countries
+            in total, so the flags shown are the countries named in published sources, not a full list.
           </p>
         </div>
       </div>

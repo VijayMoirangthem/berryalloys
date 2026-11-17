@@ -139,6 +139,8 @@ export default function GlobeScene(props: GlobeSceneProps) {
   const rootRef = useRef<HTMLDivElement>(null);
   const hostRef = useRef<HTMLDivElement>(null);
   const markerRefs = useRef(new Map<string, HTMLButtonElement>());
+  const flagRefs = useRef(new Map<string, HTMLButtonElement>());
+  const lineRefs = useRef(new Map<string, SVGLineElement>());
   const apiRef = useRef<SceneApi | null>(null);
   const live = useRef(props);
   live.current = props;
@@ -211,7 +213,7 @@ export default function GlobeScene(props: GlobeSceneProps) {
     controls.enableDamping = true;
     controls.dampingFactor = 0.08;
     controls.rotateSpeed = 0.6;
-    controls.autoRotateSpeed = 0.55;
+    controls.autoRotateSpeed = 1.1;
     controls.minPolarAngle = Math.PI * 0.2;
     controls.maxPolarAngle = Math.PI * 0.8;
     // OrbitControls forces touch-action:none; restore vertical page scrolling on touch screens.
@@ -237,7 +239,7 @@ export default function GlobeScene(props: GlobeSceneProps) {
 
     // ----- globe styling & data -----
     const ownerPoints = () =>
-      live.current.locations.filter((l) => !l.markerGroup).map((l) => ({ lat: l.lat, lng: l.lng }));
+      live.current.locations.filter((l) => !l.markerGroup).map((l) => ({ lat: l.lat, lng: l.lng, market: l.kind === 'export-market' }));
 
     const pal = () => PALETTE[live.current.theme];
 
@@ -298,7 +300,7 @@ export default function GlobeScene(props: GlobeSceneProps) {
         .pointsMerge(true);
 
       globe
-        .ringsData(flowing ? ownerPoints() : [])
+        .ringsData(flowing ? ownerPoints().filter((pt) => !pt.market) : [])
         .ringColor(() => (t: number) => `rgba(${p.ring},${(1 - t) * 0.85})`)
         .ringMaxRadius(3.2)
         .ringPropagationSpeed(1.6)
@@ -343,13 +345,21 @@ export default function GlobeScene(props: GlobeSceneProps) {
     apiRef.current = { applyTheme, applyData, focus };
 
     // ----- markers: project every frame, hide behind the globe -----
+    // Country markers float: a flag badge hovers above the surface point on a thin stem, and badges that would
+    // overlap on screen are nudged apart (recomputed from scratch each frame, so nothing drifts).
     const v = new Vector3();
+    const ve = new Vector3();
     const view = new Vector3();
     const positions = new Map<string, Vector3>();
+    const elevated = new Map<string, Vector3>();
+    const FLAG_ALT = 0.11;
+    const MIN_FLAG_GAP_X = 40;
+    const MIN_FLAG_GAP_Y = 30;
     const updateMarkers = () => {
       const w = host.clientWidth;
       const h = host.clientHeight;
       view.copy(camera.position).normalize();
+      const flags: Array<{ id: string; sx: number; sy: number; x: number; y: number; op: number }> = [];
       for (const loc of live.current.locations) {
         if (loc.markerGroup) continue;
         const el = markerRefs.current.get(loc.id);
@@ -359,20 +369,79 @@ export default function GlobeScene(props: GlobeSceneProps) {
           const c = globe.getCoords(loc.lat, loc.lng, 0.012);
           p = new Vector3(c.x, c.y, c.z);
           positions.set(loc.id, p);
+          const ce = globe.getCoords(loc.lat, loc.lng, FLAG_ALT);
+          elevated.set(loc.id, new Vector3(ce.x, ce.y, ce.z));
         }
         const facing = p.clone().normalize().dot(view);
+        const fl = flagRefs.current.get(loc.id);
+        const ln = lineRefs.current.get(loc.id);
         if (facing < 0.1) {
           el.style.visibility = 'hidden';
           el.style.pointerEvents = 'none';
+          if (fl) {
+            fl.style.visibility = 'hidden';
+            fl.style.pointerEvents = 'none';
+          }
+          if (ln) ln.style.visibility = 'hidden';
           continue;
         }
         v.copy(p).project(camera);
         const x = (v.x * 0.5 + 0.5) * w;
         const y = (-v.y * 0.5 + 0.5) * h;
+        const op = Math.min(1, (facing - 0.1) * 5);
         el.style.visibility = 'visible';
-        el.style.pointerEvents = 'auto';
-        el.style.opacity = String(Math.min(1, (facing - 0.1) * 5));
+        el.style.pointerEvents = fl ? 'none' : 'auto';
+        el.style.opacity = String(op);
         el.style.transform = `translate3d(${x}px, ${y}px, 0) translate(-50%, -50%)`;
+        if (fl) {
+          ve.copy(elevated.get(loc.id)!).project(camera);
+          const fx = (ve.x * 0.5 + 0.5) * w;
+          const fy = (-ve.y * 0.5 + 0.5) * h;
+          flags.push({ id: loc.id, sx: x, sy: y, x: fx, y: fy, op });
+        }
+      }
+      // Separate overlapping flags (a few relaxation passes over the visible set).
+      for (let pass = 0; pass < 6; pass++) {
+        for (let i = 0; i < flags.length; i++) {
+          for (let j = i + 1; j < flags.length; j++) {
+            const a = flags[i];
+            const b = flags[j];
+            const dx = b.x - a.x;
+            const dy = b.y - a.y;
+            const ox = MIN_FLAG_GAP_X - Math.abs(dx);
+            const oy = MIN_FLAG_GAP_Y - Math.abs(dy);
+            if (ox > 0 && oy > 0) {
+              // Push along the axis with the smaller overlap.
+              if (ox < oy) {
+                const s = (dx >= 0 ? 1 : -1) * (ox / 2);
+                a.x -= s;
+                b.x += s;
+              } else {
+                const s = (dy >= 0 ? 1 : -1) * (oy / 2);
+                a.y -= s;
+                b.y += s;
+              }
+            }
+          }
+        }
+      }
+      for (const f of flags) {
+        const fl = flagRefs.current.get(f.id);
+        const ln = lineRefs.current.get(f.id);
+        if (fl) {
+          fl.style.visibility = 'visible';
+          fl.style.pointerEvents = 'auto';
+          fl.style.opacity = String(f.op);
+          fl.style.transform = `translate3d(${f.x}px, ${f.y}px, 0) translate(-50%, -50%)`;
+        }
+        if (ln) {
+          ln.style.visibility = 'visible';
+          ln.setAttribute('x1', String(f.sx));
+          ln.setAttribute('y1', String(f.sy));
+          ln.setAttribute('x2', String(f.x));
+          ln.setAttribute('y2', String(f.y + 8));
+          ln.style.opacity = String(f.op * 0.85);
+        }
       }
     };
 
@@ -468,52 +537,116 @@ export default function GlobeScene(props: GlobeSceneProps) {
   return (
     <div ref={rootRef} className="relative h-full w-full overflow-hidden" style={{ touchAction: 'pan-y' }}>
       <div ref={hostRef} className="absolute inset-0 cursor-grab active:cursor-grabbing" />
+      {/* Stems joining each floating flag to its country position */}
+      <svg aria-hidden="true" className="pointer-events-none absolute inset-0 h-full w-full overflow-visible">
+        {markers
+          .filter((m) => m.kind === 'export-market')
+          .map((m) => (
+            <line
+              key={m.id}
+              ref={(el) => {
+                if (el) lineRefs.current.set(m.id, el);
+                else lineRefs.current.delete(m.id);
+              }}
+              stroke={groupSelected(m) ? '#FF8091' : 'rgba(255,255,255,0.75)'}
+              strokeWidth={groupSelected(m) ? 1.8 : 1.1}
+              strokeLinecap="round"
+              style={{ visibility: 'hidden' }}
+            />
+          ))}
+      </svg>
+
       {markers.map((m) => {
         const isSel = groupSelected(m);
         const isHot = isSel || groupHovered(m);
         const label = locations.find((l) => l.id === selectedId && markerOwner(l) === m.id) ?? m;
+        const isMarket = m.kind === 'export-market';
         return (
-          <button
-            key={m.id}
-            type="button"
-            ref={(el) => {
-              if (el) markerRefs.current.set(m.id, el);
-              else markerRefs.current.delete(m.id);
-            }}
-            onClick={() => onSelect(label.id)}
-            onPointerEnter={() => onHover(m.id)}
-            onPointerLeave={() => onHover(null)}
-            onFocus={() => onHover(m.id)}
-            onBlur={() => onHover(null)}
-            aria-label={`${label.name} — ${KIND_LABEL[label.kind]}${isSel ? ' (selected)' : ''}`}
-            aria-pressed={isSel}
-            className="absolute left-0 top-0 z-10 flex h-9 w-9 items-center justify-center focus-visible:outline-none cursor-pointer"
-            style={{ visibility: 'hidden' }}
-          >
-            <span
-              aria-hidden="true"
-              className={cn(
-                'block rounded-full border-2 transition-all duration-200',
-                m.kind === 'port' ? 'h-3 w-3' : 'h-2.5 w-2.5',
-                isSel
-                  ? 'scale-150 border-white bg-accent-red shadow-[0_0_0_4px_rgba(255,92,115,0.35)]'
-                  : isHot
-                    ? 'scale-125 border-white bg-brand shadow-[0_0_0_4px_rgba(105,197,245,0.35)]'
-                    : 'border-white/90 bg-brand'
-              )}
-            />
-            <span
-              className={cn(
-                'pointer-events-none absolute left-1/2 top-full mt-1 -translate-x-1/2 whitespace-nowrap border border-subtle bg-card px-2 py-1 text-[11px] font-semibold text-ink shadow-md transition-opacity duration-150',
-                isHot ? 'opacity-100' : 'opacity-0'
-              )}
+          <span key={m.id} className="contents">
+            {/* Surface dot (the interactive target for plants, offices and the port) */}
+            <button
+              type="button"
+              ref={(el) => {
+                if (el) markerRefs.current.set(m.id, el);
+                else markerRefs.current.delete(m.id);
+              }}
+              onClick={() => onSelect(label.id)}
+              onPointerEnter={() => onHover(m.id)}
+              onPointerLeave={() => onHover(null)}
+              onFocus={() => onHover(m.id)}
+              onBlur={() => onHover(null)}
+              tabIndex={isMarket ? -1 : 0}
+              aria-hidden={isMarket ? true : undefined}
+              aria-label={`${label.name} — ${KIND_LABEL[label.kind]}${isSel ? ' (selected)' : ''}`}
+              aria-pressed={isMarket ? undefined : isSel}
+              className="absolute left-0 top-0 z-10 flex h-9 w-9 items-center justify-center focus-visible:outline-none cursor-pointer"
+              style={{ visibility: 'hidden' }}
             >
-              <span className="inline-flex items-center gap-1.5">
-                <FlagIcon code={label.countryCode} className="h-3 w-4" />
-                {label.name.split(' / ')[0]}
-              </span>
-            </span>
-          </button>
+              <span
+                aria-hidden="true"
+                className={cn(
+                  'block rounded-full border-2 transition-all duration-200',
+                  isMarket ? 'h-2 w-2' : m.kind === 'port' ? 'h-3 w-3' : 'h-2.5 w-2.5',
+                  isSel
+                    ? 'scale-150 border-white bg-accent-red shadow-[0_0_0_4px_rgba(255,92,115,0.35)]'
+                    : isHot
+                      ? 'scale-125 border-white bg-brand shadow-[0_0_0_4px_rgba(105,197,245,0.35)]'
+                      : 'border-white/90 bg-brand'
+                )}
+              />
+              {!isMarket && (
+                <span
+                  className={cn(
+                    'pointer-events-none absolute left-1/2 top-full mt-1 -translate-x-1/2 whitespace-nowrap border border-subtle bg-card px-2 py-1 text-[11px] font-semibold text-ink shadow-md transition-opacity duration-150',
+                    isHot ? 'opacity-100' : 'opacity-0'
+                  )}
+                >
+                  <span className="inline-flex items-center gap-1.5">
+                    <FlagIcon code={label.countryCode} className="h-3 w-4" />
+                    {label.name.split(' / ')[0]}
+                  </span>
+                </span>
+              )}
+            </button>
+
+            {/* Floating flag badge for confirmed export markets */}
+            {isMarket && (
+              <button
+                type="button"
+                ref={(el) => {
+                  if (el) flagRefs.current.set(m.id, el);
+                  else flagRefs.current.delete(m.id);
+                }}
+                onClick={() => onSelect(m.id)}
+                onPointerEnter={() => onHover(m.id)}
+                onPointerLeave={() => onHover(null)}
+                onFocus={() => onHover(m.id)}
+                onBlur={() => onHover(null)}
+                aria-label={`${m.name} — ${KIND_LABEL[m.kind]}${isSel ? ' (selected)' : ''}`}
+                aria-pressed={isSel}
+                className="absolute left-0 top-0 z-20 flex h-8 w-11 items-center justify-center focus-visible:outline-none cursor-pointer"
+                style={{ visibility: 'hidden' }}
+              >
+                <span
+                  className={cn(
+                    'flag-float relative block h-[22px] w-[30px] overflow-hidden rounded-[3px] border-2 shadow-[0_4px_12px_rgba(7,17,31,0.55)] transition-all duration-200',
+                    isSel ? 'scale-[1.35] border-[#FF8091] shadow-[0_0_0_3px_rgba(255,92,115,0.35),0_6px_16px_rgba(7,17,31,0.6)]' : isHot ? 'scale-125 border-white' : 'border-white/95'
+                  )}
+                  style={{ animationDelay: `${(m.lat * 13 + m.lng * 7) % 3}s` }}
+                >
+                  <FlagIcon code={m.countryCode} className="absolute inset-0 !h-full !w-full !border-0" />
+                </span>
+                <span
+                  className={cn(
+                    'pointer-events-none absolute left-1/2 top-full -mt-0.5 -translate-x-1/2 whitespace-nowrap rounded-[2px] bg-[#07111F]/95 px-1.5 py-0.5 text-[10px] font-semibold text-white shadow-md transition-opacity duration-150',
+                    isHot ? 'opacity-100' : 'opacity-0'
+                  )}
+                >
+                  {m.name}
+                </span>
+              </button>
+            )}
+          </span>
         );
       })}
     </div>
