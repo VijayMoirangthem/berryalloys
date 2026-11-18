@@ -1,76 +1,69 @@
 import { RefObject, useEffect } from 'react';
-import gsap from 'gsap';
-import { ScrollTrigger } from 'gsap/ScrollTrigger';
-
-gsap.registerPlugin(ScrollTrigger);
 
 /**
- * Scroll- and touch-driven motion for phones and tablets (narrow viewports or coarse pointers).
- * Desktop already has hover and pointer effects; touch screens have neither, so this layer supplies equivalent life:
- *  - scrubbed photographic parallax (transform only, clipped by the image's own frame),
- *  - count-up for numeric metrics marked with data-countup.
- * Everything is skipped under prefers-reduced-motion, and nothing hides content if it fails to run.
+ * Touch & compact-viewport metric enhancer.
+ * Intentionally avoids global scrubbed image scaling/parallax (which degrades touch scroll frame rates
+ * and fights dedicated image reveals) and gently counts up clean numeric metrics when revealed.
  */
-const SKIP =
-  '[data-no-parallax], .logo-slider, [aria-label^="Steel producers"], #plant-gallery, #presence, #overview, #complex-hero, header, nav, [role="dialog"]';
-
 export function useMobileMotion(rootRef: RefObject<HTMLElement | null>) {
   useEffect(() => {
     const root = rootRef.current;
     if (!root) return;
     if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
+    if (!window.matchMedia('(max-width: 1023px), (pointer: coarse)').matches) return;
 
-    const mm = gsap.matchMedia();
-    mm.add('(max-width: 1023px), (pointer: coarse)', () => {
-      const imgs = Array.from(root.querySelectorAll<HTMLImageElement>('img')).filter((img) => {
-        if (img.closest(SKIP) || img.className.includes('object-contain') || img.width < 2) return false;
-        const frame = img.closest<HTMLElement>('[class*="overflow-hidden"]');
-        return !!frame && frame.contains(img) && frame.clientHeight >= 120;
-      });
-      imgs.forEach((img) => {
-        const frame = img.closest<HTMLElement>('[class*="overflow-hidden"]')!;
-        gsap.fromTo(
-          img,
-          { yPercent: -6, scale: 1.13 },
-          {
-            yPercent: 6,
-            scale: 1.13,
-            ease: 'none',
-            scrollTrigger: { trigger: frame, start: 'top bottom', end: 'bottom top', scrub: 0.5 },
-          }
-        );
-      });
+    const cleanups: Array<() => void> = [];
+    const targets = Array.from(root.querySelectorAll<HTMLElement>('[data-countup]'));
 
-      root.querySelectorAll<HTMLElement>('[data-countup]').forEach((el) => {
-        const m = el.textContent?.match(/^([^\d]*)([\d,]+(?:\.\d+)?)(.*)$/s);
-        if (!m) return;
-        const [, pre, num, post] = m;
-        const target = parseFloat(num.replace(/,/g, ''));
-        if (!Number.isFinite(target) || target <= 0) return;
-        const hasComma = num.includes(',');
-        const decimals = num.includes('.') ? num.split('.')[1].length : 0;
-        const fmt = (v: number) => (hasComma ? v.toLocaleString('en-US', { maximumFractionDigits: decimals }) : v.toFixed(decimals));
-        const state = { v: 0 };
-        el.textContent = `${pre}${fmt(0)}${post}`;
-        gsap.to(state, {
-          v: target,
-          duration: 1.4,
-          ease: 'power2.out',
-          onUpdate: () => {
-            el.textContent = `${pre}${fmt(state.v)}${post}`;
-          },
-          onComplete: () => {
-            el.textContent = `${pre}${num}${post}`;
-          },
-          scrollTrigger: { trigger: el, start: 'top 90%', once: true },
-        });
-      });
+    targets.forEach((el) => {
+      const original = el.textContent ?? '';
+      // Match clean leading number only (e.g. "120+", "93.43 acres", "25+ yrs") — skip compounds like "2 × 10 MVA" or "24×7"
+      const m = original.trim().match(/^(\d[\d,]*(?:\.\d+)?)([^\d×xX].*|\+|%)$/);
+      if (!m) return;
 
-      // Layout shifts as images decode; keep trigger positions honest.
-      const t = window.setTimeout(() => ScrollTrigger.refresh(), 1400);
-      return () => window.clearTimeout(t);
+      const [, numStr, suffix] = m;
+      const target = parseFloat(numStr.replace(/,/g, ''));
+      if (!Number.isFinite(target) || target <= 1) return;
+
+      const hasComma = numStr.includes(',');
+      const decimals = numStr.includes('.') ? numStr.split('.')[1].length : 0;
+      const fmt = (v: number) =>
+        hasComma ? v.toLocaleString('en-US', { maximumFractionDigits: decimals }) : v.toFixed(decimals);
+
+      let started = false;
+      let rafId = 0;
+
+      const io = new IntersectionObserver(
+        (entries) => {
+          if (started || !entries.some((e) => e.isIntersecting)) return;
+          started = true;
+          io.disconnect();
+
+          const start = performance.now();
+          const duration = 620;
+          const tick = (now: number) => {
+            const p = Math.min(1, (now - start) / duration);
+            const eased = 1 - Math.pow(1 - p, 3);
+            el.textContent = p >= 1 ? original : `${fmt(target * eased)}${suffix}`;
+            if (p < 1) {
+              rafId = window.requestAnimationFrame(tick);
+            }
+          };
+          rafId = window.requestAnimationFrame(tick);
+        },
+        { threshold: 0.25 }
+      );
+
+      io.observe(el);
+      cleanups.push(() => {
+        io.disconnect();
+        if (rafId) window.cancelAnimationFrame(rafId);
+        el.textContent = original;
+      });
     });
 
-    return () => mm.revert();
+    return () => {
+      cleanups.forEach((fn) => fn());
+    };
   }, [rootRef]);
 }

@@ -2,6 +2,7 @@ import { useEffect, useRef, useState } from 'react';
 import * as THREE from 'three';
 import { useMotionValueEvent, useScroll } from 'motion/react';
 import { cn } from '../../lib/utils';
+import { useIsCompactMobile } from '../../hooks/useIsCompactMobile';
 
 const VERTEX_SHADER = `
   varying vec2 vUv;
@@ -221,6 +222,8 @@ export function ScrollDissolveReveal({
   const containerRef = useRef<HTMLDivElement>(null);
   const stageRef = useRef<HTMLDivElement>(null);
   const targetRevealRef = useRef(0);
+  const isCompactMobile = useIsCompactMobile(1023);
+  const [mobileStage, setMobileStage] = useState<0 | 1>(0);
   const [revealPercent, setRevealPercent] = useState(0);
   const [fallback, setFallback] = useState(false);
 
@@ -236,7 +239,7 @@ export function ScrollDissolveReveal({
 
   useEffect(() => {
     const stage = stageRef.current;
-    if (!stage) return;
+    if (!stage || isCompactMobile) return;
 
     const prefersReduced = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
     if (prefersReduced) {
@@ -411,7 +414,91 @@ export function ScrollDissolveReveal({
         stage.removeChild(canvasEl);
       }
     };
-  }, [edgeColor, image1, image2]);
+  }, [edgeColor, image1, image2, isCompactMobile]);
+
+  if (isCompactMobile) {
+    return (
+      <section
+        aria-label="Transition from plant complex to submerged-arc furnace smelting"
+        className={cn('w-full bg-[#07111F] text-[#F4F8FC] py-12 px-4 border-t border-[#F4F8FC]/10', className)}
+      >
+        <div className="max-w-xl mx-auto space-y-5">
+          <div className="flex items-center justify-between gap-3 text-[11px] font-mono-tabular uppercase tracking-widest text-[#69C5F5]">
+            <span>Thermal Reduction Bridge</span>
+            <span>Stage {mobileStage === 0 ? '01 / 02' : '02 / 02'}</span>
+          </div>
+
+          {/* Segmented Stage Toggle */}
+          <div role="tablist" aria-label="Thermal reduction visual stage" className="grid grid-cols-2 gap-2">
+            <button
+              type="button"
+              role="tab"
+              aria-selected={mobileStage === 0}
+              onClick={() => setMobileStage(0)}
+              className={cn(
+                'min-h-[44px] px-3 py-2 text-xs font-mono-tabular uppercase tracking-wider border text-left transition-colors cursor-pointer',
+                mobileStage === 0
+                  ? 'bg-[#0A6AA1] text-[#FFFFFF] border-[#69C5F5]'
+                  : 'bg-[#0D1B2E] text-[#B5C5D7] border-[#F4F8FC]/16'
+              )}
+            >
+              01 · Raw Charge
+            </button>
+            <button
+              type="button"
+              role="tab"
+              aria-selected={mobileStage === 1}
+              onClick={() => setMobileStage(1)}
+              className={cn(
+                'min-h-[44px] px-3 py-2 text-xs font-mono-tabular uppercase tracking-wider border text-left transition-colors cursor-pointer',
+                mobileStage === 1
+                  ? 'bg-[#0A6AA1] text-[#FFFFFF] border-[#69C5F5]'
+                  : 'bg-[#0D1B2E] text-[#B5C5D7] border-[#F4F8FC]/16'
+              )}
+            >
+              02 · Heat &amp; AOD
+            </button>
+          </div>
+
+          {/* Crisp Crossfade Viewport */}
+          <div className="relative aspect-[16/10] w-full overflow-hidden border border-[#F4F8FC]/18 bg-[#0D1B2E]">
+            <img
+              src={image1}
+              alt={image1Alt}
+              className={cn(
+                'absolute inset-0 w-full h-full object-cover transition-opacity duration-300',
+                mobileStage === 0 ? 'opacity-100' : 'opacity-0'
+              )}
+            />
+            <img
+              src={image2}
+              alt={image2Alt}
+              className={cn(
+                'absolute inset-0 w-full h-full object-cover transition-opacity duration-300',
+                mobileStage === 1 ? 'opacity-100' : 'opacity-0'
+              )}
+            />
+            <div aria-hidden="true" className="pointer-events-none absolute inset-x-0 bottom-0 h-16 bg-gradient-to-t from-[#07111F]/90 to-transparent" />
+            <p className="absolute bottom-3 left-3 right-3 text-[11px] font-mono-tabular text-[#69C5F5]">
+              {mobileStage === 0 ? leftKicker ?? 'Stage 01 · Integrated Complex' : rightKicker ?? 'Stage 02 · Thermal Reduction'}
+            </p>
+          </div>
+
+          {/* Active Stage Narrative Card */}
+          <div className="bg-[#0D1B2E] border border-[#F4F8FC]/16 p-5 space-y-2">
+            <h3 className="font-display text-2xl font-bold uppercase text-[#F4F8FC]">
+              {mobileStage === 0 ? leftTitle ?? 'Bobbili & Jharkhand Works' : rightTitle ?? 'From Heat To Precision'}
+            </h3>
+            <p className="text-xs text-[#F4F8FC]/82 leading-relaxed">
+              {mobileStage === 0
+                ? leftDescription ?? 'Raw manganese, quartz, chromite, and metallurgical reductants prepared across multi-furnace production sheds.'
+                : rightDescription ?? 'Submerged-arc electrodes, 6,000 MT/month AOD converters, and spectrographic assay verification.'}
+            </p>
+          </div>
+        </div>
+      </section>
+    );
+  }
 
   return (
     <section

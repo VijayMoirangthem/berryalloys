@@ -1,6 +1,7 @@
 import { memo, useCallback, useEffect, useMemo, useState } from 'react';
 import { AnimatePresence, motion } from 'motion/react';
 import { cn } from '../../lib/utils';
+import { useIsCompactMobile } from '../../hooks/useIsCompactMobile';
 
 export interface FlipFadeTextProps {
   words?: string[];
@@ -17,9 +18,11 @@ const DEFAULT_WORDS = ['SAFETY', 'INTEGRITY', 'RELIABILITY', 'INNOVATION', 'TEAM
 const Letter = memo(function Letter({
   char,
   letterDuration,
+  useBlur,
 }: {
   char: string;
   letterDuration: number;
+  useBlur: boolean;
 }) {
   return (
     <motion.span
@@ -27,15 +30,15 @@ const Letter = memo(function Letter({
       variants={{
         initial: {
           rotateX: 90,
-          y: 14,
+          y: 12,
           opacity: 0,
-          filter: 'blur(6px)',
+          ...(useBlur ? { filter: 'blur(5px)' } : {}),
         },
         animate: {
           rotateX: 0,
           y: 0,
           opacity: 1,
-          filter: 'blur(0px)',
+          ...(useBlur ? { filter: 'blur(0px)' } : {}),
           transition: {
             duration: letterDuration,
             ease: [0.2, 0.65, 0.3, 0.9],
@@ -43,9 +46,9 @@ const Letter = memo(function Letter({
         },
         exit: {
           rotateX: -90,
-          y: -14,
+          y: -12,
           opacity: 0,
-          filter: 'blur(6px)',
+          ...(useBlur ? { filter: 'blur(5px)' } : {}),
           transition: {
             duration: letterDuration * 0.62,
             ease: 'easeIn',
@@ -65,12 +68,14 @@ const Word = memo(function Word({
   exitStaggerDelay,
   letterDuration,
   textClassName,
+  useBlur,
 }: {
   text: string;
   staggerDelay: number;
   exitStaggerDelay: number;
   letterDuration: number;
   textClassName?: string;
+  useBlur: boolean;
 }) {
   const letters = useMemo(() => text.split(''), [text]);
 
@@ -96,14 +101,14 @@ const Word = memo(function Word({
       }}
     >
       {letters.map((char, i) => (
-        <Letter key={`${char}-${i}`} char={char} letterDuration={letterDuration} />
+        <Letter key={`${char}-${i}`} char={char} letterDuration={letterDuration} useBlur={useBlur} />
       ))}
     </motion.div>
   );
 });
 
 /**
- * FlipFadeText — Per-character 3D rotateX + de-blur cycling indicator for Berry Alloys' core pillars.
+ * FlipFadeText — Per-character 3D rotateX cycling indicator across desktop, tablet, and mobile.
  */
 export function FlipFadeText({
   words = DEFAULT_WORDS,
@@ -114,6 +119,7 @@ export function FlipFadeText({
   staggerDelay = 0.06,
   exitStaggerDelay = 0.03,
 }: FlipFadeTextProps) {
+  const isCompactMobile = useIsCompactMobile(767);
   const [index, setIndex] = useState(0);
   const [reducedMotion, setReducedMotion] = useState(false);
 
@@ -153,16 +159,17 @@ export function FlipFadeText({
   }
 
   return (
-    <div className={cn('flex items-center justify-center min-h-[60px]', className)}>
+    <div className={cn('flex items-center justify-center min-h-[44px] sm:min-h-[60px]', className)}>
       <div className="relative flex items-center justify-center" style={{ perspective: '1000px' }}>
         <AnimatePresence mode="wait">
           <Word
             key={currentWord}
             text={currentWord}
-            staggerDelay={staggerDelay}
-            exitStaggerDelay={exitStaggerDelay}
-            letterDuration={letterDuration}
+            staggerDelay={isCompactMobile ? Math.min(staggerDelay, 0.035) : staggerDelay}
+            exitStaggerDelay={isCompactMobile ? Math.min(exitStaggerDelay, 0.02) : exitStaggerDelay}
+            letterDuration={isCompactMobile ? Math.min(letterDuration, 0.34) : letterDuration}
             textClassName={textClassName}
+            useBlur={!isCompactMobile}
           />
         </AnimatePresence>
       </div>

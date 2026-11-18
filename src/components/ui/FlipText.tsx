@@ -12,7 +12,7 @@ export interface FlipTextProps {
 }
 
 /**
- * FlipText — 3D sinusoidal character wave tumble preserving screen-reader word flow.
+ * FlipText — Clean crisp typography on mobile phones and 3D sinusoidal character tumble on md+ viewports.
  */
 export function FlipText({
   className,

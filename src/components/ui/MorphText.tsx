@@ -1,5 +1,7 @@
 import { useEffect, useId, useState } from 'react';
+import { AnimatePresence, motion } from 'motion/react';
 import { cn } from '../../lib/utils';
+import { useIsCompactMobile } from '../../hooks/useIsCompactMobile';
 
 export interface MorphTextProps {
   /** Array of words or short industrial phrases to morph through. */
@@ -20,8 +22,8 @@ export interface MorphTextProps {
 }
 
 /**
- * MorphText — SVG threshold gooey morphing word rotator engineered with
- * the site's condensed display typography and reduced-motion fallback.
+ * MorphText — SVG threshold gooey morphing word rotator on desktop, and crisp blur-free
+ * compositor crossfade on mobile screens so display lines never vanish mid-transition.
  */
 export function MorphText({
   words = ['HEAT TO PRECISION', 'FERRO MANGANESE', 'SILICO MANGANESE', 'FERRO CHROME', 'FERRO SILICON'],
@@ -37,6 +39,8 @@ export function MorphText({
   const uid = useId().replace(/:/g, '');
   const filterId = `morph-threshold-${uid}`;
   const animName = `morph-word-rotate-${uid}`;
+  const isCompactMobile = useIsCompactMobile(767);
+  const [mobileIndex, setMobileIndex] = useState(0);
   const [reducedMotion, setReducedMotion] = useState(false);
 
   useEffect(() => {
@@ -46,6 +50,14 @@ export function MorphText({
     mq.addEventListener('change', sync);
     return () => mq.removeEventListener('change', sync);
   }, []);
+
+  useEffect(() => {
+    if (!isCompactMobile || reducedMotion || words.length <= 1) return;
+    const id = window.setInterval(() => {
+      setMobileIndex((prev) => (prev + 1) % words.length);
+    }, interval);
+    return () => window.clearInterval(id);
+  }, [interval, isCompactMobile, reducedMotion, words.length]);
 
   const wordDuration = interval / 1000;
   const totalDuration = wordDuration * words.length;
@@ -67,6 +79,44 @@ export function MorphText({
         </div>
         {subtext && (
           <p className={cn('mt-2 uppercase tracking-[0.2em] text-xs', subtextClassName)} style={{ fontFamily }}>
+            {subtext}
+          </p>
+        )}
+      </div>
+    );
+  }
+
+  if (isCompactMobile) {
+    const currentWord = words[mobileIndex] ?? words[0];
+    return (
+      <div
+        className={cn(
+          'relative flex flex-col w-full max-w-full',
+          align === 'center' ? 'items-center text-center' : 'items-start text-left',
+          className
+        )}
+      >
+        <div className="min-h-[1.2em] flex items-center" style={{ fontSize, fontFamily }}>
+          <AnimatePresence mode="wait">
+            <motion.span
+              key={currentWord}
+              initial={{ opacity: 0, y: 6 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0, y: -6 }}
+              transition={{ duration: 0.22, ease: [0.22, 1, 0.36, 1] }}
+              className={cn('font-bold uppercase tracking-[0.02em] leading-none block', textClassName)}
+            >
+              {currentWord}
+            </motion.span>
+          </AnimatePresence>
+        </div>
+        {subtext && (
+          <p
+            className={cn(
+              'mt-2 uppercase tracking-[0.2em] text-xs text-[#B5C5D7]',
+              subtextClassName
+            )}
+          >
             {subtext}
           </p>
         )}

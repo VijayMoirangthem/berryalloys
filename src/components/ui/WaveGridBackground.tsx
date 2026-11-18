@@ -2,6 +2,7 @@ import { useEffect, useRef, useState } from 'react';
 import * as THREE from 'three';
 import { useTheme } from '../../context/ThemeContext';
 import { cn } from '../../lib/utils';
+import { useIsCompactMobile } from '../../hooks/useIsCompactMobile';
 
 interface WaveGridBackgroundProps {
   className?: string;
@@ -24,6 +25,7 @@ export function WaveGridBackground({
 }: WaveGridBackgroundProps) {
   const { theme } = useTheme();
   const containerRef = useRef<HTMLDivElement>(null);
+  const isCompactMobile = useIsCompactMobile(767);
   const [fallback, setFallback] = useState(false);
 
   useEffect(() => {
@@ -53,7 +55,7 @@ export function WaveGridBackground({
     const width = Math.max(1, container.clientWidth);
     const height = Math.max(1, container.clientHeight);
 
-    renderer.setPixelRatio(Math.min(window.devicePixelRatio || 1, isSoftwareGl ? 1 : 2));
+    renderer.setPixelRatio(Math.min(window.devicePixelRatio || 1, isSoftwareGl ? 1 : isCompactMobile ? 1.5 : 2));
     renderer.setSize(width, height);
     renderer.setClearColor(0x000000, 0);
 
@@ -68,7 +70,7 @@ export function WaveGridBackground({
     camera.position.set(0, 4.6, 8.2);
     camera.lookAt(0, -0.5, 0);
 
-    const segs = isSoftwareGl ? Math.min(26, segments) : segments;
+    const segs = isCompactMobile ? Math.min(20, segments) : isSoftwareGl ? Math.min(26, segments) : segments;
     const planeWidth = 22;
     const planeDepth = 14;
     const geometry = new THREE.PlaneGeometry(planeWidth, planeDepth, segs, Math.round(segs * 0.72));
@@ -111,6 +113,7 @@ export function WaveGridBackground({
       pointer.y = ((e.clientY - rect.top) / rect.height - 0.5) * 2;
     };
     window.addEventListener('pointermove', onPointerMove, { passive: true });
+    window.addEventListener('pointerdown', onPointerMove, { passive: true });
 
     let isVisible = true;
     const observer = new IntersectionObserver(
@@ -215,6 +218,7 @@ export function WaveGridBackground({
       window.clearTimeout(timeoutId);
       observer.disconnect();
       window.removeEventListener('pointermove', onPointerMove);
+      window.removeEventListener('pointerdown', onPointerMove);
       window.removeEventListener('resize', onResize);
 
       geometry.dispose();
@@ -227,7 +231,7 @@ export function WaveGridBackground({
         container.removeChild(domCanvas);
       }
     };
-  }, [amplitude, segments, theme]);
+  }, [amplitude, isCompactMobile, segments, theme]);
 
   if (fallback) {
     return (

@@ -36,7 +36,7 @@ const LAUNCHER_PREF_KEY = 'berry-compass-launcher-v1';
 
 function isCompactViewport(): boolean {
   if (typeof window === 'undefined') return false;
-  return window.matchMedia('(max-width: 639px), (pointer: coarse)').matches;
+  return window.matchMedia('(max-width: 1023px), (pointer: coarse)').matches;
 }
 const EDGE_SNAP_THRESHOLD = 22;
 const TOP_SAFE_MARGIN = 76;
@@ -117,9 +117,11 @@ export function BerryAlloysGuide() {
   const { routeLocale } = useLocale();
   const useLocalizedBody = assistant.lang !== 'en' || routeLocale !== null;
   const tC = DICTIONARIES[assistant.lang].compass;
-  // The label pill is shown briefly on the first visit of a session so the launcher introduces itself.
+  // The label pill is shown briefly on desktop on the first visit of a session so the launcher introduces itself;
+  // skipped on compact/mobile viewports so it never overlaps page CTA buttons.
   const [showIntroLabel, setShowIntroLabel] = useState(false);
   useEffect(() => {
+    if (isCompactViewport()) return;
     let seen = false;
     try {
       seen = window.sessionStorage.getItem('berry-compass-intro') === '1';

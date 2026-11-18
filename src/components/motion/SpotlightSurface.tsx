@@ -29,18 +29,29 @@ export function SpotlightSurface({
   const resolvedBorderGlow =
     theme === 'dark' ? 'rgba(40,148,204, 0.42)' : 'rgba(158, 75, 40, 0.28)';
 
-  const handleMouseMove = (e: React.MouseEvent<HTMLDivElement>) => {
+  const updateFromClient = (clientX: number, clientY: number) => {
     if (!divRef.current) return;
     const rect = divRef.current.getBoundingClientRect();
-    setPosition({ x: e.clientX - rect.left, y: e.clientY - rect.top });
+    setPosition({ x: clientX - rect.left, y: clientY - rect.top });
+  };
+
+  const handlePointerMove = (e: React.PointerEvent<HTMLDivElement>) => {
+    updateFromClient(e.clientX, e.clientY);
+    if (e.pointerType !== 'mouse') setOpacity(1);
+  };
+
+  const handlePointerDown = (e: React.PointerEvent<HTMLDivElement>) => {
+    updateFromClient(e.clientX, e.clientY);
+    setOpacity(1);
   };
 
   return (
     <div
       ref={divRef}
-      onMouseMove={handleMouseMove}
-      onMouseEnter={() => setOpacity(1)}
-      onMouseLeave={() => setOpacity(0)}
+      onPointerMove={handlePointerMove}
+      onPointerDown={handlePointerDown}
+      onPointerEnter={() => setOpacity(1)}
+      onPointerLeave={() => setOpacity(0)}
       className={cn(
         'relative overflow-hidden transition-shadow duration-200',
         opacity > 0 ? 'shadow-md' : '',

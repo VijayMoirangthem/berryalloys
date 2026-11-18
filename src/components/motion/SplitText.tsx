@@ -31,7 +31,8 @@ export function SplitText({
 
   useEffect(() => {
     const prefersReduced = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
-    if (prefersReduced || !containerRef.current) return;
+    const isCompact = window.matchMedia('(max-width: 767px)').matches;
+    if (prefersReduced || isCompact || !containerRef.current) return;
 
     const ctx = gsap.context(() => {
       const targets = containerRef.current?.querySelectorAll('.split-word-inner');
@@ -70,7 +71,7 @@ export function SplitText({
       {words.map((word, index) => (
         <span key={`${word}-${index}`} aria-hidden="true">
           <span className="inline-block overflow-hidden align-bottom">
-            <span className="split-word-inner inline-block will-change-transform">
+            <span className="split-word-inner inline-block">
               {word}
             </span>
           </span>

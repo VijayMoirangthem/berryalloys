@@ -38,10 +38,10 @@ export function PerspectiveCarousel({
   const [currentIndex, setCurrentIndex] = useState(0);
   const [paused, setPaused] = useState(false);
   const prefersReduced = useReducedMotion();
-  // Phones: one plate at a time (no overlapping neighbours, no preserve-3d, which WebKit mis-sorts).
-  const [compact, setCompact] = useState(() => typeof window !== 'undefined' && window.matchMedia('(max-width: 639px)').matches);
+  // Compact mobile (< 768px): one plate at a time (no overlapping neighbours, no preserve-3d, which WebKit mis-sorts).
+  const [compact, setCompact] = useState(() => typeof window !== 'undefined' && window.matchMedia('(max-width: 767px)').matches);
   useEffect(() => {
-    const mq = window.matchMedia('(max-width: 639px)');
+    const mq = window.matchMedia('(max-width: 767px)');
     const on = () => setCompact(mq.matches);
     on();
     mq.addEventListener('change', on);
@@ -182,7 +182,7 @@ export function PerspectiveCarousel({
                       zIndex: 20 - absOffset,
                     }
               }
-              transition={{ duration: 0.75, ease: [0.22, 1, 0.36, 1] }}
+              transition={{ duration: compact ? 0.24 : 0.75, ease: [0.22, 1, 0.36, 1] }}
               className={cn(
                 'absolute w-[84%] max-w-[430px] aspect-[16/10] border overflow-hidden text-left transition-shadow cursor-pointer',
                 isCenter

@@ -4,16 +4,18 @@ import { ScrollTrigger } from 'gsap/ScrollTrigger';
 
 gsap.registerPlugin(ScrollTrigger);
 
+function findSectionChapterEyebrow(section: HTMLElement): HTMLElement | null {
+  const explicit = section.querySelector<HTMLElement>('[data-chapter-eyebrow]');
+  if (explicit) return explicit;
+  const candidates = Array.from(section.querySelectorAll<HTMLElement>('p.font-mono-tabular'));
+  return candidates.find((el) => /^\d{2}\s*\//.test((el.textContent ?? '').trim())) ?? null;
+}
+
 /**
  * Scroll-triggered storytelling layer for long pages.
- *
- * - Section eyebrows slide in and draw a short red hairline (the controlled red accent).
- * - Section headings rise into place.
- * - Card grids and lists stagger in once, in reading order.
- *
- * Everything is `once` (nothing replays on scroll-back), skipped under prefers-reduced-motion, and the
- * content is already visible in the DOM before this runs, so a failed animation never hides text.
- * Sections listed in `skip` are left alone (they run their own pinned timelines).
+ * - Desktop (1024px+): full GSAP ScrollTrigger choreography for chapter eyebrows, headings, and card grids.
+ * - Mobile & Tablet (< 1024px): crisp native IntersectionObserver compositor transitions (220ms) that NEVER hide
+ *   elements at opacity: 0 on long pages or anchor jumps, and never wobble 1-column cards horizontally.
  */
 export function useIndustrialReveals(rootRef: RefObject<HTMLElement | null>, skip: string[] = []) {
   useEffect(() => {
@@ -21,17 +23,51 @@ export function useIndustrialReveals(rootRef: RefObject<HTMLElement | null>, ski
     if (!root) return;
     if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
 
-    const ctx = gsap.context(() => {
-      const sections = Array.from(root.querySelectorAll<HTMLElement>('section[id]')).filter(
-        (s) => !skip.includes(s.id)
-      );
+    const sections = Array.from(root.querySelectorAll<HTMLElement>('section[id]')).filter(
+      (s) => !skip.includes(s.id)
+    );
+
+    const isDesktop = window.matchMedia('(min-width: 1024px)').matches;
+
+    if (!isDesktop) {
+      // Mobile / Tablet: gentle progressive reveal with guaranteed full visibility (opacity >= 0.92 even before intersect)
+      const observers: IntersectionObserver[] = [];
 
       sections.forEach((section) => {
-        const eyebrow = section.querySelector<HTMLElement>('p.font-mono-tabular');
+        const eyebrow = findSectionChapterEyebrow(section);
+        if (eyebrow) {
+          eyebrow.classList.add('reveal-eyebrow');
+        }
+
+        const heading = section.querySelector<HTMLElement>('h2:not(.sr-only)');
+        if (heading && !heading.querySelector('.sr-word')) {
+          heading.style.transition = 'transform 260ms cubic-bezier(0.22, 1, 0.36, 1), opacity 220ms ease';
+          const io = new IntersectionObserver(
+            (entries) => {
+              if (!entries.some((e) => e.isIntersecting)) return;
+              heading.style.opacity = '1';
+              heading.style.transform = 'translate3d(0, 0, 0)';
+              io.disconnect();
+            },
+            { rootMargin: '60px 0px', threshold: 0.01 }
+          );
+          io.observe(heading);
+          observers.push(io);
+        }
+      });
+
+      return () => {
+        observers.forEach((io) => io.disconnect());
+        root.querySelectorAll('.reveal-eyebrow').forEach((n) => n.classList.remove('reveal-eyebrow'));
+      };
+    }
+
+    const ctx = gsap.context(() => {
+      sections.forEach((section) => {
+        const eyebrow = findSectionChapterEyebrow(section);
         const heading = section.querySelector<HTMLElement>('h2:not(.sr-only)');
 
         if (eyebrow) {
-          // Short red hairline drawn by a CSS ::after (see .reveal-eyebrow) — no DOM is injected into React's tree.
           eyebrow.classList.add('reveal-eyebrow');
           gsap.fromTo(
             eyebrow,
@@ -40,57 +76,68 @@ export function useIndustrialReveals(rootRef: RefObject<HTMLElement | null>, ski
               '--rule': 1,
               duration: 0.7,
               ease: 'power3.out',
-              scrollTrigger: { trigger: eyebrow, start: 'top 88%', once: true },
+              scrollTrigger: { trigger: eyebrow, start: 'top 88%', once: true, invalidateOnRefresh: true },
             }
           );
-          gsap.from(eyebrow, {
-            opacity: 0,
-            x: -14,
-            duration: 0.6,
-            ease: 'power2.out',
-            clearProps: 'transform,opacity',
-            scrollTrigger: { trigger: eyebrow, start: 'top 88%', once: true },
-          });
+          gsap.fromTo(
+            eyebrow,
+            { opacity: 0.25, x: -14 },
+            {
+              opacity: 1,
+              x: 0,
+              duration: 0.6,
+              ease: 'power2.out',
+              clearProps: 'transform,opacity',
+              scrollTrigger: { trigger: eyebrow, start: 'top 88%', once: true, invalidateOnRefresh: true },
+            }
+          );
         }
 
         if (heading && !heading.querySelector('.sr-word')) {
-          gsap.from(heading, {
-            opacity: 0,
-            y: 26,
-            duration: 0.85,
-            ease: 'power3.out',
-            clearProps: 'transform,opacity',
-            scrollTrigger: { trigger: heading, start: 'top 86%', once: true },
-          });
+          gsap.fromTo(
+            heading,
+            { opacity: 0.25, y: 24 },
+            {
+              opacity: 1,
+              y: 0,
+              duration: 0.8,
+              ease: 'power3.out',
+              clearProps: 'transform,opacity',
+              scrollTrigger: { trigger: heading, start: 'top 86%', once: true, invalidateOnRefresh: true },
+            }
+          );
         }
 
-        // Direct children of grid/list containers stagger in together.
-        const containers = section.querySelectorAll<HTMLElement>(':scope > div > .grid, :scope > div > div > .grid, :scope > div > ul, :scope > div > ol');
+        const containers = section.querySelectorAll<HTMLElement>(
+          ':scope > div > .grid, :scope > div > div > .grid, :scope > div > ul, :scope > div > ol'
+        );
         containers.forEach((container) => {
           const items = Array.from(container.children).filter(
             (c): c is HTMLElement => c instanceof HTMLElement && !c.hasAttribute('data-no-reveal') && c.offsetHeight < 900
           );
           if (items.length < 2 || items.length > 16) return;
-          // On narrow screens cards alternate in from the left and right, so a single column still feels choreographed.
-          const narrow = window.innerWidth < 1024;
-          gsap.from(items, {
-            opacity: 0,
-            y: 28,
-            x: narrow ? (i: number) => (i % 2 === 0 ? -26 : 26) : 0,
-            duration: 0.7,
-            ease: 'power2.out',
-            stagger: 0.08,
-            clearProps: 'transform,opacity',
-            scrollTrigger: { trigger: container, start: 'top 85%', once: true },
-          });
+          gsap.fromTo(
+            items,
+            { opacity: 0.25, y: 26 },
+            {
+              opacity: 1,
+              y: 0,
+              duration: 0.7,
+              ease: 'power2.out',
+              stagger: 0.08,
+              clearProps: 'transform,opacity',
+              scrollTrigger: { trigger: container, start: 'top 85%', once: true, invalidateOnRefresh: true },
+            }
+          );
         });
       });
     }, root);
 
-    // Images and lazy content change heights after mount; keep trigger positions honest.
-    const t = window.setTimeout(() => ScrollTrigger.refresh(), 1200);
+    const t1 = window.setTimeout(() => ScrollTrigger.refresh(), 350);
+    const t2 = window.setTimeout(() => ScrollTrigger.refresh(), 1200);
     return () => {
-      window.clearTimeout(t);
+      window.clearTimeout(t1);
+      window.clearTimeout(t2);
       ctx.revert();
       root.querySelectorAll('.reveal-eyebrow').forEach((n) => n.classList.remove('reveal-eyebrow'));
     };

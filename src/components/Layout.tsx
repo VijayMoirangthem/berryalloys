@@ -510,7 +510,7 @@ export function Layout({ children }: LayoutProps) {
               <span className="hidden xl:inline font-mono-tabular text-[11px] opacity-80">⌘K</span>
             </button>
 
-            <LanguageSelector className="hidden sm:block" />
+            <LanguageSelector className="hidden lg:block" />
             <ThemeToggle overDarkHero={darkHeroOverlayHeader} />
 
             {/* Compact "Explore sections" menu for screens below xl */}
@@ -534,8 +534,8 @@ export function Layout({ children }: LayoutProps) {
                 }`}
                 aria-hidden="true"
               />
-              <span className="hidden sm:inline">Explore sections</span>
-              <span className="sm:hidden">Chapters</span>
+              <span className="hidden lg:inline">Explore sections</span>
+              <span className="lg:hidden">Chapters</span>
               <ChevronDown
                 className={`w-3.5 h-3.5 transition-transform duration-150 ${
                   sectionsMenuOpen ? 'rotate-180' : ''

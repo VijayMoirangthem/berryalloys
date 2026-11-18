@@ -14,7 +14,7 @@ export function ScrollCue({ label = 'Scroll' }: { label?: string }) {
   return (
     <div
       aria-hidden="true"
-      className={`pointer-events-none absolute inset-x-0 bottom-1 z-20 flex flex-col items-center gap-1 text-[10px] font-mono-tabular uppercase tracking-[0.3em] text-ink-2 transition-opacity duration-500 sm:hidden ${gone ? 'opacity-0' : 'opacity-100'}`}
+      className={`pointer-events-none absolute inset-x-0 bottom-2.5 z-20 flex flex-col items-center gap-1 text-[10px] font-mono-tabular uppercase tracking-[0.3em] text-ink-2 transition-opacity duration-500 sm:hidden ${gone ? 'opacity-0' : 'opacity-100'}`}
     >
       <span>{label}</span>
       <span className="scroll-cue-bob inline-flex h-8 w-5 items-start justify-center rounded-full border border-control pt-1.5">

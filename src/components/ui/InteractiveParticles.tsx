@@ -87,24 +87,25 @@ const VERTEX_SHADER = `
 
     vec3 displaced = offset;
     displaced.xy += vec2(random(pindex) - 0.5, random(offset.x + pindex) - 0.5) * uRandom;
-    float rndz = (random(pindex) + snoise(vec3(pindex * 0.1, uTime * 0.1, 0.0)));
+    float rndz = (random(pindex) + snoise(vec3(pindex * 0.1, uTime * 0.12, 0.0)));
     displaced.z += rndz * (random(pindex) * 2.0 * uDepth);
     displaced.xy -= uTextureSize * 0.5;
 
-    // Entrance: particles converge from scattered positions into the typography
+    // Entrance magnetic convergence into typography
     float inv = 1.0 - uIntro;
     float inv2 = inv * inv;
-    displaced.xy += vec2(cos(angle), sin(angle)) * inv2 * (140.0 + 220.0 * random(pindex + 3.0));
-    displaced.z += inv2 * 90.0 * (random(pindex + 7.0) - 0.5);
+    displaced.xy += vec2(cos(angle), sin(angle)) * inv2 * (95.0 + 160.0 * random(pindex + 3.0));
+    displaced.z += inv2 * 70.0 * (random(pindex + 7.0) - 0.5);
 
+    // Interactive cursor / tap / swipe burst displacement
     float t = texture2D(uTouch, puv).r;
-    displaced.z += t * 22.0 * rndz;
-    displaced.x += cos(angle) * t * 18.0 * rndz;
-    displaced.y += sin(angle) * t * 18.0 * rndz;
+    displaced.z += t * 42.0 * rndz;
+    displaced.x += cos(angle) * t * 34.0 * (0.4 + rndz);
+    displaced.y += sin(angle) * t * 34.0 * (0.4 + rndz);
 
-    float psize = (snoise(vec3(uTime * 0.35, puv * 3.0)) + 2.0);
-    psize *= max(grey, 0.25);
-    psize *= uSize * mix(0.4, 1.0, uIntro);
+    float psize = (snoise(vec3(uTime * 0.4, puv * 3.0)) + 2.15);
+    psize *= max(grey, 0.34);
+    psize *= uSize * mix(0.62, 1.0, uIntro) * (1.0 + t * 0.35);
 
     vec4 mvPosition = modelViewMatrix * vec4(displaced, 1.0);
     mvPosition.xyz += position * psize;
@@ -127,14 +128,13 @@ const FRAGMENT_SHADER = `
     vec2 uv = vUv;
     vec2 center = vec2(0.5);
     float dist = distance(uv, center);
-    float t = smoothstep(0.0, 0.5, 0.5 - dist);
-    float radius = max(0.0, 0.5 - dist) * 2.0;
+    // Crisp metallic bead alpha falloff so particles stay distinct instead of smearing
+    float alpha = smoothstep(0.5, 0.24, dist) * smoothstep(0.08, 0.65, grey);
 
-    // Brand-blue edge highlight mixed with the primary typography tint
-    vec3 tint = mix(uAccentColor, uColor, smoothstep(0.35, 0.95, grey));
-    vec4 color = vec4(tint, grey * radius * t);
-    if (color.a < 0.05) discard;
-    gl_FragColor = color;
+    // Brand-blue highlight mixed with crisp primary typography tint
+    vec3 tint = mix(uAccentColor, uColor, smoothstep(0.28, 0.88, grey));
+    if (alpha < 0.06) discard;
+    gl_FragColor = vec4(tint, alpha);
   }
 `;
 
@@ -142,8 +142,8 @@ class TouchTexture {
   size = 64;
   width = 64;
   height = 64;
-  maxAge = 96;
-  radius = 0.16;
+  maxAge = 84;
+  radius = 0.22;
   trail: Array<{ x: number; y: number; age: number; force: number }> = [];
   canvas: HTMLCanvasElement;
   ctx: CanvasRenderingContext2D;
@@ -162,14 +162,16 @@ class TouchTexture {
     this.texture.generateMipmaps = false;
   }
 
-  addTouch(point: { x: number; y: number }) {
-    let force = 0;
+  addTouch(point: { x: number; y: number }, minForce = 0) {
+    let force = minForce;
     const last = this.trail[this.trail.length - 1];
     if (last) {
       const dx = last.x - point.x;
       const dy = last.y - point.y;
       const dd = dx * dx + dy * dy;
-      force = Math.min(dd * 10000, 1);
+      force = Math.max(minForce, Math.min(dd * 10000, 1));
+    } else if (force === 0) {
+      force = 0.65;
     }
     this.trail.push({ x: point.x, y: point.y, age: 0, force });
   }
@@ -193,18 +195,19 @@ class TouchTexture {
   private drawTouch(point: { x: number; y: number; age: number; force: number }) {
     const pos = { x: point.x * this.width, y: (1 - point.y) * this.height };
     let intensity = 1;
-    if (point.age < this.maxAge * 0.3) {
-      intensity = Math.sin(((point.age / (this.maxAge * 0.3)) * Math.PI) / 2);
+    if (point.age < this.maxAge * 0.28) {
+      intensity = Math.sin(((point.age / (this.maxAge * 0.28)) * Math.PI) / 2);
     } else {
-      const t = 1 - (point.age - this.maxAge * 0.3) / (this.maxAge * 0.7);
+      const t = 1 - (point.age - this.maxAge * 0.28) / (this.maxAge * 0.72);
       intensity = -t * (t - 2);
     }
     intensity *= point.force;
 
-    const r = this.size * this.radius * intensity;
+    const r = this.size * this.radius * Math.max(0.35, intensity);
     if (r <= 0.1) return;
-    const grd = this.ctx.createRadialGradient(pos.x, pos.y, r * 0.25, pos.x, pos.y, r);
-    grd.addColorStop(0, 'rgba(255, 255, 255, 0.28)');
+    const grd = this.ctx.createRadialGradient(pos.x, pos.y, r * 0.16, pos.x, pos.y, r);
+    grd.addColorStop(0, 'rgba(255, 255, 255, 0.86)');
+    grd.addColorStop(0.55, 'rgba(255, 255, 255, 0.35)');
     grd.addColorStop(1, 'rgba(0, 0, 0, 0.0)');
 
     this.ctx.beginPath();
@@ -228,23 +231,25 @@ export interface InteractiveParticlesProps {
   particleSize?: number;
 }
 
-const SAMPLE_WIDTH = 720;
-const SAMPLE_HEIGHT = 270;
-
 /**
- * Generates an offscreen high-contrast bitmap typography texture for particle sampling
- * so the complete company title renders heavily and deterministically with zero 404 risk.
+ * Generates an offscreen high-contrast bitmap typography texture for particle sampling.
+ * Adapts canvas aspect for narrow mobile screens so glyphs retain heavy fill weight and density.
  */
 function createTypographySampleDataUrl(
   text: string,
-  lines?: string[],
-  subtitle?: string
-): string {
+  lines: string[] | undefined,
+  subtitle: string | undefined,
+  viewportWidth: number
+): { dataUrl: string; width: number; height: number } {
+  const tier = viewportWidth < 640 ? 'mobile' : viewportWidth < 1024 ? 'tablet' : 'desktop';
+  const sampleWidth = tier === 'mobile' ? 420 : tier === 'tablet' ? 620 : 720;
+  const sampleHeight = tier === 'mobile' ? 240 : tier === 'tablet' ? 255 : 270;
+
   const canvas = document.createElement('canvas');
-  canvas.width = SAMPLE_WIDTH;
-  canvas.height = SAMPLE_HEIGHT;
+  canvas.width = sampleWidth;
+  canvas.height = sampleHeight;
   const ctx = canvas.getContext('2d');
-  if (!ctx) return '';
+  if (!ctx) return { dataUrl: '', width: sampleWidth, height: sampleHeight };
 
   ctx.fillStyle = '#000000';
   ctx.fillRect(0, 0, canvas.width, canvas.height);
@@ -257,47 +262,115 @@ function createTypographySampleDataUrl(
       ? lines.map((l) => l.toUpperCase())
       : [text.toUpperCase()];
   const hasSub = Boolean(subtitle);
+  const maxTextWidth = sampleWidth - 32;
+  const subParts =
+    tier === 'mobile' && subtitle && subtitle.includes(' · ') && subtitle.length > 32
+      ? subtitle.split(' · ').map((s) => s.trim().toUpperCase())
+      : subtitle
+      ? [subtitle.toUpperCase()]
+      : [];
+  const subFontSize = tier === 'mobile' ? 22 : tier === 'tablet' ? 24 : 26;
 
   if (resolvedLines.length >= 2) {
-    // Primary monumental brand line + bold secondary corporate line
     const line1 = resolvedLines[0];
     const line2 = resolvedLines[1];
-    const line1Size = line1.length > 14 ? 86 : 114;
-    const line2Size = line2.length > 14 ? 58 : 74;
+    const line1Size =
+      tier === 'mobile'
+        ? line1.length > 14
+          ? 60
+          : 76
+        : tier === 'tablet'
+        ? line1.length > 14
+          ? 78
+          : 100
+        : line1.length > 14
+        ? 86
+        : 114;
+    const line2Size =
+      tier === 'mobile'
+        ? line2.length > 14
+          ? 44
+          : 54
+        : tier === 'tablet'
+        ? line2.length > 14
+          ? 54
+          : 68
+        : line2.length > 14
+        ? 58
+        : 74;
 
+    const twoSubLines = subParts.length >= 2;
     ctx.font = `800 ${line1Size}px "Barlow Condensed", sans-serif`;
     ctx.fillStyle = '#FFFFFF';
-    ctx.fillText(line1, canvas.width / 2, hasSub ? canvas.height * 0.30 : canvas.height * 0.37);
+    ctx.fillText(
+      line1,
+      canvas.width / 2,
+      twoSubLines ? canvas.height * 0.24 : hasSub ? canvas.height * 0.28 : canvas.height * 0.37,
+      maxTextWidth
+    );
 
     ctx.font = `700 ${line2Size}px "Barlow Condensed", sans-serif`;
-    ctx.fillStyle = '#E8DFD1';
-    ctx.fillText(line2, canvas.width / 2, hasSub ? canvas.height * 0.61 : canvas.height * 0.69);
+    ctx.fillStyle = '#DCE8F5';
+    ctx.fillText(
+      line2,
+      canvas.width / 2,
+      twoSubLines ? canvas.height * 0.53 : hasSub ? canvas.height * 0.59 : canvas.height * 0.69,
+      maxTextWidth
+    );
 
-    if (subtitle) {
-      ctx.font = '600 21px "IBM Plex Mono", monospace';
-      ctx.fillStyle = '#B8AFA2';
-      ctx.fillText(subtitle.toUpperCase(), canvas.width / 2, canvas.height * 0.87);
+    if (subParts.length >= 2) {
+      ctx.font = `700 ${subFontSize}px "Barlow Condensed", sans-serif`;
+      ctx.fillStyle = '#C6D9EC';
+      ctx.fillText(subParts[0], canvas.width / 2, canvas.height * 0.78, maxTextWidth);
+      ctx.fillText(subParts[1], canvas.width / 2, canvas.height * 0.90, maxTextWidth);
+    } else if (subParts.length === 1) {
+      ctx.font = `700 ${subFontSize}px "Barlow Condensed", sans-serif`;
+      ctx.fillStyle = '#C6D9EC';
+      ctx.fillText(subParts[0], canvas.width / 2, canvas.height * 0.86, maxTextWidth);
     }
   } else {
     const single = resolvedLines[0];
-    const titleFontSize = single.length > 18 ? 72 : single.length > 13 ? 88 : 118;
+    const titleFontSize =
+      tier === 'mobile'
+        ? single.length > 14
+          ? 58
+          : 74
+        : tier === 'tablet'
+        ? single.length > 14
+          ? 74
+          : 98
+        : single.length > 18
+        ? 72
+        : single.length > 13
+        ? 88
+        : 118;
     ctx.font = `800 ${titleFontSize}px "Barlow Condensed", sans-serif`;
     ctx.fillStyle = '#FFFFFF';
-    ctx.fillText(single, canvas.width / 2, hasSub ? canvas.height * 0.42 : canvas.height * 0.5);
+    ctx.fillText(single, canvas.width / 2, hasSub ? canvas.height * 0.40 : canvas.height * 0.5, maxTextWidth);
 
-    if (subtitle) {
-      ctx.font = '600 22px "IBM Plex Mono", monospace';
-      ctx.fillStyle = '#D4DFEB';
-      ctx.fillText(subtitle.toUpperCase(), canvas.width / 2, canvas.height * 0.78);
+    if (subParts.length >= 2) {
+      ctx.font = `700 ${subFontSize}px "Barlow Condensed", sans-serif`;
+      ctx.fillStyle = '#C6D9EC';
+      ctx.fillText(subParts[0], canvas.width / 2, canvas.height * 0.74, maxTextWidth);
+      ctx.fillText(subParts[1], canvas.width / 2, canvas.height * 0.88, maxTextWidth);
+    } else if (subParts.length === 1) {
+      ctx.font = `700 ${subFontSize}px "Barlow Condensed", sans-serif`;
+      ctx.fillStyle = '#C6D9EC';
+      ctx.fillText(subParts[0], canvas.width / 2, canvas.height * 0.78, maxTextWidth);
     }
   }
 
-  return canvas.toDataURL('image/png');
+  return {
+    dataUrl: canvas.toDataURL('image/png'),
+    width: sampleWidth,
+    height: sampleHeight,
+  };
 }
 
 /**
  * InteractiveParticles — GPU WebGL Three.js instanced particle field sampling
- * the Berry Alloys Limited monumental mark from canvas raster data with cursor & touch scatter physics.
+ * the Berry Alloys Limited monumental mark across desktop, tablet, and touch phones
+ * with responsive density scaling and cursor/tap/swipe magnetic dispersion.
  */
 export function InteractiveParticles({
   text = 'BERRY ALLOYS LIMITED',
@@ -345,7 +418,10 @@ export function InteractiveParticles({
 
     const width = Math.max(1, container.clientWidth);
     const height = Math.max(1, container.clientHeight);
-    renderer.setPixelRatio(Math.min(window.devicePixelRatio || 1, isSoftwareGl ? 1 : 2));
+    const isCompactStage = width < 640;
+    const sampleStep = 3;
+
+    renderer.setPixelRatio(Math.min(window.devicePixelRatio || 1, isSoftwareGl ? 1.5 : 2));
     renderer.setSize(width, height);
     renderer.setClearColor(0x000000, 0);
 
@@ -363,14 +439,18 @@ export function InteractiveParticles({
     const raycaster = new THREE.Raycaster();
     const mouse = new THREE.Vector2(-99, -99);
 
-    const hitGeo = new THREE.PlaneGeometry(860, 380, 1, 1);
+    // 1x1 plane dynamically scaled to match particlesMesh exact world dimensions
+    const hitGeo = new THREE.PlaneGeometry(1, 1, 1, 1);
     const hitMat = new THREE.MeshBasicMaterial({ visible: false });
     const hitMesh = new THREE.Mesh(hitGeo, hitMat);
     scene.add(hitMesh);
 
     let particlesMesh: THREE.Mesh<THREE.InstancedBufferGeometry, THREE.RawShaderMaterial> | null = null;
     let sampledTexture: THREE.Texture | null = null;
-    const sampledDims = { width: SAMPLE_WIDTH, height: SAMPLE_HEIGHT };
+    const sampledDims = {
+      width: width < 640 ? 420 : width < 1024 ? 620 : 720,
+      height: width < 640 ? 240 : width < 1024 ? 255 : 270,
+    };
     let disposed = false;
     let isVisible = true;
     let rafId = 0;
@@ -383,21 +463,28 @@ export function InteractiveParticles({
       const visibleHeight = 2 * Math.tan(fovRad / 2) * camera.position.z;
       const visibleWidth = visibleHeight * (w / Math.max(1, h));
       const fillRatioW = w < 640 ? 0.94 : 0.88;
-      const fillRatioH = w < 640 ? 0.84 : 0.86;
+      const fillRatioH = w < 640 ? 0.86 : 0.86;
       const raw = Math.min((visibleWidth * fillRatioW) / imgW, (visibleHeight * fillRatioH) / imgH);
-      return Math.max(0.32, Math.min(1.35, raw));
+      return Math.max(0.36, Math.min(1.38, raw));
+    };
+
+    const computeParticleSize = (fitScale: number, containerW: number) => {
+      // psize is applied in view-space after modelViewMatrix scale, so scale linearly with sampleStep * fitScale
+      // to keep particles crisp & stippled without smearing on portrait mobile or tablet stages.
+      const densityBoost = containerW < 640 ? 1.18 : 1.05;
+      return sampleStep * fitScale * (particleSize / 2.05) * densityBoost * 0.72;
     };
 
     const buildParticlesFromBitmap = () => {
       if (disposed) return;
 
-      const dataUrl = createTypographySampleDataUrl(text, lines, subtitle);
-      if (!dataUrl) {
+      const sample = createTypographySampleDataUrl(text, lines, subtitle, width);
+      if (!sample.dataUrl) {
         setFallback(true);
         return;
       }
 
-      new THREE.TextureLoader().load(dataUrl, (texture) => {
+      new THREE.TextureLoader().load(sample.dataUrl, (texture) => {
         if (disposed) {
           texture.dispose();
           return;
@@ -408,8 +495,8 @@ export function InteractiveParticles({
         texture.generateMipmaps = false;
 
         const img = texture.image as HTMLImageElement;
-        const imgW = img.width || SAMPLE_WIDTH;
-        const imgH = img.height || SAMPLE_HEIGHT;
+        const imgW = img.width || sample.width;
+        const imgH = img.height || sample.height;
         sampledDims.width = imgW;
         sampledDims.height = imgH;
 
@@ -420,15 +507,15 @@ export function InteractiveParticles({
         ctx.drawImage(img, 0, 0, imgW, imgH);
         const imgData = ctx.getImageData(0, 0, imgW, imgH).data;
 
-        // Keep particle count crisp and fast across hardware & software WebGL
-        const step = isSoftwareGl ? 3 : 2;
+        const currW = Math.max(1, container.clientWidth);
+        const currH = Math.max(1, container.clientHeight);
         const indicesList: number[] = [];
         const offsetsList: number[] = [];
         const anglesList: number[] = [];
-        const threshold = 26;
+        const threshold = 24;
 
-        for (let y = 0; y < imgH; y += step) {
-          for (let x = 0; x < imgW; x += step) {
+        for (let y = 0; y < imgH; y += sampleStep) {
+          for (let x = 0; x < imgW; x += sampleStep) {
             const idx = (y * imgW + x) * 4;
             if (imgData[idx] > threshold) {
               offsetsList.push(x, imgH - y, 0);
@@ -461,16 +548,20 @@ export function InteractiveParticles({
         geometry.setAttribute('angle', new THREE.InstancedBufferAttribute(new Float32Array(anglesList), 1));
         geometry.instanceCount = count;
 
+        const fitScale = computeFitScale(currW, currH, imgW, imgH);
+        const computedSize = computeParticleSize(fitScale, currW);
+        hitMesh.scale.set(imgW * fitScale, imgH * fitScale, 1);
+
         const material = new THREE.RawShaderMaterial({
           uniforms: {
             uTime: { value: 0 },
-            uRandom: { value: prefersReduced ? 0.0 : 0.48 },
+            uRandom: { value: prefersReduced ? 0.0 : isCompactStage ? 0.34 : 0.46 },
             uDepth: { value: prefersReduced ? 0.0 : 1.2 },
-            uSize: { value: particleSize * (isSoftwareGl ? 1.55 : 1.18) },
+            uSize: { value: computedSize },
             uTextureSize: { value: new THREE.Vector2(imgW, imgH) },
             uTexture: { value: texture },
             uTouch: { value: touch.texture },
-            uIntro: { value: prefersReduced ? 1 : 0 },
+            uIntro: { value: prefersReduced || isSoftwareGl ? 1 : 0.12 },
             uColor: { value: new THREE.Color(colorsRef.current.primary) },
             uAccentColor: { value: new THREE.Color(colorsRef.current.accent) },
           },
@@ -482,10 +573,7 @@ export function InteractiveParticles({
 
         particlesMesh = new THREE.Mesh(geometry, material);
         particlesMesh.frustumCulled = false;
-
-        const currW = Math.max(1, container.clientWidth);
-        const currH = Math.max(1, container.clientHeight);
-        particlesMesh.scale.setScalar(computeFitScale(currW, currH, imgW, imgH));
+        particlesMesh.scale.setScalar(fitScale);
 
         scene.add(particlesMesh);
         renderer?.render(scene, camera);
@@ -498,7 +586,7 @@ export function InteractiveParticles({
       buildParticlesFromBitmap();
     }
 
-    const scatterAtClientPoint = (clientX: number, clientY: number) => {
+    const scatterAtClientPoint = (clientX: number, clientY: number, minForce = 0) => {
       if (prefersReduced || !particlesMesh) return;
       const rect = container.getBoundingClientRect();
       mouse.x = ((clientX - rect.left) / Math.max(1, rect.width)) * 2 - 1;
@@ -506,20 +594,23 @@ export function InteractiveParticles({
       raycaster.setFromCamera(mouse, camera);
       const intersects = raycaster.intersectObject(hitMesh);
       if (intersects.length > 0 && intersects[0].uv) {
-        touch.addTouch(intersects[0].uv);
+        touch.addTouch(intersects[0].uv, minForce);
       }
     };
 
-    const onPointerMove = (e: PointerEvent) => {
-      scatterAtClientPoint(e.clientX, e.clientY);
+    const onPointerDown = (e: PointerEvent) => {
+      // Immediate magnetic radial pulse when tapped or clicked on mobile/desktop
+      scatterAtClientPoint(e.clientX, e.clientY, 0.95);
     };
 
-    // Pointer events cover mouse, pen and touch; one handler means a gesture is never processed twice.
-    // The container uses touch-action: pan-y so vertical page scrolling always wins on phones.
-    container.addEventListener('pointermove', onPointerMove, { passive: true });
-    container.addEventListener('pointerdown', onPointerMove, { passive: true });
+    const onPointerMove = (e: PointerEvent) => {
+      // Give touch swipes a consistent minimum burst so slow finger drags scatter smoothly
+      scatterAtClientPoint(e.clientX, e.clientY, e.pointerType === 'touch' ? 0.48 : 0);
+    };
 
-    // Live theme change: update uniforms only, keep particle positions.
+    container.addEventListener('pointerdown', onPointerDown, { passive: true });
+    container.addEventListener('pointermove', onPointerMove, { passive: true });
+
     applyColorsRef.current = () => {
       if (!particlesMesh) return;
       const u = particlesMesh.material.uniforms;
@@ -544,9 +635,10 @@ export function InteractiveParticles({
       camera.updateProjectionMatrix();
       renderer.setSize(w, h);
       if (particlesMesh) {
-        particlesMesh.scale.setScalar(
-          computeFitScale(w, h, sampledDims.width, sampledDims.height)
-        );
+        const nextScale = computeFitScale(w, h, sampledDims.width, sampledDims.height);
+        particlesMesh.scale.setScalar(nextScale);
+        particlesMesh.material.uniforms.uSize.value = computeParticleSize(nextScale, w);
+        hitMesh.scale.set(sampledDims.width * nextScale, sampledDims.height * nextScale, 1);
       }
       if (prefersReduced && particlesMesh) {
         renderer.render(scene, camera);
@@ -600,10 +692,13 @@ export function InteractiveParticles({
         particlesMesh.material.uniforms.uTime.value += dt;
         const intro = particlesMesh.material.uniforms.uIntro;
         if (intro.value < 1) {
-          // Wall-clock progress, so the formation takes ~1.5s even when frames are slow.
-          if (introStart === 0) introStart = performance.now();
-          const p = Math.min(1, (performance.now() - introStart) / 1500);
-          intro.value = 1 - Math.pow(1 - p, 3);
+          // Wait for initial KineticLoader curtain to clear so arrival convergence is actually seen on mobile/desktop
+          const loaderActive = Boolean(document.querySelector('[aria-label="Loading Berry Alloys Limited presentation"]'));
+          if (!loaderActive) {
+            if (introStart === 0) introStart = performance.now();
+            const p = Math.min(1, (performance.now() - introStart) / 1050);
+            intro.value = 0.12 + 0.88 * (1 - Math.pow(1 - p, 3));
+          }
         }
         renderer?.render(scene, camera);
       }
@@ -620,8 +715,8 @@ export function InteractiveParticles({
       window.clearTimeout(timeoutId);
       observer.disconnect();
       resizeObserver.disconnect();
+      container.removeEventListener('pointerdown', onPointerDown);
       container.removeEventListener('pointermove', onPointerMove);
-      container.removeEventListener('pointerdown', onPointerMove);
       applyColorsRef.current = null;
       window.removeEventListener('resize', onResize);
 
@@ -673,7 +768,10 @@ export function InteractiveParticles({
       ref={containerRef}
       role="img"
       aria-label={`${displayLines.join(' ')} — ${subtitle ?? 'interactive metallurgical particle typography'}`}
-      className={cn('relative w-full h-full min-h-[260px] sm:min-h-[340px] select-none overflow-hidden cursor-crosshair touch-pan-y', className)}
+      className={cn(
+        'relative w-full h-full min-h-[260px] sm:min-h-[340px] select-none overflow-hidden cursor-crosshair touch-pan-y',
+        className
+      )}
     />
   );
 }

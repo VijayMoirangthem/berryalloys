@@ -10,6 +10,7 @@ import { SpotlightSurface } from './motion/SpotlightSurface';
 import { AnimatedTooltip } from './ui/AnimatedTooltip';
 import { IndustrialButton } from './ui/IndustrialButton';
 import { WaveGridBackground } from './ui/WaveGridBackground';
+import { useIsCompactMobile } from '../hooks/useIsCompactMobile';
 
 const FAMILY_MEDIA: Record<
   AlloyFamily,
@@ -46,6 +47,7 @@ interface HomeAlloyShowcaseProps {
 }
 
 export function HomeAlloyShowcase({ onEnquireAlloy }: HomeAlloyShowcaseProps) {
+  const isCompactMobile = useIsCompactMobile(767);
   const [activeFamily, setActiveFamily] = useState<AlloyFamily>('Ferro Manganese');
   const familyProducts = useMemo(
     () => PRODUCTS.filter((p) => p.family === activeFamily),
@@ -105,11 +107,20 @@ export function HomeAlloyShowcase({ onEnquireAlloy }: HomeAlloyShowcaseProps) {
       <WaveGridBackground className="absolute inset-0 opacity-75" />
       <div className="relative z-10 max-w-[1360px] mx-auto px-4 sm:px-6 lg:px-8 xl:px-14 2xl:px-8 space-y-12">
         {/* Section Header */}
-        <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 items-end pb-8 border-b border-[#10243A]/14 dark:border-[#F4F8FC]/12">
+        <motion.div
+          initial={{ opacity: 0.3, y: 16 }}
+          whileInView={{ opacity: 1, y: 0 }}
+          viewport={{ once: true, amount: 'some' }}
+          transition={{ duration: 0.55, ease: [0.22, 1, 0.36, 1] }}
+          className="grid grid-cols-1 lg:grid-cols-12 gap-6 items-end pb-8 border-b border-[#10243A]/14 dark:border-[#F4F8FC]/12"
+        >
           <div className="lg:col-span-8 space-y-3">
-            <p className="text-xs font-mono-tabular uppercase tracking-widest text-brand dark:text-[#69C5F5]">
-              05 / Alloy Portfolio
-            </p>
+            <div className="flex items-center gap-3">
+              <span className="inline-block w-8 h-[2px] bg-accent-red" aria-hidden="true" />
+              <p className="text-xs font-mono-tabular uppercase tracking-widest text-brand dark:text-[#69C5F5]">
+                05 / Alloy Portfolio
+              </p>
+            </div>
             <h2
               id="alloy-explorer-heading"
               className="font-display fluid-section-title font-bold uppercase tracking-tight text-[#10243A] dark:text-[#F4F8FC]"
@@ -126,7 +137,7 @@ export function HomeAlloyShowcase({ onEnquireAlloy }: HomeAlloyShowcaseProps) {
               <ArrowRight className="w-4 h-4" aria-hidden="true" />
             </Link>
           </div>
-        </div>
+        </motion.div>
 
         {/* Asymmetric Split Selector + Official Specimen Assay Panel */}
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 lg:gap-12 items-start">
@@ -141,20 +152,29 @@ export function HomeAlloyShowcase({ onEnquireAlloy }: HomeAlloyShowcaseProps) {
               {ALLOY_FAMILIES.map((family) => {
                 const isActive = activeFamily === family;
                 return (
-                  <button
+                  <motion.button
                     key={family}
                     type="button"
                     role="tab"
                     aria-selected={isActive}
+                    whileTap={{ scale: 0.96 }}
                     onClick={() => handleSelectFamily(family)}
-                    className={`min-h-[44px] px-4 py-2 text-xs font-semibold border transition-colors whitespace-nowrap shrink-0 cursor-pointer ${
+                    className={`relative min-h-[44px] px-4 py-2 text-xs font-semibold border transition-colors whitespace-nowrap shrink-0 cursor-pointer overflow-hidden ${
                       isActive
                         ? 'bg-brand text-[#FFFFFF] border-brand dark:bg-[#0A6AA1] dark:border-[#0A6AA1]'
                         : 'bg-white text-[#465C72] border-[#10243A]/15 hover:text-[#10243A] dark:bg-[#12243B] dark:text-[#B5C5D7] dark:border-[#F4F8FC]/14 dark:hover:text-[#F4F8FC]'
                     }`}
                   >
                     {FAMILY_MEDIA[family].index}. {family}
-                  </button>
+                    {isActive && (
+                      <motion.span
+                        layoutId="alloy-mobile-family-bar"
+                        transition={{ type: 'spring', stiffness: 420, damping: 32 }}
+                        aria-hidden="true"
+                        className="absolute inset-x-0 bottom-0 h-[3px] bg-accent-red"
+                      />
+                    )}
+                  </motion.button>
                 );
               })}
             </div>
@@ -171,12 +191,20 @@ export function HomeAlloyShowcase({ onEnquireAlloy }: HomeAlloyShowcaseProps) {
                     type="button"
                     onClick={() => handleSelectFamily(family)}
                     aria-pressed={isActive}
-                    className={`w-full text-left py-5 px-4 transition-colors duration-350 flex items-start justify-between gap-4 cursor-pointer ${
+                    className={`relative w-full text-left py-5 px-4 transition-colors duration-350 flex items-start justify-between gap-4 cursor-pointer ${
                       isActive
                         ? 'bg-white dark:bg-[#12243B]'
                         : 'hover:bg-white/60 dark:hover:bg-[#12243B]/55'
                     }`}
                   >
+                    {isActive && (
+                      <motion.span
+                        layoutId="alloy-desktop-family-rail"
+                        transition={{ type: 'spring', stiffness: 420, damping: 32 }}
+                        aria-hidden="true"
+                        className="absolute inset-y-0 left-0 w-[3px] bg-brand dark:bg-[#69C5F5]"
+                      />
+                    )}
                     <div className="space-y-1.5">
                       <div className="flex items-baseline gap-3">
                         <span
@@ -233,19 +261,20 @@ export function HomeAlloyShowcase({ onEnquireAlloy }: HomeAlloyShowcaseProps) {
                 {familyProducts.map((item) => {
                   const isSelected = item.slug === activeProduct.slug;
                   return (
-                    <button
+                    <motion.button
                       key={item.slug}
                       type="button"
+                      whileTap={{ scale: 0.96 }}
                       onClick={() => setSelectedSlug(item.slug)}
                       aria-pressed={isSelected}
-                      className={`min-h-[40px] px-3.5 py-2 text-xs font-medium border transition-colors cursor-pointer whitespace-nowrap ${
+                      className={`relative min-h-[40px] px-3.5 py-2 text-xs font-medium border transition-colors cursor-pointer whitespace-nowrap ${
                         isSelected
                           ? 'bg-[#10243A] text-[#FFFFFF] border-[#10243A] font-semibold dark:bg-[#F4F8FC] dark:text-[#10243A] dark:border-[#F4F8FC]'
                           : 'bg-white text-[#10243A] border-[#10243A]/18 hover:border-brand dark:bg-[#12243B] dark:text-[#F4F8FC]/80 dark:border-[#F4F8FC]/16 dark:hover:border-[#69C5F5]'
                       }`}
                     >
                       {item.name}
-                    </button>
+                    </motion.button>
                   );
                 })}
               </div>
@@ -304,10 +333,10 @@ export function HomeAlloyShowcase({ onEnquireAlloy }: HomeAlloyShowcaseProps) {
               <AnimatePresence mode="wait">
                 <motion.div
                   key={activeProduct.slug}
-                  initial={{ opacity: 0, y: 8 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  exit={{ opacity: 0, y: -6 }}
-                  transition={{ duration: 0.48, ease: [0.22, 1, 0.36, 1] }}
+                  initial={{ opacity: 0.15, y: 12, scale: 0.985 }}
+                  animate={{ opacity: 1, y: 0, scale: 1 }}
+                  exit={{ opacity: 0.15, y: -10, scale: 0.985 }}
+                  transition={{ duration: isCompactMobile ? 0.28 : 0.4, ease: [0.22, 1, 0.36, 1] }}
                 >
                   {/* Framed Official Specimen Plate (consistent studio tray in both themes) */}
                   <div className="p-4 sm:p-5 bg-[#FFFFFF] border-b border-[#10243A]/14 dark:border-[#F4F8FC]/14">
@@ -316,21 +345,31 @@ export function HomeAlloyShowcase({ onEnquireAlloy }: HomeAlloyShowcaseProps) {
                       <span>Berry Alloys Assay Series</span>
                     </div>
                     <div className="grid grid-cols-1 sm:grid-cols-12 gap-4 items-center">
-                      <div className="sm:col-span-8 aspect-[16/10] bg-white border border-[#10243A]/12 overflow-hidden">
+                      <motion.div
+                        initial={{ scale: 0.96, opacity: 0.7 }}
+                        animate={{ scale: 1, opacity: 1 }}
+                        transition={{ duration: 0.45, ease: [0.22, 1, 0.36, 1] }}
+                        className="sm:col-span-8 aspect-[16/10] bg-white border border-[#10243A]/12 overflow-hidden"
+                      >
                         <ResilientImage
                           src={activeImage.src}
                           alt={`${activeProduct.name} — ${activeImage.alt}`}
                           className="w-full h-full object-contain p-2"
                           containerClassName="w-full h-full"
                         />
-                      </div>
-                      <div className="sm:col-span-4 aspect-[16/10] sm:aspect-square bg-[#10243A] border border-[#10243A]/15 overflow-hidden">
+                      </motion.div>
+                      <motion.div
+                        initial={{ scale: 1.07 }}
+                        animate={{ scale: 1 }}
+                        transition={{ duration: 0.6, ease: [0.22, 1, 0.36, 1] }}
+                        className="sm:col-span-4 aspect-[16/10] sm:aspect-square bg-[#10243A] border border-[#10243A]/15 overflow-hidden"
+                      >
                         <ResilientImage
                           src={activeFamilyMedia.fractureScene.src}
                           alt={activeFamilyMedia.fractureScene.alt}
                           containerClassName="w-full h-full"
                         />
-                      </div>
+                      </motion.div>
                     </div>
                     <p className="pt-3 text-[11px] font-mono-tabular text-[#465C72]">
                       {activeImage.caption}

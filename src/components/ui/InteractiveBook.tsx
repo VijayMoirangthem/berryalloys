@@ -9,7 +9,7 @@ import {
   useState,
 } from 'react';
 import { BookOpen, ChevronLeft, ChevronRight, X } from 'lucide-react';
-import { animate, motion, useReducedMotion } from 'motion/react';
+import { AnimatePresence, animate, motion, useReducedMotion } from 'motion/react';
 import { OFFICIAL_BRAND_MARK_DARK } from '../../data/assets';
 import { cn } from '../../lib/utils';
 
@@ -458,13 +458,17 @@ export function InteractiveBook({
     [spread]
   );
 
+  const [turnDir, setTurnDir] = useState<'fwd' | 'back'>('fwd');
+
   const startTurn = useCallback(
     (to: number, kind?: Turn['kind']) => {
       if (turnRef.current || to === pos || to < -1 || to > total - 1) return;
       const dir: Turn['dir'] = to > pos ? 'fwd' : 'back';
       const k: Turn['kind'] = kind ?? (pos === -1 || to === -1 ? 'cover' : Math.abs(to - pos) > 1 ? 'jump' : 'page');
+      setTurnDir(dir);
 
-      if (prefersReduced) {
+      // Mobile (!spread) uses a crisp directional 3D spine-hinge card flip in renderStatic; reduced motion swaps immediately
+      if (prefersReduced || !spread) {
         setPos(to);
         return;
       }
@@ -472,7 +476,7 @@ export function InteractiveBook({
       turnRef.current = t;
       setTurn(t);
     },
-    [pos, total, prefersReduced]
+    [pos, spread, total, prefersReduced]
   );
 
   // Once the leaf is mounted, run the animation.
@@ -532,25 +536,65 @@ export function InteractiveBook({
 
   const renderStatic = () => {
     if (!spread) {
-      const shown = t ? (t.dir === 'fwd' ? t.to : t.from) : pos;
-      // Single sheet: when a sheet is turning, the destination (or the sheet being replaced) lies underneath.
-      const base = t ? (t.dir === 'fwd' ? t.to : t.from) : shown;
+      const currentPage = pages[Math.max(0, pos)] ?? pages[0];
+      const enterRotateY = turnDir === 'fwd' ? 18 : -18;
+      const exitRotateY = turnDir === 'fwd' ? -18 : 18;
       return (
-        <div className="relative border border-[#10243A]/20 dark:border-[#F4F8FC]/16 shadow-2xl overflow-hidden" style={perspectiveStyle}>
-          {sheetOf(base, !t)}
-          <div ref={shadeRightRef} aria-hidden="true" className="pointer-events-none absolute inset-0 opacity-0 bg-gradient-to-r from-black/45 via-black/10 to-transparent" />
-          {t && pageW > 0 && (
-            <div style={{ position: 'absolute', left: 0, top: 0, transformStyle: 'preserve-3d' }}>
-              <Leaf
-                ref={leafRef}
-                hinge="left"
-                width={pageW}
-                height={size.h}
-                front={t.dir === 'fwd' ? sheetOf(t.from, false) : sheetOf(t.to, false)}
-                back={<PaperBack />}
-              />
-            </div>
-          )}
+        <div style={{ perspective: '1600px' }}>
+          <AnimatePresence mode="wait">
+            <motion.div
+              key={`mobile-folio-${currentPage.pageNumber}`}
+              initial={
+                prefersReduced
+                  ? false
+                  : { opacity: 0.2, x: turnDir === 'fwd' ? 28 : -28, rotateY: enterRotateY, scale: 0.97 }
+              }
+              animate={{ opacity: 1, x: 0, rotateY: 0, scale: 1 }}
+              exit={
+                prefersReduced
+                  ? undefined
+                  : { opacity: 0.15, x: turnDir === 'fwd' ? -28 : 28, rotateY: exitRotateY, scale: 0.97 }
+              }
+              transition={{ duration: 0.42, ease: [0.22, 1, 0.36, 1] }}
+              style={{ transformOrigin: 'left center', transformStyle: 'preserve-3d' }}
+              className="border border-[#10243A]/20 dark:border-[#F4F8FC]/16 bg-[#FBFDFF] dark:bg-[#10243A] shadow-lg overflow-hidden"
+            >
+              {/* Compact Chapter Strip */}
+              <div className="flex items-center gap-1.5 overflow-x-auto px-4 py-3 border-b border-[#10243A]/12 dark:border-[#F4F8FC]/12 bg-[#F1F6FB] dark:bg-[#0D1B2E]">
+                {pages.map((p, idx) => {
+                  const selected = idx === pos;
+                  return (
+                    <button
+                      key={p.pageNumber}
+                      type="button"
+                      onClick={() => goTo(idx)}
+                      className={cn(
+                        'min-h-[38px] px-3 py-1.5 text-[11px] font-mono-tabular uppercase tracking-wider border whitespace-nowrap shrink-0 cursor-pointer transition-colors',
+                        selected
+                          ? 'bg-[#10243A] text-[#FFFFFF] border-[#10243A] dark:bg-[#0A6AA1] dark:border-[#0A6AA1]'
+                          : 'bg-white dark:bg-[#12243B] text-[#465C72] dark:text-[#B5C5D7] border-[#10243A]/14 dark:border-[#F4F8FC]/14'
+                      )}
+                    >
+                      0{p.pageNumber} · {p.title.split(' ')[0]}
+                    </button>
+                  );
+                })}
+              </div>
+
+              {currentPage.image && (
+                <div className="aspect-[16/10] w-full overflow-hidden bg-[#10243A]">
+                  <img
+                    src={currentPage.image}
+                    alt={currentPage.imageAlt ?? currentPage.title}
+                    className="w-full h-full object-cover"
+                    draggable={false}
+                  />
+                </div>
+              )}
+
+              <NarrativePage page={currentPage} />
+            </motion.div>
+          </AnimatePresence>
         </div>
       );
     }
@@ -609,7 +653,11 @@ export function InteractiveBook({
   };
 
   return (
-    <div
+    <motion.div
+      initial={prefersReduced ? false : { opacity: 0.25, y: 20 }}
+      whileInView={{ opacity: 1, y: 0 }}
+      viewport={{ once: true, amount: 'some' }}
+      transition={{ duration: 0.6, ease: [0.22, 1, 0.36, 1] }}
       className={cn(
         'w-full max-w-[920px] mx-auto bg-[#F1F6FB]/75 dark:bg-[#0D1B2E] border border-[#10243A]/14 dark:border-[#F4F8FC]/14 p-5 sm:p-8 overflow-hidden',
         className
@@ -686,9 +734,17 @@ export function InteractiveBook({
           className="relative"
         >
           {restClosed && !spread ? (
-            <button type="button" onClick={() => startTurn(0, 'cover')} aria-label="Open the dossier" className="block w-full min-h-[440px] text-left cursor-pointer shadow-2xl">
+            <motion.button
+              type="button"
+              whileTap={prefersReduced ? undefined : { scale: 0.985, rotateY: -4 }}
+              transition={{ duration: 0.2 }}
+              onClick={() => startTurn(0, 'cover')}
+              aria-label="Open the dossier"
+              className="block w-full min-h-[440px] text-left cursor-pointer shadow-2xl"
+              style={{ transformOrigin: 'left center', perspective: '1400px' }}
+            >
               <Cover coverKicker={coverKicker} coverTitle={coverTitle} coverSubtitle={coverSubtitle} coverMeta={coverMeta} fill />
-            </button>
+            </motion.button>
           ) : restClosed && spread ? (
             <div className="relative grid grid-cols-2 min-h-[560px]">
               <div aria-hidden="true" />
@@ -706,7 +762,7 @@ export function InteractiveBook({
           )}
         </motion.div>
       </div>
-    </div>
+    </motion.div>
   );
 }
 

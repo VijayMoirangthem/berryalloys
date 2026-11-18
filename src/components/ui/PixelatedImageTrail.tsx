@@ -3,6 +3,7 @@ import gsap from 'gsap';
 import { ASSETS } from '../../data/assets';
 import { cn } from '../../lib/utils';
 import { useInViewActive, useMotion } from '../../context/MotionContext';
+import { useIsCompactMobile } from '../../hooks/useIsCompactMobile';
 
 const DEFAULT_TRAIL_IMAGES = [
   ASSETS.officialPlantGate.src,
@@ -40,6 +41,7 @@ export function PixelatedImageTrail({
   imageSize: imageSizeProp,
 }: PixelatedImageTrailProps) {
   const { ambientActive, reducedMotion } = useMotion();
+  const isCompactMobile = useIsCompactMobile(767);
   const [stageWidth, setStageWidth] = useState(0);
   const imageSize = imageSizeProp ?? (() => {
     const w = Math.round(Math.min(250, Math.max(150, stageWidth * 0.2)));
@@ -181,7 +183,7 @@ export function PixelatedImageTrail({
   // on touch screens and before the first hover. It yields the moment someone interacts and honours the ambient pause.
   const inView = useInViewActive(containerRef, '0px');
   useEffect(() => {
-    if (!inView || !ambientActive || reducedMotion || images.length === 0) return;
+    if (isCompactMobile || !inView || !ambientActive || reducedMotion || images.length === 0) return;
     const el = containerRef.current;
     if (!el) return;
     let t = 0;
@@ -200,10 +202,10 @@ export function PixelatedImageTrail({
       }
     }, 120);
     return () => window.clearInterval(id);
-  }, [inView, ambientActive, reducedMotion, images.length, spawnGap, spawnAt]);
+  }, [isCompactMobile, inView, ambientActive, reducedMotion, images.length, spawnGap, spawnAt]);
 
   const handlePointerMove = (e: React.PointerEvent<HTMLDivElement>) => {
-    if (!containerRef.current || images.length === 0) return;
+    if (isCompactMobile || !containerRef.current || images.length === 0) return;
     lastInteractionRef.current = performance.now();
     if (reducedMotion) return;
 
@@ -226,6 +228,41 @@ export function PixelatedImageTrail({
       }, 95);
     }
   };
+
+  if (isCompactMobile) {
+    return (
+      <div className={cn('relative overflow-hidden', className)}>
+        <div className="relative z-20 space-y-5">
+          {children}
+          {images.length > 0 && (
+            <div className="pt-3 border-t border-[#F4F8FC]/14 space-y-2">
+              <p className="text-[10px] font-mono-tabular uppercase tracking-widest text-[#69C5F5]">
+                Swipe Field Frames ({images.length})
+              </p>
+              <div
+                aria-label="Field archive swipe strip"
+                className="flex gap-2.5 overflow-x-auto overscroll-x-contain snap-x snap-mandatory pb-1 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden"
+              >
+                {images.map((src, i) => (
+                  <div
+                    key={`${src}-${i}`}
+                    className="snap-start shrink-0 w-40 aspect-[4/3] border border-[#F4F8FC]/20 bg-[#0D1B2E] overflow-hidden"
+                  >
+                    <img
+                      src={src}
+                      alt={`Berry Alloys plant & community archive frame ${i + 1}`}
+                      loading="lazy"
+                      className="w-full h-full object-cover"
+                    />
+                  </div>
+                ))}
+              </div>
+            </div>
+          )}
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div

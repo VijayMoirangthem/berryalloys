@@ -2,6 +2,7 @@ import { useRef, useState, useEffect, useMemo, useCallback } from 'react';
 import { ChevronLeft, ChevronRight, Pause, Play } from 'lucide-react';
 import gsap from 'gsap';
 import { cn } from '../../lib/utils';
+import { useIsCompactMobile } from '../../hooks/useIsCompactMobile';
 
 export interface ScatterImageSet {
   id: string;
@@ -60,6 +61,7 @@ export function ImageScatter({
   const [focusedCardIdx, setFocusedCardIdx] = useState<number | null>(null);
   const [paused, setPaused] = useState(false);
   const [stageSize, setStageSize] = useState({ width: 1120, height: 560 });
+  const isCompactMobile = useIsCompactMobile(767);
   const isAnimatingRef = useRef(false);
   const timerRef = useRef<number | null>(null);
 
@@ -115,7 +117,7 @@ export function ImageScatter({
   }, [cardGeometry, currentSet]);
 
   const animateCards = useCallback(() => {
-    if (!cardsRef.current || !currentSet) return;
+    if (isCompactMobile || !cardsRef.current || !currentSet) return;
     const prefersReduced = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
     const cards = Array.from(cardsRef.current.children) as HTMLElement[];
     if (cards.length === 0) return;
@@ -181,7 +183,7 @@ export function ImageScatter({
         index * staggerDelay
       );
     });
-  }, [animationDuration, animationOverlap, cardPositions, currentSet]);
+  }, [animationDuration, animationOverlap, cardPositions, currentSet, isCompactMobile]);
 
   useEffect(() => {
     setFocusedCardIdx(null);
@@ -312,37 +314,33 @@ export function ImageScatter({
         </div>
       </div>
 
-      {/* Desktop / Tablet Scattered 6-Card Perimeter Stage (md+) */}
-      <div
-        ref={stageRef}
-        className="hidden md:flex relative flex-1 items-center justify-center min-h-[600px] lg:min-h-[680px]"
-      >
-        <div
-          ref={cardsRef}
-          className="absolute inset-0 pointer-events-none flex items-center justify-center"
-        >
-          {currentSet.images.map((item, idx) => {
-            const isFocused = focusedCardIdx === idx;
-            return (
+      {/* Desktop / Tablet Scattered 6-Card Perimeter Stage (md+) OR Mobile Clean 2-Column Archival Polaroid Grid (< 768px) */}
+      {isCompactMobile ? (
+        <div className="relative z-10 p-4 space-y-4">
+          <div className="text-center px-4 py-4 bg-[#FFFFFF]/96 dark:bg-[#07111F]/96 border border-[#10243A]/18 dark:border-[#F4F8FC]/18">
+            <p className="text-[10px] font-mono-tabular uppercase tracking-widest text-brand dark:text-[#69C5F5]">
+              Life & Culture at Berry Alloys
+            </p>
+            <h3 className="font-display text-2xl font-bold uppercase text-[#10243A] dark:text-[#F4F8FC] mt-0.5">
+              {currentSet.label}
+            </h3>
+            {currentSet.subtitle && (
+              <p className="text-xs text-[#465C72] dark:text-[#B5C5D7] mt-1 leading-relaxed">
+                {currentSet.subtitle}
+              </p>
+            )}
+          </div>
+
+          <div className="grid grid-cols-2 gap-3">
+            {currentSet.images.map((item, idx) => (
               <figure
-                key={`${currentSet.id}-${idx}`}
-                onMouseEnter={() => setFocusedCardIdx(idx)}
-                onMouseLeave={() => setFocusedCardIdx(null)}
-                onClick={() =>
-                  setFocusedCardIdx((prev) => (prev === idx ? null : idx))
-                }
-                style={{ width: `${cardGeometry.cardW}px` }}
-                className={cn(
-                  'pointer-events-auto absolute flex flex-col border bg-[#FFFFFF] dark:bg-[#12243B] p-2 shadow-[0_18px_40px_rgba(0,0,0,0.2)] transition-shadow duration-200 cursor-pointer',
-                  isFocused
-                    ? 'z-30 border-brand dark:border-[#69C5F5] shadow-[0_26px_58px_rgba(0,0,0,0.34)]'
-                    : 'z-10 border-[#10243A]/18 dark:border-[#F4F8FC]/20 hover:z-30 hover:border-brand'
-                )}
+                key={`${currentSet.id}-mobile-${idx}`}
+                className="flex flex-col border border-[#10243A]/16 dark:border-[#F4F8FC]/18 bg-[#FFFFFF] dark:bg-[#12243B] p-1.5 shadow-md"
               >
                 <div
                   className={cn(
                     'aspect-[16/10] w-full overflow-hidden',
-                    item.isEmblem ? 'bg-[#FFFFFF] p-2' : 'bg-[#10243A]'
+                    item.isEmblem ? 'bg-[#FFFFFF] p-1.5' : 'bg-[#10243A]'
                   )}
                 >
                   <img
@@ -354,83 +352,88 @@ export function ImageScatter({
                     )}
                   />
                 </div>
-                <figcaption className="pt-2 pb-0.5 px-0.5 flex items-center justify-between gap-2 text-[11px] font-mono-tabular text-[#10243A] dark:text-[#F4F8FC]">
-                  <span className="truncate font-medium">{item.caption}</span>
-                  <span className="text-[10px] text-brand dark:text-[#69C5F5] shrink-0">
-                    0{idx + 1}
-                  </span>
+                <figcaption className="pt-1.5 pb-0.5 px-0.5 text-[10px] font-mono-tabular text-[#10243A] dark:text-[#F4F8FC] truncate">
+                  {item.caption}
                 </figcaption>
               </figure>
-            );
-          })}
+            ))}
+          </div>
         </div>
-
-        {/* Center Editorial Title Lockup — Always Unobstructed */}
+      ) : (
         <div
-          ref={labelRef}
-          className="relative z-20 pointer-events-none text-center max-w-[270px] lg:max-w-[330px] px-5 lg:px-6 py-4 lg:py-5 bg-[#FFFFFF]/96 dark:bg-[#07111F]/96 border border-[#10243A]/20 dark:border-[#F4F8FC]/22 shadow-2xl"
+          ref={stageRef}
+          className="flex relative flex-1 items-center justify-center min-h-[600px] lg:min-h-[680px]"
         >
-          <p className="text-[10px] font-mono-tabular uppercase tracking-widest text-brand dark:text-[#69C5F5]">
-            Life & Culture at Berry Alloys
-          </p>
-          <h3 className="font-display text-2xl lg:text-3xl font-bold uppercase text-[#10243A] dark:text-[#F4F8FC] mt-1 leading-tight">
-            {currentSet.label}
-          </h3>
-          {currentSet.subtitle && (
-            <p className="text-xs text-[#465C72] dark:text-[#B5C5D7] mt-1.5 leading-relaxed">
-              {currentSet.subtitle}
-            </p>
-          )}
-          <p className="mt-2.5 pt-2 border-t border-[#10243A]/10 dark:border-[#F4F8FC]/10 text-[10px] font-mono-tabular uppercase tracking-wider text-[#465C72] dark:text-[#B5C5D7]">
-            {currentSet.images.length} Field Plates · Hover Frame To Focus
-          </p>
-        </div>
-      </div>
-
-      {/* Mobile Clean 2-Column Archival Polaroid Grid (< md) */}
-      <div className="md:hidden relative z-10 p-4 space-y-4">
-        <div className="text-center px-4 py-4 bg-[#FFFFFF]/96 dark:bg-[#07111F]/96 border border-[#10243A]/18 dark:border-[#F4F8FC]/18">
-          <p className="text-[10px] font-mono-tabular uppercase tracking-widest text-brand dark:text-[#69C5F5]">
-            Life & Culture at Berry Alloys
-          </p>
-          <h3 className="font-display text-2xl font-bold uppercase text-[#10243A] dark:text-[#F4F8FC] mt-0.5">
-            {currentSet.label}
-          </h3>
-          {currentSet.subtitle && (
-            <p className="text-xs text-[#465C72] dark:text-[#B5C5D7] mt-1 leading-relaxed">
-              {currentSet.subtitle}
-            </p>
-          )}
-        </div>
-
-        <div className="grid grid-cols-2 gap-3">
-          {currentSet.images.map((item, idx) => (
-            <figure
-              key={`${currentSet.id}-mobile-${idx}`}
-              className="flex flex-col border border-[#10243A]/16 dark:border-[#F4F8FC]/18 bg-[#FFFFFF] dark:bg-[#12243B] p-1.5 shadow-md"
-            >
-              <div
-                className={cn(
-                  'aspect-[16/10] w-full overflow-hidden',
-                  item.isEmblem ? 'bg-[#FFFFFF] p-1.5' : 'bg-[#10243A]'
-                )}
-              >
-                <img
-                  src={item.src}
-                  alt={item.alt}
+          <div
+            ref={cardsRef}
+            className="absolute inset-0 pointer-events-none flex items-center justify-center"
+          >
+            {currentSet.images.map((item, idx) => {
+              const isFocused = focusedCardIdx === idx;
+              return (
+                <figure
+                  key={`${currentSet.id}-${idx}`}
+                  onMouseEnter={() => setFocusedCardIdx(idx)}
+                  onMouseLeave={() => setFocusedCardIdx(null)}
+                  onClick={() =>
+                    setFocusedCardIdx((prev) => (prev === idx ? null : idx))
+                  }
+                  style={{ width: `${cardGeometry.cardW}px` }}
                   className={cn(
-                    'w-full h-full block',
-                    item.isEmblem ? 'object-contain' : 'object-cover'
+                    'pointer-events-auto absolute flex flex-col border bg-[#FFFFFF] dark:bg-[#12243B] p-2 shadow-[0_18px_40px_rgba(0,0,0,0.2)] transition-shadow duration-200 cursor-pointer',
+                    isFocused
+                      ? 'z-30 border-brand dark:border-[#69C5F5] shadow-[0_26px_58px_rgba(0,0,0,0.34)]'
+                      : 'z-10 border-[#10243A]/18 dark:border-[#F4F8FC]/20 hover:z-30 hover:border-brand'
                   )}
-                />
-              </div>
-              <figcaption className="pt-1.5 pb-0.5 px-0.5 text-[10px] font-mono-tabular text-[#10243A] dark:text-[#F4F8FC] truncate">
-                {item.caption}
-              </figcaption>
-            </figure>
-          ))}
+                >
+                  <div
+                    className={cn(
+                      'aspect-[16/10] w-full overflow-hidden',
+                      item.isEmblem ? 'bg-[#FFFFFF] p-2' : 'bg-[#10243A]'
+                    )}
+                  >
+                    <img
+                      src={item.src}
+                      alt={item.alt}
+                      className={cn(
+                        'w-full h-full block',
+                        item.isEmblem ? 'object-contain' : 'object-cover'
+                      )}
+                    />
+                  </div>
+                  <figcaption className="pt-2 pb-0.5 px-0.5 flex items-center justify-between gap-2 text-[11px] font-mono-tabular text-[#10243A] dark:text-[#F4F8FC]">
+                    <span className="truncate font-medium">{item.caption}</span>
+                    <span className="text-[10px] text-brand dark:text-[#69C5F5] shrink-0">
+                      0{idx + 1}
+                    </span>
+                  </figcaption>
+                </figure>
+              );
+            })}
+          </div>
+
+          {/* Center Editorial Title Lockup — Always Unobstructed */}
+          <div
+            ref={labelRef}
+            className="relative z-20 pointer-events-none text-center max-w-[270px] lg:max-w-[330px] px-5 lg:px-6 py-4 lg:py-5 bg-[#FFFFFF]/96 dark:bg-[#07111F]/96 border border-[#10243A]/20 dark:border-[#F4F8FC]/22 shadow-2xl"
+          >
+            <p className="text-[10px] font-mono-tabular uppercase tracking-widest text-brand dark:text-[#69C5F5]">
+              Life & Culture at Berry Alloys
+            </p>
+            <h3 className="font-display text-2xl lg:text-3xl font-bold uppercase text-[#10243A] dark:text-[#F4F8FC] mt-1 leading-tight">
+              {currentSet.label}
+            </h3>
+            {currentSet.subtitle && (
+              <p className="text-xs text-[#465C72] dark:text-[#B5C5D7] mt-1.5 leading-relaxed">
+                {currentSet.subtitle}
+              </p>
+            )}
+            <p className="mt-2.5 pt-2 border-t border-[#10243A]/10 dark:border-[#F4F8FC]/10 text-[10px] font-mono-tabular uppercase tracking-wider text-[#465C72] dark:text-[#B5C5D7]">
+              {currentSet.images.length} Field Plates · Hover Frame To Focus
+            </p>
+          </div>
         </div>
-      </div>
+      )}
     </div>
   );
 }

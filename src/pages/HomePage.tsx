@@ -1,6 +1,7 @@
 import { useEffect, useRef, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { ArrowRight, ArrowUpRight, Mail, MapPin, Phone } from 'lucide-react';
+import { motion } from 'motion/react';
 import gsap from 'gsap';
 import { ScrollTrigger } from 'gsap/ScrollTrigger';
 import { ASSETS, GALLERY_ITEMS } from '../data/assets';
@@ -73,7 +74,8 @@ export function HomePage() {
     const prefersReduced = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
     if (prefersReduced || !heroSectionRef.current) return;
 
-    const ctx = gsap.context(() => {
+    const mm = gsap.matchMedia();
+    mm.add('(min-width: 1024px)', () => {
       gsap.from('.hero-reveal', {
         y: 18,
         opacity: 0,
@@ -102,9 +104,9 @@ export function HomePage() {
         });
       }
       document.fonts?.ready?.then(() => ScrollTrigger.refresh());
-    }, heroSectionRef);
+    });
 
-    return () => ctx.revert();
+    return () => mm.revert();
   }, []);
 
   const scrollToChapter = (id: string) => {
@@ -122,7 +124,7 @@ export function HomePage() {
     scrollToChapter('enquiry');
   };
 
-  useIndustrialReveals(pageRootRef, ['overview', 'process']);
+  useIndustrialReveals(pageRootRef, ['overview', 'process', 'leadership', 'alloys']);
   useMobileMotion(pageRootRef);
 
   const featuredCamp = CSR_STORIES[0];
@@ -203,10 +205,10 @@ export function HomePage() {
         </div>
 
         {/* Center Monumental Interactive Particle Stage */}
-        <div className="relative z-10 flex-1 flex items-center justify-center max-w-[1440px] w-full mx-auto px-2 sm:px-6 lg:px-8 py-2">
+        <div className="relative z-10 flex-1 flex items-center justify-center max-w-[1440px] w-full mx-auto px-2 sm:px-6 lg:px-8 pt-2 pb-14 sm:pb-12">
           <ScrollCue />
           <InteractiveParticles
-            className="w-full h-[54svh] sm:h-[60svh] lg:h-[64svh] min-h-[320px] max-h-[620px]"
+            className="w-full h-[50svh] sm:h-[58svh] lg:h-[64svh] min-h-[300px] max-h-[620px]"
             lines={
               particleMode === 'brand'
                 ? ['BERRY ALLOYS', 'LIMITED']
@@ -222,13 +224,14 @@ export function HomePage() {
         </div>
 
         {/* Bottom Interaction Cue & Chapter Descent Bar */}
-        <div className="relative z-10 max-w-[1360px] mx-auto w-full px-4 sm:px-6 lg:px-8 xl:px-14 2xl:px-8 pb-5 sm:pb-7 pt-3 border-t border-accent-red/70 lg:pr-[220px] xl:pr-[220px] 2xl:pr-[220px] flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+        <div className="relative z-10 max-w-[1360px] mx-auto w-full px-4 sm:px-6 lg:px-8 xl:px-14 2xl:px-8 pb-20 sm:pb-7 pt-3 border-t border-accent-red/70 sm:pr-[116px] lg:pr-[220px] xl:pr-[220px] 2xl:pr-[220px] flex flex-col sm:flex-row sm:items-center justify-between gap-4">
           <div className="space-y-1">
-            <p className="text-[11px] font-mono-tabular uppercase tracking-widest text-[#69C5F5]">
+            <p className="text-[11px] font-mono-tabular uppercase tracking-widest text-brand dark:text-[#69C5F5]">
               Interactive Particle Forging Field
             </p>
             <p className="text-xs text-ink-2">
-              Move cursor or swipe across the alloy typography to scatter particles · Bulk Ferro Alloys Manufacturer
+              <span className="lg:hidden">Tap or swipe across the alloy typography to scatter particles · Bulk Ferro Alloys Manufacturer</span>
+              <span className="hidden lg:inline">Move cursor or swipe across the alloy typography to scatter particles · Bulk Ferro Alloys Manufacturer</span>
             </p>
           </div>
 
@@ -298,6 +301,7 @@ export function HomePage() {
                   id="hero-heading"
                   text="Strength begins with precision."
                   as="h2"
+                  triggerOnScroll
                   className="font-display fluid-hero-title font-bold uppercase text-[#F4F8FC] max-w-4xl"
                 />
 
@@ -506,7 +510,8 @@ export function HomePage() {
                   .
                 </p>
                 <p className="text-xs font-mono-tabular text-brand dark:text-[#69C5F5]">
-                  Tip: Hover or focus any dashed underline above to inspect site imagery.
+                  <span className="md:hidden">Tip: Tap any dashed underline above to inspect site imagery.</span>
+                  <span className="hidden md:inline">Tip: Hover or focus any dashed underline above to inspect site imagery.</span>
                 </p>
               </div>
 
@@ -557,13 +562,21 @@ export function HomePage() {
                 </figcaption>
               </figure>
 
-              <figure className="bg-white dark:bg-[#12243B] border border-[#10243A]/12 dark:border-[#F4F8FC]/14 grid grid-cols-12 overflow-hidden items-center">
+              <motion.figure
+                initial={{ opacity: 0.35, y: 18 }}
+                whileInView={{ opacity: 1, y: 0 }}
+                viewport={{ once: true, amount: 'some' }}
+                transition={{ duration: 0.55, delay: 0.08, ease: [0.22, 1, 0.36, 1] }}
+                className="bg-white dark:bg-[#12243B] border border-[#10243A]/12 dark:border-[#F4F8FC]/14 grid grid-cols-12 overflow-hidden items-center"
+              >
                 <div className="col-span-5 aspect-[4/3] bg-[#10243A] overflow-hidden">
-                  <ResilientImage
-                    src={ASSETS.corporateHouse.src}
-                    alt={ASSETS.corporateHouse.alt}
-                    containerClassName="w-full h-full"
-                  />
+                  <ImageReveal direction="left" className="w-full h-full">
+                    <ResilientImage
+                      src={ASSETS.corporateHouse.src}
+                      alt={ASSETS.corporateHouse.alt}
+                      containerClassName="w-full h-full"
+                    />
+                  </ImageReveal>
                 </div>
                 <figcaption className="col-span-7 p-4 space-y-1">
                   <p className="text-[11px] font-mono-tabular uppercase tracking-wider text-brand dark:text-[#69C5F5]">
@@ -576,13 +589,19 @@ export function HomePage() {
                     Active headquarters at 21A, Shakespeare Sarani; upcoming office announced at 56, Chowringhee Road, Kolkata.
                   </p>
                 </figcaption>
-              </figure>
+              </motion.figure>
             </div>
           </div>
 
           {/* Factual Heritage Strip */}
           <dl className="grid grid-cols-1 md:grid-cols-3 border-t border-b border-[#10243A]/15 dark:border-[#F4F8FC]/14 divide-y md:divide-y-0 md:divide-x divide-[#10243A]/15 dark:divide-[#F4F8FC]/14">
-            <div className="py-6 md:pr-8">
+            <motion.div
+              initial={{ opacity: 0.35, y: 14 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              viewport={{ once: true, amount: 'some' }}
+              transition={{ duration: 0.45, delay: 0, ease: [0.22, 1, 0.36, 1] }}
+              className="py-6 md:pr-8"
+            >
               <dt className="text-[11px] font-mono-tabular uppercase tracking-wider text-brand dark:text-[#69C5F5]">
                 Founding Pillar
               </dt>
@@ -592,8 +611,14 @@ export function HomePage() {
               <dd className="text-xs text-[#465C72] dark:text-[#B5C5D7] mt-1">
                 Visionary founder of the DKG Group whose industrial discipline anchors Berry Alloys Limited.
               </dd>
-            </div>
-            <div className="py-6 md:px-8">
+            </motion.div>
+            <motion.div
+              initial={{ opacity: 0.35, y: 14 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              viewport={{ once: true, amount: 'some' }}
+              transition={{ duration: 0.45, delay: 0.08, ease: [0.22, 1, 0.36, 1] }}
+              className="py-6 md:px-8"
+            >
               <dt className="text-[11px] font-mono-tabular uppercase tracking-wider text-brand dark:text-[#69C5F5]">
                 Public Incorporation
               </dt>
@@ -603,8 +628,14 @@ export function HomePage() {
               <dd className="text-xs text-[#465C72] dark:text-[#B5C5D7] mt-1">
                 Registered under CIN {COMPANY_INFO.cin} (RoC Kolkata, West Bengal).
               </dd>
-            </div>
-            <div className="py-6 md:pl-8">
+            </motion.div>
+            <motion.div
+              initial={{ opacity: 0.35, y: 14 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              viewport={{ once: true, amount: 'some' }}
+              transition={{ duration: 0.45, delay: 0.16, ease: [0.22, 1, 0.36, 1] }}
+              className="py-6 md:pl-8"
+            >
               <dt className="text-[11px] font-mono-tabular uppercase tracking-wider text-brand dark:text-[#69C5F5]">
                 Eastern & Coastal Corridor
               </dt>
@@ -614,7 +645,7 @@ export function HomePage() {
               <dd className="text-xs text-[#465C72] dark:text-[#B5C5D7] mt-1">
                 Smelting works across Andhra Pradesh and Jharkhand connected directly to Visakhapatnam Port.
               </dd>
-            </div>
+            </motion.div>
           </dl>
 
           {/* Interactive 3D Corporate Heritage Dossier */}
@@ -698,15 +729,22 @@ export function HomePage() {
             </div>
 
             <div className="grid grid-cols-2 lg:grid-cols-4 border-t border-b border-[#10243A]/12 dark:border-[#F4F8FC]/12 divide-y sm:divide-y-0 sm:divide-x divide-[#10243A]/12 dark:divide-[#F4F8FC]/12 bg-white dark:bg-[#12243B]">
-              {COMPANY_INFO.workforceStory.highlights.map((item) => (
-                <div key={item.metric} className="p-4 sm:p-5 space-y-1">
+              {COMPANY_INFO.workforceStory.highlights.map((item, idx) => (
+                <motion.div
+                  key={item.metric}
+                  initial={{ opacity: 0.35, y: 12 }}
+                  whileInView={{ opacity: 1, y: 0 }}
+                  viewport={{ once: true, amount: 'some' }}
+                  transition={{ duration: 0.42, delay: idx * 0.06, ease: [0.22, 1, 0.36, 1] }}
+                  className="p-4 sm:p-5 space-y-1"
+                >
                   <p data-countup className="font-display text-xl sm:text-2xl font-bold uppercase text-brand dark:text-[#69C5F5]">
                     {item.metric}
                   </p>
                   <p className="text-xs text-[#465C72] dark:text-[#B5C5D7] leading-relaxed">
                     {item.label}
                   </p>
-                </div>
+                </motion.div>
               ))}
             </div>
 
@@ -727,18 +765,22 @@ export function HomePage() {
                   role: 'ISO 45001 · Zero Harm',
                   title: 'Shift Safety & Shopfloor Supervisors',
                 },
-              ].map((card) => (
-                <figure
+              ].map((card, idx) => (
+                <motion.figure
                   key={card.asset.id}
+                  initial={{ opacity: 0.3, y: 18 }}
+                  whileInView={{ opacity: 1, y: 0 }}
+                  viewport={{ once: true, amount: 'some' }}
+                  transition={{ duration: 0.5, delay: idx * 0.08, ease: [0.22, 1, 0.36, 1] }}
                   className="bg-white dark:bg-[#12243B] border border-[#10243A]/12 dark:border-[#F4F8FC]/14 overflow-hidden flex flex-col"
                 >
-                  <div className="aspect-[16/10] bg-[#10243A] overflow-hidden">
+                  <ImageReveal direction="up" className="aspect-[16/10] bg-[#10243A]">
                     <ResilientImage
                       src={card.asset.src}
                       alt={card.asset.alt}
                       containerClassName="w-full h-full"
                     />
-                  </div>
+                  </ImageReveal>
                   <figcaption className="p-4 space-y-1 flex-1 flex flex-col justify-between">
                     <div className="space-y-1">
                       <p className="text-[11px] font-mono-tabular uppercase tracking-wider text-brand dark:text-[#69C5F5]">
@@ -752,7 +794,7 @@ export function HomePage() {
                       {card.asset.caption}
                     </p>
                   </figcaption>
-                </figure>
+                </motion.figure>
               ))}
             </div>
           </div>
@@ -788,20 +830,27 @@ export function HomePage() {
             </div>
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5">
               {COMPANY_INFO.values.map((val, idx) => (
-                <SpotlightSurface
+                <motion.div
                   key={val.title}
-                  className="bg-white dark:bg-[#12243B] border border-[#10243A]/12 dark:border-[#F4F8FC]/14 p-5 space-y-2"
+                  initial={{ opacity: 0.3, y: 16 }}
+                  whileInView={{ opacity: 1, y: 0 }}
+                  viewport={{ once: true, amount: 'some' }}
+                  transition={{ duration: 0.45, delay: idx * 0.055, ease: [0.22, 1, 0.36, 1] }}
                 >
-                  <span className="font-mono-tabular text-xs font-semibold text-brand dark:text-[#69C5F5]">
-                    0{idx + 1}
-                  </span>
-                  <h4 className="font-display text-xl font-bold uppercase text-[#10243A] dark:text-[#F4F8FC]">
-                    {val.title}
-                  </h4>
-                  <p className="text-xs sm:text-sm text-[#465C72] dark:text-[#B5C5D7] leading-relaxed">
-                    {val.description}
-                  </p>
-                </SpotlightSurface>
+                  <SpotlightSurface
+                    className="h-full bg-white dark:bg-[#12243B] border border-[#10243A]/12 dark:border-[#F4F8FC]/14 p-5 space-y-2"
+                  >
+                    <span className="font-mono-tabular text-xs font-semibold text-brand dark:text-[#69C5F5]">
+                      0{idx + 1}
+                    </span>
+                    <h4 className="font-display text-xl font-bold uppercase text-[#10243A] dark:text-[#F4F8FC]">
+                      {val.title}
+                    </h4>
+                    <p className="text-xs sm:text-sm text-[#465C72] dark:text-[#B5C5D7] leading-relaxed">
+                      {val.description}
+                    </p>
+                  </SpotlightSurface>
+                </motion.div>
               ))}
             </div>
           </div>
@@ -1285,7 +1334,8 @@ export function HomePage() {
                       <span className="hero-breathe absolute inline-flex h-full w-full rounded-full bg-[#FF8091] opacity-75" />
                       <span className="relative inline-flex h-2 w-2 rounded-full bg-[#FF8091]" />
                     </span>
-                    Move your cursor or drag a finger across the surface to reveal works &amp; people frames
+                    <span className="md:hidden">Swipe the archive strip below to inspect works &amp; people frames</span>
+                    <span className="hidden md:inline">Move your cursor or drag a finger across the surface to reveal works &amp; people frames</span>
                   </span>
                 </div>
                 <div className="py-6 space-y-4 max-w-2xl bg-gradient-to-r from-[#07111F]/85 via-[#07111F]/60 to-transparent -mx-2 px-2">
@@ -1388,7 +1438,7 @@ export function HomePage() {
               <div className="flex flex-col sm:flex-row sm:items-end justify-between gap-4">
                 <div>
                   <p className="text-xs font-mono-tabular uppercase tracking-widest text-brand dark:text-[#69C5F5] mb-2">
-                    10 / News & Technical Articles · Hover Banner for Field Trail
+                    10 / News & Technical Articles<span className="hidden md:inline"> · Hover Banner for Field Trail</span>
                   </p>
                   <h2
                     id="news-heading"

@@ -109,35 +109,42 @@ export function ManufacturingScrollStory() {
     return () => ctx.revert();
   }, [prefersReducedMotion]);
 
-  // Phones and tablets: the desktop pin is skipped, so the stages get their own scroll-driven story instead of a plain list.
+  // Phones and tablets: crisp active-stage dot tracking via IntersectionObserver with zero heavy clipPath/scale scrubs
   useEffect(() => {
     const list = mobileListRef.current;
     if (prefersReducedMotion || !list) return;
-    const mm = gsap.matchMedia();
-    mm.add('(max-width: 1023px)', () => {
-      const fill = list.querySelector<HTMLElement>('[data-rail-fill]');
-      if (fill) {
-        gsap.fromTo(fill, { scaleY: 0 }, { scaleY: 1, ease: 'none', scrollTrigger: { trigger: list, start: 'top 72%', end: 'bottom 72%', scrub: 0.4 } });
-      }
-      list.querySelectorAll<HTMLElement>('[data-stage-card]').forEach((card) => {
-        const media = card.querySelector<HTMLElement>('[data-stage-media]');
-        const img = media?.querySelector('img');
-        const body = card.querySelectorAll<HTMLElement>('[data-stage-body] > *');
-        if (media) {
-          gsap.fromTo(media, { clipPath: 'inset(0 0 100% 0)' }, { clipPath: 'inset(0 0 0% 0)', duration: 1.1, ease: 'power3.out', clearProps: 'clipPath', scrollTrigger: { trigger: card, start: 'top 84%', once: true } });
+    if (!window.matchMedia('(max-width: 1023px)').matches) return;
+
+    const cards = Array.from(list.querySelectorAll<HTMLElement>('[data-stage-card]'));
+    const fill = list.querySelector<HTMLElement>('[data-rail-fill]');
+    if (fill) {
+      fill.style.transition = 'transform 280ms cubic-bezier(0.22, 1, 0.36, 1)';
+    }
+
+    const io = new IntersectionObserver(
+      (entries) => {
+        entries.forEach((entry) => {
+          const card = entry.target as HTMLElement;
+          if (entry.isIntersecting) {
+            card.classList.add('is-active');
+          } else {
+            card.classList.remove('is-active');
+          }
+        });
+
+        const activeIndex = cards.reduce((acc, c, i) => (c.classList.contains('is-active') ? i : acc), 0);
+        if (fill) {
+          fill.style.transform = `scaleY(${Math.min(1, (activeIndex + 1) / Math.max(1, cards.length))})`;
         }
-        if (img) {
-          gsap.fromTo(img, { scale: 1.3, yPercent: -4 }, { scale: 1.04, yPercent: 4, ease: 'none', scrollTrigger: { trigger: card, start: 'top bottom', end: 'bottom top', scrub: 0.6 } });
-        }
-        if (body.length) {
-          gsap.from(body, { opacity: 0, y: 22, duration: 0.7, stagger: 0.1, ease: 'power2.out', clearProps: 'transform,opacity', scrollTrigger: { trigger: card, start: 'top 70%', once: true } });
-        }
-        ScrollTrigger.create({ trigger: card, start: 'top 62%', end: 'bottom 62%', toggleClass: { targets: card, className: 'is-active' } });
-      });
-      const t = window.setTimeout(() => ScrollTrigger.refresh(), 1200);
-      return () => window.clearTimeout(t);
-    });
-    return () => mm.revert();
+      },
+      { rootMargin: '-22% 0px -32% 0px', threshold: 0.1 }
+    );
+
+    cards.forEach((c) => io.observe(c));
+    return () => {
+      io.disconnect();
+      cards.forEach((c) => c.classList.remove('is-active'));
+    };
   }, [prefersReducedMotion]);
 
   const handleManualStageSelect = (idx: number) => {

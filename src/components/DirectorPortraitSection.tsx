@@ -32,7 +32,7 @@ export function DirectorPortraitSection({ variant = 'home' }: DirectorPortraitSe
   const portraitLayerRef = useRef<HTMLDivElement>(null);
   const accentLayerRef = useRef<HTMLDivElement>(null);
 
-  // Subtle ~1s staggered scroll entrance on dedicated wrapper elements (respects reduced motion)
+  // Staggered scroll entrance: full GSAP ScrollTrigger on lg+, lightweight GPU IntersectionObserver on < 1024px
   useEffect(() => {
     const root = rootRef.current;
     if (!root) return;
@@ -40,58 +40,190 @@ export function DirectorPortraitSection({ variant = 'home' }: DirectorPortraitSe
     const prefersReduced = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
     if (prefersReduced) return;
 
-    const ctx = gsap.context(() => {
-      if (frameLayerRef.current) {
-        gsap.from(frameLayerRef.current, {
-          opacity: 0,
-          scale: 0.97,
-          duration: 0.78,
-          ease: 'power2.out',
-          clearProps: 'opacity,transform',
-          scrollTrigger: {
-            trigger: root,
-            start: 'top 82%',
-            once: true,
-          },
+    const isCompactViewport = window.matchMedia('(max-width: 1023px)').matches;
+    if (isCompactViewport) {
+      const frame = frameLayerRef.current;
+      const portrait = portraitEntranceRef.current;
+      const accent = accentLayerRef.current;
+      const editorialItems = Array.from(root.querySelectorAll<HTMLElement>('.director-editorial-stagger'));
+
+      if (frame) {
+        frame.style.opacity = '0.28';
+        frame.style.transform = 'scale(0.95)';
+        frame.style.transition = 'opacity 580ms ease, transform 680ms cubic-bezier(0.22, 1, 0.36, 1)';
+      }
+      if (portrait) {
+        portrait.style.opacity = '0.25';
+        portrait.style.transform = 'translate3d(0, 26px, 0)';
+        portrait.style.transition = 'opacity 680ms ease 90ms, transform 760ms cubic-bezier(0.22, 1, 0.36, 1) 90ms';
+      }
+      if (accent) {
+        accent.style.opacity = '0.2';
+        accent.style.transform = 'translate3d(12px, 12px, 0)';
+        accent.style.transition = 'opacity 560ms ease 180ms, transform 640ms cubic-bezier(0.22, 1, 0.36, 1) 180ms';
+      }
+      editorialItems.forEach((el, idx) => {
+        el.style.opacity = '0.25';
+        el.style.transform = 'translate3d(0, 14px, 0)';
+        el.style.transition = `opacity 520ms ease ${80 + idx * 55}ms, transform 580ms cubic-bezier(0.22, 1, 0.36, 1) ${80 + idx * 55}ms`;
+      });
+
+      let revealed = false;
+      const hasEnteredOrPassed = () => root.getBoundingClientRect().top <= window.innerHeight * 0.94;
+
+      const reveal = () => {
+        if (revealed) return;
+        revealed = true;
+        if (frame) {
+          frame.style.opacity = '1';
+          frame.style.transform = 'scale(1)';
+        }
+        if (portrait) {
+          portrait.style.opacity = '1';
+          portrait.style.transform = 'translate3d(0, 0, 0)';
+        }
+        if (accent) {
+          accent.style.opacity = '1';
+          accent.style.transform = 'translate3d(0, 0, 0)';
+        }
+        editorialItems.forEach((el) => {
+          el.style.opacity = '1';
+          el.style.transform = 'translate3d(0, 0, 0)';
         });
+        io.disconnect();
+        window.removeEventListener('scroll', onScrollOrResize);
+        window.removeEventListener('resize', onScrollOrResize);
+      };
+
+      const onScrollOrResize = () => {
+        if (hasEnteredOrPassed()) reveal();
+      };
+
+      const io = new IntersectionObserver(
+        (entries) => {
+          if (entries.some((e) => e.isIntersecting || e.boundingClientRect.top <= window.innerHeight * 0.94)) {
+            reveal();
+          }
+        },
+        { threshold: 0.05, rootMargin: '60px 0px' }
+      );
+      io.observe(root);
+      window.addEventListener('scroll', onScrollOrResize, { passive: true });
+      window.addEventListener('resize', onScrollOrResize, { passive: true });
+
+      let raf1 = 0;
+      let raf2 = 0;
+      raf1 = window.requestAnimationFrame(() => {
+        raf2 = window.requestAnimationFrame(() => {
+          if (hasEnteredOrPassed()) reveal();
+        });
+      });
+
+      return () => {
+        window.cancelAnimationFrame(raf1);
+        window.cancelAnimationFrame(raf2);
+        io.disconnect();
+        window.removeEventListener('scroll', onScrollOrResize);
+        window.removeEventListener('resize', onScrollOrResize);
+        if (frame) {
+          frame.style.opacity = '';
+          frame.style.transform = '';
+          frame.style.transition = '';
+        }
+        if (portrait) {
+          portrait.style.opacity = '';
+          portrait.style.transform = '';
+          portrait.style.transition = '';
+        }
+        if (accent) {
+          accent.style.opacity = '';
+          accent.style.transform = '';
+          accent.style.transition = '';
+        }
+        editorialItems.forEach((el) => {
+          el.style.opacity = '';
+          el.style.transform = '';
+          el.style.transition = '';
+        });
+      };
+    }
+
+    const mm = gsap.matchMedia();
+    mm.add('(min-width: 1024px)', () => {
+      const tl = gsap.timeline({
+        paused: true,
+        scrollTrigger: {
+          trigger: root,
+          start: 'top 86%',
+          once: true,
+          invalidateOnRefresh: true,
+        },
+      });
+
+      if (frameLayerRef.current) {
+        tl.fromTo(
+          frameLayerRef.current,
+          { opacity: 0.25, scale: 0.96 },
+          {
+            opacity: 1,
+            scale: 1,
+            duration: 0.72,
+            ease: 'power2.out',
+            clearProps: 'opacity,transform',
+          },
+          0
+        );
       }
 
       if (portraitEntranceRef.current) {
-        gsap.from(portraitEntranceRef.current, {
-          y: 26,
-          opacity: 0,
-          duration: 0.95,
-          delay: 0.12,
-          ease: 'power3.out',
-          clearProps: 'transform,opacity',
-          scrollTrigger: {
-            trigger: root,
-            start: 'top 82%',
-            once: true,
+        tl.fromTo(
+          portraitEntranceRef.current,
+          { y: 24, opacity: 0.22 },
+          {
+            y: 0,
+            opacity: 1,
+            duration: 0.88,
+            ease: 'power3.out',
+            clearProps: 'transform,opacity',
           },
-        });
+          0.1
+        );
       }
 
       const editorialItems = root.querySelectorAll('.director-editorial-stagger');
       if (editorialItems.length > 0) {
-        gsap.from(editorialItems, {
-          y: 16,
-          opacity: 0,
-          duration: 0.72,
-          stagger: 0.09,
-          delay: 0.14,
-          ease: 'power3.out',
-          clearProps: 'transform,opacity',
-          scrollTrigger: {
-            trigger: root,
-            start: 'top 82%',
-            once: true,
+        tl.fromTo(
+          editorialItems,
+          { y: 16, opacity: 0.22 },
+          {
+            y: 0,
+            opacity: 1,
+            duration: 0.68,
+            stagger: 0.08,
+            ease: 'power3.out',
+            clearProps: 'transform,opacity',
           },
-        });
+          0.12
+        );
       }
-    }, root);
 
-    return () => ctx.revert();
+      const ensureEnteredPlayed = () => {
+        if (tl.progress() === 0 && root.getBoundingClientRect().top <= window.innerHeight * 0.9) {
+          tl.play();
+        }
+      };
+
+      const onScrollCheck = () => ensureEnteredPlayed();
+      window.addEventListener('scroll', onScrollCheck, { passive: true });
+      const rafCheck = window.requestAnimationFrame(() => ensureEnteredPlayed());
+
+      return () => {
+        window.cancelAnimationFrame(rafCheck);
+        window.removeEventListener('scroll', onScrollCheck);
+      };
+    });
+
+    return () => mm.revert();
   }, []);
 
   // Desktop fine-pointer damped rAF 5-layer depth parallax (never updates React state on pointermove)
@@ -191,44 +323,76 @@ export function DirectorPortraitSection({ variant = 'home' }: DirectorPortraitSe
     };
   }, []);
 
-  // Touch screens have no hover, so the five layers move on scroll instead: they drift at different speeds as the section passes,
-  // and a horizontal drag on the portrait tilts it a few degrees. The face is only ever translated, tilted or scaled uniformly;
-  // it is never warped, and no device-orientation permission is needed.
+  // Touch devices: full 4-layer depth parallax tilt on tap/swipe across portrait stage while preserving vertical scroll
   useEffect(() => {
     const stage = stageRef.current;
-    if (!stage) return;
+    const portrait = portraitLayerRef.current;
+    const frame = frameLayerRef.current;
+    const shadow = shadowLayerRef.current;
+    const accent = accentLayerRef.current;
+    if (!stage || !portrait) return;
     if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
-    const mm = gsap.matchMedia();
-    mm.add('(max-width: 1023px), (hover: none)', () => {
-      const tl = gsap.timeline({ scrollTrigger: { trigger: stage, start: 'top 92%', end: 'bottom 12%', scrub: 0.7 } });
-      if (portraitLayerRef.current) tl.fromTo(portraitLayerRef.current, { y: 40, scale: 0.97 }, { y: -10, scale: 1.02, ease: 'none' }, 0);
-      if (frameLayerRef.current) tl.fromTo(frameLayerRef.current, { y: 58 }, { y: -20, ease: 'none' }, 0);
-      if (shadowLayerRef.current) tl.fromTo(shadowLayerRef.current, { y: 76, x: 12 }, { y: -6, x: -6, ease: 'none' }, 0);
-      if (accentLayerRef.current) tl.fromTo(accentLayerRef.current, { y: -34, x: -20 }, { y: 20, x: 10, ease: 'none' }, 0);
+    if (!window.matchMedia('(max-width: 1023px), (hover: none)').matches) return;
 
-      const portrait = portraitLayerRef.current;
-      const onMove = (e: PointerEvent) => {
-        if (e.pointerType === 'mouse' || !portrait) return;
-        const r = stage.getBoundingClientRect();
-        const nx = Math.max(-1, Math.min(1, ((e.clientX - r.left) / Math.max(1, r.width)) * 2 - 1));
-        gsap.to(portrait, { rotationY: nx * 7, transformPerspective: 900, duration: 0.45, ease: 'power3.out', overwrite: 'auto' });
-      };
-      const onEnd = () => {
-        if (portrait) gsap.to(portrait, { rotationY: 0, duration: 0.9, ease: 'elastic.out(1, 0.6)', overwrite: 'auto' });
-      };
-      stage.style.touchAction = 'pan-y';
-      stage.addEventListener('pointermove', onMove, { passive: true });
-      stage.addEventListener('pointerup', onEnd, { passive: true });
-      stage.addEventListener('pointercancel', onEnd, { passive: true });
-      stage.addEventListener('pointerleave', onEnd, { passive: true });
-      return () => {
-        stage.removeEventListener('pointermove', onMove);
-        stage.removeEventListener('pointerup', onEnd);
-        stage.removeEventListener('pointercancel', onEnd);
-        stage.removeEventListener('pointerleave', onEnd);
-      };
-    });
-    return () => mm.revert();
+    const applyTouchParallax = (nx: number, duration: number) => {
+      gsap.to(portrait, {
+        rotationY: nx * 5,
+        x: nx * 5,
+        y: 8,
+        transformPerspective: 900,
+        duration,
+        ease: 'power3.out',
+        overwrite: 'auto',
+      });
+      if (frame) {
+        gsap.to(frame, {
+          rotationY: -nx * 1.5,
+          x: -nx * 6,
+          transformPerspective: 900,
+          duration,
+          ease: 'power3.out',
+          overwrite: 'auto',
+        });
+      }
+      if (shadow) {
+        gsap.to(shadow, {
+          x: -nx * 9,
+          duration,
+          ease: 'power3.out',
+          overwrite: 'auto',
+        });
+      }
+      if (accent) {
+        gsap.to(accent, {
+          x: nx * 8,
+          duration,
+          ease: 'power3.out',
+          overwrite: 'auto',
+        });
+      }
+    };
+
+    const onMove = (e: PointerEvent) => {
+      if (e.pointerType === 'mouse') return;
+      const r = stage.getBoundingClientRect();
+      const nx = Math.max(-1, Math.min(1, ((e.clientX - r.left) / Math.max(1, r.width)) * 2 - 1));
+      applyTouchParallax(nx, 0.35);
+    };
+    const onEnd = () => applyTouchParallax(0, 0.65);
+
+    stage.style.touchAction = 'pan-y';
+    stage.addEventListener('pointerdown', onMove, { passive: true });
+    stage.addEventListener('pointermove', onMove, { passive: true });
+    stage.addEventListener('pointerup', onEnd, { passive: true });
+    stage.addEventListener('pointercancel', onEnd, { passive: true });
+    stage.addEventListener('pointerleave', onEnd, { passive: true });
+    return () => {
+      stage.removeEventListener('pointerdown', onMove);
+      stage.removeEventListener('pointermove', onMove);
+      stage.removeEventListener('pointerup', onEnd);
+      stage.removeEventListener('pointercancel', onEnd);
+      stage.removeEventListener('pointerleave', onEnd);
+    };
   }, []);
 
   return (
@@ -315,7 +479,10 @@ export function DirectorPortraitSection({ variant = 'home' }: DirectorPortraitSe
         <div className="space-y-4">
           <div className="director-editorial-stagger flex items-center gap-3">
             <span className="inline-block w-8 h-[2px] bg-brand dark:bg-[#69C5F5]" aria-hidden="true" />
-            <p className="text-xs font-mono-tabular uppercase tracking-widest text-brand dark:text-[#69C5F5]">
+            <p
+              data-chapter-eyebrow
+              className="text-xs font-mono-tabular uppercase tracking-widest text-brand dark:text-[#69C5F5]"
+            >
               {variant === 'home' ? '04 / Leadership & Operating Principles' : 'Promoters & Governance Leadership'}
             </p>
           </div>

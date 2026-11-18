@@ -4,6 +4,7 @@ import { ArrowLeft, ArrowRight, ArrowUpRight } from 'lucide-react';
 import { AnimatePresence, motion, useReducedMotion } from 'motion/react';
 import { cn } from '../../lib/utils';
 import { ResilientImage } from '../ResilientImage';
+import { useIsCompactMobile } from '../../hooks/useIsCompactMobile';
 
 export interface DiagonalCarouselSlide {
   id: string;
@@ -35,6 +36,7 @@ export function DiagonalCarousel({
   const [index, setIndex] = useState(0);
   const [direction, setDirection] = useState<1 | -1>(1);
   const prefersReduced = useReducedMotion();
+  const isCompactMobile = useIsCompactMobile(767);
 
   const total = slides.length;
   const active = slides[index] ?? slides[0];
@@ -81,9 +83,18 @@ export function DiagonalCarousel({
               <motion.div
                 key={active.id}
                 custom={direction}
+                drag={isCompactMobile ? 'x' : false}
+                dragConstraints={{ left: 0, right: 0 }}
+                dragElastic={0.25}
+                onDragEnd={(_, info) => {
+                  if (info.offset.x < -40) step(1);
+                  else if (info.offset.x > 40) step(-1);
+                }}
                 initial={
                   prefersReduced
                     ? { opacity: 1 }
+                    : isCompactMobile
+                    ? { opacity: 0, x: direction * 24 }
                     : {
                         opacity: 0,
                         x: direction * 38,
@@ -102,6 +113,8 @@ export function DiagonalCarousel({
                 exit={
                   prefersReduced
                     ? { opacity: 0 }
+                    : isCompactMobile
+                    ? { opacity: 0, x: direction * -24 }
                     : {
                         opacity: 0,
                         x: direction * -38,
@@ -110,13 +123,14 @@ export function DiagonalCarousel({
                         scale: 0.96,
                       }
                 }
-                transition={{ duration: 0.6, ease: [0.22, 1, 0.36, 1] }}
+                transition={{ duration: isCompactMobile ? 0.22 : 0.6, ease: [0.22, 1, 0.36, 1] }}
+                style={isCompactMobile ? { touchAction: 'pan-y' } : undefined}
                 className="group absolute inset-0 overflow-hidden will-change-transform"
               >
                 <div
                   className={cn(
                     'w-full h-full transition-transform duration-700 ease-[cubic-bezier(0.22,1,0.36,1)]',
-                    !prefersReduced && '-rotate-[1.75deg] scale-[1.06] group-hover:rotate-0 group-hover:scale-[1.02]'
+                    !prefersReduced && !isCompactMobile && '-rotate-[1.75deg] scale-[1.06] group-hover:rotate-0 group-hover:scale-[1.02]'
                   )}
                 >
                   <ResilientImage
@@ -156,9 +170,9 @@ export function DiagonalCarousel({
             <div>
               <motion.div
                 key={active.id}
-                initial={prefersReduced ? { opacity: 1 } : { opacity: 0, y: 10 }}
+                initial={prefersReduced ? { opacity: 1 } : { opacity: 0, y: 8 }}
                 animate={{ opacity: 1, y: 0 }}
-                transition={{ duration: 0.5, ease: [0.22, 1, 0.36, 1] }}
+                transition={{ duration: isCompactMobile ? 0.2 : 0.5, ease: [0.22, 1, 0.36, 1] }}
                 className="space-y-3"
               >
                 <h3 className="font-display text-2xl sm:text-3xl font-bold uppercase tracking-tight text-[#10243A] dark:text-[#F4F8FC]">
