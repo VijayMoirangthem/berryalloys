@@ -3,6 +3,7 @@ import gsap from 'gsap';
 import { ScrollTrigger } from 'gsap/ScrollTrigger';
 
 gsap.registerPlugin(ScrollTrigger);
+ScrollTrigger.config({ ignoreMobileResize: true });
 
 interface ImageRevealProps {
   children: ReactNode;
@@ -12,7 +13,8 @@ interface ImageRevealProps {
 
 /**
  * ImageReveal — Scroll-linked editorial image curtain wipe + subtle photographic settle.
- * Immediately displays full frame under prefers-reduced-motion.
+ * Uses GSAP ScrollTrigger with clearProps across mobile & desktop so iPhone WebKit
+ * executes every curtain wipe reliably without CSS-transition frame skips.
  */
 export function ImageReveal({
   children,
@@ -36,78 +38,22 @@ export function ImageReveal({
         : 'inset(14% 0% 0% 0%)';
 
     const isCompact = window.matchMedia('(max-width: 767px)').matches;
-    if (isCompact) {
-      inner.style.clipPath = fromClip;
-      inner.style.opacity = '0.68';
-      inner.style.transform = 'scale(1.07)';
-      inner.style.transition =
-        'clip-path 780ms cubic-bezier(0.22, 1, 0.36, 1), opacity 620ms ease, transform 980ms cubic-bezier(0.22, 1, 0.36, 1)';
-
-      let revealed = false;
-      const hasEnteredOrPassed = () => frame.getBoundingClientRect().top <= window.innerHeight * 0.94;
-
-      const reveal = () => {
-        if (revealed) return;
-        revealed = true;
-        inner.style.clipPath = 'inset(0% 0% 0% 0%)';
-        inner.style.opacity = '1';
-        inner.style.transform = 'scale(1)';
-        io.disconnect();
-        window.removeEventListener('scroll', onScrollOrResize);
-        window.removeEventListener('resize', onScrollOrResize);
-      };
-
-      const onScrollOrResize = () => {
-        if (hasEnteredOrPassed()) reveal();
-      };
-
-      const io = new IntersectionObserver(
-        (entries) => {
-          if (entries.some((e) => e.isIntersecting || e.boundingClientRect.top <= window.innerHeight * 0.94)) {
-            reveal();
-          }
-        },
-        { threshold: 0.05, rootMargin: '60px 0px' }
-      );
-      io.observe(frame);
-      window.addEventListener('scroll', onScrollOrResize, { passive: true });
-      window.addEventListener('resize', onScrollOrResize, { passive: true });
-
-      let raf1 = 0;
-      let raf2 = 0;
-      raf1 = window.requestAnimationFrame(() => {
-        raf2 = window.requestAnimationFrame(() => {
-          if (hasEnteredOrPassed()) reveal();
-        });
-      });
-
-      return () => {
-        window.cancelAnimationFrame(raf1);
-        window.cancelAnimationFrame(raf2);
-        io.disconnect();
-        window.removeEventListener('scroll', onScrollOrResize);
-        window.removeEventListener('resize', onScrollOrResize);
-        inner.style.clipPath = '';
-        inner.style.opacity = '';
-        inner.style.transform = '';
-        inner.style.transition = '';
-      };
-    }
 
     const ctx = gsap.context(() => {
       gsap.fromTo(
         frame,
-        { clipPath: fromClip, opacity: 0.72 },
+        { clipPath: fromClip, opacity: 0.7 },
         {
           clipPath: 'inset(0% 0% 0% 0%)',
           opacity: 1,
-          duration: 1.18,
+          duration: isCompact ? 0.85 : 1.18,
           ease: 'power3.out',
           clearProps: 'clipPath,opacity',
           scrollTrigger: {
             trigger: frame,
-            start: 'top 86%',
+            start: isCompact ? 'top 93%' : 'top 86%',
             once: true,
+            invalidateOnRefresh: true,
           },
         }
       );
@@ -117,13 +63,14 @@ export function ImageReveal({
         { scale: 1.07 },
         {
           scale: 1,
-          duration: 1.4,
+          duration: isCompact ? 1.0 : 1.4,
           ease: 'power2.out',
           clearProps: 'transform',
           scrollTrigger: {
             trigger: frame,
-            start: 'top 86%',
+            start: isCompact ? 'top 93%' : 'top 86%',
             once: true,
+            invalidateOnRefresh: true,
           },
         }
       );

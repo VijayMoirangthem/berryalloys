@@ -1,6 +1,7 @@
 import { useEffect, useRef, useState } from 'react';
 import * as THREE from 'three';
-import { useMotionValueEvent, useScroll } from 'motion/react';
+import { animate, motion, useMotionValue, useMotionValueEvent, useScroll, useTransform } from 'motion/react';
+import { useDrag } from '@use-gesture/react';
 import { cn } from '../../lib/utils';
 import { useIsCompactMobile } from '../../hooks/useIsCompactMobile';
 
@@ -224,18 +225,57 @@ export function ScrollDissolveReveal({
   const targetRevealRef = useRef(0);
   const isCompactMobile = useIsCompactMobile(1023);
   const [mobileStage, setMobileStage] = useState<0 | 1>(0);
+  const [manualMobileOverride, setManualMobileOverride] = useState<0 | 1 | null>(null);
   const [revealPercent, setRevealPercent] = useState(0);
   const [fallback, setFallback] = useState(false);
 
+  const mobileMix = useMotionValue(0);
+  const mobileImage1Scale = useTransform(mobileMix, [0, 1], [1.0, 1.06]);
+  const mobileImage2Scale = useTransform(mobileMix, [0, 1], [1.05, 1.0]);
+  const mobileGlowOpacity = useTransform(mobileMix, [0, 0.45, 0.55, 1], [0, 0.9, 0.9, 0]);
+  const mobileGlowX = useTransform(mobileMix, [0, 1], ['-15%', '110%']);
+
   const { scrollYProgress } = useScroll({
     target: containerRef,
-    offset: ['start start', 'end end'],
+    offset: isCompactMobile ? ['start 85%', 'end 25%'] : ['start start', 'end end'],
   });
 
   useMotionValueEvent(scrollYProgress, 'change', (latest) => {
     targetRevealRef.current = latest;
-    setRevealPercent(Math.round(latest * 100));
+    if (!isCompactMobile || manualMobileOverride === null) {
+      setRevealPercent(Math.round(latest * 100));
+    }
+    if (isCompactMobile && manualMobileOverride === null) {
+      const clamped = Math.max(0, Math.min(1, (latest - 0.14) / 0.68));
+      mobileMix.set(clamped);
+      const nextStage: 0 | 1 = clamped >= 0.5 ? 1 : 0;
+      setMobileStage((prev) => (prev === nextStage ? prev : nextStage));
+    }
   });
+
+  const selectMobileStage = (stage: 0 | 1 | null) => {
+    setManualMobileOverride(stage);
+    if (stage === null) {
+      const clamped = Math.max(0, Math.min(1, (targetRevealRef.current - 0.14) / 0.68));
+      animate(mobileMix, clamped, { duration: 0.45, ease: [0.22, 1, 0.36, 1] });
+      setMobileStage(clamped >= 0.5 ? 1 : 0);
+      setRevealPercent(Math.round(targetRevealRef.current * 100));
+      return;
+    }
+    setMobileStage(stage);
+    setRevealPercent(stage === 1 ? 100 : 0);
+    animate(mobileMix, stage, { duration: 0.48, ease: [0.22, 1, 0.36, 1] });
+  };
+
+  const bindMobileSwipe = useDrag(
+    ({ last, movement: [mx], velocity: [vx], direction: [dx] }) => {
+      if (!last) return;
+      if (Math.abs(mx) > 36 || vx > 0.3) {
+        selectMobileStage(dx < 0 || mx < 0 ? 1 : 0);
+      }
+    },
+    { axis: 'x', filterTaps: true, threshold: 8, pointer: { capture: false } }
+  );
 
   useEffect(() => {
     const stage = stageRef.current;
@@ -419,22 +459,26 @@ export function ScrollDissolveReveal({
   if (isCompactMobile) {
     return (
       <section
+        ref={containerRef}
         aria-label="Transition from plant complex to submerged-arc furnace smelting"
         className={cn('w-full bg-[#07111F] text-[#F4F8FC] py-12 px-4 border-t border-[#F4F8FC]/10', className)}
       >
         <div className="max-w-xl mx-auto space-y-5">
           <div className="flex items-center justify-between gap-3 text-[11px] font-mono-tabular uppercase tracking-widest text-[#69C5F5]">
             <span>Thermal Reduction Bridge</span>
-            <span>Stage {mobileStage === 0 ? '01 / 02' : '02 / 02'}</span>
+            <span>
+              Stage {mobileStage === 0 ? '01' : '02'} · {revealPercent}%
+            </span>
           </div>
 
-          {/* Segmented Stage Toggle */}
+          {/* Segmented Stage Toggle + Scroll Link */}
           <div role="tablist" aria-label="Thermal reduction visual stage" className="grid grid-cols-2 gap-2">
-            <button
+            <motion.button
               type="button"
               role="tab"
               aria-selected={mobileStage === 0}
-              onClick={() => setMobileStage(0)}
+              whileTap={{ scale: 0.97 }}
+              onClick={() => selectMobileStage(0)}
               className={cn(
                 'min-h-[44px] px-3 py-2 text-xs font-mono-tabular uppercase tracking-wider border text-left transition-colors cursor-pointer',
                 mobileStage === 0
@@ -443,12 +487,13 @@ export function ScrollDissolveReveal({
               )}
             >
               01 · Raw Charge
-            </button>
-            <button
+            </motion.button>
+            <motion.button
               type="button"
               role="tab"
               aria-selected={mobileStage === 1}
-              onClick={() => setMobileStage(1)}
+              whileTap={{ scale: 0.97 }}
+              onClick={() => selectMobileStage(1)}
               className={cn(
                 'min-h-[44px] px-3 py-2 text-xs font-mono-tabular uppercase tracking-wider border text-left transition-colors cursor-pointer',
                 mobileStage === 1
@@ -457,35 +502,52 @@ export function ScrollDissolveReveal({
               )}
             >
               02 · Heat &amp; AOD
-            </button>
+            </motion.button>
           </div>
 
-          {/* Crisp Crossfade Viewport */}
-          <div className="relative aspect-[16/10] w-full overflow-hidden border border-[#F4F8FC]/18 bg-[#0D1B2E]">
-            <img
+          {/* Scroll-Scrubbed + Swipeable Cross-Dissolve Viewport */}
+          <div
+            {...bindMobileSwipe()}
+            style={{ touchAction: 'pan-y' }}
+            className="relative aspect-[16/10] w-full overflow-hidden border border-[#F4F8FC]/18 bg-[#0D1B2E]"
+          >
+            <motion.img
               src={image1}
               alt={image1Alt}
-              className={cn(
-                'absolute inset-0 w-full h-full object-cover transition-opacity duration-300',
-                mobileStage === 0 ? 'opacity-100' : 'opacity-0'
-              )}
+              style={{ scale: mobileImage1Scale }}
+              className="absolute inset-0 w-full h-full object-cover will-change-transform"
             />
-            <img
+            <motion.img
               src={image2}
               alt={image2Alt}
-              className={cn(
-                'absolute inset-0 w-full h-full object-cover transition-opacity duration-300',
-                mobileStage === 1 ? 'opacity-100' : 'opacity-0'
-              )}
+              style={{ opacity: mobileMix, scale: mobileImage2Scale }}
+              className="absolute inset-0 w-full h-full object-cover will-change-transform"
+            />
+            {/* Travelling Molten Copper Dissolve Seam */}
+            <motion.div
+              aria-hidden="true"
+              style={{ opacity: mobileGlowOpacity, left: mobileGlowX }}
+              className="pointer-events-none absolute inset-y-0 w-16 -translate-x-1/2 bg-gradient-to-r from-transparent via-[#EC743C]/65 to-transparent blur-[6px]"
             />
             <div aria-hidden="true" className="pointer-events-none absolute inset-x-0 bottom-0 h-16 bg-gradient-to-t from-[#07111F]/90 to-transparent" />
-            <p className="absolute bottom-3 left-3 right-3 text-[11px] font-mono-tabular text-[#69C5F5]">
-              {mobileStage === 0 ? leftKicker ?? 'Stage 01 · Integrated Complex' : rightKicker ?? 'Stage 02 · Thermal Reduction'}
-            </p>
+            <div className="absolute bottom-3 left-3 right-3 flex items-center justify-between gap-2 text-[11px] font-mono-tabular text-[#69C5F5]">
+              <span className="truncate">
+                {mobileStage === 0 ? leftKicker ?? 'Stage 01 · Integrated Complex' : rightKicker ?? 'Stage 02 · Thermal Reduction'}
+              </span>
+              {manualMobileOverride !== null && (
+                <button
+                  type="button"
+                  onClick={() => selectMobileStage(null)}
+                  className="shrink-0 underline underline-offset-2 text-[#F4F8FC]/85 cursor-pointer"
+                >
+                  Sync Scroll
+                </button>
+              )}
+            </div>
           </div>
 
           {/* Active Stage Narrative Card */}
-          <div className="bg-[#0D1B2E] border border-[#F4F8FC]/16 p-5 space-y-2">
+          <div className="bg-[#0D1B2E] border border-[#F4F8FC]/16 p-5 space-y-2 transition-colors">
             <h3 className="font-display text-2xl font-bold uppercase text-[#F4F8FC]">
               {mobileStage === 0 ? leftTitle ?? 'Bobbili & Jharkhand Works' : rightTitle ?? 'From Heat To Precision'}
             </h3>

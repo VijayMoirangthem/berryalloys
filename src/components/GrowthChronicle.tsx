@@ -1,5 +1,7 @@
-import { useRef, useState } from 'react';
+import { useCallback, useRef, useState } from 'react';
+import { ChevronLeft, ChevronRight } from 'lucide-react';
 import { AnimatePresence, motion, useReducedMotion } from 'motion/react';
+import { useDrag } from '@use-gesture/react';
 import { ASSETS } from '../data/assets';
 import { GROWTH_TIMELINE, GrowthMilestone } from '../data/company';
 import { ResilientImage } from './ResilientImage';
@@ -29,14 +31,46 @@ export function GrowthChronicle() {
   const activeItem: GrowthMilestone = GROWTH_TIMELINE[activeIdx] ?? GROWTH_TIMELINE[0];
   const activeVisual = YEAR_VISUAL_MAP[activeItem.year] ?? ASSETS.officialAerialComplex;
 
-  const selectMilestone = (year: string) => {
+  const selectMilestone = useCallback((year: string) => {
     const nextIdx = GROWTH_TIMELINE.findIndex((m) => m.year === year);
     if (nextIdx >= 0 && nextIdx !== prevIdxRef.current) {
       setDirection(nextIdx > prevIdxRef.current ? 1 : -1);
       prevIdxRef.current = nextIdx;
     }
     setSelectedYear(year);
-  };
+  }, []);
+
+  const stepMilestone = useCallback(
+    (delta: 1 | -1) => {
+      const nextIdx = (activeIdx + delta + GROWTH_TIMELINE.length) % GROWTH_TIMELINE.length;
+      setDirection(delta);
+      prevIdxRef.current = nextIdx;
+      setSelectedYear(GROWTH_TIMELINE[nextIdx].year);
+    },
+    [activeIdx]
+  );
+
+  const bindSwipe = useDrag(
+    ({ active, movement: [mx], velocity: [vx], direction: [dx], memo }) => {
+      if (active) {
+        if (!memo?.swiped && (Math.abs(mx) > 42 || (vx > 0.35 && Math.abs(mx) > 18))) {
+          stepMilestone(mx < 0 || dx < 0 ? 1 : -1);
+          return { swiped: true };
+        }
+        return memo ?? { swiped: false };
+      }
+      return { swiped: false };
+    },
+    {
+      axis: 'x',
+      filterTaps: true,
+      threshold: 5,
+      preventScroll: true,
+      pointer: { capture: false },
+    }
+  );
+
+  const progressRatio = (activeIdx + 1) / Math.max(1, GROWTH_TIMELINE.length);
 
   return (
     <motion.div
@@ -44,63 +78,102 @@ export function GrowthChronicle() {
       whileInView={{ opacity: 1, y: 0 }}
       viewport={{ once: true, amount: 'some' }}
       transition={{ duration: 0.55, ease: [0.22, 1, 0.36, 1] }}
-      className="space-y-10"
+      className="space-y-8 sm:space-y-10"
     >
       {/* Horizontal Year Selector Strip */}
-      <div
-        role="tablist"
-        aria-label="Select milestone year in Berry Alloys growth story"
-        className="grid grid-cols-3 sm:grid-cols-5 lg:grid-cols-9 gap-2"
-      >
-        {GROWTH_TIMELINE.map((milestone) => {
-          const isSelected = milestone.year === activeItem.year;
-          return (
-            <motion.button
-              key={milestone.year}
+      <div className="space-y-3">
+        <div
+          role="tablist"
+          aria-label="Select milestone year in Berry Alloys growth story"
+          className="grid grid-cols-3 sm:grid-cols-5 lg:grid-cols-9 gap-2"
+        >
+          {GROWTH_TIMELINE.map((milestone) => {
+            const isSelected = milestone.year === activeItem.year;
+            return (
+              <motion.button
+                key={milestone.year}
+                type="button"
+                role="tab"
+                aria-selected={isSelected}
+                whileTap={prefersReduced ? undefined : { scale: 0.96 }}
+                onClick={() => selectMilestone(milestone.year)}
+                className={`relative min-h-[48px] px-3 py-2.5 text-left border transition-colors cursor-pointer overflow-hidden ${
+                  isSelected
+                    ? 'bg-[#10243A] text-[#F4F8FC] border-[#10243A] dark:bg-[#0A6AA1] dark:text-[#F4F8FC] dark:border-[#69C5F5]'
+                    : 'bg-white text-[#10243A] border-[#10243A]/15 hover:border-brand dark:bg-[#12243B] dark:text-[#F4F8FC]/80 dark:border-[#F4F8FC]/14 dark:hover:border-[#69C5F5]'
+                }`}
+              >
+                <span
+                  className={`block font-mono-tabular text-xs font-semibold ${
+                    isSelected
+                      ? 'text-[#69C5F5] dark:text-[#F4F8FC]'
+                      : 'text-brand dark:text-[#69C5F5]'
+                  }`}
+                >
+                  {milestone.year}
+                </span>
+                <span
+                  className={`block text-[11px] truncate mt-0.5 ${
+                    isSelected
+                      ? 'text-[#F4F8FC]/85'
+                      : 'text-[#465C72] dark:text-[#B5C5D7]'
+                  }`}
+                >
+                  {milestone.capacitySummary.split('·')[0].trim()}
+                </span>
+                {isSelected && (
+                  <motion.span
+                    layoutId="chronicle-active-tab-bar"
+                    transition={{ type: 'spring', stiffness: 420, damping: 32 }}
+                    aria-hidden="true"
+                    className="absolute inset-x-0 bottom-0 h-[3px] bg-accent-red"
+                  />
+                )}
+              </motion.button>
+            );
+          })}
+        </div>
+
+        {/* Continuous Timeline Scrubber Progress + Quick Prev/Next Controls */}
+        <div className="flex items-center justify-between gap-3 pt-1">
+          <div className="flex-1 h-[3px] bg-[#10243A]/12 dark:bg-[#F4F8FC]/14 overflow-hidden">
+            <motion.div
+              className="h-full w-full origin-left bg-gradient-to-r from-brand via-[#69C5F5] to-accent-red"
+              initial={false}
+              animate={{ scaleX: progressRatio }}
+              transition={{ type: 'spring', stiffness: 300, damping: 30 }}
+            />
+          </div>
+          <div className="flex items-center gap-1.5 shrink-0">
+            <span className="text-[11px] font-mono-tabular text-[#465C72] dark:text-[#B5C5D7] mr-1">
+              0{activeIdx + 1} / 0{GROWTH_TIMELINE.length}
+            </span>
+            <button
               type="button"
-              role="tab"
-              aria-selected={isSelected}
-              whileTap={prefersReduced ? undefined : { scale: 0.96 }}
-              onClick={() => selectMilestone(milestone.year)}
-              className={`relative min-h-[48px] px-3 py-2.5 text-left border transition-colors cursor-pointer overflow-hidden ${
-                isSelected
-                  ? 'bg-[#10243A] text-[#F4F8FC] border-[#10243A] dark:bg-[#0A6AA1] dark:text-[#F4F8FC] dark:border-[#69C5F5]'
-                  : 'bg-white text-[#10243A] border-[#10243A]/15 hover:border-brand dark:bg-[#12243B] dark:text-[#F4F8FC]/80 dark:border-[#F4F8FC]/14 dark:hover:border-[#69C5F5]'
-              }`}
+              onClick={() => stepMilestone(-1)}
+              aria-label="Previous milestone"
+              className="inline-flex items-center justify-center w-10 h-10 sm:w-9 sm:h-9 border border-[#10243A]/18 dark:border-[#F4F8FC]/18 bg-white dark:bg-[#12243B] text-[#10243A] dark:text-[#F4F8FC] hover:border-brand transition-colors cursor-pointer"
             >
-              <span
-                className={`block font-mono-tabular text-xs font-semibold ${
-                  isSelected
-                    ? 'text-[#69C5F5] dark:text-[#F4F8FC]'
-                    : 'text-brand dark:text-[#69C5F5]'
-                }`}
-              >
-                {milestone.year}
-              </span>
-              <span
-                className={`block text-[11px] truncate mt-0.5 ${
-                  isSelected
-                    ? 'text-[#F4F8FC]/85'
-                    : 'text-[#465C72] dark:text-[#B5C5D7]'
-                }`}
-              >
-                {milestone.capacitySummary.split('·')[0].trim()}
-              </span>
-              {isSelected && (
-                <motion.span
-                  layoutId="chronicle-active-tab-bar"
-                  transition={{ type: 'spring', stiffness: 420, damping: 32 }}
-                  aria-hidden="true"
-                  className="absolute inset-x-0 bottom-0 h-[3px] bg-accent-red"
-                />
-              )}
-            </motion.button>
-          );
-        })}
+              <ChevronLeft className="w-4 h-4" aria-hidden="true" />
+            </button>
+            <button
+              type="button"
+              onClick={() => stepMilestone(1)}
+              aria-label="Next milestone"
+              className="inline-flex items-center justify-center w-10 h-10 sm:w-9 sm:h-9 border border-[#10243A]/18 dark:border-[#F4F8FC]/18 bg-white dark:bg-[#12243B] text-[#10243A] dark:text-[#F4F8FC] hover:border-brand transition-colors cursor-pointer"
+            >
+              <ChevronRight className="w-4 h-4" aria-hidden="true" />
+            </button>
+          </div>
+        </div>
       </div>
 
-      {/* Selected Milestone Focus + Supporting Official Photograph */}
-      <div className="bg-white dark:bg-[#12243B] border border-[#10243A]/14 dark:border-[#F4F8FC]/14 overflow-hidden">
+      {/* Selected Milestone Focus + Supporting Official Photograph (Swipeable on Touch Screens) */}
+      <div
+        {...bindSwipe()}
+        style={{ touchAction: 'pan-y' }}
+        className="bg-white dark:bg-[#12243B] border border-[#10243A]/14 dark:border-[#F4F8FC]/14 overflow-hidden select-none"
+      >
         <AnimatePresence mode="wait" custom={direction}>
           <motion.div
             key={activeItem.year}
@@ -116,7 +189,7 @@ export function GrowthChronicle() {
                 ? undefined
                 : { opacity: 0.2, x: direction * -26 }
             }
-            transition={{ duration: 0.36, ease: [0.22, 1, 0.36, 1] }}
+            transition={{ duration: 0.34, ease: [0.22, 1, 0.36, 1] }}
             className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-stretch"
           >
             <div className="lg:col-span-6 p-6 sm:p-8 lg:p-10 flex flex-col justify-between space-y-6">
@@ -148,9 +221,14 @@ export function GrowthChronicle() {
                 </p>
               </div>
 
-              <p className="text-[11px] text-[#465C72] dark:text-[#B5C5D7] pt-4 border-t border-[#10243A]/10 dark:border-[#F4F8FC]/10 leading-relaxed">
-                Milestones 2010–2025 transcribe Berry Alloys’ published website growth timeline verbatim; 2026 entries reflect dated news and AP SIPB disclosures rather than completed installed tonnage.
-              </p>
+              <div className="pt-4 border-t border-[#10243A]/10 dark:border-[#F4F8FC]/10 space-y-1">
+                <p className="lg:hidden text-[10.5px] font-mono-tabular uppercase tracking-wider text-brand dark:text-[#69C5F5]">
+                  Swipe card left / right to step through milestones
+                </p>
+                <p className="text-[11px] text-[#465C72] dark:text-[#B5C5D7] leading-relaxed">
+                  Milestones 2010–2025 transcribe Berry Alloys’ published website growth timeline verbatim; 2026 entries reflect dated news and AP SIPB disclosures rather than completed installed tonnage.
+                </p>
+              </div>
             </div>
 
             <figure className="lg:col-span-6 flex flex-col bg-[#F1F6FB] dark:bg-[#07111F] border-t lg:border-t-0 lg:border-l border-[#10243A]/12 dark:border-[#F4F8FC]/12">
@@ -158,7 +236,7 @@ export function GrowthChronicle() {
                 <motion.div
                   initial={prefersReduced ? false : { scale: 1.07 }}
                   animate={{ scale: 1 }}
-                  transition={{ duration: 0.72, ease: [0.22, 1, 0.36, 1] }}
+                  transition={{ duration: 0.68, ease: [0.22, 1, 0.36, 1] }}
                   className="w-full h-full"
                 >
                   <ResilientImage

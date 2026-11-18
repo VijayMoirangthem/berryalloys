@@ -18,12 +18,14 @@ const VERTEX_SHADER = `
   uniform float uDepth;
   uniform float uSize;
   uniform float uIntro;
+  uniform float uAmbient;
   uniform vec2 uTextureSize;
   uniform sampler2D uTexture;
   uniform sampler2D uTouch;
 
   varying vec2 vPUv;
   varying vec2 vUv;
+  varying float vWave;
 
   vec3 mod289(vec3 x) { return x - floor(x * (1.0 / 289.0)) * 289.0; }
   vec4 mod289(vec4 x) { return x - floor(x * (1.0 / 289.0)) * 289.0; }
@@ -86,9 +88,14 @@ const VERTEX_SHADER = `
     float grey = colA.r * 0.21 + colA.g * 0.71 + colA.b * 0.07;
 
     vec3 displaced = offset;
+    float wavePhase = sin(puv.x * 7.5 - uTime * 1.4) * cos(puv.y * 5.0 + uTime * 0.85) * uAmbient;
+    float drift = snoise(vec3(puv * 4.5, uTime * 0.32)) * uAmbient;
+    vWave = clamp(wavePhase * 0.5 + 0.5, 0.0, 1.0);
+
     displaced.xy += vec2(random(pindex) - 0.5, random(offset.x + pindex) - 0.5) * uRandom;
-    float rndz = (random(pindex) + snoise(vec3(pindex * 0.1, uTime * 0.12, 0.0)));
-    displaced.z += rndz * (random(pindex) * 2.0 * uDepth);
+    displaced.xy += vec2(drift * 1.65, wavePhase * 1.35);
+    float rndz = (random(pindex) + snoise(vec3(pindex * 0.1, uTime * 0.24 * max(uAmbient, 0.15), 0.0)));
+    displaced.z += rndz * (random(pindex) * 2.4 * uDepth) + wavePhase * 4.5;
     displaced.xy -= uTextureSize * 0.5;
 
     // Entrance magnetic convergence into typography
@@ -99,13 +106,13 @@ const VERTEX_SHADER = `
 
     // Interactive cursor / tap / swipe burst displacement
     float t = texture2D(uTouch, puv).r;
-    displaced.z += t * 42.0 * rndz;
-    displaced.x += cos(angle) * t * 34.0 * (0.4 + rndz);
-    displaced.y += sin(angle) * t * 34.0 * (0.4 + rndz);
+    displaced.z += t * 46.0 * rndz;
+    displaced.x += cos(angle) * t * 38.0 * (0.4 + rndz);
+    displaced.y += sin(angle) * t * 38.0 * (0.4 + rndz);
 
-    float psize = (snoise(vec3(uTime * 0.4, puv * 3.0)) + 2.15);
+    float psize = (snoise(vec3(uTime * 0.55 * max(uAmbient, 0.1), puv * 3.0)) + 2.15 + wavePhase * 0.28);
     psize *= max(grey, 0.34);
-    psize *= uSize * mix(0.62, 1.0, uIntro) * (1.0 + t * 0.35);
+    psize *= uSize * mix(0.62, 1.0, uIntro) * (1.0 + t * 0.42);
 
     vec4 mvPosition = modelViewMatrix * vec4(displaced, 1.0);
     mvPosition.xyz += position * psize;
@@ -120,6 +127,7 @@ const FRAGMENT_SHADER = `
   uniform vec3 uAccentColor;
   varying vec2 vPUv;
   varying vec2 vUv;
+  varying float vWave;
 
   void main() {
     vec4 colA = texture2D(uTexture, vPUv);
@@ -131,8 +139,9 @@ const FRAGMENT_SHADER = `
     // Crisp metallic bead alpha falloff so particles stay distinct instead of smearing
     float alpha = smoothstep(0.5, 0.24, dist) * smoothstep(0.08, 0.65, grey);
 
-    // Brand-blue highlight mixed with crisp primary typography tint
-    vec3 tint = mix(uAccentColor, uColor, smoothstep(0.28, 0.88, grey));
+    // Traveling brand-blue / metallic shimmer blended with crisp primary typography tint
+    float shimmer = mix(0.22, 0.92, clamp(grey * 0.78 + vWave * 0.28, 0.0, 1.0));
+    vec3 tint = mix(uAccentColor, uColor, smoothstep(0.25, 0.9, shimmer));
     if (alpha < 0.06) discard;
     gl_FragColor = vec4(tint, alpha);
   }
@@ -142,8 +151,8 @@ class TouchTexture {
   size = 64;
   width = 64;
   height = 64;
-  maxAge = 84;
-  radius = 0.22;
+  maxAge = 88;
+  radius = 0.26;
   trail: Array<{ x: number; y: number; age: number; force: number }> = [];
   canvas: HTMLCanvasElement;
   ctx: CanvasRenderingContext2D;
@@ -551,13 +560,14 @@ export function InteractiveParticles({
       const material = new THREE.RawShaderMaterial({
         uniforms: {
           uTime: { value: 0 },
-          uRandom: { value: prefersReduced ? 0.0 : isCompactStage ? 0.36 : 0.46 },
-          uDepth: { value: prefersReduced ? 0.0 : 1.2 },
+          uRandom: { value: prefersReduced ? 0.0 : isCompactStage ? 0.42 : 0.48 },
+          uDepth: { value: prefersReduced ? 0.0 : isCompactStage ? 1.5 : 1.35 },
           uSize: { value: computedSize },
           uTextureSize: { value: new THREE.Vector2(imgW, imgH) },
           uTexture: { value: texture },
           uTouch: { value: touch.texture },
           uIntro: { value: prefersReduced || isSoftwareGl ? 1 : 0.12 },
+          uAmbient: { value: prefersReduced ? 0 : 1 },
           uColor: { value: new THREE.Color(colorsRef.current.primary) },
           uAccentColor: { value: new THREE.Color(colorsRef.current.accent) },
         },
@@ -581,8 +591,12 @@ export function InteractiveParticles({
       buildParticlesFromBitmap();
     }
 
+    let lastInteractionAt = 0;
+    let sweepCooldown = 0;
+
     const scatterAtClientPoint = (clientX: number, clientY: number, minForce = 0) => {
       if (prefersReduced || !particlesMesh) return;
+      lastInteractionAt = performance.now();
       const rect = container.getBoundingClientRect();
       mouse.x = ((clientX - rect.left) / Math.max(1, rect.width)) * 2 - 1;
       mouse.y = -((clientY - rect.top) / Math.max(1, rect.height)) * 2 + 1;
@@ -594,23 +608,23 @@ export function InteractiveParticles({
     };
 
     const onPointerDown = (e: PointerEvent) => {
-      scatterAtClientPoint(e.clientX, e.clientY, 0.95);
+      scatterAtClientPoint(e.clientX, e.clientY, 0.98);
     };
 
     const onPointerMove = (e: PointerEvent) => {
-      scatterAtClientPoint(e.clientX, e.clientY, e.pointerType === 'touch' ? 0.55 : 0);
+      scatterAtClientPoint(e.clientX, e.clientY, e.pointerType === 'touch' ? 0.62 : 0.28);
     };
 
     // Native touch listeners guarantee iPhone Chrome (WKWebView) keeps feeding scatter ripples
     // even when iOS claims pointermove for native vertical scroll.
     const onTouchStart = (e: TouchEvent) => {
       const t = e.touches[0];
-      if (t) scatterAtClientPoint(t.clientX, t.clientY, 0.95);
+      if (t) scatterAtClientPoint(t.clientX, t.clientY, 0.98);
     };
 
     const onTouchMove = (e: TouchEvent) => {
       const t = e.touches[0];
-      if (t) scatterAtClientPoint(t.clientX, t.clientY, 0.55);
+      if (t) scatterAtClientPoint(t.clientX, t.clientY, 0.62);
     };
 
     container.addEventListener('pointerdown', onPointerDown, { passive: true });
@@ -695,8 +709,13 @@ export function InteractiveParticles({
       if (disposed || prefersReduced) return;
       if (isVisible && !document.hidden && particlesMesh) {
         const dt = Math.min(clock.getDelta(), 0.05);
+        const ambientPaused = document.documentElement.dataset.ambient === 'paused';
+        particlesMesh.material.uniforms.uAmbient.value = ambientPaused ? 0 : 1;
+
         touch.update();
-        particlesMesh.material.uniforms.uTime.value += dt;
+        if (!ambientPaused) {
+          particlesMesh.material.uniforms.uTime.value += dt;
+        }
         const intro = particlesMesh.material.uniforms.uIntro;
         if (intro.value < 1) {
           // Wait for initial KineticLoader curtain to clear so arrival convergence is actually seen on mobile/desktop
@@ -705,6 +724,16 @@ export function InteractiveParticles({
             if (introStart === 0) introStart = performance.now();
             const p = Math.min(1, (performance.now() - introStart) / 1050);
             intro.value = 0.12 + 0.88 * (1 - Math.pow(1 - p, 3));
+          }
+        } else if (!ambientPaused && !isSoftwareGl) {
+          // Emit a gentle periodic magnetic shimmer pulse across the alloy wordmark when untouched (especially on phones)
+          const now = performance.now();
+          if (now - lastInteractionAt > 2200 && now > sweepCooldown) {
+            const elapsed = particlesMesh.material.uniforms.uTime.value;
+            const sweepX = 0.12 + 0.76 * ((elapsed * 0.22) % 1);
+            const sweepY = 0.48 + 0.16 * Math.sin(elapsed * 1.4);
+            touch.addTouch({ x: sweepX, y: sweepY }, isCompactStage ? 0.34 : 0.26);
+            sweepCooldown = now + (isCompactStage ? 180 : 240);
           }
         }
         renderer?.render(scene, camera);

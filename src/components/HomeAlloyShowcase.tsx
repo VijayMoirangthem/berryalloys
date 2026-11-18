@@ -1,7 +1,8 @@
 import { useMemo, useState } from 'react';
 import { Link } from 'react-router-dom';
-import { ArrowRight, ArrowUpRight, Check, GitCompare, X } from 'lucide-react';
-import { AnimatePresence, motion } from 'motion/react';
+import { ArrowRight, ArrowUpRight, Check, ChevronLeft, ChevronRight, GitCompare, X } from 'lucide-react';
+import { AnimatePresence, motion, useMotionValue, useSpring } from 'motion/react';
+import { useDrag } from '@use-gesture/react';
 import { ASSETS, VisualAsset } from '../data/assets';
 import { ALLOY_FAMILIES, AlloyFamily, AlloyProduct, PRODUCTS } from '../data/products';
 import { CompareModal } from './CompareModal';
@@ -97,6 +98,43 @@ export function HomeAlloyShowcase({ onEnquireAlloy }: HomeAlloyShowcaseProps) {
   };
 
   const isCurrentCompared = compareSlugs.includes(activeProduct.slug);
+
+  const activeGlobalIndex = useMemo(
+    () => Math.max(0, PRODUCTS.findIndex((p) => p.slug === activeProduct.slug)),
+    [activeProduct.slug]
+  );
+
+  const stepProduct = (delta: number) => {
+    const nextIdx = (activeGlobalIndex + delta + PRODUCTS.length) % PRODUCTS.length;
+    const nextProduct = PRODUCTS[nextIdx];
+    if (!nextProduct) return;
+    setActiveFamily(nextProduct.family);
+    setSelectedSlug(nextProduct.slug);
+  };
+
+  const dragOffsetX = useMotionValue(0);
+  const springDragX = useSpring(dragOffsetX, { stiffness: 360, damping: 32 });
+
+  const bindSwipe = useDrag(
+    ({ active, movement: [mx], velocity: [vx], direction: [dx], last, cancel }) => {
+      if (active) {
+        dragOffsetX.set(Math.max(-22, Math.min(22, mx * 0.22)));
+      }
+      if (last) {
+        dragOffsetX.set(0);
+        if (Math.abs(mx) > 42 || vx > 0.35) {
+          stepProduct(dx < 0 || mx < 0 ? 1 : -1);
+          cancel();
+        }
+      }
+    },
+    {
+      axis: 'x',
+      filterTaps: true,
+      threshold: 8,
+      pointer: { capture: false },
+    }
+  );
 
   return (
     <section
@@ -294,7 +332,7 @@ export function HomeAlloyShowcase({ onEnquireAlloy }: HomeAlloyShowcaseProps) {
                   type="button"
                   disabled={comparedProducts.length < 2}
                   onClick={() => setCompareModalOpen(true)}
-                  className="px-3 py-1.5 text-xs font-semibold bg-brand text-[#FFFFFF] hover:bg-brand-hover dark:bg-[#0A6AA1] dark:hover:bg-[#004C73] disabled:opacity-40 disabled:cursor-not-allowed transition-colors cursor-pointer whitespace-nowrap shrink-0"
+                  className="min-h-[40px] px-3.5 py-2 text-xs font-semibold bg-brand text-[#FFFFFF] hover:bg-brand-hover dark:bg-[#0A6AA1] dark:hover:bg-[#004C73] disabled:opacity-40 disabled:cursor-not-allowed transition-colors cursor-pointer whitespace-nowrap shrink-0"
                 >
                   Open Matrix
                 </button>
@@ -329,6 +367,8 @@ export function HomeAlloyShowcase({ onEnquireAlloy }: HomeAlloyShowcaseProps) {
 
           {/* Right: Official Specimen Tray + Specification Card */}
           <div className="lg:col-span-7">
+            <div {...bindSwipe()} style={{ touchAction: 'pan-y' }}>
+              <motion.div style={{ x: springDragX }}>
             <SpotlightSurface className="bg-white dark:bg-[#12243B] border border-[#10243A]/14 dark:border-[#F4F8FC]/14">
               <AnimatePresence mode="wait">
                 <motion.div
@@ -342,7 +382,29 @@ export function HomeAlloyShowcase({ onEnquireAlloy }: HomeAlloyShowcaseProps) {
                   <div className="p-4 sm:p-5 bg-[#FFFFFF] border-b border-[#10243A]/14 dark:border-[#F4F8FC]/14">
                     <div className="flex flex-wrap items-center justify-between gap-2 pb-3 text-[11px] font-mono-tabular uppercase tracking-wider text-[#465C72]">
                       <span>Official Alloy Specimen Plate · {activeProduct.family}</span>
-                      <span>Berry Alloys Assay Series</span>
+                      <div className="flex items-center gap-2">
+                        <span className="text-brand font-semibold">
+                          {String(activeGlobalIndex + 1).padStart(2, '0')} / {String(PRODUCTS.length).padStart(2, '0')}
+                        </span>
+                        <div className="flex items-center gap-1 lg:hidden">
+                          <button
+                            type="button"
+                            onClick={() => stepProduct(-1)}
+                            aria-label="Previous alloy grade series"
+                            className="inline-flex items-center justify-center w-9 h-9 border border-[#10243A]/18 bg-[#F1F6FB] text-[#10243A] hover:border-brand cursor-pointer"
+                          >
+                            <ChevronLeft className="w-4 h-4" aria-hidden="true" />
+                          </button>
+                          <button
+                            type="button"
+                            onClick={() => stepProduct(1)}
+                            aria-label="Next alloy grade series"
+                            className="inline-flex items-center justify-center w-9 h-9 border border-[#10243A]/18 bg-[#F1F6FB] text-[#10243A] hover:border-brand cursor-pointer"
+                          >
+                            <ChevronRight className="w-4 h-4" aria-hidden="true" />
+                          </button>
+                        </div>
+                      </div>
                     </div>
                     <div className="grid grid-cols-1 sm:grid-cols-12 gap-4 items-center">
                       <motion.div
@@ -409,7 +471,7 @@ export function HomeAlloyShowcase({ onEnquireAlloy }: HomeAlloyShowcaseProps) {
                         type="button"
                         onClick={() => toggleCompare(activeProduct.slug)}
                         aria-pressed={isCurrentCompared}
-                        className={`min-h-[40px] inline-flex items-center gap-1.5 px-3.5 py-2 text-xs font-medium border transition-colors cursor-pointer shrink-0 ${
+                        className={`min-h-[42px] inline-flex items-center gap-1.5 px-3.5 py-2 text-xs font-medium border transition-colors cursor-pointer shrink-0 ${
                           isCurrentCompared
                             ? 'bg-[#10243A] text-[#FFFFFF] border-[#10243A] dark:bg-[#F4F8FC] dark:text-[#10243A] dark:border-[#F4F8FC]'
                             : 'bg-transparent text-[#10243A] border-[#10243A]/25 hover:border-brand dark:text-[#F4F8FC] dark:border-[#F4F8FC]/25 dark:hover:border-[#69C5F5]'
@@ -495,6 +557,11 @@ export function HomeAlloyShowcase({ onEnquireAlloy }: HomeAlloyShowcaseProps) {
                 </motion.div>
               </AnimatePresence>
             </SpotlightSurface>
+              </motion.div>
+            </div>
+            <p className="lg:hidden pt-2.5 text-[11px] font-mono-tabular uppercase tracking-wider text-[#465C72] dark:text-[#B5C5D7] text-center">
+              Swipe card left/right or tap arrows to cycle all 10 grade series
+            </p>
           </div>
         </div>
       </div>

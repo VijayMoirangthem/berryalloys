@@ -1,4 +1,4 @@
-import React, { useRef, useEffect } from 'react';
+import React, { useRef, useEffect, useState } from 'react';
 import { cn } from '../../lib/utils';
 
 export interface StackedLogoItem {
@@ -16,8 +16,8 @@ export interface StackedLogosProps {
 }
 
 /**
- * StackedLogos — Mouse-tracking radial glow & border highlight matrix
- * with cycling alternating credential/affiliation cells.
+ * StackedLogos — Pointer/touch-tracking radial glow & border highlight matrix
+ * with alternating credential/affiliation cells across desktop and mobile.
  */
 export const StackedLogos: React.FC<StackedLogosProps> = ({
   logoGroups,
@@ -26,21 +26,32 @@ export const StackedLogos: React.FC<StackedLogosProps> = ({
   itemClassName,
 }) => {
   const containerRef = useRef<HTMLDivElement>(null);
+  const [touchActive, setTouchActive] = useState(false);
 
   useEffect(() => {
     const container = containerRef.current;
     if (!container) return;
 
-    const updateCoordinates = (e: MouseEvent | PointerEvent) => {
+    const updateCoordinates = (clientX: number, clientY: number) => {
       const items = container.querySelectorAll<HTMLElement>('.stacked-logos__item');
       items.forEach((item) => {
         const rect = item.getBoundingClientRect();
-        item.style.setProperty('--mouse-x', `${e.clientX - rect.left}px`);
-        item.style.setProperty('--mouse-y', `${e.clientY - rect.top}px`);
+        item.style.setProperty('--mouse-x', `${clientX - rect.left}px`);
+        item.style.setProperty('--mouse-y', `${clientY - rect.top}px`);
       });
     };
 
+    const onPointerDown = (e: PointerEvent) => {
+      if (e.pointerType !== 'mouse') setTouchActive(true);
+      updateCoordinates(e.clientX, e.clientY);
+    };
+
+    const onPointerMove = (e: PointerEvent) => {
+      updateCoordinates(e.clientX, e.clientY);
+    };
+
     const handleLeave = () => {
+      setTouchActive(false);
       const items = container.querySelectorAll<HTMLElement>('.stacked-logos__item');
       items.forEach((item) => {
         item.style.setProperty('--mouse-x', '-250px');
@@ -48,11 +59,17 @@ export const StackedLogos: React.FC<StackedLogosProps> = ({
       });
     };
 
-    container.addEventListener('pointermove', updateCoordinates, { passive: true });
+    container.addEventListener('pointerdown', onPointerDown, { passive: true });
+    container.addEventListener('pointermove', onPointerMove, { passive: true });
+    container.addEventListener('pointerup', handleLeave, { passive: true });
+    container.addEventListener('pointercancel', handleLeave, { passive: true });
     container.addEventListener('pointerleave', handleLeave);
 
     return () => {
-      container.removeEventListener('pointermove', updateCoordinates);
+      container.removeEventListener('pointerdown', onPointerDown);
+      container.removeEventListener('pointermove', onPointerMove);
+      container.removeEventListener('pointerup', handleLeave);
+      container.removeEventListener('pointercancel', handleLeave);
       container.removeEventListener('pointerleave', handleLeave);
     };
   }, []);
@@ -60,6 +77,7 @@ export const StackedLogos: React.FC<StackedLogosProps> = ({
   return (
     <div
       ref={containerRef}
+      data-touch-active={touchActive ? 'true' : undefined}
       className={cn(
         'stacked-logos grid grid-cols-2 sm:grid-cols-4 border border-[#10243A]/14 dark:border-[#F4F8FC]/14 bg-[#F1F6FB]/40 dark:bg-[#0D1B2E]/60',
         className

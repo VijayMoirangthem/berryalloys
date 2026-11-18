@@ -2,8 +2,8 @@ import { RefObject, useEffect } from 'react';
 
 /**
  * Touch & compact-viewport metric enhancer.
- * Intentionally avoids global scrubbed image scaling/parallax (which degrades touch scroll frame rates
- * and fights dedicated image reveals) and gently counts up clean numeric metrics when revealed.
+ * Counts up numeric metrics smoothly once visible (and after initial splash curtain clears),
+ * with an IntersectionObserver + passive scroll safety check so fast iPhone swipes never miss it.
  */
 export function useMobileMotion(rootRef: RefObject<HTMLElement | null>) {
   useEffect(() => {
@@ -16,9 +16,9 @@ export function useMobileMotion(rootRef: RefObject<HTMLElement | null>) {
     const targets = Array.from(root.querySelectorAll<HTMLElement>('[data-countup]'));
 
     targets.forEach((el) => {
-      const original = el.textContent ?? '';
-      // Match clean leading number only (e.g. "120+", "93.43 acres", "25+ yrs") — skip compounds like "2 × 10 MVA" or "24×7"
-      const m = original.trim().match(/^(\d[\d,]*(?:\.\d+)?)([^\d×xX].*|\+|%)$/);
+      const original = (el.textContent ?? '').trim();
+      // Match clean leading number (e.g. "120+", "93.43 acres", "25+ yrs", "83 MW Solar...")
+      const m = original.match(/^(\d[\d,]*(?:\.\d+)?)([^\d×xX].*|\+|%)$/);
       if (!m) return;
 
       const [, numStr, suffix] = m;
@@ -32,31 +32,60 @@ export function useMobileMotion(rootRef: RefObject<HTMLElement | null>) {
 
       let started = false;
       let rafId = 0;
+      let pollId = 0;
+
+      const runCount = () => {
+        if (started) return;
+        const loaderActive = Boolean(
+          document.querySelector('[aria-label="Loading Berry Alloys Limited presentation"]')
+        );
+        if (loaderActive) {
+          pollId = window.setTimeout(runCount, 90);
+          return;
+        }
+        started = true;
+        io.disconnect();
+        window.removeEventListener('scroll', onScroll);
+
+        const start = performance.now();
+        const duration = 680;
+        const tick = (now: number) => {
+          const p = Math.min(1, (now - start) / duration);
+          const eased = 1 - Math.pow(1 - p, 3);
+          el.textContent = p >= 1 ? original : `${fmt(target * eased)}${suffix}`;
+          if (p < 1) {
+            rafId = window.requestAnimationFrame(tick);
+          }
+        };
+        rafId = window.requestAnimationFrame(tick);
+      };
+
+      const inViewport = () => {
+        const rect = el.getBoundingClientRect();
+        return rect.top <= window.innerHeight * 0.96 && rect.bottom >= 0;
+      };
+
+      const onScroll = () => {
+        if (!started && inViewport()) runCount();
+      };
 
       const io = new IntersectionObserver(
         (entries) => {
-          if (started || !entries.some((e) => e.isIntersecting)) return;
-          started = true;
-          io.disconnect();
-
-          const start = performance.now();
-          const duration = 620;
-          const tick = (now: number) => {
-            const p = Math.min(1, (now - start) / duration);
-            const eased = 1 - Math.pow(1 - p, 3);
-            el.textContent = p >= 1 ? original : `${fmt(target * eased)}${suffix}`;
-            if (p < 1) {
-              rafId = window.requestAnimationFrame(tick);
-            }
-          };
-          rafId = window.requestAnimationFrame(tick);
+          if (!started && entries.some((e) => e.isIntersecting)) {
+            runCount();
+          }
         },
-        { threshold: 0.25 }
+        { threshold: 0.1, rootMargin: '40px 0px' }
       );
 
       io.observe(el);
+      window.addEventListener('scroll', onScroll, { passive: true });
+      if (inViewport()) runCount();
+
       cleanups.push(() => {
         io.disconnect();
+        window.removeEventListener('scroll', onScroll);
+        window.clearTimeout(pollId);
         if (rafId) window.cancelAnimationFrame(rafId);
         el.textContent = original;
       });

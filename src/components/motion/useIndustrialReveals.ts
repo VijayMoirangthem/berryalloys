@@ -3,6 +3,7 @@ import gsap from 'gsap';
 import { ScrollTrigger } from 'gsap/ScrollTrigger';
 
 gsap.registerPlugin(ScrollTrigger);
+ScrollTrigger.config({ ignoreMobileResize: true });
 
 function findSectionChapterEyebrow(section: HTMLElement): HTMLElement | null {
   const explicit = section.querySelector<HTMLElement>('[data-chapter-eyebrow]');
@@ -12,10 +13,10 @@ function findSectionChapterEyebrow(section: HTMLElement): HTMLElement | null {
 }
 
 /**
- * Scroll-triggered storytelling layer for long pages.
- * - Desktop (1024px+): full GSAP ScrollTrigger choreography for chapter eyebrows, headings, and card grids.
- * - Mobile & Tablet (< 1024px): crisp native IntersectionObserver compositor transitions (220ms) that NEVER hide
- *   elements at opacity: 0 on long pages or anchor jumps, and never wobble 1-column cards horizontally.
+ * Scroll-triggered storytelling layer across Desktop, Tablet, and Mobile.
+ * Uses GPU-composited GSAP ScrollTrigger tweens with `ignoreMobileResize: true`
+ * and clearProps so iPhone Chrome / WebKit renders smooth eyebrow rule draws,
+ * headings, and staggered grid/list entrances without stalling.
  */
 export function useIndustrialReveals(rootRef: RefObject<HTMLElement | null>, skip: string[] = []) {
   useEffect(() => {
@@ -28,65 +29,7 @@ export function useIndustrialReveals(rootRef: RefObject<HTMLElement | null>, ski
     );
 
     const isDesktop = window.matchMedia('(min-width: 1024px)').matches;
-
-    if (!isDesktop) {
-      // Mobile / Tablet: crisp GPU reveal on scroll with passive scroll fallback so headings never stall on iOS WebKit
-      const observers: IntersectionObserver[] = [];
-      const scrollHandlers: Array<() => void> = [];
-
-      sections.forEach((section) => {
-        const eyebrow = findSectionChapterEyebrow(section);
-        if (eyebrow) {
-          eyebrow.classList.add('reveal-eyebrow');
-        }
-
-        const heading = section.querySelector<HTMLElement>('h2:not(.sr-only)');
-        if (heading && !heading.querySelector('.sr-word')) {
-          const alreadyInView = heading.getBoundingClientRect().top <= window.innerHeight * 0.94;
-          if (!alreadyInView) {
-            heading.style.opacity = '0.3';
-            heading.style.transform = 'translate3d(0, 16px, 0)';
-            heading.style.transition = 'transform 420ms cubic-bezier(0.22, 1, 0.36, 1), opacity 340ms ease';
-
-            let revealed = false;
-            const reveal = () => {
-              if (revealed) return;
-              revealed = true;
-              heading.style.opacity = '1';
-              heading.style.transform = 'translate3d(0, 0, 0)';
-              io.disconnect();
-              window.removeEventListener('scroll', onScroll);
-            };
-            const onScroll = () => {
-              if (heading.getBoundingClientRect().top <= window.innerHeight * 0.94) reveal();
-            };
-            const io = new IntersectionObserver(
-              (entries) => {
-                if (entries.some((e) => e.isIntersecting || e.boundingClientRect.top <= window.innerHeight * 0.94)) {
-                  reveal();
-                }
-              },
-              { rootMargin: '60px 0px', threshold: 0.01 }
-            );
-            io.observe(heading);
-            window.addEventListener('scroll', onScroll, { passive: true });
-            observers.push(io);
-            scrollHandlers.push(() => {
-              window.removeEventListener('scroll', onScroll);
-              heading.style.opacity = '';
-              heading.style.transform = '';
-              heading.style.transition = '';
-            });
-          }
-        }
-      });
-
-      return () => {
-        observers.forEach((io) => io.disconnect());
-        scrollHandlers.forEach((fn) => fn());
-        root.querySelectorAll('.reveal-eyebrow').forEach((n) => n.classList.remove('reveal-eyebrow'));
-      };
-    }
+    const triggerStart = isDesktop ? 'top 86%' : 'top 93%';
 
     const ctx = gsap.context(() => {
       sections.forEach((section) => {
@@ -100,36 +43,36 @@ export function useIndustrialReveals(rootRef: RefObject<HTMLElement | null>, ski
             { '--rule': 0 },
             {
               '--rule': 1,
-              duration: 0.7,
+              duration: isDesktop ? 0.7 : 0.56,
               ease: 'power3.out',
-              scrollTrigger: { trigger: eyebrow, start: 'top 88%', once: true, invalidateOnRefresh: true },
+              scrollTrigger: { trigger: eyebrow, start: triggerStart, once: true, invalidateOnRefresh: true },
             }
           );
           gsap.fromTo(
             eyebrow,
-            { opacity: 0.25, x: -14 },
+            { opacity: 0.25, x: isDesktop ? -14 : -10 },
             {
               opacity: 1,
               x: 0,
-              duration: 0.6,
+              duration: isDesktop ? 0.6 : 0.48,
               ease: 'power2.out',
               clearProps: 'transform,opacity',
-              scrollTrigger: { trigger: eyebrow, start: 'top 88%', once: true, invalidateOnRefresh: true },
+              scrollTrigger: { trigger: eyebrow, start: triggerStart, once: true, invalidateOnRefresh: true },
             }
           );
         }
 
-        if (heading && !heading.querySelector('.sr-word')) {
+        if (heading && !heading.querySelector('.sr-word') && !heading.querySelector('.split-word-inner')) {
           gsap.fromTo(
             heading,
-            { opacity: 0.25, y: 24 },
+            { opacity: 0.25, y: isDesktop ? 24 : 16 },
             {
               opacity: 1,
               y: 0,
-              duration: 0.8,
+              duration: isDesktop ? 0.8 : 0.58,
               ease: 'power3.out',
               clearProps: 'transform,opacity',
-              scrollTrigger: { trigger: heading, start: 'top 86%', once: true, invalidateOnRefresh: true },
+              scrollTrigger: { trigger: heading, start: triggerStart, once: true, invalidateOnRefresh: true },
             }
           );
         }
@@ -139,28 +82,30 @@ export function useIndustrialReveals(rootRef: RefObject<HTMLElement | null>, ski
         );
         containers.forEach((container) => {
           const items = Array.from(container.children).filter(
-            (c): c is HTMLElement => c instanceof HTMLElement && !c.hasAttribute('data-no-reveal') && c.offsetHeight < 900
+            (c): c is HTMLElement => c instanceof HTMLElement && !c.hasAttribute('data-no-reveal') && c.offsetHeight < 950
           );
           if (items.length < 2 || items.length > 16) return;
           gsap.fromTo(
             items,
-            { opacity: 0.25, y: 26 },
+            { opacity: 0.28, y: isDesktop ? 26 : 16 },
             {
               opacity: 1,
               y: 0,
-              duration: 0.7,
+              duration: isDesktop ? 0.7 : 0.52,
               ease: 'power2.out',
-              stagger: 0.08,
+              stagger: isDesktop ? 0.08 : 0.055,
               clearProps: 'transform,opacity',
-              scrollTrigger: { trigger: container, start: 'top 85%', once: true, invalidateOnRefresh: true },
+              scrollTrigger: { trigger: container, start: isDesktop ? 'top 85%' : 'top 93%', once: true, invalidateOnRefresh: true },
             }
           );
         });
       });
     }, root);
 
-    const t1 = window.setTimeout(() => ScrollTrigger.refresh(), 350);
-    const t2 = window.setTimeout(() => ScrollTrigger.refresh(), 1200);
+    const refresh = () => ScrollTrigger.refresh();
+    const t1 = window.setTimeout(refresh, 350);
+    const t2 = window.setTimeout(refresh, 1150);
+    document.fonts?.ready?.then(refresh);
     return () => {
       window.clearTimeout(t1);
       window.clearTimeout(t2);

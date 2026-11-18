@@ -7,6 +7,7 @@ import { ASSETS, VisualAsset } from '../data/assets';
 import { ResilientImage } from './ResilientImage';
 
 gsap.registerPlugin(ScrollTrigger);
+ScrollTrigger.config({ ignoreMobileResize: true });
 
 interface ProcessStage {
   number: string;
@@ -63,6 +64,7 @@ export function ManufacturingScrollStory() {
   const mobileListRef = useRef<HTMLDivElement>(null);
   const lastStageRef = useRef(0);
   const [activeStage, setActiveStage] = useState(0);
+  const [activeMobileStage, setActiveMobileStage] = useState(0);
   const [prefersReducedMotion, setPrefersReducedMotion] = useState(() =>
     typeof window !== 'undefined'
       ? window.matchMedia('(prefers-reduced-motion: reduce)').matches
@@ -109,7 +111,7 @@ export function ManufacturingScrollStory() {
     return () => ctx.revert();
   }, [prefersReducedMotion]);
 
-  // Phones and tablets: crisp active-stage dot tracking via IntersectionObserver with zero heavy clipPath/scale scrubs
+  // Phones and tablets: GSAP stage entrance + active-stage dot/rail tracking via IntersectionObserver
   useEffect(() => {
     const list = mobileListRef.current;
     if (prefersReducedMotion || !list) return;
@@ -120,6 +122,27 @@ export function ManufacturingScrollStory() {
     if (fill) {
       fill.style.transition = 'transform 280ms cubic-bezier(0.22, 1, 0.36, 1)';
     }
+
+    const ctx = gsap.context(() => {
+      cards.forEach((card) => {
+        gsap.fromTo(
+          card,
+          { y: 20, opacity: 0.35 },
+          {
+            y: 0,
+            opacity: 1,
+            duration: 0.55,
+            ease: 'power3.out',
+            clearProps: 'transform,opacity',
+            scrollTrigger: {
+              trigger: card,
+              start: 'top 93%',
+              once: true,
+            },
+          }
+        );
+      });
+    }, list);
 
     const io = new IntersectionObserver(
       (entries) => {
@@ -133,6 +156,7 @@ export function ManufacturingScrollStory() {
         });
 
         const activeIndex = cards.reduce((acc, c, i) => (c.classList.contains('is-active') ? i : acc), 0);
+        setActiveMobileStage(activeIndex);
         if (fill) {
           fill.style.transform = `scaleY(${Math.min(1, (activeIndex + 1) / Math.max(1, cards.length))})`;
         }
@@ -143,9 +167,23 @@ export function ManufacturingScrollStory() {
     cards.forEach((c) => io.observe(c));
     return () => {
       io.disconnect();
+      ctx.revert();
       cards.forEach((c) => c.classList.remove('is-active'));
     };
   }, [prefersReducedMotion]);
+
+  const jumpToMobileStage = (idx: number) => {
+    const list = mobileListRef.current;
+    if (!list) return;
+    const cards = Array.from(list.querySelectorAll<HTMLElement>('[data-stage-card]'));
+    const target = cards[idx];
+    if (!target) return;
+    setActiveMobileStage(idx);
+    target.scrollIntoView({
+      behavior: prefersReducedMotion ? 'auto' : 'smooth',
+      block: 'center',
+    });
+  };
 
   const handleManualStageSelect = (idx: number) => {
     lastStageRef.current = idx;
@@ -330,6 +368,37 @@ export function ManufacturingScrollStory() {
             <ArrowRight className="w-3.5 h-3.5" aria-hidden="true" />
           </Link>
         </div>
+
+        {!prefersReducedMotion && (
+          <nav
+            aria-label="Manufacturing stage quick navigation"
+            className="flex lg:hidden items-center gap-2 overflow-x-auto pb-1"
+          >
+            {[
+              { number: '01', short: 'Smelting' },
+              { number: '02', short: 'Refining' },
+              { number: '03', short: 'Assay' },
+              { number: '04', short: 'Port' },
+            ].map((item, idx) => {
+              const isActive = activeMobileStage === idx;
+              return (
+                <button
+                  key={item.number}
+                  type="button"
+                  onClick={() => jumpToMobileStage(idx)}
+                  aria-current={isActive ? 'step' : undefined}
+                  className={`min-h-[40px] px-3 py-1.5 text-[11px] font-mono-tabular uppercase tracking-wider border whitespace-nowrap shrink-0 transition-colors cursor-pointer ${
+                    isActive
+                      ? 'bg-brand text-[#FFFFFF] border-brand dark:bg-[#0A6AA1] dark:border-[#69C5F5]'
+                      : 'bg-white text-[#465C72] border-[#10243A]/16 dark:bg-[#12243B] dark:text-[#B5C5D7] dark:border-[#F4F8FC]/14'
+                  }`}
+                >
+                  {item.number} · {item.short}
+                </button>
+              );
+            })}
+          </nav>
+        )}
 
         <div ref={mobileListRef} className="relative">
         <div aria-hidden="true" className="absolute start-[7px] top-2 bottom-2 w-[2px] bg-subtle lg:hidden">

@@ -96,15 +96,27 @@ export function MorphText({
           className
         )}
       >
-        <div className="min-h-[1.2em] flex items-center" style={{ fontSize, fontFamily }}>
+        <div
+          className="min-h-[1.25em] flex items-center overflow-hidden"
+          style={{
+            fontSize,
+            fontFamily,
+            perspective: '900px',
+            WebkitPerspective: '900px',
+          }}
+        >
           <AnimatePresence mode="wait">
             <motion.span
               key={currentWord}
-              initial={{ opacity: 0, y: 6 }}
-              animate={{ opacity: 1, y: 0 }}
-              exit={{ opacity: 0, y: -6 }}
-              transition={{ duration: 0.22, ease: [0.22, 1, 0.36, 1] }}
-              className={cn('font-bold uppercase tracking-[0.02em] leading-none block', textClassName)}
+              initial={{ opacity: 0, rotateX: -72, y: 12 }}
+              animate={{ opacity: 1, rotateX: 0, y: 0 }}
+              exit={{ opacity: 0, rotateX: 72, y: -12 }}
+              transition={{ duration: 0.34, ease: [0.22, 1, 0.36, 1] }}
+              style={{
+                transformStyle: 'preserve-3d',
+                WebkitTransformStyle: 'preserve-3d',
+              }}
+              className={cn('font-bold uppercase tracking-[0.02em] leading-none block will-change-transform', textClassName)}
             >
               {currentWord}
             </motion.span>

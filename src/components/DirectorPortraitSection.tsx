@@ -32,7 +32,7 @@ export function DirectorPortraitSection({ variant = 'home' }: DirectorPortraitSe
   const portraitLayerRef = useRef<HTMLDivElement>(null);
   const accentLayerRef = useRef<HTMLDivElement>(null);
 
-  // Staggered scroll entrance: full GSAP ScrollTrigger on lg+, lightweight GPU IntersectionObserver on < 1024px
+  // Staggered scroll entrance across all viewports + mobile scroll-linked multi-layer depth
   useEffect(() => {
     const root = rootRef.current;
     if (!root) return;
@@ -40,121 +40,15 @@ export function DirectorPortraitSection({ variant = 'home' }: DirectorPortraitSe
     const prefersReduced = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
     if (prefersReduced) return;
 
-    const isCompactViewport = window.matchMedia('(max-width: 1023px)').matches;
-    if (isCompactViewport) {
-      const frame = frameLayerRef.current;
-      const portrait = portraitEntranceRef.current;
-      const accent = accentLayerRef.current;
-      const editorialItems = Array.from(root.querySelectorAll<HTMLElement>('.director-editorial-stagger'));
+    ScrollTrigger.config({ ignoreMobileResize: true });
+    const isDesktop = window.matchMedia('(min-width: 1024px)').matches;
 
-      if (frame) {
-        frame.style.opacity = '0.28';
-        frame.style.transform = 'scale(0.95)';
-        frame.style.transition = 'opacity 580ms ease, transform 680ms cubic-bezier(0.22, 1, 0.36, 1)';
-      }
-      if (portrait) {
-        portrait.style.opacity = '0.25';
-        portrait.style.transform = 'translate3d(0, 26px, 0)';
-        portrait.style.transition = 'opacity 680ms ease 90ms, transform 760ms cubic-bezier(0.22, 1, 0.36, 1) 90ms';
-      }
-      if (accent) {
-        accent.style.opacity = '0.2';
-        accent.style.transform = 'translate3d(12px, 12px, 0)';
-        accent.style.transition = 'opacity 560ms ease 180ms, transform 640ms cubic-bezier(0.22, 1, 0.36, 1) 180ms';
-      }
-      editorialItems.forEach((el, idx) => {
-        el.style.opacity = '0.25';
-        el.style.transform = 'translate3d(0, 14px, 0)';
-        el.style.transition = `opacity 520ms ease ${80 + idx * 55}ms, transform 580ms cubic-bezier(0.22, 1, 0.36, 1) ${80 + idx * 55}ms`;
-      });
-
-      let revealed = false;
-      const hasEnteredOrPassed = () => root.getBoundingClientRect().top <= window.innerHeight * 0.94;
-
-      const reveal = () => {
-        if (revealed) return;
-        revealed = true;
-        if (frame) {
-          frame.style.opacity = '1';
-          frame.style.transform = 'scale(1)';
-        }
-        if (portrait) {
-          portrait.style.opacity = '1';
-          portrait.style.transform = 'translate3d(0, 0, 0)';
-        }
-        if (accent) {
-          accent.style.opacity = '1';
-          accent.style.transform = 'translate3d(0, 0, 0)';
-        }
-        editorialItems.forEach((el) => {
-          el.style.opacity = '1';
-          el.style.transform = 'translate3d(0, 0, 0)';
-        });
-        io.disconnect();
-        window.removeEventListener('scroll', onScrollOrResize);
-        window.removeEventListener('resize', onScrollOrResize);
-      };
-
-      const onScrollOrResize = () => {
-        if (hasEnteredOrPassed()) reveal();
-      };
-
-      const io = new IntersectionObserver(
-        (entries) => {
-          if (entries.some((e) => e.isIntersecting || e.boundingClientRect.top <= window.innerHeight * 0.94)) {
-            reveal();
-          }
-        },
-        { threshold: 0.05, rootMargin: '60px 0px' }
-      );
-      io.observe(root);
-      window.addEventListener('scroll', onScrollOrResize, { passive: true });
-      window.addEventListener('resize', onScrollOrResize, { passive: true });
-
-      let raf1 = 0;
-      let raf2 = 0;
-      raf1 = window.requestAnimationFrame(() => {
-        raf2 = window.requestAnimationFrame(() => {
-          if (hasEnteredOrPassed()) reveal();
-        });
-      });
-
-      return () => {
-        window.cancelAnimationFrame(raf1);
-        window.cancelAnimationFrame(raf2);
-        io.disconnect();
-        window.removeEventListener('scroll', onScrollOrResize);
-        window.removeEventListener('resize', onScrollOrResize);
-        if (frame) {
-          frame.style.opacity = '';
-          frame.style.transform = '';
-          frame.style.transition = '';
-        }
-        if (portrait) {
-          portrait.style.opacity = '';
-          portrait.style.transform = '';
-          portrait.style.transition = '';
-        }
-        if (accent) {
-          accent.style.opacity = '';
-          accent.style.transform = '';
-          accent.style.transition = '';
-        }
-        editorialItems.forEach((el) => {
-          el.style.opacity = '';
-          el.style.transform = '';
-          el.style.transition = '';
-        });
-      };
-    }
-
-    const mm = gsap.matchMedia();
-    mm.add('(min-width: 1024px)', () => {
+    const ctx = gsap.context(() => {
       const tl = gsap.timeline({
         paused: true,
         scrollTrigger: {
           trigger: root,
-          start: 'top 86%',
+          start: isDesktop ? 'top 86%' : 'top 93%',
           once: true,
           invalidateOnRefresh: true,
         },
@@ -167,7 +61,7 @@ export function DirectorPortraitSection({ variant = 'home' }: DirectorPortraitSe
           {
             opacity: 1,
             scale: 1,
-            duration: 0.72,
+            duration: isDesktop ? 0.72 : 0.58,
             ease: 'power2.out',
             clearProps: 'opacity,transform',
           },
@@ -178,15 +72,15 @@ export function DirectorPortraitSection({ variant = 'home' }: DirectorPortraitSe
       if (portraitEntranceRef.current) {
         tl.fromTo(
           portraitEntranceRef.current,
-          { y: 24, opacity: 0.22 },
+          { y: isDesktop ? 24 : 20, opacity: 0.22 },
           {
             y: 0,
             opacity: 1,
-            duration: 0.88,
+            duration: isDesktop ? 0.88 : 0.68,
             ease: 'power3.out',
             clearProps: 'transform,opacity',
           },
-          0.1
+          0.08
         );
       }
 
@@ -198,17 +92,56 @@ export function DirectorPortraitSection({ variant = 'home' }: DirectorPortraitSe
           {
             y: 0,
             opacity: 1,
-            duration: 0.68,
-            stagger: 0.08,
+            duration: isDesktop ? 0.68 : 0.54,
+            stagger: isDesktop ? 0.08 : 0.055,
             ease: 'power3.out',
             clearProps: 'transform,opacity',
           },
-          0.12
+          0.1
         );
       }
 
+      // Mobile scroll-scrubbed 3D layer separation so thumb scrolling glides portrait over frame
+      if (!isDesktop) {
+        if (portraitLayerRef.current) {
+          gsap.fromTo(
+            portraitLayerRef.current,
+            { y: 12 },
+            {
+              y: -4,
+              ease: 'none',
+              scrollTrigger: {
+                trigger: root,
+                start: 'top bottom',
+                end: 'bottom top',
+                scrub: 0.35,
+                invalidateOnRefresh: true,
+              },
+            }
+          );
+        }
+        if (accentLayerRef.current) {
+          gsap.fromTo(
+            accentLayerRef.current,
+            { y: -6, x: 4 },
+            {
+              y: 10,
+              x: -4,
+              ease: 'none',
+              scrollTrigger: {
+                trigger: root,
+                start: 'top bottom',
+                end: 'bottom top',
+                scrub: 0.35,
+                invalidateOnRefresh: true,
+              },
+            }
+          );
+        }
+      }
+
       const ensureEnteredPlayed = () => {
-        if (tl.progress() === 0 && root.getBoundingClientRect().top <= window.innerHeight * 0.9) {
+        if (tl.progress() === 0 && root.getBoundingClientRect().top <= window.innerHeight * 0.94) {
           tl.play();
         }
       };
@@ -221,9 +154,9 @@ export function DirectorPortraitSection({ variant = 'home' }: DirectorPortraitSe
         window.cancelAnimationFrame(rafCheck);
         window.removeEventListener('scroll', onScrollCheck);
       };
-    });
+    }, root);
 
-    return () => mm.revert();
+    return () => ctx.revert();
   }, []);
 
   // Desktop fine-pointer damped rAF 5-layer depth parallax (never updates React state on pointermove)

@@ -74,7 +74,9 @@ export function HomePage() {
     const prefersReduced = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
     if (prefersReduced || !heroSectionRef.current) return;
 
+    ScrollTrigger.config({ ignoreMobileResize: true });
     const mm = gsap.matchMedia();
+
     mm.add('(min-width: 1024px)', () => {
       gsap.from('.hero-reveal', {
         y: 18,
@@ -103,8 +105,39 @@ export function HomePage() {
           },
         });
       }
-      document.fonts?.ready?.then(() => ScrollTrigger.refresh());
     });
+
+    mm.add('(max-width: 1023px)', () => {
+      gsap.from('.hero-reveal', {
+        y: 14,
+        opacity: 0.2,
+        duration: 0.52,
+        stagger: 0.06,
+        ease: 'power3.out',
+        clearProps: 'transform,opacity',
+        scrollTrigger: {
+          trigger: heroSectionRef.current,
+          start: 'top 93%',
+          once: true,
+        },
+      });
+
+      if (heroMediaRef.current) {
+        gsap.to(heroMediaRef.current, {
+          yPercent: 6,
+          scale: 1.04,
+          ease: 'none',
+          scrollTrigger: {
+            trigger: heroSectionRef.current,
+            start: 'top bottom',
+            end: 'bottom top',
+            scrub: 0.3,
+          },
+        });
+      }
+    });
+
+    document.fonts?.ready?.then(() => ScrollTrigger.refresh());
 
     return () => mm.revert();
   }, []);
@@ -410,7 +443,10 @@ export function HomePage() {
         <div className="max-w-[1360px] mx-auto px-4 sm:px-6 lg:px-8 xl:px-14 2xl:px-8 space-y-2.5">
           <div className="flex flex-wrap items-center justify-between gap-2 text-[10px] font-mono-tabular uppercase tracking-widest text-[#465C72] dark:text-[#B5C5D7]">
             <span>Documented Systems, Credit Ratings & Industry Bodies</span>
-            <span className="text-brand dark:text-[#69C5F5]">Hover Ribbon To Pause</span>
+            <span className="text-brand dark:text-[#69C5F5]">
+              <span className="lg:hidden">Tap Ribbon To Pause</span>
+              <span className="hidden lg:inline">Hover Ribbon To Pause</span>
+            </span>
           </div>
           <CredentialLogoMarquee />
         </div>
@@ -1413,7 +1449,8 @@ export function HomePage() {
                 </h3>
               </div>
               <p className="text-xs text-[#465C72] dark:text-[#B5C5D7]">
-                Hover or focus any site row to unveil facility preview imagery.
+                <span className="md:hidden">Tap any site row to unveil facility preview imagery.</span>
+                <span className="hidden md:inline">Hover or focus any site row to unveil facility preview imagery.</span>
               </p>
             </div>
             <ImageRevealList items={PLANT_REVEAL_ROWS} />

@@ -109,62 +109,35 @@ export const GooeyTextReveal = forwardRef<HTMLDivElement, GooeyTextRevealProps>(
       const isCompact = window.matchMedia('(max-width: 767px)').matches;
       if (isCompact) {
         const targets = getRevealTargets(container);
-        targets.forEach((el, i) => {
-          el.style.opacity = '0.32';
-          el.style.transform = 'translate3d(0, 12px, 0)';
-          el.style.transition = `opacity 520ms cubic-bezier(0.22, 1, 0.36, 1) ${i * 70}ms, transform 560ms cubic-bezier(0.22, 1, 0.36, 1) ${i * 70}ms`;
-        });
+        if (targets.length === 0) return;
 
-        let revealed = false;
-        const hasEnteredOrPassed = () => container.getBoundingClientRect().top <= window.innerHeight * 0.94;
-
-        const reveal = () => {
-          if (revealed) return;
-          revealed = true;
-          targets.forEach((el) => {
-            el.style.opacity = '1';
-            el.style.transform = 'translate3d(0, 0, 0)';
-          });
-          io.disconnect();
-          window.removeEventListener('scroll', onScrollOrResize);
-          window.removeEventListener('resize', onScrollOrResize);
-        };
-
-        const onScrollOrResize = () => {
-          if (hasEnteredOrPassed()) reveal();
-        };
-
-        const io = new IntersectionObserver(
-          (entries) => {
-            if (entries.some((e) => e.isIntersecting || e.boundingClientRect.top <= window.innerHeight * 0.94)) {
-              reveal();
-            }
-          },
-          { threshold: 0.08, rootMargin: '40px 0px' }
+        ScrollTrigger.config({ ignoreMobileResize: true });
+        const tweenMobile = gsap.fromTo(
+          targets,
+          { opacity: 0.25, y: 14 },
+          {
+            opacity: 1,
+            y: 0,
+            duration: 0.62,
+            stagger: 0.08,
+            ease: 'power3.out',
+            clearProps: 'transform,opacity',
+            ...(mode === 'immediate'
+              ? { delay }
+              : {
+                  scrollTrigger: {
+                    trigger: container,
+                    start: 'top 93%',
+                    once,
+                    invalidateOnRefresh: true,
+                  },
+                }),
+          }
         );
-        io.observe(container);
-        window.addEventListener('scroll', onScrollOrResize, { passive: true });
-        window.addEventListener('resize', onScrollOrResize, { passive: true });
-
-        let raf1 = 0;
-        let raf2 = 0;
-        raf1 = window.requestAnimationFrame(() => {
-          raf2 = window.requestAnimationFrame(() => {
-            if (hasEnteredOrPassed()) reveal();
-          });
-        });
 
         return () => {
-          window.cancelAnimationFrame(raf1);
-          window.cancelAnimationFrame(raf2);
-          io.disconnect();
-          window.removeEventListener('scroll', onScrollOrResize);
-          window.removeEventListener('resize', onScrollOrResize);
-          targets.forEach((el) => {
-            el.style.opacity = '';
-            el.style.transform = '';
-            el.style.transition = '';
-          });
+          tweenMobile.scrollTrigger?.kill();
+          tweenMobile.kill();
         };
       }
 

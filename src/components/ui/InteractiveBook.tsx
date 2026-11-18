@@ -381,6 +381,15 @@ function Cover({ coverKicker, coverTitle, coverSubtitle, coverMeta, fill, compac
           <span className="text-[#69C5F5] shrink-0">{compact ? 'Swipe / Tap →' : 'Open Book →'}</span>
         </div>
       </div>
+      {compact && (
+        <motion.span
+          aria-hidden="true"
+          animate={{ scale: [1, 1.16, 1], opacity: [0.82, 1, 0.82] }}
+          transition={{ duration: 2.6, repeat: Infinity, ease: 'easeInOut' }}
+          style={{ clipPath: 'polygon(100% 0, 0 100%, 100% 100%)' }}
+          className="pointer-events-none absolute bottom-0 right-0 w-9 h-9 bg-gradient-to-tl from-[#69C5F5]/75 via-[#2894CC]/45 to-transparent border-t border-l border-[#69C5F5]/55"
+        />
+      )}
     </div>
   );
 }
@@ -454,9 +463,11 @@ function MobileSheet({ page, hasNext, onTapNext }: MobileSheetProps) {
           aria-label={`Turn to folio 0${page.pageNumber + 1}`}
           className="group absolute bottom-0 right-0 z-20 flex items-end justify-end w-16 h-12 cursor-pointer focus:outline-none"
         >
-          <span
+          <motion.span
             aria-hidden="true"
-            className="w-9 h-9 bg-gradient-to-tl from-[#D9E5F0] via-[#EEF4FA] to-transparent dark:from-[#1B3A5C] dark:via-[#142D49] border-t border-l border-[#10243A]/18 dark:border-[#69C5F5]/30 shadow-[-3px_-3px_8px_rgba(16,36,58,0.14)] transition-transform duration-200 group-hover:scale-110 flex items-center justify-center"
+            animate={{ scale: [1, 1.12, 1] }}
+            transition={{ duration: 2.8, repeat: Infinity, ease: 'easeInOut' }}
+            className="w-9 h-9 bg-gradient-to-tl from-[#D9E5F0] via-[#EEF4FA] to-transparent dark:from-[#1B3A5C] dark:via-[#142D49] border-t border-l border-[#10243A]/18 dark:border-[#69C5F5]/35 shadow-[-3px_-3px_8px_rgba(16,36,58,0.16)] transition-transform duration-200 group-hover:scale-110 flex items-center justify-center origin-bottom-right"
             style={{ clipPath: 'polygon(100% 0, 0 100%, 100% 100%)' }}
           />
         </button>
@@ -627,10 +638,10 @@ export function InteractiveBook({
     const duration = spread
       ? desktopDuration
       : turn.kind === 'cover'
-        ? 0.85
+        ? 0.72
         : turn.kind === 'jump'
-          ? 0.62
-          : 0.72;
+          ? 0.56
+          : 0.62;
     const controls = animate(0, 1, {
       duration,
       ease: spread ? TURN_EASE : [0.22, 1, 0.36, 1],
@@ -715,8 +726,8 @@ export function InteractiveBook({
 
       if (last || !active) {
         const flickCommit =
-          activeTurn.dir === 'fwd' ? vx > 0.25 && dxDir < 0 : vx > 0.25 && dxDir > 0;
-        const commit = p >= 0.2 || flickCommit;
+          activeTurn.dir === 'fwd' ? vx > 0.18 && dxDir < 0 : vx > 0.18 && dxDir > 0;
+        const commit = p >= 0.16 || flickCommit;
         const targetEnd = commit ? 1 : 0;
         const rem = Math.abs(targetEnd - p);
 
@@ -925,7 +936,7 @@ export function InteractiveBook({
                 onClick={() => step(-1)}
                 disabled={turning || pos <= 0}
                 aria-label="Previous dossier folio"
-                className="inline-flex items-center justify-center w-8 h-8 sm:w-9 sm:h-9 border border-[#10243A]/20 dark:border-[#F4F8FC]/20 bg-white dark:bg-[#12243B] text-[#10243A] dark:text-[#F4F8FC] disabled:opacity-40 hover:border-brand transition-colors duration-300 cursor-pointer disabled:cursor-not-allowed"
+                className="inline-flex items-center justify-center w-10 h-10 sm:w-9 sm:h-9 border border-[#10243A]/20 dark:border-[#F4F8FC]/20 bg-white dark:bg-[#12243B] text-[#10243A] dark:text-[#F4F8FC] disabled:opacity-40 hover:border-brand transition-colors duration-300 cursor-pointer disabled:cursor-not-allowed"
               >
                 <ChevronLeft className="w-4 h-4" aria-hidden="true" />
               </button>
@@ -934,7 +945,7 @@ export function InteractiveBook({
                 onClick={() => step(1)}
                 disabled={turning || pos >= total - 1}
                 aria-label="Next dossier folio"
-                className="inline-flex items-center justify-center w-8 h-8 sm:w-9 sm:h-9 border border-[#10243A]/20 dark:border-[#F4F8FC]/20 bg-white dark:bg-[#12243B] text-[#10243A] dark:text-[#F4F8FC] disabled:opacity-40 hover:border-brand transition-colors duration-300 cursor-pointer disabled:cursor-not-allowed"
+                className="inline-flex items-center justify-center w-10 h-10 sm:w-9 sm:h-9 border border-[#10243A]/20 dark:border-[#F4F8FC]/20 bg-white dark:bg-[#12243B] text-[#10243A] dark:text-[#F4F8FC] disabled:opacity-40 hover:border-brand transition-colors duration-300 cursor-pointer disabled:cursor-not-allowed"
               >
                 <ChevronRight className="w-4 h-4" aria-hidden="true" />
               </button>
@@ -942,7 +953,7 @@ export function InteractiveBook({
                 type="button"
                 onClick={() => startTurn(-1, 'cover')}
                 disabled={turning}
-                className="inline-flex items-center gap-1 min-h-[32px] sm:min-h-[36px] px-2.5 sm:px-3 py-1 text-[11px] sm:text-xs font-semibold border border-[#10243A]/20 dark:border-[#F4F8FC]/20 bg-[#10243A] text-[#FFFFFF] hover:bg-brand dark:bg-[#0A6AA1] dark:hover:bg-[#69C5F5] dark:hover:text-[#10243A] transition-colors duration-300 cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed"
+                className="inline-flex items-center gap-1 min-h-[40px] sm:min-h-[36px] px-3 py-1.5 text-[11px] sm:text-xs font-semibold border border-[#10243A]/20 dark:border-[#F4F8FC]/20 bg-[#10243A] text-[#FFFFFF] hover:bg-brand dark:bg-[#0A6AA1] dark:hover:bg-[#69C5F5] dark:hover:text-[#10243A] transition-colors duration-300 cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed"
               >
                 <X className="w-3.5 h-3.5" aria-hidden="true" />
                 <span>Close</span>
@@ -953,7 +964,7 @@ export function InteractiveBook({
               type="button"
               onClick={() => startTurn(0, 'cover')}
               disabled={turning}
-              className="inline-flex items-center gap-1.5 min-h-[36px] sm:min-h-[40px] px-3.5 sm:px-4 py-1.5 sm:py-2 text-[11px] sm:text-xs font-semibold uppercase tracking-wider bg-[#10243A] text-[#FFFFFF] hover:bg-brand dark:bg-[#0A6AA1] dark:text-[#F4F8FC] dark:hover:bg-[#69C5F5] dark:hover:text-[#10243A] transition-colors duration-300 cursor-pointer disabled:opacity-60"
+              className="inline-flex items-center gap-1.5 min-h-[42px] sm:min-h-[40px] px-4 py-2 text-[11px] sm:text-xs font-semibold uppercase tracking-wider bg-[#10243A] text-[#FFFFFF] hover:bg-brand dark:bg-[#0A6AA1] dark:text-[#F4F8FC] dark:hover:bg-[#69C5F5] dark:hover:text-[#10243A] transition-colors duration-300 cursor-pointer disabled:opacity-60"
             >
               <BookOpen className="w-3.5 h-3.5" aria-hidden="true" />
               <span>Open Dossier</span>
@@ -974,7 +985,7 @@ export function InteractiveBook({
                 disabled={turning}
                 onClick={() => goTo(idx)}
                 className={cn(
-                  'min-h-[32px] px-2.5 py-1 text-[10.5px] font-mono-tabular uppercase tracking-wider border whitespace-nowrap shrink-0 cursor-pointer transition-colors disabled:opacity-60',
+                  'min-h-[38px] px-2.5 py-1.5 text-[10.5px] font-mono-tabular uppercase tracking-wider border whitespace-nowrap shrink-0 cursor-pointer transition-colors disabled:opacity-60',
                   selected
                     ? 'bg-[#10243A] text-[#FFFFFF] border-[#10243A] dark:bg-[#0A6AA1] dark:border-[#0A6AA1]'
                     : 'bg-white dark:bg-[#12243B] text-[#465C72] dark:text-[#B5C5D7] border-[#10243A]/14 dark:border-[#F4F8FC]/14'

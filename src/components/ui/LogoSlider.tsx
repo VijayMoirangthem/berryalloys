@@ -1,4 +1,5 @@
 import * as React from 'react';
+import { useState } from 'react';
 import { cn } from '../../lib/utils';
 
 export interface LogoSliderItem {
@@ -23,8 +24,8 @@ export interface LogoSliderProps extends React.HTMLAttributes<HTMLDivElement> {
 }
 
 /**
- * LogoSlider — Continuous marquee ribbon with progressive CSS blur masks
- * and hover-pause ergonomics adapted from VengeanceUI for credential & standards strips.
+ * LogoSlider — Continuous marquee ribbon with hover-pause on desktop,
+ * tap-to-pause/resume on touch screens, and ambient-motion awareness.
  */
 export function LogoSlider({
   items,
@@ -44,13 +45,18 @@ export function LogoSlider({
 }: LogoSliderProps) {
   const safeSpeed = Math.max(8, speed);
   const safeBlurLayers = Math.max(1, Math.min(8, blurLayers));
+  const [tapPaused, setTapPaused] = useState(false);
 
   return (
     <div
-      className={cn('logo-slider', className)}
+      className={cn('logo-slider', pauseOnHover && 'cursor-pointer', className)}
       data-direction={direction}
       data-pause-on-hover={String(pauseOnHover)}
+      data-user-paused={String(tapPaused)}
       data-edge-fade={String(edgeFade)}
+      onClick={() => {
+        if (pauseOnHover) setTapPaused((p) => !p);
+      }}
       style={
         {
           '--duration': `${safeSpeed}s`,

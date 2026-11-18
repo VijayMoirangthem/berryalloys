@@ -82,11 +82,12 @@ export function WaveGridBackground({
       baseY[i] = posAttr.getY(i);
     }
 
+    const effectiveAmplitude = isCompactMobile ? amplitude * 1.32 : amplitude;
     const wireMaterial = new THREE.MeshBasicMaterial({
       color: isDark ? 0xec743c : 0x9e4b28,
       wireframe: true,
       transparent: true,
-      opacity: isDark ? 0.24 : 0.16,
+      opacity: isDark ? (isCompactMobile ? 0.3 : 0.24) : isCompactMobile ? 0.22 : 0.16,
     });
     const waveMesh = new THREE.Mesh(geometry, wireMaterial);
     waveMesh.position.y = -0.6;
@@ -94,9 +95,9 @@ export function WaveGridBackground({
 
     const pointsMaterial = new THREE.PointsMaterial({
       color: isDark ? 0xf3f0e9 : 0x141618,
-      size: 0.055,
+      size: isCompactMobile ? 0.07 : 0.055,
       transparent: true,
-      opacity: isDark ? 0.36 : 0.22,
+      opacity: isDark ? (isCompactMobile ? 0.44 : 0.36) : isCompactMobile ? 0.28 : 0.22,
     });
     const wavePoints = new THREE.Points(geometry, pointsMaterial);
     wavePoints.position.y = -0.59;
@@ -143,22 +144,33 @@ export function WaveGridBackground({
     };
     window.addEventListener('resize', onResize);
 
+    let lastTouchAt = 0;
+    const onTouchMark = () => {
+      lastTouchAt = performance.now();
+    };
+    window.addEventListener('pointermove', onTouchMark, { passive: true });
+    window.addEventListener('touchstart', onTouchMark, { passive: true });
+
     const updateWave = (t: number) => {
-      smoothPointer.x += (pointer.x - smoothPointer.x) * 0.05;
-      smoothPointer.y += (pointer.y - smoothPointer.y) * 0.05;
+      const idleOnCompact = isCompactMobile && performance.now() - lastTouchAt > 2500;
+      const targetX = idleOnCompact ? Math.sin(t * 0.55) * 0.65 : pointer.x;
+      const targetY = idleOnCompact ? Math.cos(t * 0.42) * 0.5 : pointer.y;
+
+      smoothPointer.x += (targetX - smoothPointer.x) * 0.05;
+      smoothPointer.y += (targetY - smoothPointer.y) * 0.05;
 
       for (let i = 0; i < posAttr.count; i++) {
         const x = posAttr.getX(i);
         const z = posAttr.getZ(i);
 
-        const ridgeA = Math.sin(x * 0.45 + t * 0.85) * Math.cos(z * 0.52 + t * 0.65);
-        const ridgeB = Math.sin((x + z) * 0.32 - t * 0.55) * 0.48;
+        const ridgeA = Math.sin(x * 0.45 + t * 0.95) * Math.cos(z * 0.52 + t * 0.72);
+        const ridgeB = Math.sin((x + z) * 0.32 - t * 0.62) * 0.48;
         const dx = x - smoothPointer.x * 7.5;
         const dz = z - smoothPointer.y * 4.5;
         const dist = Math.sqrt(dx * dx + dz * dz);
-        const cursorRipple = Math.exp(-dist * 0.24) * Math.cos(dist * 1.1 - t * 2.2) * 0.65;
+        const cursorRipple = Math.exp(-dist * 0.24) * Math.cos(dist * 1.1 - t * 2.4) * 0.72;
 
-        posAttr.setY(i, baseY[i] + (ridgeA + ridgeB) * amplitude + cursorRipple);
+        posAttr.setY(i, baseY[i] + (ridgeA + ridgeB) * effectiveAmplitude + cursorRipple);
       }
       posAttr.needsUpdate = true;
     };
@@ -209,7 +221,8 @@ export function WaveGridBackground({
 
     const loop = () => {
       if (disposed || prefersReduced) return;
-      if (isVisible && !document.hidden) {
+      const ambientPaused = document.documentElement.dataset.ambient === 'paused';
+      if (isVisible && !document.hidden && !ambientPaused) {
         const elapsed = (performance.now() - startTime) * 0.001;
         updateWave(elapsed);
         renderer?.render(scene, camera);
@@ -230,6 +243,8 @@ export function WaveGridBackground({
       window.removeEventListener('pointerdown', onPointerMove);
       window.removeEventListener('touchstart', onTouchUpdate);
       window.removeEventListener('touchmove', onTouchUpdate);
+      window.removeEventListener('pointermove', onTouchMark);
+      window.removeEventListener('touchstart', onTouchMark);
       window.removeEventListener('resize', onResize);
 
       geometry.dispose();

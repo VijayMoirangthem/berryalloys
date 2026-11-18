@@ -37,7 +37,7 @@ export function FlipText({
   return (
     <span
       className={cn('flip-text-wrapper inline-block leading-none', className)}
-      style={{ perspective: '1000px' }}
+      style={{ perspective: '1000px', WebkitPerspective: '1000px' }}
     >
       <span className="sr-only">{children}</span>
       {words.map((word, wordIndex) => {
@@ -47,7 +47,7 @@ export function FlipText({
             key={`${word}-${wordIndex}`}
             aria-hidden="true"
             className="word inline-block whitespace-nowrap"
-            style={{ transformStyle: 'preserve-3d' }}
+            style={{ transformStyle: 'preserve-3d', WebkitTransformStyle: 'preserve-3d' }}
           >
             {chars.map((char, charIndex) => {
               const currentGlobalIndex = getCharIndex(wordIndex, charIndex);
@@ -69,6 +69,7 @@ export function FlipText({
                       '--flip-delay': `${calculatedDelay}s`,
                       '--flip-iteration': loop ? 'infinite' : '1',
                       transformStyle: 'preserve-3d',
+                      WebkitTransformStyle: 'preserve-3d',
                     } as React.CSSProperties
                   }
                 >

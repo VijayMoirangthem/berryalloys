@@ -20,7 +20,8 @@ export function ClientLogoStrip({ title, note, className = '' }: { title: string
           {note && <p className="text-[11px] text-ink-muted">{note}</p>}
         </div>
         <span className="text-[10px] font-mono-tabular uppercase tracking-widest text-brand dark:text-[#69C5F5]">
-          Hover Ribbon To Pause
+          <span className="lg:hidden">Tap Ribbon To Pause</span>
+          <span className="hidden lg:inline">Hover Ribbon To Pause</span>
         </span>
       </div>
 
