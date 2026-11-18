@@ -331,6 +331,7 @@ body, header, footer, section, nav, main {
 .flip-text-wrapper .flip-char {
   display: inline-block;
   position: relative;
+  -webkit-transform-style: preserve-3d;
   transform-style: preserve-3d;
   transform-origin: center center -0.35em;
   animation: flip-text-tumble var(--flip-duration, 2.2s) cubic-bezier(0.22, 1, 0.36, 1) var(--flip-delay, 0s) var(--flip-iteration, infinite);
@@ -343,6 +344,7 @@ body, header, footer, section, nav, main {
   transform: rotateX(90deg) translateZ(0.45em);
   transform-origin: center center;
   color: var(--accent-red);
+  -webkit-backface-visibility: hidden;
   backface-visibility: hidden;
   pointer-events: none;
 }
@@ -360,10 +362,12 @@ body, header, footer, section, nav, main {
 }
 
 .perspective-\[2000px\] {
+  -webkit-perspective: 2000px;
   perspective: 2000px;
 }
 
 .preserve-3d {
+  -webkit-transform-style: preserve-3d;
   transform-style: preserve-3d;
 }
 
@@ -548,18 +552,18 @@ html[data-ambient="paused"] .logo-slider__track {
   animation: none;
 }
 
-/* ---------- Touch devices: physical press feedback and a calmer tap surface ---------- */
+/* ---------- Touch devices: physical press feedback without overriding custom 3D transforms ---------- */
 @media (hover: none) and (pointer: coarse) {
   a, button, summary, [role="button"] {
     -webkit-tap-highlight-color: transparent;
     touch-action: manipulation;
   }
-  :is(a, button)[class*="border"]:not([style*="transform"]),
-  :is(a, button)[class*="bg-"]:not([style*="transform"]) {
+  :is(a, button)[class*="border"]:not([style*="transform"]):not([aria-roledescription="carousel"] button),
+  :is(a, button)[class*="bg-"]:not([style*="transform"]):not([aria-roledescription="carousel"] button) {
     transition: transform 150ms cubic-bezier(0.22, 1, 0.36, 1), background-color 200ms ease, border-color 200ms ease, color 200ms ease;
   }
-  :is(a, button)[class*="border"]:not([style*="transform"]):active,
-  :is(a, button)[class*="bg-"]:not([style*="transform"]):active {
+  :is(a, button)[class*="border"]:not([style*="transform"]):not([aria-roledescription="carousel"] button):active,
+  :is(a, button)[class*="bg-"]:not([style*="transform"]):not([aria-roledescription="carousel"] button):active {
     transform: scale(0.97);
   }
 }

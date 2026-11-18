@@ -64,6 +64,7 @@ export function DiagonalCarousel({
 
   const bindSwipe = useDrag(
     ({ active, movement: [mx], velocity: [vx], direction: [dx], memo }) => {
+      setIsPressed(active);
       if (active) {
         if (!memo?.swiped && (Math.abs(mx) > 42 || (vx > 0.35 && Math.abs(mx) > 18))) {
           step(mx < 0 || dx < 0 ? 1 : -1);
@@ -76,8 +77,9 @@ export function DiagonalCarousel({
     {
       axis: 'x',
       filterTaps: true,
-      threshold: 12,
-      pointer: { touch: true },
+      threshold: 5,
+      preventScroll: true,
+      pointer: { capture: false },
     }
   );
 
@@ -102,10 +104,6 @@ export function DiagonalCarousel({
         <div className="lg:col-span-6 py-3 px-2 sm:px-4">
           <div
             {...bindSwipe()}
-            onPointerDown={() => setIsPressed(true)}
-            onPointerUp={() => setIsPressed(false)}
-            onPointerCancel={() => setIsPressed(false)}
-            onPointerLeave={() => setIsPressed(false)}
             style={{ touchAction: 'pan-y' }}
             className="relative aspect-[16/10] w-full overflow-hidden bg-[#07111F] border border-[#10243A]/18 dark:border-[#F4F8FC]/16 shadow-lg select-none cursor-grab active:cursor-grabbing"
           >

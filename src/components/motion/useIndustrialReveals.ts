@@ -30,8 +30,9 @@ export function useIndustrialReveals(rootRef: RefObject<HTMLElement | null>, ski
     const isDesktop = window.matchMedia('(min-width: 1024px)').matches;
 
     if (!isDesktop) {
-      // Mobile / Tablet: gentle progressive reveal with guaranteed full visibility (opacity >= 0.92 even before intersect)
+      // Mobile / Tablet: crisp GPU reveal on scroll with passive scroll fallback so headings never stall on iOS WebKit
       const observers: IntersectionObserver[] = [];
+      const scrollHandlers: Array<() => void> = [];
 
       sections.forEach((section) => {
         const eyebrow = findSectionChapterEyebrow(section);
@@ -41,23 +42,48 @@ export function useIndustrialReveals(rootRef: RefObject<HTMLElement | null>, ski
 
         const heading = section.querySelector<HTMLElement>('h2:not(.sr-only)');
         if (heading && !heading.querySelector('.sr-word')) {
-          heading.style.transition = 'transform 260ms cubic-bezier(0.22, 1, 0.36, 1), opacity 220ms ease';
-          const io = new IntersectionObserver(
-            (entries) => {
-              if (!entries.some((e) => e.isIntersecting)) return;
+          const alreadyInView = heading.getBoundingClientRect().top <= window.innerHeight * 0.94;
+          if (!alreadyInView) {
+            heading.style.opacity = '0.3';
+            heading.style.transform = 'translate3d(0, 16px, 0)';
+            heading.style.transition = 'transform 420ms cubic-bezier(0.22, 1, 0.36, 1), opacity 340ms ease';
+
+            let revealed = false;
+            const reveal = () => {
+              if (revealed) return;
+              revealed = true;
               heading.style.opacity = '1';
               heading.style.transform = 'translate3d(0, 0, 0)';
               io.disconnect();
-            },
-            { rootMargin: '60px 0px', threshold: 0.01 }
-          );
-          io.observe(heading);
-          observers.push(io);
+              window.removeEventListener('scroll', onScroll);
+            };
+            const onScroll = () => {
+              if (heading.getBoundingClientRect().top <= window.innerHeight * 0.94) reveal();
+            };
+            const io = new IntersectionObserver(
+              (entries) => {
+                if (entries.some((e) => e.isIntersecting || e.boundingClientRect.top <= window.innerHeight * 0.94)) {
+                  reveal();
+                }
+              },
+              { rootMargin: '60px 0px', threshold: 0.01 }
+            );
+            io.observe(heading);
+            window.addEventListener('scroll', onScroll, { passive: true });
+            observers.push(io);
+            scrollHandlers.push(() => {
+              window.removeEventListener('scroll', onScroll);
+              heading.style.opacity = '';
+              heading.style.transform = '';
+              heading.style.transition = '';
+            });
+          }
         }
       });
 
       return () => {
         observers.forEach((io) => io.disconnect());
+        scrollHandlers.forEach((fn) => fn());
         root.querySelectorAll('.reveal-eyebrow').forEach((n) => n.classList.remove('reveal-eyebrow'));
       };
     }

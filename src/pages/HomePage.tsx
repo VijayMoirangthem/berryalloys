@@ -1334,7 +1334,7 @@ export function HomePage() {
                       <span className="hero-breathe absolute inline-flex h-full w-full rounded-full bg-[#FF8091] opacity-75" />
                       <span className="relative inline-flex h-2 w-2 rounded-full bg-[#FF8091]" />
                     </span>
-                    <span className="md:hidden">Swipe the archive strip below to inspect works &amp; people frames</span>
+                    <span className="md:hidden">Tap or swipe across the panel to reveal works &amp; people frames</span>
                     <span className="hidden md:inline">Move your cursor or drag a finger across the surface to reveal works &amp; people frames</span>
                   </span>
                 </div>

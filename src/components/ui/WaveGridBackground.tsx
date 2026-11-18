@@ -105,15 +105,24 @@ export function WaveGridBackground({
     const pointer = new THREE.Vector2(0, 0);
     const smoothPointer = new THREE.Vector2(0, 0);
 
-    const onPointerMove = (e: PointerEvent) => {
+    const updatePointerClient = (clientX: number, clientY: number) => {
       if (prefersReduced) return;
       const rect = container.getBoundingClientRect();
       if (rect.width <= 0 || rect.height <= 0) return;
-      pointer.x = ((e.clientX - rect.left) / rect.width - 0.5) * 2;
-      pointer.y = ((e.clientY - rect.top) / rect.height - 0.5) * 2;
+      pointer.x = ((clientX - rect.left) / rect.width - 0.5) * 2;
+      pointer.y = ((clientY - rect.top) / rect.height - 0.5) * 2;
+    };
+    const onPointerMove = (e: PointerEvent) => {
+      updatePointerClient(e.clientX, e.clientY);
+    };
+    const onTouchUpdate = (e: TouchEvent) => {
+      const t = e.touches[0];
+      if (t) updatePointerClient(t.clientX, t.clientY);
     };
     window.addEventListener('pointermove', onPointerMove, { passive: true });
     window.addEventListener('pointerdown', onPointerMove, { passive: true });
+    window.addEventListener('touchstart', onTouchUpdate, { passive: true });
+    window.addEventListener('touchmove', onTouchUpdate, { passive: true });
 
     let isVisible = true;
     const observer = new IntersectionObserver(
@@ -219,6 +228,8 @@ export function WaveGridBackground({
       observer.disconnect();
       window.removeEventListener('pointermove', onPointerMove);
       window.removeEventListener('pointerdown', onPointerMove);
+      window.removeEventListener('touchstart', onTouchUpdate);
+      window.removeEventListener('touchmove', onTouchUpdate);
       window.removeEventListener('resize', onResize);
 
       geometry.dispose();

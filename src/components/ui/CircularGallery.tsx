@@ -214,7 +214,8 @@ export function CircularGallery({
       axis: 'x',
       filterTaps: true,
       threshold: DRAG_THRESHOLD_PX,
-      pointer: { touch: true },
+      preventScroll: true,
+      pointer: { capture: false },
     }
   );
 
@@ -271,14 +272,20 @@ export function CircularGallery({
             className="relative flex h-full w-full items-center justify-center"
             style={{
               perspective: 1650,
+              WebkitPerspective: 1650,
               transformStyle: 'preserve-3d',
+              WebkitTransformStyle: 'preserve-3d',
               transform: `scale(${scale}) rotate(-8deg)`,
             }}
           >
             <div
               ref={ringRef}
               className="relative flex items-center justify-center"
-              style={{ transformStyle: 'preserve-3d', transform: `rotateY(${initialRotation}deg)` }}
+              style={{
+                transformStyle: 'preserve-3d',
+                WebkitTransformStyle: 'preserve-3d',
+                transform: `rotateY(${initialRotation}deg)`,
+              }}
             >
               {items.map((item, idx) => {
                 const angle = idx * step;

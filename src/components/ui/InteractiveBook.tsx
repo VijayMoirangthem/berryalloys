@@ -116,13 +116,21 @@ const Leaf = forwardRef<LeafHandle, LeafProps>(function Leaf({ hinge, width, hei
           height,
           transformOrigin: `${hinge} center`,
           transformStyle: 'preserve-3d',
+          WebkitTransformStyle: 'preserve-3d',
           willChange: 'transform',
         }}
       >
         <div
-          style={{ position: 'absolute', inset: 0, overflow: 'hidden', backfaceVisibility: 'hidden', WebkitBackfaceVisibility: 'hidden' }}
+          style={{
+            position: 'absolute',
+            inset: 0,
+            overflow: 'hidden',
+            backfaceVisibility: 'hidden',
+            WebkitBackfaceVisibility: 'hidden',
+            transform: 'translateZ(0.5px)',
+          }}
         >
-          <div style={{ position: 'absolute', top: 0, left: 0, width, height, transform: `translateX(${frontOffset(k)}px)` }}>
+          <div style={{ position: 'absolute', top: 0, left: 0, width, height, transform: `translate3d(${frontOffset(k)}px, 0, 0)` }}>
             {front}
           </div>
           <div
@@ -143,11 +151,12 @@ const Leaf = forwardRef<LeafHandle, LeafProps>(function Leaf({ hinge, width, hei
             position: 'absolute',
             inset: 0,
             overflow: 'hidden',
-            backfaceVisibility: 'hidden', WebkitBackfaceVisibility: 'hidden',
-            transform: 'rotateY(180deg)',
+            backfaceVisibility: 'hidden',
+            WebkitBackfaceVisibility: 'hidden',
+            transform: 'rotateY(180deg) translateZ(0.5px)',
           }}
         >
-          <div style={{ position: 'absolute', top: 0, left: 0, width, height, transform: `translateX(${backOffset(k)}px)` }}>
+          <div style={{ position: 'absolute', top: 0, left: 0, width, height, transform: `translate3d(${backOffset(k)}px, 0, 0)` }}>
             {back}
           </div>
           <div
@@ -179,6 +188,7 @@ const Leaf = forwardRef<LeafHandle, LeafProps>(function Leaf({ hinge, width, hei
         width,
         zIndex: 30,
         transformStyle: 'preserve-3d',
+        WebkitTransformStyle: 'preserve-3d',
         pointerEvents: 'none',
       }}
       data-leaf-hinge={hinge}
@@ -677,7 +687,7 @@ export function InteractiveBook({
         return { engaged: false, ignore: false };
       }
 
-      if (memo?.ignore) return memo;
+      if (!memo || memo.ignore) return memo;
 
       if (!memo.engaged) {
         if (Math.abs(mx) < 4) return memo;
@@ -733,8 +743,9 @@ export function InteractiveBook({
       enabled: !spread && !prefersReduced,
       axis: 'x',
       filterTaps: true,
-      threshold: 8,
-      pointer: { touch: true },
+      threshold: 4,
+      preventScroll: true,
+      pointer: { capture: false },
     }
   );
 
@@ -751,7 +762,10 @@ export function InteractiveBook({
   };
   const perspectiveStyle: React.CSSProperties = {
     perspective: spread ? 2600 : 1850,
+    WebkitPerspective: spread ? 2600 : 1850,
     perspectiveOrigin: spread ? '50% 38%' : '50% 42%',
+    transformStyle: 'preserve-3d',
+    WebkitTransformStyle: 'preserve-3d',
   };
 
   const renderMobileBook = () => {
@@ -764,8 +778,11 @@ export function InteractiveBook({
         className="relative h-[396px] shadow-[0_22px_40px_-20px_rgba(7,17,31,0.52)]"
         style={perspectiveStyle}
       >
-        {/* Base sheet (underneath during a turn, or resting top page) */}
-        <div className="relative h-full w-full overflow-hidden">
+        {/* Base sheet pushed back slightly in Z so iOS WebKit sorts Leaf cleanly above */}
+        <div
+          className="relative h-full w-full overflow-hidden"
+          style={{ transform: 'translateZ(-2px)' }}
+        >
           {underMobilePos < 0 && !t ? (
             <button
               type="button"
@@ -793,7 +810,7 @@ export function InteractiveBook({
           />
         </div>
 
-        {/* Real 3-strip curved turning 3D leaf on mobile */}
+        {/* Real 3-strip curved turning 3D leaf elevated in +Z for iOS WebKit */}
         {t && pageW > 0 && pageH > 0 && (
           <div
             style={{
@@ -802,7 +819,9 @@ export function InteractiveBook({
               bottom: 0,
               left: 0,
               width: pageW,
+              transform: 'translateZ(2px)',
               transformStyle: 'preserve-3d',
+              WebkitTransformStyle: 'preserve-3d',
               pointerEvents: 'none',
             }}
           >
@@ -874,12 +893,12 @@ export function InteractiveBook({
 
   return (
     <motion.div
-      initial={prefersReduced ? false : { opacity: 0.25, y: 20 }}
-      whileInView={{ opacity: 1, y: 0 }}
+      initial={prefersReduced ? false : { opacity: 0.25 }}
+      whileInView={{ opacity: 1 }}
       viewport={{ once: true, amount: 'some' }}
-      transition={{ duration: 0.6, ease: [0.22, 1, 0.36, 1] }}
+      transition={{ duration: 0.55, ease: [0.22, 1, 0.36, 1] }}
       className={cn(
-        'w-full max-w-[920px] mx-auto bg-[#F1F6FB]/75 dark:bg-[#0D1B2E] border border-[#10243A]/14 dark:border-[#F4F8FC]/14 p-3.5 sm:p-8 overflow-x-clip',
+        'w-full max-w-[920px] mx-auto bg-[#F1F6FB]/75 dark:bg-[#0D1B2E] border border-[#10243A]/14 dark:border-[#F4F8FC]/14 p-3.5 sm:p-8',
         className
       )}
     >
@@ -977,15 +996,12 @@ export function InteractiveBook({
         aria-label="Heritage book pages"
         aria-busy={turning}
       >
-        <motion.div
+        <div
           ref={(el) => {
             stageRef.current = el;
             frameRef.current = el;
           }}
           key={prefersReduced ? `rm-${pos}` : 'stage'}
-          initial={prefersReduced ? { opacity: 0.4 } : false}
-          animate={{ opacity: 1 }}
-          transition={{ duration: 0.2 }}
           style={{ ...stageStyle, touchAction: spread ? undefined : 'pan-y' }}
           {...(spread ? {} : bindMobileDrag())}
           onClickCapture={(e) => {
@@ -1014,7 +1030,7 @@ export function InteractiveBook({
           ) : (
             renderDesktopSpread()
           )}
-        </motion.div>
+        </div>
 
         {!spread && (
           <div className="pt-2.5 flex items-center justify-between text-[10.5px] font-mono-tabular text-[#465C72] dark:text-[#B5C5D7]">

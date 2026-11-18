@@ -83,8 +83,9 @@ export function PerspectiveCarousel({
     {
       axis: 'x',
       filterTaps: true,
-      threshold: 12,
-      pointer: { touch: true },
+      threshold: 5,
+      preventScroll: true,
+      pointer: { capture: false },
     }
   );
 

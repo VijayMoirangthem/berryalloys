@@ -244,20 +244,25 @@ export function PixelatedImageTrail({
     {
       axis: 'x',
       filterTaps: false,
-      pointer: { touch: true },
+      preventScroll: true,
+      pointer: { capture: false },
     }
   );
+
+  const dragProps = bindTouchDrag();
 
   return (
     <div
       ref={containerRef}
-      {...bindTouchDrag()}
+      {...dragProps}
       onPointerMove={(e) => {
+        dragProps.onPointerMove?.(e);
         if (e.pointerType === 'mouse') {
           trySpawnClient(e.clientX, e.clientY, false);
         }
       }}
       onPointerDown={(e) => {
+        dragProps.onPointerDown?.(e);
         trySpawnClient(e.clientX, e.clientY, true);
       }}
       style={{ touchAction: 'pan-y' }}

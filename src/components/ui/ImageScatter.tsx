@@ -269,8 +269,9 @@ export function ImageScatter({
     {
       axis: 'x',
       filterTaps: true,
-      threshold: 14,
-      pointer: { touch: true },
+      threshold: 5,
+      preventScroll: true,
+      pointer: { capture: false },
     }
   );
 

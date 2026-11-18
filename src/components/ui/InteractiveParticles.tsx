@@ -235,12 +235,12 @@ export interface InteractiveParticlesProps {
  * Generates an offscreen high-contrast bitmap typography texture for particle sampling.
  * Adapts canvas aspect for narrow mobile screens so glyphs retain heavy fill weight and density.
  */
-function createTypographySampleDataUrl(
+function createTypographySampleCanvas(
   text: string,
   lines: string[] | undefined,
   subtitle: string | undefined,
   viewportWidth: number
-): { dataUrl: string; width: number; height: number } {
+): { canvas: HTMLCanvasElement | null; width: number; height: number } {
   const tier = viewportWidth < 640 ? 'mobile' : viewportWidth < 1024 ? 'tablet' : 'desktop';
   const sampleWidth = tier === 'mobile' ? 420 : tier === 'tablet' ? 620 : 720;
   const sampleHeight = tier === 'mobile' ? 240 : tier === 'tablet' ? 255 : 270;
@@ -249,7 +249,7 @@ function createTypographySampleDataUrl(
   canvas.width = sampleWidth;
   canvas.height = sampleHeight;
   const ctx = canvas.getContext('2d');
-  if (!ctx) return { dataUrl: '', width: sampleWidth, height: sampleHeight };
+  if (!ctx) return { canvas: null, width: sampleWidth, height: sampleHeight };
 
   ctx.fillStyle = '#000000';
   ctx.fillRect(0, 0, canvas.width, canvas.height);
@@ -361,7 +361,7 @@ function createTypographySampleDataUrl(
   }
 
   return {
-    dataUrl: canvas.toDataURL('image/png'),
+    canvas,
     width: sampleWidth,
     height: sampleHeight,
   };
@@ -478,106 +478,101 @@ export function InteractiveParticles({
     const buildParticlesFromBitmap = () => {
       if (disposed) return;
 
-      const sample = createTypographySampleDataUrl(text, lines, subtitle, width);
-      if (!sample.dataUrl) {
+      const sample = createTypographySampleCanvas(text, lines, subtitle, width);
+      if (!sample.canvas) {
         setFallback(true);
         return;
       }
 
-      new THREE.TextureLoader().load(sample.dataUrl, (texture) => {
-        if (disposed) {
-          texture.dispose();
-          return;
-        }
-        sampledTexture = texture;
-        texture.minFilter = THREE.LinearFilter;
-        texture.magFilter = THREE.LinearFilter;
-        texture.generateMipmaps = false;
+      const imgW = sample.width;
+      const imgH = sample.height;
+      sampledDims.width = imgW;
+      sampledDims.height = imgH;
 
-        const img = texture.image as HTMLImageElement;
-        const imgW = img.width || sample.width;
-        const imgH = img.height || sample.height;
-        sampledDims.width = imgW;
-        sampledDims.height = imgH;
+      const texture = new THREE.CanvasTexture(sample.canvas);
+      texture.minFilter = THREE.LinearFilter;
+      texture.magFilter = THREE.LinearFilter;
+      texture.generateMipmaps = false;
+      texture.needsUpdate = true;
+      sampledTexture = texture;
 
-        const sampleCanvas = document.createElement('canvas');
-        sampleCanvas.width = imgW;
-        sampleCanvas.height = imgH;
-        const ctx = sampleCanvas.getContext('2d')!;
-        ctx.drawImage(img, 0, 0, imgW, imgH);
-        const imgData = ctx.getImageData(0, 0, imgW, imgH).data;
+      const ctx = sample.canvas.getContext('2d');
+      if (!ctx) {
+        setFallback(true);
+        return;
+      }
+      const imgData = ctx.getImageData(0, 0, imgW, imgH).data;
 
-        const currW = Math.max(1, container.clientWidth);
-        const currH = Math.max(1, container.clientHeight);
-        const indicesList: number[] = [];
-        const offsetsList: number[] = [];
-        const anglesList: number[] = [];
-        const threshold = 24;
+      const currW = Math.max(1, container.clientWidth);
+      const currH = Math.max(1, container.clientHeight);
+      const indicesList: number[] = [];
+      const offsetsList: number[] = [];
+      const anglesList: number[] = [];
+      const threshold = 24;
 
-        for (let y = 0; y < imgH; y += sampleStep) {
-          for (let x = 0; x < imgW; x += sampleStep) {
-            const idx = (y * imgW + x) * 4;
-            if (imgData[idx] > threshold) {
-              offsetsList.push(x, imgH - y, 0);
-              indicesList.push(y * imgW + x);
-              anglesList.push(Math.random() * Math.PI * 2);
-            }
+      for (let y = 0; y < imgH; y += sampleStep) {
+        for (let x = 0; x < imgW; x += sampleStep) {
+          const idx = (y * imgW + x) * 4;
+          if (imgData[idx] > threshold) {
+            offsetsList.push(x, imgH - y, 0);
+            indicesList.push(y * imgW + x);
+            anglesList.push(Math.random() * Math.PI * 2);
           }
         }
+      }
 
-        const count = indicesList.length;
-        const geometry = new THREE.InstancedBufferGeometry();
+      const count = indicesList.length;
+      const geometry = new THREE.InstancedBufferGeometry();
 
-        const positions = new THREE.BufferAttribute(new Float32Array(12), 3);
-        positions.setXYZ(0, -0.5, 0.5, 0.0);
-        positions.setXYZ(1, 0.5, 0.5, 0.0);
-        positions.setXYZ(2, -0.5, -0.5, 0.0);
-        positions.setXYZ(3, 0.5, -0.5, 0.0);
-        geometry.setAttribute('position', positions);
+      const positions = new THREE.BufferAttribute(new Float32Array(12), 3);
+      positions.setXYZ(0, -0.5, 0.5, 0.0);
+      positions.setXYZ(1, 0.5, 0.5, 0.0);
+      positions.setXYZ(2, -0.5, -0.5, 0.0);
+      positions.setXYZ(3, 0.5, -0.5, 0.0);
+      geometry.setAttribute('position', positions);
 
-        const uvs = new THREE.BufferAttribute(new Float32Array(8), 2);
-        uvs.setXY(0, 0, 0);
-        uvs.setXY(1, 1, 0);
-        uvs.setXY(2, 0, 1);
-        uvs.setXY(3, 1, 1);
-        geometry.setAttribute('uv', uvs);
+      const uvs = new THREE.BufferAttribute(new Float32Array(8), 2);
+      uvs.setXY(0, 0, 0);
+      uvs.setXY(1, 1, 0);
+      uvs.setXY(2, 0, 1);
+      uvs.setXY(3, 1, 1);
+      geometry.setAttribute('uv', uvs);
 
-        geometry.setIndex(new THREE.BufferAttribute(new Uint16Array([0, 2, 1, 2, 3, 1]), 1));
-        geometry.setAttribute('offset', new THREE.InstancedBufferAttribute(new Float32Array(offsetsList), 3));
-        geometry.setAttribute('pindex', new THREE.InstancedBufferAttribute(new Float32Array(indicesList), 1));
-        geometry.setAttribute('angle', new THREE.InstancedBufferAttribute(new Float32Array(anglesList), 1));
-        geometry.instanceCount = count;
+      geometry.setIndex(new THREE.BufferAttribute(new Uint16Array([0, 2, 1, 2, 3, 1]), 1));
+      geometry.setAttribute('offset', new THREE.InstancedBufferAttribute(new Float32Array(offsetsList), 3));
+      geometry.setAttribute('pindex', new THREE.InstancedBufferAttribute(new Float32Array(indicesList), 1));
+      geometry.setAttribute('angle', new THREE.InstancedBufferAttribute(new Float32Array(anglesList), 1));
+      geometry.instanceCount = count;
 
-        const fitScale = computeFitScale(currW, currH, imgW, imgH);
-        const computedSize = computeParticleSize(fitScale, currW);
-        hitMesh.scale.set(imgW * fitScale, imgH * fitScale, 1);
+      const fitScale = computeFitScale(currW, currH, imgW, imgH);
+      const computedSize = computeParticleSize(fitScale, currW);
+      hitMesh.scale.set(imgW * fitScale, imgH * fitScale, 1);
 
-        const material = new THREE.RawShaderMaterial({
-          uniforms: {
-            uTime: { value: 0 },
-            uRandom: { value: prefersReduced ? 0.0 : isCompactStage ? 0.34 : 0.46 },
-            uDepth: { value: prefersReduced ? 0.0 : 1.2 },
-            uSize: { value: computedSize },
-            uTextureSize: { value: new THREE.Vector2(imgW, imgH) },
-            uTexture: { value: texture },
-            uTouch: { value: touch.texture },
-            uIntro: { value: prefersReduced || isSoftwareGl ? 1 : 0.12 },
-            uColor: { value: new THREE.Color(colorsRef.current.primary) },
-            uAccentColor: { value: new THREE.Color(colorsRef.current.accent) },
-          },
-          vertexShader: VERTEX_SHADER,
-          fragmentShader: FRAGMENT_SHADER,
-          depthTest: false,
-          transparent: true,
-        });
-
-        particlesMesh = new THREE.Mesh(geometry, material);
-        particlesMesh.frustumCulled = false;
-        particlesMesh.scale.setScalar(fitScale);
-
-        scene.add(particlesMesh);
-        renderer?.render(scene, camera);
+      const material = new THREE.RawShaderMaterial({
+        uniforms: {
+          uTime: { value: 0 },
+          uRandom: { value: prefersReduced ? 0.0 : isCompactStage ? 0.36 : 0.46 },
+          uDepth: { value: prefersReduced ? 0.0 : 1.2 },
+          uSize: { value: computedSize },
+          uTextureSize: { value: new THREE.Vector2(imgW, imgH) },
+          uTexture: { value: texture },
+          uTouch: { value: touch.texture },
+          uIntro: { value: prefersReduced || isSoftwareGl ? 1 : 0.12 },
+          uColor: { value: new THREE.Color(colorsRef.current.primary) },
+          uAccentColor: { value: new THREE.Color(colorsRef.current.accent) },
+        },
+        vertexShader: VERTEX_SHADER,
+        fragmentShader: FRAGMENT_SHADER,
+        depthTest: false,
+        transparent: true,
       });
+
+      particlesMesh = new THREE.Mesh(geometry, material);
+      particlesMesh.frustumCulled = false;
+      particlesMesh.scale.setScalar(fitScale);
+
+      scene.add(particlesMesh);
+      renderer?.render(scene, camera);
     };
 
     if (document.fonts?.ready) {
@@ -599,17 +594,29 @@ export function InteractiveParticles({
     };
 
     const onPointerDown = (e: PointerEvent) => {
-      // Immediate magnetic radial pulse when tapped or clicked on mobile/desktop
       scatterAtClientPoint(e.clientX, e.clientY, 0.95);
     };
 
     const onPointerMove = (e: PointerEvent) => {
-      // Give touch swipes a consistent minimum burst so slow finger drags scatter smoothly
-      scatterAtClientPoint(e.clientX, e.clientY, e.pointerType === 'touch' ? 0.48 : 0);
+      scatterAtClientPoint(e.clientX, e.clientY, e.pointerType === 'touch' ? 0.55 : 0);
+    };
+
+    // Native touch listeners guarantee iPhone Chrome (WKWebView) keeps feeding scatter ripples
+    // even when iOS claims pointermove for native vertical scroll.
+    const onTouchStart = (e: TouchEvent) => {
+      const t = e.touches[0];
+      if (t) scatterAtClientPoint(t.clientX, t.clientY, 0.95);
+    };
+
+    const onTouchMove = (e: TouchEvent) => {
+      const t = e.touches[0];
+      if (t) scatterAtClientPoint(t.clientX, t.clientY, 0.55);
     };
 
     container.addEventListener('pointerdown', onPointerDown, { passive: true });
     container.addEventListener('pointermove', onPointerMove, { passive: true });
+    container.addEventListener('touchstart', onTouchStart, { passive: true });
+    container.addEventListener('touchmove', onTouchMove, { passive: true });
 
     applyColorsRef.current = () => {
       if (!particlesMesh) return;
@@ -717,6 +724,8 @@ export function InteractiveParticles({
       resizeObserver.disconnect();
       container.removeEventListener('pointerdown', onPointerDown);
       container.removeEventListener('pointermove', onPointerMove);
+      container.removeEventListener('touchstart', onTouchStart);
+      container.removeEventListener('touchmove', onTouchMove);
       applyColorsRef.current = null;
       window.removeEventListener('resize', onResize);
 
