@@ -19,7 +19,7 @@ export interface CursorCardProps {
 
 /**
  * CursorCard — Spring-physics floating preview card triggered from inline
- * narrative terms on desktop hover, and a crisp tap-to-inspect bottom card on mobile.
+ * narrative terms on mouse hover, and a crisp tap-to-inspect preview sheet on touchscreens.
  */
 export function CursorCard({
   children,
@@ -33,14 +33,31 @@ export function CursorCard({
   onActivate,
 }: CursorCardProps) {
   const [isActive, setIsActive] = useState(false);
+  const [touchMode, setTouchMode] = useState(false);
   const [mounted, setMounted] = useState(false);
   const isCompactMobile = useIsCompactMobile(767);
   const triggerRef = useRef<HTMLSpanElement>(null);
+  const cardRef = useRef<HTMLDivElement>(null);
+  const openedByTouchRef = useRef(false);
   const tooltipId = useId();
 
   useEffect(() => {
     setMounted(true);
   }, []);
+
+  const showTouchSheet = isCompactMobile || touchMode;
+
+  useEffect(() => {
+    if (!isActive || !showTouchSheet) return;
+    const handleOutside = (e: PointerEvent) => {
+      const target = e.target as Node | null;
+      if (!target) return;
+      if (triggerRef.current?.contains(target) || cardRef.current?.contains(target)) return;
+      setIsActive(false);
+    };
+    document.addEventListener('pointerdown', handleOutside, true);
+    return () => document.removeEventListener('pointerdown', handleOutside, true);
+  }, [isActive, showTouchSheet]);
 
   const mouseX = useMotionValue(0);
   const mouseY = useMotionValue(0);
@@ -70,15 +87,10 @@ export function CursorCard({
     return { targetX, targetY };
   };
 
-  const handleMouseMove = (e: React.MouseEvent<HTMLElement>) => {
-    if (isCompactMobile) return;
-    const { targetX, targetY } = clampCoordinates(e.clientX, e.clientY);
-    mouseX.set(targetX);
-    mouseY.set(targetY);
-  };
-
-  const handleMouseEnter = (e: React.MouseEvent<HTMLElement>) => {
-    if (isCompactMobile) return;
+  const handlePointerEnter = (e: React.PointerEvent<HTMLElement>) => {
+    if (e.pointerType !== 'mouse' || isCompactMobile) return;
+    openedByTouchRef.current = false;
+    setTouchMode(false);
     const { targetX, targetY } = clampCoordinates(e.clientX, e.clientY);
     mouseX.jump(targetX);
     mouseY.jump(targetY);
@@ -87,8 +99,30 @@ export function CursorCard({
     setIsActive(true);
   };
 
+  const handlePointerMove = (e: React.PointerEvent<HTMLElement>) => {
+    if (e.pointerType !== 'mouse' || isCompactMobile) return;
+    const { targetX, targetY } = clampCoordinates(e.clientX, e.clientY);
+    mouseX.set(targetX);
+    mouseY.set(targetY);
+  };
+
+  const handlePointerLeave = (e: React.PointerEvent<HTMLElement>) => {
+    if (e.pointerType !== 'mouse' || isCompactMobile || openedByTouchRef.current) return;
+    setIsActive(false);
+  };
+
+  const handlePointerDown = (e: React.PointerEvent<HTMLElement>) => {
+    if (e.pointerType !== 'mouse') {
+      openedByTouchRef.current = true;
+      setTouchMode(true);
+    } else {
+      openedByTouchRef.current = false;
+      setTouchMode(false);
+    }
+  };
+
   const handleFocus = () => {
-    if (isCompactMobile || !triggerRef.current) return;
+    if (isCompactMobile || openedByTouchRef.current || !triggerRef.current) return;
     const rect = triggerRef.current.getBoundingClientRect();
     const { targetX, targetY } = clampCoordinates(rect.right, rect.top + rect.height * 0.5);
     mouseX.jump(targetX);
@@ -99,7 +133,7 @@ export function CursorCard({
   };
 
   const handleClick = () => {
-    if (isCompactMobile) {
+    if (isCompactMobile || openedByTouchRef.current) {
       setIsActive((prev) => !prev);
     }
     onActivate?.();
@@ -112,29 +146,31 @@ export function CursorCard({
       <Wrapper
         ref={triggerRef as React.RefObject<HTMLDivElement>}
         tabIndex={0}
-        role={onActivate || isCompactMobile ? 'button' : undefined}
+        role={onActivate || showTouchSheet ? 'button' : undefined}
         aria-describedby={isActive ? tooltipId : undefined}
         onClick={handleClick}
         onKeyDown={(e) => {
-          if ((onActivate || isCompactMobile) && (e.key === 'Enter' || e.key === ' ')) {
+          if ((onActivate || showTouchSheet) && (e.key === 'Enter' || e.key === ' ')) {
             e.preventDefault();
-            handleClick();
+            setIsActive((prev) => !prev);
+            onActivate?.();
           }
           if (e.key === 'Escape') {
             setIsActive(false);
           }
         }}
-        onMouseEnter={handleMouseEnter}
-        onMouseMove={handleMouseMove}
-        onMouseLeave={() => {
-          if (!isCompactMobile) setIsActive(false);
-        }}
+        onPointerDown={handlePointerDown}
+        onPointerEnter={handlePointerEnter}
+        onPointerMove={handlePointerMove}
+        onPointerLeave={handlePointerLeave}
         onFocus={handleFocus}
-        onBlur={() => setIsActive(false)}
+        onBlur={() => {
+          if (!openedByTouchRef.current) setIsActive(false);
+        }}
         className={cn(
           variant === 'block'
             ? 'relative block'
-            : 'relative inline font-semibold text-[#10243A] dark:text-[#F4F8FC] border-b border-dashed border-brand dark:border-[#69C5F5] hover:text-brand dark:hover:text-[#69C5F5] transition-colors cursor-help focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-[#69C5F5]',
+            : 'relative inline font-semibold text-[#10243A] dark:text-[#F4F8FC] border-b border-dashed border-brand dark:border-[#69C5F5] hover:text-brand dark:hover:text-[#69C5F5] active:text-brand transition-colors cursor-pointer focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-[#69C5F5]',
           className
         )}
       >
@@ -145,8 +181,9 @@ export function CursorCard({
         createPortal(
           <AnimatePresence>
             {isActive &&
-              (isCompactMobile ? (
+              (showTouchSheet ? (
                 <motion.div
+                  ref={cardRef}
                   id={tooltipId}
                   role="dialog"
                   aria-label={caption ?? 'Site reference preview'}
@@ -155,7 +192,7 @@ export function CursorCard({
                   exit={{ opacity: 0, y: 12 }}
                   transition={{ duration: 0.18, ease: [0.22, 1, 0.36, 1] }}
                   className={cn(
-                    'fixed bottom-4 left-4 right-4 z-[9990] border border-[#10243A]/20 dark:border-[#F4F8FC]/22 bg-[#FFFFFF] dark:bg-[#0D1B2E] shadow-2xl overflow-hidden',
+                    'fixed bottom-4 left-4 right-4 sm:left-auto sm:right-6 sm:w-[340px] z-[9990] border border-[#10243A]/20 dark:border-[#F4F8FC]/22 bg-[#FFFFFF] dark:bg-[#0D1B2E] shadow-2xl overflow-hidden',
                     cardClassName
                   )}
                 >
@@ -178,7 +215,7 @@ export function CursorCard({
                         setIsActive(false);
                       }}
                       aria-label="Close preview"
-                      className="absolute top-2 right-2 inline-flex items-center justify-center w-9 h-9 bg-[#07111F]/85 text-[#F4F8FC] border border-[#F4F8FC]/20"
+                      className="absolute top-2 right-2 inline-flex items-center justify-center w-9 h-9 bg-[#07111F]/85 text-[#F4F8FC] border border-[#F4F8FC]/20 cursor-pointer"
                     >
                       <X className="w-4 h-4" aria-hidden="true" />
                     </button>

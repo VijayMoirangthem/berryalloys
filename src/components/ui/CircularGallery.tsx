@@ -1,5 +1,6 @@
 import React, { useCallback, useEffect, useRef, useState } from 'react';
 import { ChevronLeft, ChevronRight, Pause, Play } from 'lucide-react';
+import { useDrag } from '@use-gesture/react';
 import gsap from 'gsap';
 import { cn } from '../../lib/utils';
 import { useInViewActive, useMotion } from '../../context/MotionContext';
@@ -67,17 +68,7 @@ export function CircularGallery({
 
   const rot = useRef({ current: initialRotation, target: initialRotation });
   const lastInteraction = useRef(0);
-  const drag = useRef({
-    active: false,
-    captured: false,
-    pointerId: -1,
-    startX: 0,
-    startTarget: 0,
-    lastX: 0,
-    lastT: 0,
-    velocity: 0,
-    moved: 0,
-  });
+  const draggingRef = useRef(false);
   const suppressClick = useRef(false);
 
   // Responsive geometry via ResizeObserver; the scene is not positioned until the container has a real width.
@@ -134,7 +125,7 @@ export function CircularGallery({
       if (disposed) return;
       const r = rot.current;
       const idle = performance.now() - lastInteraction.current > IDLE_BEFORE_DRIFT_MS;
-      if (ambientRef.current && !drag.current.active && !inspectingRef.current && idle) {
+      if (ambientRef.current && !draggingRef.current && !inspectingRef.current && idle) {
         r.target += 0.05;
       }
       const delta = r.target - r.current;
@@ -179,70 +170,53 @@ export function CircularGallery({
     [settleTo, step]
   );
 
-  const onPointerDown = (e: React.PointerEvent<HTMLDivElement>) => {
-    if (e.pointerType === 'mouse' && e.button !== 0) return;
-    if ((e.target as HTMLElement).closest('[data-gallery-control="true"]')) return;
-    const d = drag.current;
-    d.active = true;
-    d.captured = false;
-    d.pointerId = e.pointerId;
-    d.startX = e.clientX;
-    d.lastX = e.clientX;
-    d.lastT = performance.now();
-    d.startTarget = rot.current.target;
-    d.velocity = 0;
-    d.moved = 0;
-    lastInteraction.current = performance.now();
-  };
-
-  const onPointerMove = (e: React.PointerEvent<HTMLDivElement>) => {
-    const d = drag.current;
-    if (!d.active || e.pointerId !== d.pointerId) return;
-    const dx = e.clientX - d.startX;
-    d.moved = Math.max(d.moved, Math.abs(dx));
-    if (d.moved <= DRAG_THRESHOLD_PX) return;
-    if (!d.captured) {
-      // Capture only once this is clearly a drag so ordinary clicks still reach their card.
-      try {
-        containerRef.current?.setPointerCapture(e.pointerId);
-      } catch {
-        /* ignore */
+  const bindOrbitDrag = useDrag(
+    ({ first, last, active: isDown, movement: [mx], velocity: [vx], direction: [dxDir], target, memo }) => {
+      if ((target as HTMLElement | null)?.closest?.('[data-gallery-control="true"]')) {
+        return memo;
       }
-      d.captured = true;
-      setDragging(true);
-    }
-    const now = performance.now();
-    const dt = Math.max(1, now - d.lastT);
-    d.velocity = d.velocity * 0.7 + ((e.clientX - d.lastX) / dt) * 0.3;
-    d.lastX = e.clientX;
-    d.lastT = now;
-    lastInteraction.current = now;
-    rot.current.target = d.startTarget + dx * DEG_PER_PX;
-  };
 
-  const endDrag = (e?: React.PointerEvent<HTMLDivElement>) => {
-    const d = drag.current;
-    if (!d.active) return;
-    d.active = false;
-    if (d.captured) {
-      suppressClick.current = true;
-      window.setTimeout(() => {
-        suppressClick.current = false;
-      }, 0);
-      if (e) {
-        try {
-          containerRef.current?.releasePointerCapture(e.pointerId);
-        } catch {
-          /* ignore */
+      if (first) {
+        lastInteraction.current = performance.now();
+        draggingRef.current = false;
+        return { startTarget: rot.current.target, moved: false };
+      }
+
+      if (!memo) return memo;
+
+      if (!memo.moved && Math.abs(mx) > DRAG_THRESHOLD_PX) {
+        memo.moved = true;
+        draggingRef.current = true;
+        setDragging(true);
+      }
+
+      if (memo.moved) {
+        lastInteraction.current = performance.now();
+        rot.current.target = memo.startTarget + mx * DEG_PER_PX;
+      }
+
+      if (last || !isDown) {
+        if (memo.moved) {
+          suppressClick.current = true;
+          window.setTimeout(() => {
+            suppressClick.current = false;
+          }, 0);
+          const flick = Math.min(1.6, vx) * (dxDir || 0) * 160 * DEG_PER_PX;
+          settleTo(rot.current.target + flick);
         }
+        draggingRef.current = false;
+        setDragging(false);
       }
-      // Controlled inertia, then settle on the nearest frame.
-      const flick = Math.max(-1.6, Math.min(1.6, d.velocity)) * 160 * DEG_PER_PX;
-      settleTo(rot.current.target + flick);
+
+      return memo;
+    },
+    {
+      axis: 'x',
+      filterTaps: true,
+      threshold: DRAG_THRESHOLD_PX,
+      pointer: { touch: true },
     }
-    d.captured = false;
-    setDragging(false);
-  };
+  );
 
   const onWheel = (e: React.WheelEvent<HTMLDivElement>) => {
     if (Math.abs(e.deltaX) > Math.abs(e.deltaY) || e.shiftKey) {
@@ -275,14 +249,9 @@ export function CircularGallery({
       aria-label="Plant and specimen gallery, orbital view"
       onKeyDown={onKeyDown}
       onWheel={onWheel}
-      onPointerDown={onPointerDown}
-      onPointerMove={onPointerMove}
-      onPointerUp={endDrag}
-      onPointerCancel={endDrag}
-      onLostPointerCapture={() => endDrag()}
+      {...bindOrbitDrag()}
       onPointerLeave={(e) => {
-        if (!drag.current.captured) endDrag(e);
-        setHoveredId(null);
+        if (e.pointerType === 'mouse') setHoveredId(null);
       }}
       style={{ touchAction: 'pan-y' }}
       className={cn(
@@ -315,14 +284,19 @@ export function CircularGallery({
                 const angle = idx * step;
                 const isHot = highlightId === item.id;
                 return (
-                  <button
+                    <button
                     key={item.id}
                     ref={(el) => {
                       cardRefs.current[idx] = el;
                     }}
                     type="button"
-                    onMouseEnter={() => setHoveredId(item.id)}
-                    onMouseLeave={() => setHoveredId((prev) => (prev === item.id ? null : prev))}
+                    onPointerEnter={(e) => {
+                      if (e.pointerType === 'mouse') setHoveredId(item.id);
+                    }}
+                    onPointerLeave={(e) => {
+                      if (e.pointerType === 'mouse') setHoveredId((prev) => (prev === item.id ? null : prev));
+                    }}
+                    onPointerDown={() => setHoveredId(item.id)}
                     onFocus={() => {
                       setFocusedId(item.id);
                       rotateToIndex(idx);

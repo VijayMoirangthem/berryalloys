@@ -129,6 +129,7 @@ export function SocialFlipButton({
   heading = 'Channels & Connect',
   className,
 }: SocialFlipButtonProps) {
+  const [activeId, setActiveId] = useState<string | null>(null);
   const [activeNote, setActiveNote] = useState<string | null>(null);
 
   return (
@@ -142,8 +143,14 @@ export function SocialFlipButton({
         style={{ perspective: '1000px' }}
       >
         {CONNECT_TILES.map((item) => {
+          const isFlipped = activeId === item.id;
           const tileContent = (
-            <span className="relative block w-9 h-9 preserve-3d transition-transform duration-500 ease-[cubic-bezier(0.16,1,0.3,1)] group-hover:rotate-y-180 group-focus-visible:rotate-y-180 motion-reduce:transition-none motion-reduce:group-hover:rotate-y-0">
+            <span
+              className={cn(
+                'relative block w-9 h-9 preserve-3d transition-transform duration-500 ease-[cubic-bezier(0.16,1,0.3,1)] group-hover:rotate-y-180 group-focus-visible:rotate-y-180 motion-reduce:transition-none motion-reduce:group-hover:rotate-y-0',
+                isFlipped && 'rotate-y-180 motion-reduce:rotate-y-0'
+              )}
+            >
               {/* Front Face — Letter */}
               <span className="backface-hidden absolute inset-0 flex items-center justify-center bg-[#F1F6FB] dark:bg-[#12243B] border border-[#10243A]/12 dark:border-[#F4F8FC]/12 font-display text-sm font-bold uppercase text-[#10243A] dark:text-[#F4F8FC]">
                 {item.letter}
@@ -155,6 +162,37 @@ export function SocialFlipButton({
             </span>
           );
 
+          const sharedHandlers = {
+            title: item.label,
+            'aria-label': item.label,
+            onPointerEnter: (e: React.PointerEvent) => {
+              if (e.pointerType === 'mouse') {
+                setActiveId(item.id);
+                setActiveNote(item.note);
+              }
+            },
+            onPointerLeave: () => {
+              setActiveId((prev) => (prev === item.id ? null : prev));
+            },
+            onPointerDown: () => {
+              setActiveId(item.id);
+              setActiveNote(item.note);
+            },
+            onFocus: () => {
+              setActiveId(item.id);
+              setActiveNote(item.note);
+            },
+            onBlur: () => {
+              setActiveId((prev) => (prev === item.id ? null : prev));
+            },
+            onClick: () => {
+              setActiveId(item.id);
+              setActiveNote(item.note);
+            },
+            className:
+              'group block cursor-pointer focus-visible:outline-2 focus-visible:outline-[#69C5F5]',
+          };
+
           if (item.href) {
             return (
               <a
@@ -162,12 +200,7 @@ export function SocialFlipButton({
                 href={item.href}
                 target={item.external ? '_blank' : undefined}
                 rel={item.external ? 'noopener noreferrer' : undefined}
-                title={item.label}
-                aria-label={item.label}
-                onMouseEnter={() => setActiveNote(item.note)}
-                onFocus={() => setActiveNote(item.note)}
-                onClick={() => setActiveNote(item.note)}
-                className="group block cursor-pointer focus-visible:outline-2 focus-visible:outline-[#69C5F5]"
+                {...sharedHandlers}
               >
                 {tileContent}
               </a>
@@ -175,16 +208,7 @@ export function SocialFlipButton({
           }
 
           return (
-            <Link
-              key={item.id}
-              to={item.to ?? '/contact'}
-              title={item.label}
-              aria-label={item.label}
-              onMouseEnter={() => setActiveNote(item.note)}
-              onFocus={() => setActiveNote(item.note)}
-              onClick={() => setActiveNote(item.note)}
-              className="group block cursor-pointer focus-visible:outline-2 focus-visible:outline-[#69C5F5]"
-            >
+            <Link key={item.id} to={item.to ?? '/contact'} {...sharedHandlers}>
               {tileContent}
             </Link>
           );

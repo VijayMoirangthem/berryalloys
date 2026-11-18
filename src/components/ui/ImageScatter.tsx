@@ -1,5 +1,6 @@
 import { useRef, useState, useEffect, useMemo, useCallback } from 'react';
 import { ChevronLeft, ChevronRight, Pause, Play } from 'lucide-react';
+import { useDrag } from '@use-gesture/react';
 import gsap from 'gsap';
 import { cn } from '../../lib/utils';
 import { useIsCompactMobile } from '../../hooks/useIsCompactMobile';
@@ -56,6 +57,7 @@ export function ImageScatter({
 }: ImageScatterProps) {
   const stageRef = useRef<HTMLDivElement>(null);
   const cardsRef = useRef<HTMLDivElement>(null);
+  const mobileGridRef = useRef<HTMLDivElement>(null);
   const labelRef = useRef<HTMLDivElement>(null);
   const [currentSetIndex, setCurrentSetIndex] = useState(0);
   const [focusedCardIdx, setFocusedCardIdx] = useState<number | null>(null);
@@ -195,6 +197,26 @@ export function ImageScatter({
     };
   }, [animateCards]);
 
+  // Mobile card staggered entrance when photo set changes
+  useEffect(() => {
+    if (!isCompactMobile || !mobileGridRef.current || !currentSet) return;
+    const cards = Array.from(mobileGridRef.current.children) as HTMLElement[];
+    if (cards.length === 0) return;
+    const prefersReduced = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+    if (prefersReduced) {
+      gsap.set(cards, { opacity: 1, y: 0, scale: 1 });
+      return;
+    }
+    const tween = gsap.fromTo(
+      cards,
+      { opacity: 0.15, y: 14, scale: 0.94 },
+      { opacity: 1, y: 0, scale: 1, duration: 0.36, stagger: 0.045, ease: 'power3.out' }
+    );
+    return () => {
+      tween.kill();
+    };
+  }, [currentSet, isCompactMobile]);
+
   const stepSet = useCallback(
     (delta: number) => {
       if (safeSets.length <= 1) return;
@@ -232,6 +254,25 @@ export function ImageScatter({
       if (timerRef.current) window.clearInterval(timerRef.current);
     };
   }, [interval, paused, safeSets.length, stepSet]);
+
+  const bindSetSwipe = useDrag(
+    ({ active, movement: [mx], velocity: [vx], direction: [dx], memo }) => {
+      if (active) {
+        if (!memo?.swiped && (Math.abs(mx) > 48 || (vx > 0.35 && Math.abs(mx) > 18))) {
+          stepSet(mx < 0 || dx < 0 ? 1 : -1);
+          return { swiped: true };
+        }
+        return memo ?? { swiped: false };
+      }
+      return { swiped: false };
+    },
+    {
+      axis: 'x',
+      filterTaps: true,
+      threshold: 14,
+      pointer: { touch: true },
+    }
+  );
 
   if (!currentSet) return null;
 
@@ -314,9 +355,13 @@ export function ImageScatter({
         </div>
       </div>
 
-      {/* Desktop / Tablet Scattered 6-Card Perimeter Stage (md+) OR Mobile Clean 2-Column Archival Polaroid Grid (< 768px) */}
+      {/* Desktop / Tablet Scattered 6-Card Perimeter Stage (md+) OR Mobile Clean Staggered Polaroid Grid (< 768px) */}
       {isCompactMobile ? (
-        <div className="relative z-10 p-4 space-y-4">
+        <div
+          {...bindSetSwipe()}
+          style={{ touchAction: 'pan-y' }}
+          className="relative z-10 p-4 space-y-4 select-none"
+        >
           <div className="text-center px-4 py-4 bg-[#FFFFFF]/96 dark:bg-[#07111F]/96 border border-[#10243A]/18 dark:border-[#F4F8FC]/18">
             <p className="text-[10px] font-mono-tabular uppercase tracking-widest text-brand dark:text-[#69C5F5]">
               Life & Culture at Berry Alloys
@@ -331,37 +376,49 @@ export function ImageScatter({
             )}
           </div>
 
-          <div className="grid grid-cols-2 gap-3">
-            {currentSet.images.map((item, idx) => (
-              <figure
-                key={`${currentSet.id}-mobile-${idx}`}
-                className="flex flex-col border border-[#10243A]/16 dark:border-[#F4F8FC]/18 bg-[#FFFFFF] dark:bg-[#12243B] p-1.5 shadow-md"
-              >
-                <div
+          <div ref={mobileGridRef} className="grid grid-cols-2 gap-3">
+            {currentSet.images.map((item, idx) => {
+              const isFocused = focusedCardIdx === idx;
+              return (
+                <figure
+                  key={`${currentSet.id}-mobile-${idx}`}
+                  onPointerDown={() => setFocusedCardIdx((prev) => (prev === idx ? null : idx))}
                   className={cn(
-                    'aspect-[16/10] w-full overflow-hidden',
-                    item.isEmblem ? 'bg-[#FFFFFF] p-1.5' : 'bg-[#10243A]'
+                    'flex flex-col border bg-[#FFFFFF] dark:bg-[#12243B] p-1.5 shadow-md transition-transform duration-200 cursor-pointer',
+                    isFocused
+                      ? 'scale-[1.03] -translate-y-1 border-brand dark:border-[#69C5F5] ring-1 ring-brand/40 z-20 shadow-xl'
+                      : 'border-[#10243A]/16 dark:border-[#F4F8FC]/18'
                   )}
                 >
-                  <img
-                    src={item.src}
-                    alt={item.alt}
+                  <div
                     className={cn(
-                      'w-full h-full block',
-                      item.isEmblem ? 'object-contain' : 'object-cover'
+                      'aspect-[16/10] w-full overflow-hidden',
+                      item.isEmblem ? 'bg-[#FFFFFF] p-1.5' : 'bg-[#10243A]'
                     )}
-                  />
-                </div>
-                <figcaption className="pt-1.5 pb-0.5 px-0.5 text-[10px] font-mono-tabular text-[#10243A] dark:text-[#F4F8FC] truncate">
-                  {item.caption}
-                </figcaption>
-              </figure>
-            ))}
+                  >
+                    <img
+                      src={item.src}
+                      alt={item.alt}
+                      draggable={false}
+                      className={cn(
+                        'w-full h-full block',
+                        item.isEmblem ? 'object-contain' : 'object-cover'
+                      )}
+                    />
+                  </div>
+                  <figcaption className="pt-1.5 pb-0.5 px-0.5 text-[10px] font-mono-tabular text-[#10243A] dark:text-[#F4F8FC] truncate">
+                    {item.caption}
+                  </figcaption>
+                </figure>
+              );
+            })}
           </div>
         </div>
       ) : (
         <div
           ref={stageRef}
+          {...bindSetSwipe()}
+          style={{ touchAction: 'pan-y' }}
           className="flex relative flex-1 items-center justify-center min-h-[600px] lg:min-h-[680px]"
         >
           <div
@@ -373,9 +430,13 @@ export function ImageScatter({
               return (
                 <figure
                   key={`${currentSet.id}-${idx}`}
-                  onMouseEnter={() => setFocusedCardIdx(idx)}
-                  onMouseLeave={() => setFocusedCardIdx(null)}
-                  onClick={() =>
+                  onPointerEnter={(e) => {
+                    if (e.pointerType === 'mouse') setFocusedCardIdx(idx);
+                  }}
+                  onPointerLeave={(e) => {
+                    if (e.pointerType === 'mouse') setFocusedCardIdx(null);
+                  }}
+                  onPointerDown={() =>
                     setFocusedCardIdx((prev) => (prev === idx ? null : idx))
                   }
                   style={{ width: `${cardGeometry.cardW}px` }}

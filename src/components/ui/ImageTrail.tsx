@@ -52,25 +52,26 @@ export function ImageTrail({
     };
   }, []);
 
-  const handlePointerMove = useCallback(
-    (e: React.PointerEvent<HTMLDivElement>) => {
-      if (prefersReduced || e.pointerType === 'touch' || images.length === 0) return;
+  const spawnNode = useCallback(
+    (clientX: number, clientY: number, force = false) => {
+      if (prefersReduced || images.length === 0) return;
       const el = containerRef.current;
       if (!el) return;
 
       const rect = el.getBoundingClientRect();
-      const x = e.clientX - rect.left;
-      const y = e.clientY - rect.top;
+      const x = clientX - rect.left;
+      const y = clientY - rect.top;
 
-      if (!lastPosRef.current) {
+      if (!force && !lastPosRef.current) {
         lastPosRef.current = { x, y };
         return;
       }
 
-      const dx = x - lastPosRef.current.x;
-      const dy = y - lastPosRef.current.y;
-      const dist = Math.hypot(dx, dy);
-      if (dist < spawnDistance) return;
+      if (!force && lastPosRef.current) {
+        const dx = x - lastPosRef.current.x;
+        const dy = y - lastPosRef.current.y;
+        if (Math.hypot(dx, dy) < spawnDistance) return;
+      }
 
       lastPosRef.current = { x, y };
 
@@ -92,6 +93,20 @@ export function ImageTrail({
     [images, spawnDistance, maxActive, lifetimeMs, prefersReduced]
   );
 
+  const handlePointerMove = useCallback(
+    (e: React.PointerEvent<HTMLDivElement>) => {
+      spawnNode(e.clientX, e.clientY, false);
+    },
+    [spawnNode]
+  );
+
+  const handlePointerDown = useCallback(
+    (e: React.PointerEvent<HTMLDivElement>) => {
+      spawnNode(e.clientX, e.clientY, true);
+    },
+    [spawnNode]
+  );
+
   const handlePointerLeave = useCallback(() => {
     lastPosRef.current = null;
   }, []);
@@ -99,8 +114,10 @@ export function ImageTrail({
   return (
     <div
       ref={containerRef}
+      onPointerDown={handlePointerDown}
       onPointerMove={handlePointerMove}
       onPointerLeave={handlePointerLeave}
+      style={{ touchAction: 'pan-y' }}
       className={cn('relative overflow-hidden', className)}
     >
       {/* Floating spring photo cards behind content */}

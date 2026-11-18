@@ -9,7 +9,8 @@ import {
   useState,
 } from 'react';
 import { BookOpen, ChevronLeft, ChevronRight, X } from 'lucide-react';
-import { AnimatePresence, animate, motion, useReducedMotion } from 'motion/react';
+import { animate, motion, useReducedMotion } from 'motion/react';
+import { useDrag } from '@use-gesture/react';
 import { OFFICIAL_BRAND_MARK_DARK } from '../../data/assets';
 import { cn } from '../../lib/utils';
 
@@ -194,29 +195,64 @@ function smooth(a: number, b: number, x: number) {
   return t * t * (3 - 2 * t);
 }
 
-function NarrativePage({ page }: { page: InteractiveBookPage }) {
+function NarrativePage({
+  page,
+  compact = false,
+}: {
+  page: InteractiveBookPage;
+  compact?: boolean;
+}) {
   return (
-    <article className="h-full p-6 sm:p-8 flex flex-col justify-between gap-5 bg-[#FBFDFF] dark:bg-[#10243A]">
-      <div className="space-y-3">
-        <div className="flex items-center justify-between gap-2 text-[10px] font-mono-tabular uppercase tracking-widest text-brand">
-          <span>{page.kicker}</span>
-          <span className="text-[#465C72] dark:text-[#B5C5D7]">Folio 0{page.pageNumber}</span>
+    <article
+      className={cn(
+        'h-full flex flex-col justify-between bg-[#FBFDFF] dark:bg-[#10243A]',
+        compact ? 'p-3.5 gap-2.5 overflow-y-auto' : 'p-6 sm:p-8 gap-5'
+      )}
+    >
+      <div className={compact ? 'space-y-1.5' : 'space-y-3'}>
+        <div className="flex items-center justify-between gap-2 text-[10px] font-mono-tabular uppercase tracking-widest text-brand dark:text-[#69C5F5]">
+          <span className="truncate">{page.kicker}</span>
+          <span className="text-[#465C72] dark:text-[#B5C5D7] shrink-0">Folio 0{page.pageNumber}</span>
         </div>
-        <h3 className="font-display text-2xl sm:text-3xl font-bold uppercase tracking-tight text-[#10243A] dark:text-[#F4F8FC]">
+        <h3
+          className={cn(
+            'font-display font-bold uppercase tracking-tight text-[#10243A] dark:text-[#F4F8FC]',
+            compact ? 'text-[21px] leading-[1.08]' : 'text-2xl sm:text-3xl'
+          )}
+        >
           {page.title}
         </h3>
-        <div className="space-y-3 text-xs sm:text-sm text-[#465C72] dark:text-[#F4F8FC]/82 leading-relaxed">
+        <div
+          className={cn(
+            'text-[#465C72] dark:text-[#F4F8FC]/84',
+            compact ? 'space-y-1.5 text-[12px] leading-[1.44]' : 'space-y-3 text-xs sm:text-sm leading-relaxed'
+          )}
+        >
           {page.paragraphs.map((p) => (
             <p key={p}>{p}</p>
           ))}
         </div>
       </div>
       {page.metrics && page.metrics.length > 0 && (
-        <dl className="grid grid-cols-2 gap-3 pt-4 border-t border-[#10243A]/12 dark:border-[#F4F8FC]/12">
+        <dl
+          className={cn(
+            'grid grid-cols-2 gap-3 border-t border-[#10243A]/12 dark:border-[#F4F8FC]/12 shrink-0',
+            compact ? 'pt-2.5' : 'pt-4'
+          )}
+        >
           {page.metrics.map((m) => (
             <div key={m.label}>
-              <dt className="text-[10px] font-mono-tabular uppercase tracking-wider text-[#465C72] dark:text-[#B5C5D7]">{m.label}</dt>
-              <dd className="font-display text-lg font-bold uppercase text-[#10243A] dark:text-[#F4F8FC]">{m.value}</dd>
+              <dt className="text-[9.5px] font-mono-tabular uppercase tracking-wider text-[#465C72] dark:text-[#B5C5D7]">
+                {m.label}
+              </dt>
+              <dd
+                className={cn(
+                  'font-display font-bold uppercase text-[#10243A] dark:text-[#F4F8FC]',
+                  compact ? 'text-base leading-tight mt-0.5' : 'text-lg'
+                )}
+              >
+                {m.value}
+              </dd>
             </div>
           ))}
         </dl>
@@ -299,41 +335,123 @@ interface CoverProps {
   coverSubtitle: string;
   coverMeta: string;
   fill: boolean;
+  compact?: boolean;
 }
 
-function Cover({ coverKicker, coverTitle, coverSubtitle, coverMeta, fill }: CoverProps) {
+function Cover({ coverKicker, coverTitle, coverSubtitle, coverMeta, fill, compact = false }: CoverProps) {
   return (
     <div
       className={cn(
-        'relative h-full min-h-[inherit] w-full overflow-hidden bg-[#10243A] text-[#F4F8FC] border border-[#69C5F5]/35 p-6 sm:p-8 group',
+        'relative h-full min-h-[inherit] w-full overflow-hidden bg-[#10243A] text-[#F4F8FC] border border-[#69C5F5]/35 group',
+        compact ? 'p-5' : 'p-6 sm:p-8',
         fill ? '' : 'max-w-[380px] mx-auto'
       )}
     >
       <span aria-hidden="true" className="absolute inset-y-0 left-0 w-4 bg-gradient-to-r from-[#0B0C0E] via-[#262B32] to-transparent border-r border-[#F4F8FC]/10" />
       <span aria-hidden="true" className="absolute top-0 inset-x-0 h-1 bg-gradient-to-r from-brand via-[#69C5F5] to-brand" />
-      <div className="pl-3 h-full flex flex-col justify-between gap-6">
+      {/* Subtle layered page-block edge on the right */}
+      <span
+        aria-hidden="true"
+        className="pointer-events-none absolute inset-y-1.5 right-0 w-[3px] bg-gradient-to-b from-[#E5EDF5] via-[#C8D6E4] to-[#E5EDF5] opacity-75"
+      />
+      <div className="pl-3 h-full flex flex-col justify-between gap-4">
         <div className="flex items-center justify-between gap-2">
-          <img src={OFFICIAL_BRAND_MARK_DARK} alt="Berry Alloys Limited emblem" className="h-7 w-auto object-contain" draggable={false} />
+          <img src={OFFICIAL_BRAND_MARK_DARK} alt="Berry Alloys Limited emblem" className="h-6 sm:h-7 w-auto object-contain" draggable={false} />
           <span className="font-mono-tabular text-[10px] uppercase tracking-widest text-[#69C5F5]">2006–2026</span>
         </div>
-        <div className="space-y-2 py-4 border-y border-[#F4F8FC]/14">
+        <div className={cn('space-y-2 border-y border-[#F4F8FC]/14', compact ? 'py-3' : 'py-4')}>
           <p className="text-[10px] font-mono-tabular uppercase tracking-widest text-[#B5C5D7]">{coverKicker}</p>
-          <h3 className="font-display text-3xl sm:text-4xl font-bold uppercase tracking-tight text-[#F4F8FC]">{coverTitle}</h3>
-          <p className="text-xs text-[#F4F8FC]/78 leading-relaxed">{coverSubtitle}</p>
+          <h3 className={cn('font-display font-bold uppercase tracking-tight text-[#F4F8FC]', compact ? 'text-2xl' : 'text-3xl sm:text-4xl')}>
+            {coverTitle}
+          </h3>
+          <p className="text-xs text-[#F4F8FC]/78 leading-relaxed line-clamp-3">{coverSubtitle}</p>
         </div>
         <div className="flex items-center justify-between text-[11px] font-mono-tabular text-[#B5C5D7]">
-          <span>{coverMeta}</span>
-          <span className="text-[#69C5F5]">Open Book →</span>
+          <span className="truncate">{coverMeta}</span>
+          <span className="text-[#69C5F5] shrink-0">{compact ? 'Swipe / Tap →' : 'Open Book →'}</span>
         </div>
       </div>
     </div>
   );
 }
 
-/** Blank paper: the reverse of a sheet that is turning away in single-page (phone) mode. */
+/** Blank ruled paper back face on a single-sheet mobile turn. */
 function PaperBack() {
   return (
-    <div className="h-full w-full bg-[#F4F8FC] dark:bg-[#0D1B2E] bg-[repeating-linear-gradient(0deg,transparent_0,transparent_27px,rgba(16,36,58,0.05)_28px)]" />
+    <div className="h-full w-full bg-[#EFF4FA] dark:bg-[#0B1728] bg-[repeating-linear-gradient(0deg,transparent_0,transparent_25px,rgba(16,36,58,0.06)_26px)] border border-[#10243A]/15 dark:border-[#F4F8FC]/12">
+      <div className="h-full w-full bg-gradient-to-r from-[#10243A]/14 via-transparent to-transparent" />
+    </div>
+  );
+}
+
+/** Inside navy endpaper visible on the reverse side of the opening cover. */
+function CoverInside() {
+  return (
+    <div className="h-full w-full bg-[#0C1C30] border border-[#69C5F5]/20 p-5 flex flex-col justify-between text-[#F4F8FC]/55">
+      <span className="text-[9px] font-mono-tabular uppercase tracking-widest">DKG Group · Corporate Archive</span>
+      <span className="text-[9px] font-mono-tabular uppercase tracking-widest self-end">Berry Alloys Limited</span>
+    </div>
+  );
+}
+
+interface MobileSheetProps {
+  page: InteractiveBookPage;
+  hasNext: boolean;
+  onTapNext?: () => void;
+}
+
+function MobileSheet({ page, hasNext, onTapNext }: MobileSheetProps) {
+  return (
+    <div className="relative h-full w-full flex flex-col bg-[#FBFDFF] dark:bg-[#10243A] border border-[#10243A]/20 dark:border-[#F4F8FC]/16 overflow-hidden select-none">
+      {/* Left bound spine fold */}
+      <span
+        aria-hidden="true"
+        className="pointer-events-none absolute inset-y-0 left-0 w-3.5 z-10 bg-gradient-to-r from-[#10243A]/20 via-[#10243A]/06 to-transparent dark:from-black/45 dark:via-black/15"
+      />
+      {/* Stacked page fore-edge lines on right edge */}
+      <span
+        aria-hidden="true"
+        className="pointer-events-none absolute inset-y-0 right-0 w-[3px] z-10 bg-[repeating-linear-gradient(0deg,rgba(16,36,58,0.16)_0,rgba(16,36,58,0.16)_1px,transparent_1px,transparent_3px)]"
+      />
+
+      {page.image && (
+        <div className="relative h-[96px] w-full shrink-0 overflow-hidden bg-[#10243A] border-b border-[#10243A]/14 dark:border-[#F4F8FC]/12">
+          <img
+            src={page.image}
+            alt={page.imageAlt ?? page.title}
+            className="w-full h-full object-cover"
+            draggable={false}
+          />
+          <div
+            aria-hidden="true"
+            className="absolute inset-0 bg-gradient-to-t from-[#07111F]/70 via-transparent to-transparent"
+          />
+          <span className="absolute bottom-2 left-3.5 text-[9.5px] font-mono-tabular uppercase tracking-widest text-[#F4F8FC]/92">
+            Plate 0{page.pageNumber} · Official Archive
+          </span>
+        </div>
+      )}
+
+      <div className="flex-1 min-h-0 flex flex-col">
+        <NarrativePage page={page} compact />
+      </div>
+
+      {/* Tactile corner curl tap zone for next page */}
+      {hasNext && onTapNext && (
+        <button
+          type="button"
+          onClick={onTapNext}
+          aria-label={`Turn to folio 0${page.pageNumber + 1}`}
+          className="group absolute bottom-0 right-0 z-20 flex items-end justify-end w-16 h-12 cursor-pointer focus:outline-none"
+        >
+          <span
+            aria-hidden="true"
+            className="w-9 h-9 bg-gradient-to-tl from-[#D9E5F0] via-[#EEF4FA] to-transparent dark:from-[#1B3A5C] dark:via-[#142D49] border-t border-l border-[#10243A]/18 dark:border-[#69C5F5]/30 shadow-[-3px_-3px_8px_rgba(16,36,58,0.14)] transition-transform duration-200 group-hover:scale-110 flex items-center justify-center"
+            style={{ clipPath: 'polygon(100% 0, 0 100%, 100% 100%)' }}
+          />
+        </button>
+      )}
+    </div>
   );
 }
 
@@ -344,12 +462,14 @@ interface Turn {
   to: number;
   dir: 'fwd' | 'back';
   kind: 'cover' | 'page' | 'jump';
+  manual?: boolean;
 }
 
+const MOBILE_BOOK_HEIGHT = 396;
+
 /**
- * InteractiveBook — a corporate heritage dossier with a genuine page-turn: a slow (about 1.6 s), curved leaf that hinges
- * on the spine, a cover that opens and re-centres the book, and soft shading. Spread layout on tablets and up; a
- * single turning sheet on phones. Under reduced motion pages change with a short cross-fade instead.
+ * InteractiveBook — a corporate heritage dossier with a genuine 3-strip curved 3D leaf turn:
+ * spread view on tablet/desktop and a compact, touch-swipe / finger-drag single-sheet book on mobile.
  */
 export function InteractiveBook({
   coverKicker = 'Corporate Heritage Dossier · CIN U27310WB2006PLC145016',
@@ -374,6 +494,9 @@ export function InteractiveBook({
   const leafRef = useRef<LeafHandle>(null);
   const turnRef = useRef<Turn | null>(null);
   const animRef = useRef<{ stop: () => void } | null>(null);
+  const didDragRef = useRef(false);
+  const lastDragProgressRef = useRef(0);
+
   const turning = turn !== null;
 
   useEffect(() => {
@@ -401,6 +524,7 @@ export function InteractiveBook({
   );
 
   const pageW = spread ? size.w / 2 : size.w;
+  const pageH = spread ? size.h : Math.max(size.h, MOBILE_BOOK_HEIGHT);
 
   /* Content for each side of a given position. */
   const leftOf = (p: number): ReactNode =>
@@ -411,14 +535,23 @@ export function InteractiveBook({
     ) : (
       <PlatePage page={pages[p]} pages={pages} activeIndex={p} interactive={interactive} onJump={goTo} onNext={() => goTo(p + 1)} />
     );
-  const sheetOf = (p: number, interactive: boolean): ReactNode =>
+
+  const mobileSheetOf = (p: number, interactive: boolean): ReactNode =>
     p < 0 ? (
-      <Cover coverKicker={coverKicker} coverTitle={coverTitle} coverSubtitle={coverSubtitle} coverMeta={coverMeta} fill />
+      <Cover
+        coverKicker={coverKicker}
+        coverTitle={coverTitle}
+        coverSubtitle={coverSubtitle}
+        coverMeta={coverMeta}
+        fill
+        compact
+      />
     ) : (
-      <div className="flex flex-col bg-[#FBFDFF] dark:bg-[#10243A]">
-        <NarrativePage page={pages[p]} />
-        <PlatePage page={pages[p]} pages={pages} activeIndex={p} interactive={interactive} onJump={goTo} onNext={() => goTo(p + 1)} />
-      </div>
+      <MobileSheet
+        page={pages[p]}
+        hasNext={p < total - 1}
+        onTapNext={interactive ? () => step(1) : undefined}
+      />
     );
 
   /* Drives one turn: eased progress 0→1 written directly to the DOM. */
@@ -435,18 +568,18 @@ export function InteractiveBook({
       } else {
         const pe = fwd ? p : 1 - p; // on phones the previous sheet swings back in
         theta = -180 * pe;
-        delta = CURL_DEG * Math.sin(2 * Math.PI * pe);
+        delta = (CURL_DEG + 4) * Math.sin(2 * Math.PI * pe);
       }
       leafRef.current?.update(theta, delta);
 
       // Cast shadows on the pages under the leaf.
       const rise = 0.42 * Math.sin(Math.PI * Math.min(1, p)) * (1 - smooth(0.42, 0.62, p));
       const land = 0.42 * smooth(0.38, 0.72, p) * (1 - smooth(0.88, 1, p));
-      const under = spread ? (fwd ? [land, rise] : [rise, land]) : [0, rise];
+      const under = spread ? (fwd ? [land, rise] : [rise, land]) : [0, fwd ? rise : land];
       if (shadeLeftRef.current) shadeLeftRef.current.style.opacity = String(under[0]);
       if (shadeRightRef.current) shadeRightRef.current.style.opacity = String(under[1]);
 
-      // The closed book sits centred; opening/closing slides it across the table as the cover swings.
+      // Desktop cover opens and re-centres the spread.
       if (spread && t.kind === 'cover' && stageRef.current) {
         const closedness = t.to === -1 ? p : 1 - p;
         stageRef.current.style.transform = `translateX(${-25 * closedness}%)`;
@@ -458,35 +591,39 @@ export function InteractiveBook({
     [spread]
   );
 
-  const [turnDir, setTurnDir] = useState<'fwd' | 'back'>('fwd');
-
   const startTurn = useCallback(
     (to: number, kind?: Turn['kind']) => {
       if (turnRef.current || to === pos || to < -1 || to > total - 1) return;
       const dir: Turn['dir'] = to > pos ? 'fwd' : 'back';
       const k: Turn['kind'] = kind ?? (pos === -1 || to === -1 ? 'cover' : Math.abs(to - pos) > 1 ? 'jump' : 'page');
-      setTurnDir(dir);
 
-      // Mobile (!spread) uses a crisp directional 3D spine-hinge card flip in renderStatic; reduced motion swaps immediately
-      if (prefersReduced || !spread) {
+      if (prefersReduced) {
         setPos(to);
         return;
       }
-      const t: Turn = { from: pos, to, dir, kind: k };
+
+      const t: Turn = { from: pos, to, dir, kind: k, manual: false };
       turnRef.current = t;
       setTurn(t);
     },
-    [pos, spread, total, prefersReduced]
+    [pos, total, prefersReduced]
   );
 
-  // Once the leaf is mounted, run the animation.
+  // Auto-play timed page turn when not driven manually by live finger drag.
   useLayoutEffect(() => {
-    if (!turn) return;
+    if (!turn || turn.manual) return;
     apply(0);
-    const duration = DURATION[turn.kind];
+    const desktopDuration = DURATION[turn.kind];
+    const duration = spread
+      ? desktopDuration
+      : turn.kind === 'cover'
+        ? 0.85
+        : turn.kind === 'jump'
+          ? 0.62
+          : 0.72;
     const controls = animate(0, 1, {
       duration,
-      ease: TURN_EASE,
+      ease: spread ? TURN_EASE : [0.22, 1, 0.36, 1],
       onUpdate: apply,
       onComplete: () => {
         apply(1);
@@ -502,6 +639,13 @@ export function InteractiveBook({
     };
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [turn]);
+
+  // Apply initial drag progress immediately once the manual Turn mounts the Leaf.
+  useLayoutEffect(() => {
+    if (turn?.manual) {
+      apply(lastDragProgressRef.current);
+    }
+  }, [turn, apply]);
 
   function goTo(index: number) {
     startTurn(index);
@@ -520,6 +664,80 @@ export function InteractiveBook({
     }
   };
 
+  /* Interactive live finger-drag / swipe page peel via @use-gesture/react */
+  const bindMobileDrag = useDrag(
+    ({ first, last, active, movement: [mx], velocity: [vx], direction: [dxDir], memo }) => {
+      if (spread || prefersReduced) return memo;
+
+      if (first) {
+        if (turnRef.current && !turnRef.current.manual) return { ignore: true };
+        animRef.current?.stop();
+        animRef.current = null;
+        didDragRef.current = false;
+        return { engaged: false, ignore: false };
+      }
+
+      if (memo?.ignore) return memo;
+
+      if (!memo.engaged) {
+        if (Math.abs(mx) < 4) return memo;
+        const dir: Turn['dir'] = mx < 0 ? 'fwd' : 'back';
+        const targetPos = dir === 'fwd' ? pos + 1 : pos - 1;
+        if (targetPos < -1 || targetPos > total - 1) {
+          return { ...memo, ignore: true };
+        }
+        memo.engaged = true;
+        didDragRef.current = true;
+        const kind: Turn['kind'] = pos === -1 || targetPos === -1 ? 'cover' : 'page';
+        const manualTurn: Turn = { from: pos, to: targetPos, dir, kind, manual: true };
+        turnRef.current = manualTurn;
+        setTurn(manualTurn);
+      }
+
+      const activeTurn = turnRef.current;
+      if (!activeTurn || !activeTurn.manual) return memo;
+
+      const dragSpan = Math.max(140, (pageW || 320) * 0.65);
+      const directionalDx = activeTurn.dir === 'fwd' ? -mx : mx;
+      const p = Math.min(0.96, Math.max(0.02, directionalDx / dragSpan));
+      lastDragProgressRef.current = p;
+      apply(p);
+
+      if (last || !active) {
+        const flickCommit =
+          activeTurn.dir === 'fwd' ? vx > 0.25 && dxDir < 0 : vx > 0.25 && dxDir > 0;
+        const commit = p >= 0.2 || flickCommit;
+        const targetEnd = commit ? 1 : 0;
+        const rem = Math.abs(targetEnd - p);
+
+        const controls = animate(p, targetEnd, {
+          duration: Math.max(0.16, rem * 0.44),
+          ease: [0.22, 1, 0.36, 1],
+          onUpdate: apply,
+          onComplete: () => {
+            apply(targetEnd);
+            animRef.current = null;
+            turnRef.current = null;
+            if (commit) {
+              setPos(activeTurn.to);
+            }
+            setTurn(null);
+          },
+        });
+        animRef.current = controls;
+      }
+
+      return memo;
+    },
+    {
+      enabled: !spread && !prefersReduced,
+      axis: 'x',
+      filterTaps: true,
+      threshold: 8,
+      pointer: { touch: true },
+    }
+  );
+
   if (total === 0) return null;
 
   /* What sits under the leaf, and what the leaf carries. */
@@ -531,108 +749,58 @@ export function InteractiveBook({
   const stageStyle: React.CSSProperties = {
     transform: spread && restClosed ? 'translateX(-25%)' : undefined,
   };
-  // Perspective must sit on the element whose child is the 3D leaf.
-  const perspectiveStyle: React.CSSProperties = { perspective: spread ? 2600 : 2200, perspectiveOrigin: '50% 38%' };
+  const perspectiveStyle: React.CSSProperties = {
+    perspective: spread ? 2600 : 1850,
+    perspectiveOrigin: spread ? '50% 38%' : '50% 42%',
+  };
 
-  const renderStatic = () => {
-    if (!spread) {
-      const currentPage = pages[Math.max(0, pos)] ?? pages[0];
-      const enterRotateY = turnDir === 'fwd' ? 18 : -18;
-      const exitRotateY = turnDir === 'fwd' ? -18 : 18;
-      return (
-        <div style={{ perspective: '1600px' }}>
-          <AnimatePresence mode="wait">
-            <motion.div
-              key={`mobile-folio-${currentPage.pageNumber}`}
-              initial={
-                prefersReduced
-                  ? false
-                  : { opacity: 0.2, x: turnDir === 'fwd' ? 28 : -28, rotateY: enterRotateY, scale: 0.97 }
-              }
-              animate={{ opacity: 1, x: 0, rotateY: 0, scale: 1 }}
-              exit={
-                prefersReduced
-                  ? undefined
-                  : { opacity: 0.15, x: turnDir === 'fwd' ? -28 : 28, rotateY: exitRotateY, scale: 0.97 }
-              }
-              transition={{ duration: 0.42, ease: [0.22, 1, 0.36, 1] }}
-              style={{ transformOrigin: 'left center', transformStyle: 'preserve-3d' }}
-              className="border border-[#10243A]/20 dark:border-[#F4F8FC]/16 bg-[#FBFDFF] dark:bg-[#10243A] shadow-lg overflow-hidden"
-            >
-              {/* Compact Chapter Strip */}
-              <div className="flex items-center gap-1.5 overflow-x-auto px-4 py-3 border-b border-[#10243A]/12 dark:border-[#F4F8FC]/12 bg-[#F1F6FB] dark:bg-[#0D1B2E]">
-                {pages.map((p, idx) => {
-                  const selected = idx === pos;
-                  return (
-                    <button
-                      key={p.pageNumber}
-                      type="button"
-                      onClick={() => goTo(idx)}
-                      className={cn(
-                        'min-h-[38px] px-3 py-1.5 text-[11px] font-mono-tabular uppercase tracking-wider border whitespace-nowrap shrink-0 cursor-pointer transition-colors',
-                        selected
-                          ? 'bg-[#10243A] text-[#FFFFFF] border-[#10243A] dark:bg-[#0A6AA1] dark:border-[#0A6AA1]'
-                          : 'bg-white dark:bg-[#12243B] text-[#465C72] dark:text-[#B5C5D7] border-[#10243A]/14 dark:border-[#F4F8FC]/14'
-                      )}
-                    >
-                      0{p.pageNumber} · {p.title.split(' ')[0]}
-                    </button>
-                  );
-                })}
-              </div>
-
-              {currentPage.image && (
-                <div className="aspect-[16/10] w-full overflow-hidden bg-[#10243A]">
-                  <img
-                    src={currentPage.image}
-                    alt={currentPage.imageAlt ?? currentPage.title}
-                    className="w-full h-full object-cover"
-                    draggable={false}
-                  />
-                </div>
-              )}
-
-              <NarrativePage page={currentPage} />
-            </motion.div>
-          </AnimatePresence>
-        </div>
-      );
-    }
+  const renderMobileBook = () => {
+    const underMobilePos = t ? (t.dir === 'fwd' ? t.to : t.from) : pos;
+    const leafFrontPos = t ? (t.dir === 'fwd' ? t.from : t.to) : pos;
+    const leafBackIsCoverInside = t ? t.from === -1 || t.to === -1 : false;
 
     return (
-      <div className="relative grid grid-cols-2 shadow-[0_30px_60px_-28px_rgba(7,17,31,0.55)]" style={perspectiveStyle}>
-        {/* Left page */}
-        <div
-          ref={leftLayerRef}
-          className="relative min-h-[560px] border border-r-0 border-[#10243A]/20 dark:border-[#F4F8FC]/16 overflow-hidden bg-[#FBFDFF] dark:bg-[#10243A]"
-          style={{ opacity: restClosed ? 0 : 1 }}
-        >
-          {leftOf(underLeft)}
-          <div ref={shadeLeftRef} aria-hidden="true" className="pointer-events-none absolute inset-0 opacity-0 bg-gradient-to-r from-black/20 via-black/10 to-black/55" />
-          <span aria-hidden="true" className="pointer-events-none absolute inset-y-0 left-0 w-[3px] bg-[repeating-linear-gradient(0deg,rgba(16,36,58,0.18)_0,rgba(16,36,58,0.18)_1px,transparent_1px,transparent_3px)]" />
-        </div>
-        {/* Right page */}
-        <div className="relative min-h-[560px] border border-[#10243A]/20 dark:border-[#F4F8FC]/16 overflow-hidden">
-          {rightOf(underRight, !t)}
-          <div ref={shadeRightRef} aria-hidden="true" className="pointer-events-none absolute inset-0 opacity-0 bg-gradient-to-r from-black/55 via-black/10 to-black/20" />
-          <span aria-hidden="true" className="pointer-events-none absolute inset-y-0 right-0 w-[3px] bg-[repeating-linear-gradient(0deg,rgba(16,36,58,0.18)_0,rgba(16,36,58,0.18)_1px,transparent_1px,transparent_3px)]" />
+      <div
+        className="relative h-[396px] shadow-[0_22px_40px_-20px_rgba(7,17,31,0.52)]"
+        style={perspectiveStyle}
+      >
+        {/* Base sheet (underneath during a turn, or resting top page) */}
+        <div className="relative h-full w-full overflow-hidden">
+          {underMobilePos < 0 && !t ? (
+            <button
+              type="button"
+              onClick={() => startTurn(0, 'cover')}
+              aria-label="Open the dossier"
+              className="block w-full h-full text-left cursor-pointer"
+            >
+              <Cover
+                coverKicker={coverKicker}
+                coverTitle={coverTitle}
+                coverSubtitle={coverSubtitle}
+                coverMeta={coverMeta}
+                fill
+                compact
+              />
+            </button>
+          ) : (
+            mobileSheetOf(Math.max(0, underMobilePos), !t)
+          )}
+          {/* Cast shadow onto base sheet while leaf passes over */}
+          <div
+            ref={shadeRightRef}
+            aria-hidden="true"
+            className="pointer-events-none absolute inset-0 opacity-0 bg-gradient-to-r from-[#07111F]/65 via-[#07111F]/22 to-transparent"
+          />
         </div>
 
-        {/* Spine gutter */}
-        <div
-          aria-hidden="true"
-          className="pointer-events-none absolute inset-y-0 left-1/2 -translate-x-1/2 w-8 z-20 bg-gradient-to-r from-transparent via-[#10243A]/22 to-transparent dark:via-black/55"
-          style={{ opacity: restClosed ? 0 : 1 }}
-        />
-
-        {/* The turning leaf */}
-        {t && pageW > 0 && (
+        {/* Real 3-strip curved turning 3D leaf on mobile */}
+        {t && pageW > 0 && pageH > 0 && (
           <div
             style={{
               position: 'absolute',
               top: 0,
               bottom: 0,
-              [t.dir === 'fwd' ? 'left' : 'right']: '50%',
+              left: 0,
               width: pageW,
               transformStyle: 'preserve-3d',
               pointerEvents: 'none',
@@ -640,17 +808,69 @@ export function InteractiveBook({
           >
             <Leaf
               ref={leafRef}
-              hinge={t.dir === 'fwd' ? 'left' : 'right'}
+              hinge="left"
               width={pageW}
-              height={size.h}
-              front={t.dir === 'fwd' ? rightOf(t.from, false) : leftOf(t.from)}
-              back={t.dir === 'fwd' ? leftOf(t.to) : rightOf(t.to, false)}
+              height={pageH}
+              front={mobileSheetOf(leafFrontPos, false)}
+              back={leafBackIsCoverInside ? <CoverInside /> : <PaperBack />}
             />
           </div>
         )}
       </div>
     );
   };
+
+  const renderDesktopSpread = () => (
+    <div className="relative grid grid-cols-2 shadow-[0_30px_60px_-28px_rgba(7,17,31,0.55)]" style={perspectiveStyle}>
+      {/* Left page */}
+      <div
+        ref={leftLayerRef}
+        className="relative min-h-[560px] border border-r-0 border-[#10243A]/20 dark:border-[#F4F8FC]/16 overflow-hidden bg-[#FBFDFF] dark:bg-[#10243A]"
+        style={{ opacity: restClosed ? 0 : 1 }}
+      >
+        {leftOf(underLeft)}
+        <div ref={shadeLeftRef} aria-hidden="true" className="pointer-events-none absolute inset-0 opacity-0 bg-gradient-to-r from-black/20 via-black/10 to-black/55" />
+        <span aria-hidden="true" className="pointer-events-none absolute inset-y-0 left-0 w-[3px] bg-[repeating-linear-gradient(0deg,rgba(16,36,58,0.18)_0,rgba(16,36,58,0.18)_1px,transparent_1px,transparent_3px)]" />
+      </div>
+      {/* Right page */}
+      <div className="relative min-h-[560px] border border-[#10243A]/20 dark:border-[#F4F8FC]/16 overflow-hidden">
+        {rightOf(underRight, !t)}
+        <div ref={shadeRightRef} aria-hidden="true" className="pointer-events-none absolute inset-0 opacity-0 bg-gradient-to-r from-black/55 via-black/10 to-black/20" />
+        <span aria-hidden="true" className="pointer-events-none absolute inset-y-0 right-0 w-[3px] bg-[repeating-linear-gradient(0deg,rgba(16,36,58,0.18)_0,rgba(16,36,58,0.18)_1px,transparent_1px,transparent_3px)]" />
+      </div>
+
+      {/* Spine gutter */}
+      <div
+        aria-hidden="true"
+        className="pointer-events-none absolute inset-y-0 left-1/2 -translate-x-1/2 w-8 z-20 bg-gradient-to-r from-transparent via-[#10243A]/22 to-transparent dark:via-black/55"
+        style={{ opacity: restClosed ? 0 : 1 }}
+      />
+
+      {/* The turning leaf */}
+      {t && pageW > 0 && (
+        <div
+          style={{
+            position: 'absolute',
+            top: 0,
+            bottom: 0,
+            [t.dir === 'fwd' ? 'left' : 'right']: '50%',
+            width: pageW,
+            transformStyle: 'preserve-3d',
+            pointerEvents: 'none',
+          }}
+        >
+          <Leaf
+            ref={leafRef}
+            hinge={t.dir === 'fwd' ? 'left' : 'right'}
+            width={pageW}
+            height={size.h}
+            front={t.dir === 'fwd' ? rightOf(t.from, false) : leftOf(t.from)}
+            back={t.dir === 'fwd' ? leftOf(t.to) : rightOf(t.to, false)}
+          />
+        </div>
+      )}
+    </div>
+  );
 
   return (
     <motion.div
@@ -659,22 +879,26 @@ export function InteractiveBook({
       viewport={{ once: true, amount: 'some' }}
       transition={{ duration: 0.6, ease: [0.22, 1, 0.36, 1] }}
       className={cn(
-        'w-full max-w-[920px] mx-auto bg-[#F1F6FB]/75 dark:bg-[#0D1B2E] border border-[#10243A]/14 dark:border-[#F4F8FC]/14 p-5 sm:p-8 overflow-hidden',
+        'w-full max-w-[920px] mx-auto bg-[#F1F6FB]/75 dark:bg-[#0D1B2E] border border-[#10243A]/14 dark:border-[#F4F8FC]/14 p-3.5 sm:p-8 overflow-x-clip',
         className
       )}
     >
       {/* Top Bar */}
-      <div className="flex flex-wrap items-center justify-between gap-3 pb-4 border-b border-[#10243A]/12 dark:border-[#F4F8FC]/12">
-        <div className="space-y-0.5">
-          <p className="text-[11px] font-mono-tabular uppercase tracking-widest text-brand">Interactive Heritage Book</p>
-          <p className="text-xs text-[#465C72] dark:text-[#B5C5D7]" aria-live="polite">
+      <div className="flex flex-wrap items-center justify-between gap-2.5 pb-3 sm:pb-4 border-b border-[#10243A]/12 dark:border-[#F4F8FC]/12">
+        <div className="space-y-0.5 min-w-0">
+          <p className="text-[11px] font-mono-tabular uppercase tracking-widest text-brand dark:text-[#69C5F5]">
+            Interactive Heritage Book
+          </p>
+          <p className="text-[11.5px] sm:text-xs text-[#465C72] dark:text-[#B5C5D7] truncate" aria-live="polite">
             {isOpen
-              ? `Reading Folio 0${folio + 1} of 0${total} — turn pages with the controls or arrow keys`
-              : 'Select the cover to open the bound Berry Alloys Limited chronicle'}
+              ? `Folio 0${Math.max(1, folio + 1)} of 0${total} · ${spread ? 'turn pages with controls or arrow keys' : 'swipe page left / right'}`
+              : spread
+                ? 'Select the cover to open the bound Berry Alloys chronicle'
+                : 'Swipe left or tap cover to open'}
           </p>
         </div>
 
-        <div className="flex items-center gap-2">
+        <div className="flex items-center gap-1.5 sm:gap-2 shrink-0">
           {isOpen ? (
             <>
               <button
@@ -682,7 +906,7 @@ export function InteractiveBook({
                 onClick={() => step(-1)}
                 disabled={turning || pos <= 0}
                 aria-label="Previous dossier folio"
-                className="inline-flex items-center justify-center w-9 h-9 border border-[#10243A]/20 dark:border-[#F4F8FC]/20 bg-white dark:bg-[#12243B] text-[#10243A] dark:text-[#F4F8FC] disabled:opacity-40 hover:border-brand transition-colors duration-300 cursor-pointer disabled:cursor-not-allowed"
+                className="inline-flex items-center justify-center w-8 h-8 sm:w-9 sm:h-9 border border-[#10243A]/20 dark:border-[#F4F8FC]/20 bg-white dark:bg-[#12243B] text-[#10243A] dark:text-[#F4F8FC] disabled:opacity-40 hover:border-brand transition-colors duration-300 cursor-pointer disabled:cursor-not-allowed"
               >
                 <ChevronLeft className="w-4 h-4" aria-hidden="true" />
               </button>
@@ -691,7 +915,7 @@ export function InteractiveBook({
                 onClick={() => step(1)}
                 disabled={turning || pos >= total - 1}
                 aria-label="Next dossier folio"
-                className="inline-flex items-center justify-center w-9 h-9 border border-[#10243A]/20 dark:border-[#F4F8FC]/20 bg-white dark:bg-[#12243B] text-[#10243A] dark:text-[#F4F8FC] disabled:opacity-40 hover:border-brand transition-colors duration-300 cursor-pointer disabled:cursor-not-allowed"
+                className="inline-flex items-center justify-center w-8 h-8 sm:w-9 sm:h-9 border border-[#10243A]/20 dark:border-[#F4F8FC]/20 bg-white dark:bg-[#12243B] text-[#10243A] dark:text-[#F4F8FC] disabled:opacity-40 hover:border-brand transition-colors duration-300 cursor-pointer disabled:cursor-not-allowed"
               >
                 <ChevronRight className="w-4 h-4" aria-hidden="true" />
               </button>
@@ -699,10 +923,10 @@ export function InteractiveBook({
                 type="button"
                 onClick={() => startTurn(-1, 'cover')}
                 disabled={turning}
-                className="inline-flex items-center gap-1.5 min-h-[36px] px-3 py-1.5 text-xs font-semibold border border-[#10243A]/20 dark:border-[#F4F8FC]/20 bg-[#10243A] text-[#FFFFFF] hover:bg-brand dark:bg-[#0A6AA1] dark:hover:bg-[#69C5F5] dark:hover:text-[#10243A] transition-colors duration-300 cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed"
+                className="inline-flex items-center gap-1 min-h-[32px] sm:min-h-[36px] px-2.5 sm:px-3 py-1 text-[11px] sm:text-xs font-semibold border border-[#10243A]/20 dark:border-[#F4F8FC]/20 bg-[#10243A] text-[#FFFFFF] hover:bg-brand dark:bg-[#0A6AA1] dark:hover:bg-[#69C5F5] dark:hover:text-[#10243A] transition-colors duration-300 cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed"
               >
                 <X className="w-3.5 h-3.5" aria-hidden="true" />
-                <span>Close Cover</span>
+                <span>Close</span>
               </button>
             </>
           ) : (
@@ -710,7 +934,7 @@ export function InteractiveBook({
               type="button"
               onClick={() => startTurn(0, 'cover')}
               disabled={turning}
-              className="inline-flex items-center gap-1.5 min-h-[40px] px-4 py-2 text-xs font-semibold uppercase tracking-wider bg-[#10243A] text-[#FFFFFF] hover:bg-brand dark:bg-[#0A6AA1] dark:text-[#F4F8FC] dark:hover:bg-[#69C5F5] dark:hover:text-[#10243A] transition-colors duration-300 cursor-pointer disabled:opacity-60"
+              className="inline-flex items-center gap-1.5 min-h-[36px] sm:min-h-[40px] px-3.5 sm:px-4 py-1.5 sm:py-2 text-[11px] sm:text-xs font-semibold uppercase tracking-wider bg-[#10243A] text-[#FFFFFF] hover:bg-brand dark:bg-[#0A6AA1] dark:text-[#F4F8FC] dark:hover:bg-[#69C5F5] dark:hover:text-[#10243A] transition-colors duration-300 cursor-pointer disabled:opacity-60"
             >
               <BookOpen className="w-3.5 h-3.5" aria-hidden="true" />
               <span>Open Dossier</span>
@@ -719,8 +943,40 @@ export function InteractiveBook({
         </div>
       </div>
 
+      {/* Compact Mobile Chapter Tabs Strip (only when open on phone) */}
+      {!spread && isOpen && (
+        <div className="flex items-center gap-1.5 overflow-x-auto pt-2.5 pb-1">
+          {pages.map((p, idx) => {
+            const selected = idx === Math.max(0, folio);
+            return (
+              <button
+                key={p.pageNumber}
+                type="button"
+                disabled={turning}
+                onClick={() => goTo(idx)}
+                className={cn(
+                  'min-h-[32px] px-2.5 py-1 text-[10.5px] font-mono-tabular uppercase tracking-wider border whitespace-nowrap shrink-0 cursor-pointer transition-colors disabled:opacity-60',
+                  selected
+                    ? 'bg-[#10243A] text-[#FFFFFF] border-[#10243A] dark:bg-[#0A6AA1] dark:border-[#0A6AA1]'
+                    : 'bg-white dark:bg-[#12243B] text-[#465C72] dark:text-[#B5C5D7] border-[#10243A]/14 dark:border-[#F4F8FC]/14'
+                )}
+              >
+                0{p.pageNumber} · {p.title.split(' ')[0]}
+              </button>
+            );
+          })}
+        </div>
+      )}
+
       {/* Stage */}
-      <div className="pt-6" onKeyDown={onKeyDown} tabIndex={0} role="group" aria-label="Heritage book pages" aria-busy={turning}>
+      <div
+        className={cn(spread ? 'pt-6' : 'pt-3')}
+        onKeyDown={onKeyDown}
+        tabIndex={0}
+        role="group"
+        aria-label="Heritage book pages"
+        aria-busy={turning}
+      >
         <motion.div
           ref={(el) => {
             stageRef.current = el;
@@ -730,21 +986,19 @@ export function InteractiveBook({
           initial={prefersReduced ? { opacity: 0.4 } : false}
           animate={{ opacity: 1 }}
           transition={{ duration: 0.2 }}
-          style={stageStyle}
+          style={{ ...stageStyle, touchAction: spread ? undefined : 'pan-y' }}
+          {...(spread ? {} : bindMobileDrag())}
+          onClickCapture={(e) => {
+            if (didDragRef.current) {
+              didDragRef.current = false;
+              e.preventDefault();
+              e.stopPropagation();
+            }
+          }}
           className="relative"
         >
-          {restClosed && !spread ? (
-            <motion.button
-              type="button"
-              whileTap={prefersReduced ? undefined : { scale: 0.985, rotateY: -4 }}
-              transition={{ duration: 0.2 }}
-              onClick={() => startTurn(0, 'cover')}
-              aria-label="Open the dossier"
-              className="block w-full min-h-[440px] text-left cursor-pointer shadow-2xl"
-              style={{ transformOrigin: 'left center', perspective: '1400px' }}
-            >
-              <Cover coverKicker={coverKicker} coverTitle={coverTitle} coverSubtitle={coverSubtitle} coverMeta={coverMeta} fill />
-            </motion.button>
+          {!spread ? (
+            renderMobileBook()
           ) : restClosed && spread ? (
             <div className="relative grid grid-cols-2 min-h-[560px]">
               <div aria-hidden="true" />
@@ -758,9 +1012,20 @@ export function InteractiveBook({
               </button>
             </div>
           ) : (
-            renderStatic()
+            renderDesktopSpread()
           )}
         </motion.div>
+
+        {!spread && (
+          <div className="pt-2.5 flex items-center justify-between text-[10.5px] font-mono-tabular text-[#465C72] dark:text-[#B5C5D7]">
+            <span>
+              {isOpen ? 'Drag or swipe horizontally across sheet to turn' : 'Swipe left across cover to peel open'}
+            </span>
+            <span className="text-brand dark:text-[#69C5F5]">
+              {isOpen ? `0${Math.max(1, folio + 1)} / 0${total}` : 'Cover'}
+            </span>
+          </div>
+        )}
       </div>
     </motion.div>
   );

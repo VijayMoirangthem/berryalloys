@@ -97,11 +97,31 @@ export function CreepyButton({
     </>
   );
 
+  const resetTimerRef = useRef<number | null>(null);
+
   const sharedProps = {
     'aria-label': ariaLabel,
-    onMouseEnter: () => setIsHovered(true),
-    onMouseMove: (e: React.MouseEvent<HTMLElement>) => updateEyes(e.clientX, e.clientY),
-    onMouseLeave: resetEyes,
+    onPointerEnter: (e: React.PointerEvent<HTMLElement>) => {
+      if (resetTimerRef.current) window.clearTimeout(resetTimerRef.current);
+      if (e.pointerType === 'mouse') setIsHovered(true);
+    },
+    onPointerDown: (e: React.PointerEvent<HTMLElement>) => {
+      if (resetTimerRef.current) window.clearTimeout(resetTimerRef.current);
+      setIsHovered(true);
+      updateEyes(e.clientX, e.clientY);
+    },
+    onPointerMove: (e: React.PointerEvent<HTMLElement>) => {
+      if (e.pointerType === 'mouse' || isHovered) {
+        updateEyes(e.clientX, e.clientY);
+      }
+    },
+    onPointerUp: (e: React.PointerEvent<HTMLElement>) => {
+      if (e.pointerType !== 'mouse') {
+        resetTimerRef.current = window.setTimeout(resetEyes, 260);
+      }
+    },
+    onPointerCancel: resetEyes,
+    onPointerLeave: resetEyes,
     onFocus: () => setIsHovered(true),
     onBlur: resetEyes,
     className: cn(

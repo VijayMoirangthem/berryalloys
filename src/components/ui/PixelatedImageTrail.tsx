@@ -1,5 +1,6 @@
 import React, { useRef, useEffect, useCallback, useState } from 'react';
 import gsap from 'gsap';
+import { useDrag } from '@use-gesture/react';
 import { ASSETS } from '../../data/assets';
 import { cn } from '../../lib/utils';
 import { useInViewActive, useMotion } from '../../context/MotionContext';
@@ -29,7 +30,7 @@ interface PixelatedImageTrailProps {
 }
 
 /**
- * PixelatedImageTrail — Pointer-driven sliced clip-path photography trail
+ * PixelatedImageTrail — Pointer- and touch-driven sliced clip-path photography trail
  * adapted to verified local Berry Alloys works, alloy specimen, and CSR assets.
  */
 export function PixelatedImageTrail({
@@ -43,15 +44,19 @@ export function PixelatedImageTrail({
   const { ambientActive, reducedMotion } = useMotion();
   const isCompactMobile = useIsCompactMobile(767);
   const [stageWidth, setStageWidth] = useState(0);
-  const imageSize = imageSizeProp ?? (() => {
-    const w = Math.round(Math.min(250, Math.max(150, stageWidth * 0.2)));
-    return { width: w, height: Math.round(w * 1.22) };
-  })();
-  const spawnGap = spawnDistance ?? Math.round(imageSize.width * 0.7);
+  const imageSize =
+    imageSizeProp ??
+    (() => {
+      const w = isCompactMobile
+        ? Math.round(Math.min(138, Math.max(106, stageWidth * 0.3)))
+        : Math.round(Math.min(250, Math.max(150, stageWidth * 0.2)));
+      return { width: w, height: Math.round(w * 1.22) };
+    })();
+  const spawnGap = spawnDistance ?? Math.round(imageSize.width * (isCompactMobile ? 0.56 : 0.7));
   const lastInteractionRef = useRef(0);
   const containerRef = useRef<HTMLDivElement>(null);
   const trailLayerRef = useRef<HTMLDivElement>(null);
-  const lastMousePosRef = useRef({ x: 0, y: 0 });
+  const lastMousePosRef = useRef({ x: -9999, y: -9999 });
   const currentImgIndexRef = useRef(0);
   const isAnimatingRef = useRef(false);
   const activeCountRef = useRef(0);
@@ -67,6 +72,7 @@ export function PixelatedImageTrail({
     const el = containerRef.current;
     if (!el) return;
     const ro = new ResizeObserver(() => setStageWidth(el.clientWidth));
+    ro.observe(el);
     setStageWidth(el.clientWidth);
     return () => ro.disconnect();
   }, []);
@@ -84,7 +90,8 @@ export function PixelatedImageTrail({
   const createTrailItem = useCallback(
     (x: number, y: number, src: string) => {
       const layer = trailLayerRef.current;
-      if (!layer || !src || activeCountRef.current > 10) return;
+      const maxActive = isCompactMobile ? 5 : 10;
+      if (!layer || !src || activeCountRef.current > maxActive) return;
 
       activeCountRef.current += 1;
 
@@ -143,7 +150,7 @@ export function PixelatedImageTrail({
           {
             clipPath: `polygon(${startX}% 0%, ${endX}% 0%, ${endX}% 100%, ${startX}% 100%)`,
             opacity: 1,
-            duration: 0.42,
+            duration: 0.4,
             ease: 'power2.out',
           },
           randDelay(i)
@@ -160,14 +167,14 @@ export function PixelatedImageTrail({
           {
             clipPath: `polygon(${startX}% 100%, ${endX}% 100%, ${endX}% 100%, ${startX}% 100%)`,
             opacity: 0,
-            duration: 0.35,
+            duration: 0.34,
             ease: 'power2.in',
           },
-          0.62 + randDelay(i)
+          0.6 + randDelay(i)
         );
       });
     },
-    [imageSize.height, imageSize.width, slices]
+    [imageSize.height, imageSize.width, isCompactMobile, slices]
   );
 
   const spawnAt = useCallback(
@@ -179,96 +186,80 @@ export function PixelatedImageTrail({
     [images, createTrailItem]
   );
 
-  // Self-playing demonstration: while on screen and untouched, a slow glide reveals frames so the effect is discoverable
-  // on touch screens and before the first hover. It yields the moment someone interacts and honours the ambient pause.
+  // Ambient demonstration glide while visible and untouched (works on desktop, tablet, and mobile).
   const inView = useInViewActive(containerRef, '0px');
   useEffect(() => {
-    if (isCompactMobile || !inView || !ambientActive || reducedMotion || images.length === 0) return;
+    if (!inView || !ambientActive || reducedMotion || images.length === 0) return;
     const el = containerRef.current;
     if (!el) return;
     let t = 0;
     let last = { x: -9999, y: -9999 };
+    const intervalMs = isCompactMobile ? 420 : 120;
     const id = window.setInterval(() => {
-      if (performance.now() - lastInteractionRef.current < 3500) return;
+      if (performance.now() - lastInteractionRef.current < 3200) return;
       const w = el.clientWidth;
       const h = el.clientHeight;
       if (w < 50 || h < 50) return;
-      t += 0.16;
+      t += isCompactMobile ? 0.38 : 0.16;
       const x = w * (0.5 + 0.36 * Math.sin(t * 0.9));
-      const y = h * (0.5 + 0.3 * Math.sin(t * 1.35 + 1.2));
-      if (Math.hypot(x - last.x, y - last.y) >= spawnGap * 0.9) {
+      const y = h * (0.48 + 0.28 * Math.sin(t * 1.35 + 1.2));
+      if (Math.hypot(x - last.x, y - last.y) >= spawnGap * 0.85) {
         last = { x, y };
         spawnAt(x, y);
       }
-    }, 120);
+    }, intervalMs);
     return () => window.clearInterval(id);
-  }, [isCompactMobile, inView, ambientActive, reducedMotion, images.length, spawnGap, spawnAt]);
+  }, [inView, ambientActive, reducedMotion, images.length, spawnGap, spawnAt, isCompactMobile]);
 
-  const handlePointerMove = (e: React.PointerEvent<HTMLDivElement>) => {
-    if (isCompactMobile || !containerRef.current || images.length === 0) return;
-    lastInteractionRef.current = performance.now();
-    if (reducedMotion) return;
+  const trySpawnClient = useCallback(
+    (clientX: number, clientY: number, force = false) => {
+      if (!containerRef.current || images.length === 0 || reducedMotion) return;
+      lastInteractionRef.current = performance.now();
+      const rect = containerRef.current.getBoundingClientRect();
+      const x = clientX - rect.left;
+      const y = clientY - rect.top;
 
-    const rect = containerRef.current.getBoundingClientRect();
-    const x = e.clientX - rect.left;
-    const y = e.clientY - rect.top;
+      const dx = x - lastMousePosRef.current.x;
+      const dy = y - lastMousePosRef.current.y;
+      const distance = Math.hypot(dx, dy);
 
-    const dx = x - lastMousePosRef.current.x;
-    const dy = y - lastMousePosRef.current.y;
-    const distance = Math.sqrt(dx * dx + dy * dy);
+      if (force || (distance >= spawnGap && !isAnimatingRef.current)) {
+        isAnimatingRef.current = true;
+        lastMousePosRef.current = { x, y };
+        spawnAt(x, y);
+        window.setTimeout(() => {
+          isAnimatingRef.current = false;
+        }, 85);
+      }
+    },
+    [images.length, reducedMotion, spawnAt, spawnGap]
+  );
 
-    if (distance >= spawnGap && !isAnimatingRef.current) {
-      isAnimatingRef.current = true;
-      lastMousePosRef.current = { x, y };
-
-      spawnAt(x, y);
-
-      window.setTimeout(() => {
-        isAnimatingRef.current = false;
-      }, 95);
+  // @use-gesture/react drag binding lets touch users swipe across the banner smoothly while keeping vertical pan-y scroll free.
+  const bindTouchDrag = useDrag(
+    ({ xy: [cx, cy], tap }) => {
+      if ((cx === 0 && cy === 0) || reducedMotion) return;
+      trySpawnClient(cx, cy, tap);
+    },
+    {
+      axis: 'x',
+      filterTaps: false,
+      pointer: { touch: true },
     }
-  };
-
-  if (isCompactMobile) {
-    return (
-      <div className={cn('relative overflow-hidden', className)}>
-        <div className="relative z-20 space-y-5">
-          {children}
-          {images.length > 0 && (
-            <div className="pt-3 border-t border-[#F4F8FC]/14 space-y-2">
-              <p className="text-[10px] font-mono-tabular uppercase tracking-widest text-[#69C5F5]">
-                Swipe Field Frames ({images.length})
-              </p>
-              <div
-                aria-label="Field archive swipe strip"
-                className="flex gap-2.5 overflow-x-auto overscroll-x-contain snap-x snap-mandatory pb-1 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden"
-              >
-                {images.map((src, i) => (
-                  <div
-                    key={`${src}-${i}`}
-                    className="snap-start shrink-0 w-40 aspect-[4/3] border border-[#F4F8FC]/20 bg-[#0D1B2E] overflow-hidden"
-                  >
-                    <img
-                      src={src}
-                      alt={`Berry Alloys plant & community archive frame ${i + 1}`}
-                      loading="lazy"
-                      className="w-full h-full object-cover"
-                    />
-                  </div>
-                ))}
-              </div>
-            </div>
-          )}
-        </div>
-      </div>
-    );
-  }
+  );
 
   return (
     <div
       ref={containerRef}
-      onPointerMove={handlePointerMove}
-      onPointerDown={handlePointerMove}
+      {...bindTouchDrag()}
+      onPointerMove={(e) => {
+        if (e.pointerType === 'mouse') {
+          trySpawnClient(e.clientX, e.clientY, false);
+        }
+      }}
+      onPointerDown={(e) => {
+        trySpawnClient(e.clientX, e.clientY, true);
+      }}
       style={{ touchAction: 'pan-y' }}
       className={cn('relative overflow-hidden', className)}
     >

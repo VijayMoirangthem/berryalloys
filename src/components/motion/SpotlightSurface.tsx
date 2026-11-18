@@ -20,14 +20,15 @@ export function SpotlightSurface({
 }: SpotlightSurfaceProps) {
   const { theme } = useTheme();
   const divRef = useRef<HTMLDivElement>(null);
+  const fadeTimerRef = useRef<number | null>(null);
   const [position, setPosition] = useState({ x: 0, y: 0 });
   const [opacity, setOpacity] = useState(0);
 
   const resolvedFill =
     spotlightColor ??
-    (theme === 'dark' ? 'rgba(40,148,204, 0.14)' : 'rgba(158, 75, 40, 0.08)');
+    (theme === 'dark' ? 'rgba(105, 197, 245, 0.14)' : 'rgba(0, 99, 147, 0.08)');
   const resolvedBorderGlow =
-    theme === 'dark' ? 'rgba(40,148,204, 0.42)' : 'rgba(158, 75, 40, 0.28)';
+    theme === 'dark' ? 'rgba(105, 197, 245, 0.42)' : 'rgba(0, 99, 147, 0.28)';
 
   const updateFromClient = (clientX: number, clientY: number) => {
     if (!divRef.current) return;
@@ -37,12 +38,22 @@ export function SpotlightSurface({
 
   const handlePointerMove = (e: React.PointerEvent<HTMLDivElement>) => {
     updateFromClient(e.clientX, e.clientY);
-    if (e.pointerType !== 'mouse') setOpacity(1);
+    if (e.pointerType !== 'mouse') {
+      if (fadeTimerRef.current) window.clearTimeout(fadeTimerRef.current);
+      setOpacity(1);
+    }
   };
 
   const handlePointerDown = (e: React.PointerEvent<HTMLDivElement>) => {
+    if (fadeTimerRef.current) window.clearTimeout(fadeTimerRef.current);
     updateFromClient(e.clientX, e.clientY);
     setOpacity(1);
+  };
+
+  const handlePointerUp = (e: React.PointerEvent<HTMLDivElement>) => {
+    if (e.pointerType !== 'mouse') {
+      fadeTimerRef.current = window.setTimeout(() => setOpacity(0), 650);
+    }
   };
 
   return (
@@ -50,8 +61,14 @@ export function SpotlightSurface({
       ref={divRef}
       onPointerMove={handlePointerMove}
       onPointerDown={handlePointerDown}
-      onPointerEnter={() => setOpacity(1)}
-      onPointerLeave={() => setOpacity(0)}
+      onPointerUp={handlePointerUp}
+      onPointerCancel={() => setOpacity(0)}
+      onPointerEnter={(e) => {
+        if (e.pointerType === 'mouse') setOpacity(1);
+      }}
+      onPointerLeave={(e) => {
+        if (e.pointerType === 'mouse') setOpacity(0);
+      }}
       className={cn(
         'relative overflow-hidden transition-shadow duration-200',
         opacity > 0 ? 'shadow-md' : '',

@@ -183,8 +183,16 @@ export function AnimatedFooterCanvas() {
   return (
     <div
       ref={containerRef}
-      onMouseEnter={() => setIsHovered(true)}
-      onMouseLeave={() => setIsHovered(false)}
+      onPointerEnter={(e) => {
+        if (e.pointerType === 'mouse') setIsHovered(true);
+      }}
+      onPointerLeave={(e) => {
+        if (e.pointerType === 'mouse') setIsHovered(false);
+      }}
+      onPointerDown={() => setIsHovered(true)}
+      onPointerUp={(e) => {
+        if (e.pointerType !== 'mouse') window.setTimeout(() => setIsHovered(false), 900);
+      }}
       className="relative border-b border-[#10243A]/14 dark:border-[#F4F8FC]/12 overflow-hidden py-10 sm:py-12"
     >
       <div className="max-w-[1360px] mx-auto px-4 sm:px-6 lg:px-8 xl:px-14 2xl:px-8 relative">

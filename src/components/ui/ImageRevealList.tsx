@@ -30,6 +30,8 @@ export function ImageRevealList({ items, className }: ImageRevealListProps) {
 
   const activeItem = items.find((i) => i.id === hoveredId) ?? null;
 
+  const openedByTouchRef = useRef(false);
+
   const handleActivateRow = (id: string, el: HTMLElement | null) => {
     setHoveredId(id);
     if (!containerRef.current || !el) return;
@@ -43,7 +45,9 @@ export function ImageRevealList({ items, className }: ImageRevealListProps) {
   return (
     <div
       ref={containerRef}
-      onMouseLeave={() => setHoveredId(null)}
+      onPointerLeave={(e) => {
+        if (e.pointerType === 'mouse' && !openedByTouchRef.current) setHoveredId(null);
+      }}
       className={cn('relative', className)}
     >
       <ul className="divide-y divide-[#10243A]/14 dark:divide-[#F4F8FC]/14 border-t border-b border-[#10243A]/14 dark:border-[#F4F8FC]/14">
@@ -58,9 +62,16 @@ export function ImageRevealList({ items, className }: ImageRevealListProps) {
               <RowTag
                 {...rowProps}
                 tabIndex={item.to ? undefined : 0}
-                onMouseEnter={(e: React.MouseEvent<HTMLElement>) =>
-                  handleActivateRow(item.id, e.currentTarget)
-                }
+                onPointerEnter={(e: React.PointerEvent<HTMLElement>) => {
+                  if (e.pointerType === 'mouse') {
+                    openedByTouchRef.current = false;
+                    handleActivateRow(item.id, e.currentTarget);
+                  }
+                }}
+                onPointerDown={(e: React.PointerEvent<HTMLElement>) => {
+                  if (e.pointerType !== 'mouse') openedByTouchRef.current = true;
+                  handleActivateRow(item.id, e.currentTarget);
+                }}
                 onFocus={(e: React.FocusEvent<HTMLElement>) =>
                   handleActivateRow(item.id, e.currentTarget)
                 }

@@ -2,6 +2,7 @@ import { useCallback, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { ArrowLeft, ArrowRight, ArrowUpRight } from 'lucide-react';
 import { AnimatePresence, motion, useReducedMotion } from 'motion/react';
+import { useDrag } from '@use-gesture/react';
 import { cn } from '../../lib/utils';
 import { ResilientImage } from '../ResilientImage';
 import { useIsCompactMobile } from '../../hooks/useIsCompactMobile';
@@ -59,6 +60,27 @@ export function DiagonalCarousel({
     [index]
   );
 
+  const [isPressed, setIsPressed] = useState(false);
+
+  const bindSwipe = useDrag(
+    ({ active, movement: [mx], velocity: [vx], direction: [dx], memo }) => {
+      if (active) {
+        if (!memo?.swiped && (Math.abs(mx) > 42 || (vx > 0.35 && Math.abs(mx) > 18))) {
+          step(mx < 0 || dx < 0 ? 1 : -1);
+          return { swiped: true };
+        }
+        return memo ?? { swiped: false };
+      }
+      return { swiped: false };
+    },
+    {
+      axis: 'x',
+      filterTaps: true,
+      threshold: 12,
+      pointer: { touch: true },
+    }
+  );
+
   if (!active) return null;
 
   return (
@@ -78,23 +100,24 @@ export function DiagonalCarousel({
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 lg:gap-10 p-6 sm:p-8 lg:p-10 items-center relative z-10">
         {/* Left: Diagonal Canted Image Stage */}
         <div className="lg:col-span-6 py-3 px-2 sm:px-4">
-          <div className="relative aspect-[16/10] w-full overflow-hidden bg-[#07111F] border border-[#10243A]/18 dark:border-[#F4F8FC]/16 shadow-lg">
+          <div
+            {...bindSwipe()}
+            onPointerDown={() => setIsPressed(true)}
+            onPointerUp={() => setIsPressed(false)}
+            onPointerCancel={() => setIsPressed(false)}
+            onPointerLeave={() => setIsPressed(false)}
+            style={{ touchAction: 'pan-y' }}
+            className="relative aspect-[16/10] w-full overflow-hidden bg-[#07111F] border border-[#10243A]/18 dark:border-[#F4F8FC]/16 shadow-lg select-none cursor-grab active:cursor-grabbing"
+          >
             <AnimatePresence initial={false} custom={direction}>
               <motion.div
                 key={active.id}
                 custom={direction}
-                drag={isCompactMobile ? 'x' : false}
-                dragConstraints={{ left: 0, right: 0 }}
-                dragElastic={0.25}
-                onDragEnd={(_, info) => {
-                  if (info.offset.x < -40) step(1);
-                  else if (info.offset.x > 40) step(-1);
-                }}
                 initial={
                   prefersReduced
                     ? { opacity: 1 }
                     : isCompactMobile
-                    ? { opacity: 0, x: direction * 24 }
+                    ? { opacity: 0, x: direction * 28 }
                     : {
                         opacity: 0,
                         x: direction * 38,
@@ -114,7 +137,7 @@ export function DiagonalCarousel({
                   prefersReduced
                     ? { opacity: 0 }
                     : isCompactMobile
-                    ? { opacity: 0, x: direction * -24 }
+                    ? { opacity: 0, x: direction * -28 }
                     : {
                         opacity: 0,
                         x: direction * -38,
@@ -123,14 +146,14 @@ export function DiagonalCarousel({
                         scale: 0.96,
                       }
                 }
-                transition={{ duration: isCompactMobile ? 0.22 : 0.6, ease: [0.22, 1, 0.36, 1] }}
-                style={isCompactMobile ? { touchAction: 'pan-y' } : undefined}
+                transition={{ duration: isCompactMobile ? 0.24 : 0.6, ease: [0.22, 1, 0.36, 1] }}
                 className="group absolute inset-0 overflow-hidden will-change-transform"
               >
                 <div
                   className={cn(
                     'w-full h-full transition-transform duration-700 ease-[cubic-bezier(0.22,1,0.36,1)]',
-                    !prefersReduced && !isCompactMobile && '-rotate-[1.75deg] scale-[1.06] group-hover:rotate-0 group-hover:scale-[1.02]'
+                    !prefersReduced && '-rotate-[1.75deg] scale-[1.06] group-hover:rotate-0 group-hover:scale-[1.02]',
+                    !prefersReduced && isPressed && 'rotate-0 scale-[1.02]'
                   )}
                 >
                   <ResilientImage

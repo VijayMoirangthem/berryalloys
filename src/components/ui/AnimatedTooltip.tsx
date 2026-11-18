@@ -1,4 +1,4 @@
-import { ReactNode, useState } from 'react';
+import { ReactNode, useEffect, useRef, useState } from 'react';
 import {
   AnimatePresence,
   motion,
@@ -30,9 +30,8 @@ const VARIANT_CLASSES: Record<TooltipVariant, string> = {
 };
 
 /**
- * AnimatedTooltip — Adapted from VengeanceUI AnimatedTooltip.
- * Spring-physics cursor-following metallurgical callout for alloy chemistry codes,
- * quality standards, and export credentials. Supports keyboard focus and hover.
+ * AnimatedTooltip — Spring-physics pointer- and touch-responsive callout for alloy chemistry codes,
+ * quality standards, and export credentials. Supports mouse hover, finger tap/drag, and keyboard focus.
  */
 export function AnimatedTooltip({
   label,
@@ -43,6 +42,8 @@ export function AnimatedTooltip({
   position = 'top',
 }: AnimatedTooltipProps) {
   const [open, setOpen] = useState(false);
+  const wrapperRef = useRef<HTMLSpanElement>(null);
+  const openedByTouchRef = useRef(false);
   const prefersReduced = useReducedMotion();
 
   const x = useMotionValue(0);
@@ -55,23 +56,52 @@ export function AnimatedTooltip({
     damping: 20,
   });
 
-  const handleMouseMove = (e: React.MouseEvent<HTMLSpanElement>) => {
+  useEffect(() => {
+    if (!open || !openedByTouchRef.current) return;
+    const dismiss = (e: PointerEvent) => {
+      if (wrapperRef.current && !wrapperRef.current.contains(e.target as Node)) {
+        setOpen(false);
+        x.set(0);
+      }
+    };
+    document.addEventListener('pointerdown', dismiss, true);
+    return () => document.removeEventListener('pointerdown', dismiss, true);
+  }, [open, x]);
+
+  const updateOffset = (clientX: number, target: HTMLElement) => {
     if (prefersReduced) return;
-    const rect = e.currentTarget.getBoundingClientRect();
-    x.set(e.clientX - rect.left - rect.width / 2);
+    const rect = target.getBoundingClientRect();
+    x.set(clientX - rect.left - rect.width / 2);
   };
 
   return (
     <span
+      ref={wrapperRef}
       className={cn('relative inline-flex items-center', className)}
-      onMouseEnter={() => setOpen(true)}
-      onMouseLeave={() => {
-        setOpen(false);
-        x.set(0);
+      onPointerEnter={(e) => {
+        if (e.pointerType === 'mouse') {
+          openedByTouchRef.current = false;
+          setOpen(true);
+        }
       }}
+      onPointerLeave={(e) => {
+        if (e.pointerType === 'mouse' && !openedByTouchRef.current) {
+          setOpen(false);
+          x.set(0);
+        }
+      }}
+      onPointerDown={(e) => {
+        updateOffset(e.clientX, e.currentTarget);
+        if (e.pointerType !== 'mouse') {
+          openedByTouchRef.current = true;
+          setOpen((prev) => !prev);
+        }
+      }}
+      onPointerMove={(e) => updateOffset(e.clientX, e.currentTarget)}
       onFocus={() => setOpen(true)}
-      onBlur={() => setOpen(false)}
-      onMouseMove={handleMouseMove}
+      onBlur={() => {
+        if (!openedByTouchRef.current) setOpen(false);
+      }}
     >
       {children}
       <AnimatePresence>

@@ -2,6 +2,7 @@ import { useCallback, useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { ArrowUpRight, ChevronLeft, ChevronRight, Pause, Play } from 'lucide-react';
 import { motion, useReducedMotion } from 'motion/react';
+import { useDrag } from '@use-gesture/react';
 import { cn } from '../../lib/utils';
 
 export interface PerspectiveSlide {
@@ -67,6 +68,26 @@ export function PerspectiveCarousel({
   }, [paused, prefersReduced, total, autoPlayMs]);
 
   const activeSlide = slides[currentIndex] ?? slides[0];
+
+  const bindDeckSwipe = useDrag(
+    ({ active, movement: [mx], velocity: [vx], direction: [dx], memo }) => {
+      if (active) {
+        if (!memo?.swiped && (Math.abs(mx) > 42 || (vx > 0.32 && Math.abs(mx) > 16))) {
+          step(mx < 0 || dx < 0 ? 1 : -1);
+          return { swiped: true };
+        }
+        return memo ?? { swiped: false };
+      }
+      return { swiped: false };
+    },
+    {
+      axis: 'x',
+      filterTaps: true,
+      threshold: 12,
+      pointer: { touch: true },
+    }
+  );
+
   if (!activeSlide) return null;
 
   const getOffset = (idx: number) => {
@@ -83,8 +104,12 @@ export function PerspectiveCarousel({
         'bg-[#07111F] text-[#F4F8FC] border border-[#10243A]/20 dark:border-[#F4F8FC]/14 p-5 sm:p-8 overflow-hidden select-none',
         className
       )}
-      onMouseEnter={() => setPaused(true)}
-      onMouseLeave={() => setPaused(false)}
+      onPointerEnter={(e) => {
+        if (e.pointerType === 'mouse') setPaused(true);
+      }}
+      onPointerLeave={(e) => {
+        if (e.pointerType === 'mouse') setPaused(false);
+      }}
     >
       {/* Top Deck Bar */}
       <div className="flex flex-wrap items-center justify-between gap-3 pb-4 border-b border-[#F4F8FC]/12">
@@ -129,8 +154,13 @@ export function PerspectiveCarousel({
 
       {/* 3D Perspective Stage */}
       <div
-        className="relative h-[270px] sm:h-[320px] flex items-center justify-center my-4 overflow-hidden"
-        style={compact ? { touchAction: 'pan-y' } : { perspective: '1200px', transformStyle: 'preserve-3d' }}
+        {...bindDeckSwipe()}
+        className="relative h-[270px] sm:h-[320px] flex items-center justify-center my-4 overflow-hidden cursor-grab active:cursor-grabbing"
+        style={
+          compact
+            ? { touchAction: 'pan-y' }
+            : { perspective: '1200px', transformStyle: 'preserve-3d', touchAction: 'pan-y' }
+        }
       >
         {slides.map((slide, idx) => {
           const offset = getOffset(idx);
@@ -151,13 +181,6 @@ export function PerspectiveCarousel({
                 } else {
                   onSlideSelect?.(slide);
                 }
-              }}
-              drag={compact && isCenter ? 'x' : false}
-              dragConstraints={{ left: 0, right: 0 }}
-              dragElastic={0.35}
-              onDragEnd={(_, info) => {
-                if (info.offset.x < -50) step(1);
-                else if (info.offset.x > 50) step(-1);
               }}
               animate={
                 compact
