@@ -75,7 +75,7 @@ export function seoFor(kind: SeoKind, locale: LocaleCode, env: SeoEnv, slug?: st
     return {
       ...base, kind, path, title: t.seo.landing.title, description: t.seo.landing.description, ...alternatesFor(env, ''),
       jsonLd: [
-        { '@context': 'https://schema.org', '@type': 'Organization', name: COMPANY_NAME, url: abs(env, '/'), logo: abs(env, '/favicon.svg'), description: 'Manufacturer of ferro manganese, silico manganese, ferro chrome and ferro silicon in India.' },
+        { '@context': 'https://schema.org', '@type': 'Organization', name: COMPANY_NAME, url: abs(env, '/'), logo: abs(env, '/berry-mark.png'), description: 'Manufacturer of ferro manganese, silico manganese, ferro chrome and ferro silicon in India.' },
         breadcrumb(env, [{ name: t.common.breadcrumbHome, path }]),
       ],
     };

@@ -38,6 +38,15 @@ export function PerspectiveCarousel({
   const [currentIndex, setCurrentIndex] = useState(0);
   const [paused, setPaused] = useState(false);
   const prefersReduced = useReducedMotion();
+  // Phones: one plate at a time (no overlapping neighbours, no preserve-3d, which WebKit mis-sorts).
+  const [compact, setCompact] = useState(() => typeof window !== 'undefined' && window.matchMedia('(max-width: 639px)').matches);
+  useEffect(() => {
+    const mq = window.matchMedia('(max-width: 639px)');
+    const on = () => setCompact(mq.matches);
+    on();
+    mq.addEventListener('change', on);
+    return () => mq.removeEventListener('change', on);
+  }, []);
 
   const total = slides.length;
 
@@ -69,6 +78,7 @@ export function PerspectiveCarousel({
 
   return (
     <div
+      data-no-parallax
       className={cn(
         'bg-[#07111F] text-[#F4F8FC] border border-[#10243A]/20 dark:border-[#F4F8FC]/14 p-5 sm:p-8 overflow-hidden select-none',
         className
@@ -120,13 +130,13 @@ export function PerspectiveCarousel({
       {/* 3D Perspective Stage */}
       <div
         className="relative h-[270px] sm:h-[320px] flex items-center justify-center my-4 overflow-hidden"
-        style={{ perspective: '1200px', transformStyle: 'preserve-3d' }}
+        style={compact ? { touchAction: 'pan-y' } : { perspective: '1200px', transformStyle: 'preserve-3d' }}
       >
         {slides.map((slide, idx) => {
           const offset = getOffset(idx);
           const absOffset = Math.abs(offset);
           const isCenter = offset === 0;
-          const visible = absOffset <= 2;
+          const visible = compact ? absOffset <= 1 : absOffset <= 2;
 
           if (!visible) return null;
 
@@ -142,8 +152,23 @@ export function PerspectiveCarousel({
                   onSlideSelect?.(slide);
                 }
               }}
+              drag={compact && isCenter ? 'x' : false}
+              dragConstraints={{ left: 0, right: 0 }}
+              dragElastic={0.35}
+              onDragEnd={(_, info) => {
+                if (info.offset.x < -50) step(1);
+                else if (info.offset.x > 50) step(-1);
+              }}
               animate={
-                prefersReduced
+                compact
+                  ? {
+                      x: offset * 112 + '%',
+                      scale: 1,
+                      rotateY: 0,
+                      opacity: isCenter ? 1 : 0,
+                      zIndex: isCenter ? 20 : 10,
+                    }
+                  : prefersReduced
                   ? {
                       opacity: isCenter ? 1 : 0,
                       scale: 1,
@@ -162,17 +187,19 @@ export function PerspectiveCarousel({
                 'absolute w-[84%] max-w-[430px] aspect-[16/10] border overflow-hidden text-left transition-shadow cursor-pointer',
                 isCenter
                   ? 'border-[#69C5F5]/70 shadow-2xl ring-1 ring-[#69C5F5]/25'
+                  : compact
+                  ? 'border-[#F4F8FC]/16'
                   : 'border-[#F4F8FC]/16 opacity-60 hover:opacity-90'
               )}
               style={{
                 backgroundColor: slide.specimenPlate ? '#FFFFFF' : '#0D1B2E',
-                pointerEvents: prefersReduced && !isCenter ? 'none' : 'auto',
+                pointerEvents: (prefersReduced || compact) && !isCenter ? 'none' : 'auto',
               }}
             >
               <img
                 src={slide.image}
                 alt={slide.alt}
-                loading="lazy"
+                loading={compact ? "eager" : "lazy"}
                 referrerPolicy="no-referrer"
                 className={cn(
                   'w-full h-full block',

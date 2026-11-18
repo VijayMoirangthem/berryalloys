@@ -119,7 +119,7 @@ const Leaf = forwardRef<LeafHandle, LeafProps>(function Leaf({ hinge, width, hei
         }}
       >
         <div
-          style={{ position: 'absolute', inset: 0, overflow: 'hidden', backfaceVisibility: 'hidden' }}
+          style={{ position: 'absolute', inset: 0, overflow: 'hidden', backfaceVisibility: 'hidden', WebkitBackfaceVisibility: 'hidden' }}
         >
           <div style={{ position: 'absolute', top: 0, left: 0, width, height, transform: `translateX(${frontOffset(k)}px)` }}>
             {front}
@@ -142,7 +142,7 @@ const Leaf = forwardRef<LeafHandle, LeafProps>(function Leaf({ hinge, width, hei
             position: 'absolute',
             inset: 0,
             overflow: 'hidden',
-            backfaceVisibility: 'hidden',
+            backfaceVisibility: 'hidden', WebkitBackfaceVisibility: 'hidden',
             transform: 'rotateY(180deg)',
           }}
         >

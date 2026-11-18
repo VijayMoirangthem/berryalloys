@@ -1,0 +1,12 @@
+{
+  "name": "Berry Alloys Limited",
+  "short_name": "Berry Alloys",
+  "icons": [
+    { "src": "/favicon-192x192.png", "sizes": "192x192", "type": "image/png" },
+    { "src": "/berry-mark.png", "sizes": "512x512", "type": "image/png", "purpose": "any" }
+  ],
+  "theme_color": "#07111F",
+  "background_color": "#07111F",
+  "display": "browser",
+  "start_url": "/"
+}

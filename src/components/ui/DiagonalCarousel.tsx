@@ -61,6 +61,7 @@ export function DiagonalCarousel({
 
   return (
     <div
+      data-no-parallax
       className={cn(
         'relative overflow-hidden bg-white dark:bg-[#12243B] border border-[#10243A]/14 dark:border-[#F4F8FC]/14',
         className
@@ -75,8 +76,8 @@ export function DiagonalCarousel({
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 lg:gap-10 p-6 sm:p-8 lg:p-10 items-center relative z-10">
         {/* Left: Diagonal Canted Image Stage */}
         <div className="lg:col-span-6 py-3 px-2 sm:px-4">
-          <div className="relative overflow-hidden bg-[#07111F] border border-[#10243A]/18 dark:border-[#F4F8FC]/16 shadow-lg">
-            <AnimatePresence mode="wait" custom={direction}>
+          <div className="relative aspect-[16/10] w-full overflow-hidden bg-[#07111F] border border-[#10243A]/18 dark:border-[#F4F8FC]/16 shadow-lg">
+            <AnimatePresence initial={false} custom={direction}>
               <motion.div
                 key={active.id}
                 custom={direction}
@@ -109,8 +110,8 @@ export function DiagonalCarousel({
                         scale: 0.96,
                       }
                 }
-                transition={{ duration: 0.72, ease: [0.22, 1, 0.36, 1] }}
-                className="group relative aspect-[16/10] w-full overflow-hidden"
+                transition={{ duration: 0.6, ease: [0.22, 1, 0.36, 1] }}
+                className="group absolute inset-0 overflow-hidden will-change-transform"
               >
                 <div
                   className={cn(
@@ -152,12 +153,11 @@ export function DiagonalCarousel({
               )}
             </div>
 
-            <AnimatePresence mode="wait">
+            <div>
               <motion.div
                 key={active.id}
                 initial={prefersReduced ? { opacity: 1 } : { opacity: 0, y: 10 }}
                 animate={{ opacity: 1, y: 0 }}
-                exit={prefersReduced ? { opacity: 0 } : { opacity: 0, y: -10 }}
                 transition={{ duration: 0.5, ease: [0.22, 1, 0.36, 1] }}
                 className="space-y-3"
               >
@@ -168,7 +168,7 @@ export function DiagonalCarousel({
                   {active.summary}
                 </p>
               </motion.div>
-            </AnimatePresence>
+            </div>
           </div>
 
           {/* Stepper & Action Bar */}

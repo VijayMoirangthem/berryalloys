@@ -1,4 +1,5 @@
 import { cn } from '../lib/utils';
+import berryMark from '../assets/images/official/berry_mark.png';
 
 export interface BerryMonogramProps {
   size?: 'xs' | 'sm' | 'md' | 'lg';
@@ -14,16 +15,8 @@ const SIZE_MAP = {
   lg: 'w-14 h-14',
 } as const;
 
-/**
- * BerryMonogram — Compact forged geometric 'B' monogram inspired by
- * Berry Alloys Limited's foundry heritage, copper ember arc, and architectural grid.
- */
-export function BerryMonogram({
-  size = 'md',
-  surface = 'auto',
-  framed = false,
-  className,
-}: BerryMonogramProps) {
+/** BerryMonogram — the official glossy blue "B" short logo (same artwork as the browser-tab icon). */
+export function BerryMonogram({ size = 'md', surface = 'auto', framed = false, className }: BerryMonogramProps) {
   const frameBg =
     surface === 'dark'
       ? 'bg-[#07111F] border-[#F4F8FC]/22'
@@ -31,52 +24,23 @@ export function BerryMonogram({
       ? 'bg-[#FFFFFF] border-[#10243A]/20'
       : 'bg-[#FFFFFF] border-[#10243A]/20 dark:bg-[#07111F] dark:border-[#F4F8FC]/22';
 
-  const letterFill =
-    surface === 'dark'
-      ? 'fill-[#F4F8FC]'
-      : surface === 'light'
-      ? 'fill-[#10243A]'
-      : 'fill-[#10243A] dark:fill-[#F4F8FC]';
-
-  const emberFill =
-    surface === 'dark'
-      ? 'fill-[#69C5F5]'
-      : surface === 'light'
-      ? 'fill-brand'
-      : 'fill-brand dark:fill-[#69C5F5]';
-
-  const svg = (
-    <svg
-      viewBox="0 0 64 64"
-      fill="none"
+  const img = (
+    <img
+      src={berryMark}
+      alt=""
       aria-hidden="true"
-      className={cn(SIZE_MAP[size], !framed && className)}
-    >
-      <path
-        d="M17 14H35.5C42.6 14 47.2 17.7 47.2 23.4C47.2 27.2 44.8 30.1 41.2 31.6C45.6 33.1 48.5 36.6 48.5 41.4C48.5 47.7 43.4 51.2 35.8 51.2H17V14ZM24.5 28.8H34.2C37.6 28.8 39.4 27.2 39.4 24.5C39.4 21.8 37.6 20.4 34.2 20.4H24.5V28.8ZM24.5 44.7H35.1C38.8 44.7 40.8 43 40.8 39.9C40.8 36.9 38.8 35.1 35.1 35.1H24.5V44.7Z"
-        className={letterFill}
-      />
-      <path
-        d="M13 20.2C23.2 11.4 38.5 8.8 51.5 11.4C43.6 13.1 34.1 16 25.2 21.3L13 20.2Z"
-        className={emberFill}
-      />
-      <rect x="17" y="54" width="15" height="2.6" className={emberFill} />
-    </svg>
+      draggable={false}
+      width={64}
+      height={64}
+      className={cn(framed ? 'w-full h-full' : SIZE_MAP[size], 'object-contain', !framed && className)}
+    />
   );
 
-  if (!framed) return svg;
+  if (!framed) return img;
 
   return (
-    <span
-      className={cn(
-        'inline-flex items-center justify-center border shrink-0 select-none',
-        frameBg,
-        SIZE_MAP[size],
-        'p-1.5',
-        className
-      )}
-    >
-      {svg}
+    <span className={cn('inline-flex items-center justify-center border shrink-0 select-none p-1', frameBg, SIZE_MAP[size], className)}>
+      {img}
     </span>
   );
 }
