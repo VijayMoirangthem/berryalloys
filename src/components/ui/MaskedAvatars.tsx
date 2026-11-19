@@ -1,11 +1,22 @@
 import React, { useMemo, useState } from 'react';
 import { motion } from 'motion/react';
+import { Flame, Factory, Microscope, Anchor, Sun } from 'lucide-react';
 import { cn } from '../../lib/utils';
 
+export type EngineeringEmblemKey = 'furnace' | 'converter' | 'assay' | 'maritime' | 'energy';
+
 export interface MaskedAvatarItem {
-  avatar: string;
+  avatar?: string;
   name: string;
   role?: string;
+  /** Optional industrial engineering medallion spec (renders precision metallic emblem instead of a human photo). */
+  emblem?: {
+    code: string;
+    icon: EngineeringEmblemKey;
+    bgFrom: string;
+    bgTo: string;
+    accent: string;
+  };
 }
 
 export interface MaskedAvatarsProps {
@@ -19,11 +30,34 @@ export interface MaskedAvatarsProps {
   offset?: number;
   blurOnRest?: boolean;
   className?: string;
+  restHint?: string;
+}
+
+function renderEmblemIcon(icon: EngineeringEmblemKey, accent: string) {
+  const props = {
+    className: 'w-6 h-6',
+    style: { color: accent },
+    strokeWidth: 1.75,
+    'aria-hidden': true as const,
+  };
+  switch (icon) {
+    case 'furnace':
+      return <Flame {...props} />;
+    case 'converter':
+      return <Factory {...props} />;
+    case 'assay':
+      return <Microscope {...props} />;
+    case 'maritime':
+      return <Anchor {...props} />;
+    case 'energy':
+      return <Sun {...props} />;
+  }
 }
 
 /**
- * MaskedAvatars — Overlapping radial-cutout circular avatar stack with spring lift
- * and curved orbital name ring (ported from VengeanceUI to motion/react with touch tap toggle).
+ * MaskedAvatars — Overlapping radial-cutout circular medallion stack with spring lift
+ * and curved orbital ring label. Supports precision engineering discipline emblems
+ * (zero fabricated portraits) as well as verified photography when provided.
  */
 export function MaskedAvatars({
   avatars,
@@ -36,6 +70,7 @@ export function MaskedAvatars({
   offset = -3,
   blurOnRest = false,
   className,
+  restHint = 'Hover or tap any production pillar to inspect operational scope',
 }: MaskedAvatarsProps) {
   const [hoveredIndex, setHoveredIndex] = useState<number | null>(null);
 
@@ -58,14 +93,14 @@ export function MaskedAvatars({
     []
   );
 
-  const activePerson = hoveredIndex !== null ? avatars[hoveredIndex] : null;
+  const activeItem = hoveredIndex !== null ? avatars[hoveredIndex] : null;
 
   return (
     <div
       className={cn('relative flex flex-col items-start gap-4', className)}
       style={{ '--size': dynamicSize } as React.CSSProperties}
       role="group"
-      aria-label="Functional leadership avatars"
+      aria-label="Integrated production and engineering disciplines"
     >
       <div className="relative flex items-end pt-12 pb-2">
         <ul
@@ -77,7 +112,7 @@ export function MaskedAvatars({
           }}
           role="list"
         >
-          {avatars.map((person, index) => {
+          {avatars.map((item, index) => {
             const isHovered = hoveredIndex === index;
             const isPrevHovered = hoveredIndex === index - 1;
 
@@ -90,12 +125,12 @@ export function MaskedAvatars({
               ? `0 ${baseOffset + moveOffset}px`
               : `0 ${baseOffset}px`;
 
-            const chars = person.name.toUpperCase().split('');
+            const chars = item.name.toUpperCase().split('');
             const arcSpan = Math.min(140, chars.length * 10.5);
 
             return (
               <motion.li
-                key={`${person.name}-${index}`}
+                key={`${item.name}-${index}`}
                 className="relative grid content-end outline-none will-change-transform"
                 role="listitem"
                 style={{
@@ -104,7 +139,7 @@ export function MaskedAvatars({
                   zIndex: isHovered ? avatars.length + 5 : avatars.length - index,
                 }}
                 tabIndex={0}
-                aria-label={`${person.name}${person.role ? ` — ${person.role}` : ''}`}
+                aria-label={`${item.name}${item.role ? ` — ${item.role}` : ''}`}
                 onMouseEnter={() => setHoveredIndex(index)}
                 onMouseLeave={() => setHoveredIndex(null)}
                 onFocus={() => setHoveredIndex(index)}
@@ -151,7 +186,7 @@ export function MaskedAvatars({
                           startOffset="50%"
                           textAnchor="middle"
                         >
-                          {person.name}
+                          {item.name}
                         </textPath>
                       </text>
                     </svg>
@@ -159,7 +194,7 @@ export function MaskedAvatars({
                 )}
 
                 <motion.div
-                  className="relative w-full aspect-square rounded-full overflow-hidden cursor-pointer border-2 border-[#FFFFFF] dark:border-[#07111F] shadow-md bg-[#E7F0F8] dark:bg-[#12243B]"
+                  className="relative w-full aspect-square rounded-full overflow-hidden cursor-pointer border-2 border-[#FFFFFF] dark:border-[#07111F] shadow-md bg-[#0E2035]"
                   animate={{
                     y: isHovered ? -size * movement * 0.42 : 0,
                     scale: isHovered ? 1.08 : 1,
@@ -184,12 +219,35 @@ export function MaskedAvatars({
                       : undefined
                   }
                 >
-                  <img
-                    src={person.avatar}
-                    alt={person.name}
-                    draggable={false}
-                    className="w-full h-full object-cover object-top select-none"
-                  />
+                  {item.emblem ? (
+                    <div
+                      className="w-full h-full flex flex-col items-center justify-center relative select-none"
+                      style={{
+                        background: `radial-gradient(circle at 30% 25%, ${item.emblem.bgTo}, ${item.emblem.bgFrom} 75%)`,
+                      }}
+                    >
+                      {/* Precision machined inner instrument ring */}
+                      <span
+                        aria-hidden="true"
+                        className="absolute inset-[5px] rounded-full border border-dashed"
+                        style={{ borderColor: `${item.emblem.accent}48` }}
+                      />
+                      {renderEmblemIcon(item.emblem.icon, item.emblem.accent)}
+                      <span
+                        className="mt-0.5 text-[9px] font-mono-tabular font-bold tracking-[0.14em] uppercase"
+                        style={{ color: '#F4F8FC' }}
+                      >
+                        {item.emblem.code}
+                      </span>
+                    </div>
+                  ) : item.avatar ? (
+                    <img
+                      src={item.avatar}
+                      alt={item.name}
+                      draggable={false}
+                      className="w-full h-full object-cover object-top select-none"
+                    />
+                  ) : null}
                 </motion.div>
               </motion.li>
             );
@@ -197,22 +255,22 @@ export function MaskedAvatars({
         </ul>
       </div>
 
-      {/* Live readout bar beneath the avatar stack so mobile & desktop visitors always see role details cleanly */}
+      {/* Live readout bar beneath the medallion stack */}
       <div className="min-h-[38px] flex flex-col justify-center">
-        {activePerson ? (
+        {activeItem ? (
           <div className="flex flex-wrap items-center gap-x-2.5 gap-y-0.5">
             <span className="text-xs font-semibold text-[#10243A] dark:text-[#F4F8FC]">
-              {activePerson.name}
+              {activeItem.name}
             </span>
-            {activePerson.role && (
+            {activeItem.role && (
               <span className="text-[11px] font-mono-tabular uppercase tracking-wider text-brand dark:text-[#69C5F5]">
-                · {activePerson.role}
+                · {activeItem.role}
               </span>
             )}
           </div>
         ) : (
           <p className="text-[11px] font-mono-tabular uppercase tracking-wider text-[#465C72] dark:text-[#B5C5D7]">
-            Hover or tap any discipline steward to inspect operational ownership
+            {restHint}
           </p>
         )}
       </div>

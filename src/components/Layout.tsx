@@ -184,6 +184,11 @@ const PRIMARY_NAV: MegaMenuItem[] = [
     spotlightCta: { label: 'View Awards & Achievements', to: '/awards-achievements' },
   },
   {
+    key: 'awards',
+    label: 'Awards',
+    to: '/awards-achievements',
+  },
+  {
     key: 'news',
     label: 'News',
     to: '/news',

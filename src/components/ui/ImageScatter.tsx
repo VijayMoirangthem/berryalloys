@@ -1,5 +1,6 @@
 import { useRef, useState, useEffect, useMemo, useCallback } from 'react';
-import { ChevronLeft, ChevronRight, Pause, Play } from 'lucide-react';
+import { createPortal } from 'react-dom';
+import { ChevronLeft, ChevronRight, Maximize2, Pause, Play, X, ZoomIn, ZoomOut } from 'lucide-react';
 import { useDrag } from '@use-gesture/react';
 import gsap from 'gsap';
 import { cn } from '../../lib/utils';
@@ -74,6 +75,8 @@ export function ImageScatter({
   const labelRef = useRef<HTMLDivElement>(null);
   const [currentSetIndex, setCurrentSetIndex] = useState(0);
   const [focusedCardIdx, setFocusedCardIdx] = useState<number | null>(null);
+  const [lightboxIdx, setLightboxIdx] = useState<number | null>(null);
+  const [lightboxZoomed, setLightboxZoomed] = useState(false);
   const [paused, setPaused] = useState(false);
   const [stageSize, setStageSize] = useState({ width: 1120, height: 560 });
   const isCompactMobile = useIsCompactMobile(767);
@@ -82,6 +85,51 @@ export function ImageScatter({
 
   const safeSets = imageSets.length > 0 ? imageSets : [];
   const currentSet = safeSets[currentSetIndex];
+  const lightboxOpen = lightboxIdx !== null && Boolean(currentSet?.images[lightboxIdx]);
+
+  const openLightbox = useCallback((idx: number) => {
+    setLightboxZoomed(false);
+    setLightboxIdx(idx);
+  }, []);
+
+  const closeLightbox = useCallback(() => {
+    setLightboxZoomed(false);
+    setLightboxIdx(null);
+  }, []);
+
+  const stepLightbox = useCallback(
+    (delta: number) => {
+      if (!currentSet || currentSet.images.length === 0) return;
+      setLightboxZoomed(false);
+      setLightboxIdx((prev) => {
+        if (prev === null) return 0;
+        return (prev + delta + currentSet.images.length) % currentSet.images.length;
+      });
+    },
+    [currentSet]
+  );
+
+  useEffect(() => {
+    if (!lightboxOpen) return;
+    const prevOverflow = document.body.style.overflow;
+    document.body.style.overflow = 'hidden';
+
+    const onKeyDown = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') {
+        closeLightbox();
+      } else if (e.key === 'ArrowRight') {
+        stepLightbox(1);
+      } else if (e.key === 'ArrowLeft') {
+        stepLightbox(-1);
+      }
+    };
+    window.addEventListener('keydown', onKeyDown);
+
+    return () => {
+      document.body.style.overflow = prevOverflow;
+      window.removeEventListener('keydown', onKeyDown);
+    };
+  }, [lightboxOpen, closeLightbox, stepLightbox]);
 
   useEffect(() => {
     const updateSize = () => {
@@ -264,7 +312,7 @@ export function ImageScatter({
   );
 
   useEffect(() => {
-    if (paused || safeSets.length <= 1) return;
+    if (paused || lightboxOpen || safeSets.length <= 1) return;
     timerRef.current = window.setInterval(() => {
       stepSet(1);
     }, interval);
@@ -272,7 +320,7 @@ export function ImageScatter({
     return () => {
       if (timerRef.current) window.clearInterval(timerRef.current);
     };
-  }, [interval, paused, safeSets.length, stepSet]);
+  }, [interval, lightboxOpen, paused, safeSets.length, stepSet]);
 
   const bindSetSwipe = useDrag(
     ({ active, movement: [mx], velocity: [vx], direction: [dx], memo }) => {
@@ -402,9 +450,18 @@ export function ImageScatter({
               return (
                 <figure
                   key={`${currentSet.id}-mobile-${idx}`}
-                  onPointerDown={() => setFocusedCardIdx((prev) => (prev === idx ? null : idx))}
+                  role="button"
+                  tabIndex={0}
+                  aria-label={`Open full view of ${item.caption}`}
+                  onClick={() => openLightbox(idx)}
+                  onKeyDown={(e) => {
+                    if (e.key === 'Enter' || e.key === ' ') {
+                      e.preventDefault();
+                      openLightbox(idx);
+                    }
+                  }}
                   className={cn(
-                    'flex flex-col border bg-[#FFFFFF] dark:bg-[#12243B] p-1.5 shadow-md transition-transform duration-200 cursor-pointer',
+                    'group flex flex-col border bg-[#FFFFFF] dark:bg-[#12243B] p-1.5 shadow-md transition-transform duration-200 cursor-pointer active:scale-[0.98]',
                     isFocused
                       ? 'scale-[1.03] -translate-y-1 border-brand dark:border-[#69C5F5] ring-1 ring-brand/40 z-20 shadow-xl'
                       : 'border-[#10243A]/16 dark:border-[#F4F8FC]/18'
@@ -412,7 +469,7 @@ export function ImageScatter({
                 >
                   <div
                     className={cn(
-                      'aspect-[16/10] w-full overflow-hidden',
+                      'relative aspect-[16/10] w-full overflow-hidden',
                       item.isEmblem ? 'bg-[#FFFFFF] p-1.5' : 'bg-[#10243A]'
                     )}
                   >
@@ -421,10 +478,16 @@ export function ImageScatter({
                       alt={item.alt}
                       draggable={false}
                       className={cn(
-                        'w-full h-full block',
+                        'w-full h-full block transition-transform duration-300 group-hover:scale-105',
                         item.isEmblem ? 'object-contain' : 'object-cover'
                       )}
                     />
+                    <span
+                      aria-hidden="true"
+                      className="absolute right-1.5 bottom-1.5 inline-flex items-center justify-center w-6 h-6 bg-[#07111F]/85 text-[#F4F8FC] border border-[#F4F8FC]/20"
+                    >
+                      <Maximize2 className="w-3 h-3" />
+                    </span>
                   </div>
                   <figcaption className="pt-1.5 pb-0.5 px-0.5 text-[10px] font-mono-tabular text-[#10243A] dark:text-[#F4F8FC] truncate">
                     {item.caption}
@@ -450,18 +513,25 @@ export function ImageScatter({
               return (
                 <figure
                   key={`${currentSet.id}-${idx}`}
+                  role="button"
+                  tabIndex={0}
+                  aria-label={`Open full view of ${item.caption}`}
                   onPointerEnter={(e) => {
                     if (e.pointerType === 'mouse') setFocusedCardIdx(idx);
                   }}
                   onPointerLeave={(e) => {
                     if (e.pointerType === 'mouse') setFocusedCardIdx(null);
                   }}
-                  onPointerDown={() =>
-                    setFocusedCardIdx((prev) => (prev === idx ? null : idx))
-                  }
+                  onClick={() => openLightbox(idx)}
+                  onKeyDown={(e) => {
+                    if (e.key === 'Enter' || e.key === ' ') {
+                      e.preventDefault();
+                      openLightbox(idx);
+                    }
+                  }}
                   style={{ width: `${cardGeometry.cardW}px` }}
                   className={cn(
-                    'pointer-events-auto absolute flex flex-col border bg-[#FFFFFF] dark:bg-[#12243B] p-2 shadow-[0_18px_40px_rgba(0,0,0,0.2)] transition-shadow duration-200 cursor-pointer',
+                    'group pointer-events-auto absolute flex flex-col border bg-[#FFFFFF] dark:bg-[#12243B] p-2 shadow-[0_18px_40px_rgba(0,0,0,0.2)] transition-shadow duration-200 cursor-pointer focus-visible:outline-2 focus-visible:outline-brand',
                     isFocused
                       ? 'z-30 border-brand dark:border-[#69C5F5] shadow-[0_26px_58px_rgba(0,0,0,0.34)]'
                       : 'z-10 border-[#10243A]/18 dark:border-[#F4F8FC]/20 hover:z-30 hover:border-brand'
@@ -469,7 +539,7 @@ export function ImageScatter({
                 >
                   <div
                     className={cn(
-                      'aspect-[16/10] w-full overflow-hidden',
+                      'relative aspect-[16/10] w-full overflow-hidden',
                       item.isEmblem ? 'bg-[#FFFFFF] p-2' : 'bg-[#10243A]'
                     )}
                   >
@@ -477,10 +547,17 @@ export function ImageScatter({
                       src={item.src}
                       alt={item.alt}
                       className={cn(
-                        'w-full h-full block',
+                        'w-full h-full block transition-transform duration-300 group-hover:scale-105',
                         item.isEmblem ? 'object-contain' : 'object-cover'
                       )}
                     />
+                    <span
+                      aria-hidden="true"
+                      className="absolute right-2 bottom-2 inline-flex items-center gap-1 px-2 py-0.5 bg-[#07111F]/88 text-[#F4F8FC] border border-[#F4F8FC]/25 text-[9px] font-mono-tabular uppercase tracking-wider opacity-90 group-hover:opacity-100 group-hover:bg-brand transition-colors"
+                    >
+                      <Maximize2 className="w-2.5 h-2.5" />
+                      Open
+                    </span>
                   </div>
                   <figcaption className="pt-2 pb-0.5 px-0.5 flex items-center justify-between gap-2 text-[11px] font-mono-tabular text-[#10243A] dark:text-[#F4F8FC]">
                     <span className="truncate font-medium">{item.caption}</span>
@@ -510,11 +587,116 @@ export function ImageScatter({
               </p>
             )}
             <p className="mt-2.5 pt-2 border-t border-[#10243A]/10 dark:border-[#F4F8FC]/10 text-[10px] font-mono-tabular uppercase tracking-wider text-[#465C72] dark:text-[#B5C5D7]">
-              {currentSet.images.length} Field Plates · Hover Or Tap Frame
+              {currentSet.images.length} Field Plates · Click Or Tap Any Frame To Expand
             </p>
           </div>
         </div>
       )}
+
+      {/* Full-Resolution Interactive Polaroid Lightbox Modal */}
+      {lightboxOpen &&
+        lightboxIdx !== null &&
+        typeof document !== 'undefined' &&
+        createPortal(
+          <div
+            role="dialog"
+            aria-modal="true"
+            aria-label={currentSet.images[lightboxIdx].caption}
+            onClick={closeLightbox}
+            className="fixed inset-0 z-[120] bg-[#040B14]/92 backdrop-blur-sm flex items-center justify-center p-4 sm:p-6 lg:p-10"
+          >
+            <div
+              onClick={(e) => e.stopPropagation()}
+              className="relative w-full max-w-5xl bg-[#0B1726] border border-[#F4F8FC]/18 shadow-2xl flex flex-col max-h-[92vh] overflow-hidden"
+            >
+              {/* Lightbox Header */}
+              <div className="flex items-center justify-between gap-4 px-4 sm:px-6 py-3.5 border-b border-[#F4F8FC]/12 bg-[#07111F]">
+                <div className="min-w-0">
+                  <p className="text-[10px] font-mono-tabular uppercase tracking-widest text-[#69C5F5] truncate">
+                    {currentSet.label} · Frame {lightboxIdx + 1} / {currentSet.images.length}
+                  </p>
+                  <p className="font-display text-lg sm:text-xl font-bold uppercase text-[#F4F8FC] truncate">
+                    {currentSet.images[lightboxIdx].caption}
+                  </p>
+                </div>
+
+                <div className="flex items-center gap-2 shrink-0">
+                  <button
+                    type="button"
+                    onClick={() => setLightboxZoomed((z) => !z)}
+                    aria-label={lightboxZoomed ? 'Reset zoom' : 'Zoom in'}
+                    className="inline-flex items-center gap-1.5 min-h-[38px] px-3 border border-[#F4F8FC]/20 bg-[#10243A] text-[#F4F8FC] hover:border-[#69C5F5] text-[11px] font-mono-tabular uppercase tracking-wider cursor-pointer"
+                  >
+                    {lightboxZoomed ? (
+                      <>
+                        <ZoomOut className="w-3.5 h-3.5" aria-hidden="true" />
+                        <span className="hidden sm:inline">1× Fit</span>
+                      </>
+                    ) : (
+                      <>
+                        <ZoomIn className="w-3.5 h-3.5" aria-hidden="true" />
+                        <span className="hidden sm:inline">Zoom</span>
+                      </>
+                    )}
+                  </button>
+                  <button
+                    type="button"
+                    onClick={closeLightbox}
+                    aria-label="Close image preview"
+                    className="inline-flex items-center justify-center w-9 h-9 border border-[#F4F8FC]/20 bg-[#10243A] text-[#F4F8FC] hover:bg-[#C9233B] hover:border-[#C9233B] transition-colors cursor-pointer"
+                  >
+                    <X className="w-4 h-4" aria-hidden="true" />
+                  </button>
+                </div>
+              </div>
+
+              {/* Lightbox Image Canvas */}
+              <div className="relative flex-1 bg-[#050C16] flex items-center justify-center overflow-auto min-h-[300px] sm:min-h-[440px]">
+                <img
+                  src={currentSet.images[lightboxIdx].src}
+                  alt={currentSet.images[lightboxIdx].alt}
+                  onClick={() => setLightboxZoomed((z) => !z)}
+                  className={cn(
+                    'transition-transform duration-300 ease-out select-none',
+                    lightboxZoomed
+                      ? 'max-h-none w-auto scale-125 sm:scale-150 cursor-zoom-out'
+                      : 'max-h-[68vh] max-w-full object-contain cursor-zoom-in'
+                  )}
+                />
+
+                {currentSet.images.length > 1 && (
+                  <>
+                    <button
+                      type="button"
+                      onClick={() => stepLightbox(-1)}
+                      aria-label="Previous photograph"
+                      className="absolute left-3 sm:left-4 top-1/2 -translate-y-1/2 inline-flex items-center justify-center w-10 h-10 bg-[#07111F]/88 border border-[#F4F8FC]/22 text-[#F4F8FC] hover:bg-brand hover:border-brand transition-colors cursor-pointer"
+                    >
+                      <ChevronLeft className="w-5 h-5" aria-hidden="true" />
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => stepLightbox(1)}
+                      aria-label="Next photograph"
+                      className="absolute right-3 sm:right-4 top-1/2 -translate-y-1/2 inline-flex items-center justify-center w-10 h-10 bg-[#07111F]/88 border border-[#F4F8FC]/22 text-[#F4F8FC] hover:bg-brand hover:border-brand transition-colors cursor-pointer"
+                    >
+                      <ChevronRight className="w-5 h-5" aria-hidden="true" />
+                    </button>
+                  </>
+                )}
+              </div>
+
+              {/* Lightbox Footer */}
+              <div className="px-4 sm:px-6 py-3.5 border-t border-[#F4F8FC]/12 bg-[#07111F] flex flex-col sm:flex-row sm:items-center justify-between gap-2 text-xs text-[#B5C5D7]">
+                <p className="leading-relaxed">{currentSet.images[lightboxIdx].alt}</p>
+                <span className="text-[10px] font-mono-tabular uppercase tracking-widest text-[#69C5F5] shrink-0">
+                  Esc to Close · ← → Navigate
+                </span>
+              </div>
+            </div>
+          </div>,
+          document.body
+        )}
     </div>
   );
 }

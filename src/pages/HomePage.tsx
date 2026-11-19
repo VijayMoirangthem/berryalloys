@@ -25,12 +25,16 @@ import {
   BERRY_COMPENDIUM_BOOKS,
   CORPORATE_DOSSIER_PAGES,
   CSR_DIAGONAL_SLIDES,
+  CSR_FIELDWORK_TRAIL_IMAGES,
   FUNCTIONAL_STEWARD_AVATARS,
   GLOBAL_CAPABILITY_SPOTLIGHT_ITEMS,
   HOME_CAREERS_SCATTER_SETS,
   HOME_PIXEL_TRAIL_IMAGES,
+  INSTITUTIONAL_TESTIMONIAL_ITEMS,
   PLANT_REVEAL_ROWS,
   QA_PERSPECTIVE_SLIDES,
+  WORKFORCE_CULTURE_PILLARS,
+  WORKFORCE_CULTURE_RING_IMAGES,
 } from '../data/showcaseCollections';
 import { useGuide } from '../context/GuideContext';
 import { BerryMonogram } from '../components/BerryMonogram';
@@ -44,6 +48,7 @@ import { EnquiryFormPanel } from '../components/EnquiryFormPanel';
 import { FacilityCorridorMap } from '../components/FacilityCorridorMap';
 import { GlobalPresenceSection } from '../components/GlobalPresenceSection';
 import { LogisticsJourney } from '../components/LogisticsJourney';
+import { PortLogistics3DViewer } from '../components/PortLogistics3DViewer';
 import { GrowthChronicle } from '../components/GrowthChronicle';
 import { HomeAlloyShowcase } from '../components/HomeAlloyShowcase';
 import { HomeAwardsSection } from '../components/HomeAwardsSection';
@@ -78,7 +83,10 @@ import { MorphText } from '../components/ui/MorphText';
 import { PerspectiveCarousel } from '../components/ui/PerspectiveCarousel';
 import { PerspectiveGrid } from '../components/ui/PerspectiveGrid';
 import { PixelatedImageTrail } from '../components/ui/PixelatedImageTrail';
+import { PopButton } from '../components/ui/PopButton';
 import { ScrollDissolveReveal } from '../components/ui/ScrollDissolveReveal';
+import { TestimonialsCard } from '../components/ui/TestimonialsCard';
+import { WorkforceCircularGallery } from '../components/ui/WorkforceCircularGallery';
 import { onLoaderCleared, setMotionInitStatus } from '../lib/motionDiagnostics';
 
 gsap.registerPlugin(ScrollTrigger);
@@ -336,28 +344,22 @@ export function HomePage() {
           </div>
 
           <div className="flex flex-wrap items-center gap-3 shrink-0">
-            <IndustrialButton
-              href="#complex-hero"
-              variant="primary"
-              onClick={(e) => {
-                e.preventDefault();
-                scrollToChapter('complex-hero');
-              }}
+            <PopButton
+              variant="brand"
+              size="sm"
+              onClick={() => scrollToChapter('complex-hero')}
             >
-              Enter Complex & Story
+              Enter Complex &amp; Story
               <ArrowRight className="w-4 h-4" aria-hidden="true" />
-            </IndustrialButton>
-            <IndustrialButton
-              href="#alloys"
-              variant="outline-light"
-              onClick={(e) => {
-                e.preventDefault();
-                scrollToChapter('alloys');
-              }}
+            </PopButton>
+            <PopButton
+              variant="crimson"
+              size="sm"
+              onClick={() => scrollToChapter('enquiry')}
             >
-              Alloy Portfolio
+              Request Batch Quote
               <ArrowUpRight className="w-4 h-4" aria-hidden="true" />
-            </IndustrialButton>
+            </PopButton>
           </div>
         </div>
       </section>
@@ -795,8 +797,14 @@ export function HomePage() {
             <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 items-end">
               <div className="lg:col-span-7 space-y-2.5">
                 <p className="text-[11px] font-mono-tabular uppercase tracking-widest text-brand dark:text-[#69C5F5]">
-                  Workforce & Workplace Culture · {COMPANY_INFO.workforceStory.motto}
+                  Workforce &amp; Workplace Culture · {COMPANY_INFO.workforceStory.motto}
                 </p>
+                <FlipText
+                  className="font-display text-xl sm:text-2xl font-bold uppercase tracking-[0.18em] text-brand dark:text-[#69C5F5]"
+                  duration={2.6}
+                >
+                  EMPOWERED PEOPLE
+                </FlipText>
                 <h3 className="font-display text-3xl sm:text-4xl font-bold uppercase tracking-tight text-[#10243A] dark:text-[#F4F8FC]">
                   {COMPANY_INFO.workforceStory.headline}
                 </h3>
@@ -824,23 +832,23 @@ export function HomePage() {
               </div>
             </div>
 
-            {/* VengeanceUI MaskedAvatars — Cross-Functional Operational Stewards */}
+            {/* VengeanceUI MaskedAvatars — Five Core Plant-to-Port Engineering Pillars */}
             <div className="bg-[#F1F6FB] dark:bg-[#12243B] border border-[#10243A]/12 dark:border-[#F4F8FC]/14 p-5 sm:p-6 flex flex-col lg:flex-row lg:items-center justify-between gap-6">
               <div className="space-y-1.5 max-w-md">
                 <p className="text-[11px] font-mono-tabular uppercase tracking-widest text-brand dark:text-[#69C5F5]">
-                  Cross-Functional Operational Stewards
+                  Integrated Plant-to-Port Chain
                 </p>
                 <h4 className="font-display text-xl sm:text-2xl font-bold uppercase text-[#10243A] dark:text-[#F4F8FC]">
-                  Five Engineering Disciplines Behind Every Heat
+                  Five Core Production &amp; Assurance Pillars
                 </h4>
                 <p className="text-xs text-[#465C72] dark:text-[#B5C5D7] leading-relaxed">
-                  Metallurgy, continuous furnace operations, optical spectrometry QA/QC, maritime export logistics, and clean-energy compliance work as one integrated chain.
+                  Submerged-arc smelting, 6,000 MT/month AOD refining, optical emission assaying, Visakhapatnam port logistics, and ISO 14067 clean-energy compliance operate as one continuous chain.
                 </p>
               </div>
               <MaskedAvatars
                 avatars={FUNCTIONAL_STEWARD_AVATARS}
-                size={76}
-                column={46}
+                size={80}
+                column={50}
                 border={7}
                 ringed
               />
@@ -914,6 +922,63 @@ export function HomePage() {
                   </figcaption>
                 </motion.figure>
               ))}
+            </div>
+
+            {/* VengeanceUI 3D Tilted Circular Gallery — Workforce Culture Orbital Showcase */}
+            <div className="pt-4 space-y-5">
+              <div className="flex flex-col md:flex-row md:items-end justify-between gap-3">
+                <div className="space-y-1">
+                  <p className="text-[11px] font-mono-tabular uppercase tracking-widest text-brand dark:text-[#69C5F5]">
+                    3D Orbital Workforce Showcase · ET Edge Best Organisation to Work 2026
+                  </p>
+                  <h4 className="font-display text-2xl sm:text-3xl font-bold uppercase text-[#10243A] dark:text-[#F4F8FC]">
+                    People, Safety &amp; Shopfloor Culture in Motion
+                  </h4>
+                </div>
+                <p className="text-xs text-[#465C72] dark:text-[#B5C5D7] max-w-md md:text-right">
+                  Drag horizontally to spin the 3D orbital ring, hover any card to preview it at centre, or click any tile to inspect full resolution.
+                </p>
+              </div>
+
+              <WorkforceCircularGallery
+                images={WORKFORCE_CULTURE_RING_IMAGES}
+                count={42}
+                tilt={54}
+                radius={340}
+                itemWidth={54}
+                itemHeight={74}
+              />
+
+              {/* Six Substantive Workplace Culture Pillars */}
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 pt-2">
+                {WORKFORCE_CULTURE_PILLARS.map((pillar, idx) => (
+                  <motion.article
+                    key={pillar.code}
+                    initial={{ opacity: 0.25, y: 16 }}
+                    whileInView={{ opacity: 1, y: 0 }}
+                    viewport={{ once: true, amount: 'some' }}
+                    transition={{ duration: 0.45, delay: idx * 0.05, ease: [0.22, 1, 0.36, 1] }}
+                    className="bg-[#F1F6FB]/70 dark:bg-[#12243B] border border-[#10243A]/12 dark:border-[#F4F8FC]/14 p-5 flex flex-col justify-between gap-3"
+                  >
+                    <div className="space-y-2">
+                      <div className="flex items-center justify-between gap-2">
+                        <span className="text-[11px] font-mono-tabular uppercase tracking-widest text-brand dark:text-[#69C5F5]">
+                          {pillar.code} / {pillar.tag}
+                        </span>
+                        <span className="text-[10px] font-mono-tabular uppercase tracking-wider px-2 py-0.5 bg-white dark:bg-[#0B1728] border border-[#10243A]/12 dark:border-[#F4F8FC]/14 text-[#10243A] dark:text-[#F4F8FC]">
+                          {pillar.metric}
+                        </span>
+                      </div>
+                      <h5 className="font-display text-xl font-bold uppercase text-[#10243A] dark:text-[#F4F8FC]">
+                        {pillar.title}
+                      </h5>
+                      <p className="text-xs sm:text-[13px] text-[#465C72] dark:text-[#B5C5D7] leading-relaxed">
+                        {pillar.description}
+                      </p>
+                    </div>
+                  </motion.article>
+                ))}
+              </div>
             </div>
           </div>
 
@@ -1327,15 +1392,22 @@ export function HomePage() {
             <div className="lg:col-span-6 space-y-6">
               <div className="space-y-4">
                 <p className="text-xs font-mono-tabular uppercase tracking-widest text-brand dark:text-[#69C5F5]">
-                  09 / Sustainability & Community Stewardship
+                  09 / Sustainability &amp; Community Stewardship
                 </p>
-                <h2
-                  id="responsibility-heading"
-                  className="font-display fluid-section-title font-bold uppercase tracking-tight text-[#10243A] dark:text-[#F4F8FC]"
+                <GooeyTextReveal
+                  mode="scroll"
+                  blurAmount={0.38}
+                  duration={1.35}
+                  stagger={0.1}
+                  className="space-y-4"
                 >
-                  Energy disclosure kept distinct from future expansion
-                </h2>
-                <GooeyTextReveal>
+                  <h2
+                    id="responsibility-heading"
+                    data-gooey-reveal-item=""
+                    className="font-display fluid-section-title font-bold uppercase tracking-tight text-[#10243A] dark:text-[#F4F8FC]"
+                  >
+                    Energy disclosure kept distinct from future expansion
+                  </h2>
                   <p
                     data-gooey-reveal-item=""
                     className="text-sm sm:text-base text-[#465C72] dark:text-[#F4F8FC]/82 leading-relaxed max-w-[60ch]"
@@ -1346,54 +1418,68 @@ export function HomePage() {
               </div>
 
               <div className="border-t border-b border-[#10243A]/14 dark:border-[#F4F8FC]/14 divide-y divide-[#10243A]/12 dark:divide-[#F4F8FC]/12">
-                <div className="py-5 grid grid-cols-1 sm:grid-cols-12 gap-3 items-baseline">
-                  <div className="sm:col-span-4">
-                    <p className="text-[11px] font-mono-tabular uppercase tracking-wider text-brand dark:text-[#69C5F5]">
-                      Reported Operational
+                {[
+                  {
+                    status: 'Reported Operational',
+                    accent: true,
+                    headline: '83 MW Solar · 29.6 MW Wind',
+                    detail:
+                      'Disclosed on the company sustainability page; reported separately from the 2.6 MW homepage solar installation notice pending scope reconciliation.',
+                  },
+                  {
+                    status: 'Planned Project Scope',
+                    accent: true,
+                    headline: '90 MW WHR + 2 × 1,000 TPD DRI',
+                    detail:
+                      'Planned waste heat recovery and direct reduced iron expansion at Ghatsila alongside existing 24 MVA furnace operations.',
+                  },
+                  {
+                    status: 'Exploratory Research',
+                    accent: false,
+                    headline: 'Biomass Reductants',
+                    detail:
+                      'Early-stage exploration of biomass carbon substitutes alongside AOD low-carbon ferro alloy grades and Q4 2023 CBAM reporting; no commercial substitution volume claimed.',
+                  },
+                ].map((row, idx) => (
+                  <motion.div
+                    key={row.headline}
+                    initial={{ opacity: 0.2, x: -16 }}
+                    whileInView={{ opacity: 1, x: 0 }}
+                    viewport={{ once: true, amount: 'some' }}
+                    transition={{ duration: 0.55, delay: idx * 0.1, ease: [0.22, 1, 0.36, 1] }}
+                    className="py-5 grid grid-cols-1 sm:grid-cols-12 gap-3 items-baseline"
+                  >
+                    <div className="sm:col-span-4">
+                      <p
+                        className={`text-[11px] font-mono-tabular uppercase tracking-wider ${
+                          row.accent
+                            ? 'text-brand dark:text-[#69C5F5]'
+                            : 'text-[#465C72] dark:text-[#B5C5D7]'
+                        }`}
+                      >
+                        {row.status}
+                      </p>
+                      <GooeyTextReveal mode="scroll" blurAmount={0.28} duration={1.1} delay={idx * 0.08}>
+                        <p
+                          data-gooey-reveal-item=""
+                          className="font-display text-2xl font-bold text-[#10243A] dark:text-[#F4F8FC] mt-0.5"
+                        >
+                          {row.headline}
+                        </p>
+                      </GooeyTextReveal>
+                    </div>
+                    <p className="sm:col-span-8 text-xs sm:text-sm text-[#465C72] dark:text-[#B5C5D7] leading-relaxed">
+                      {row.detail}
                     </p>
-                    <p className="font-display text-2xl font-bold text-[#10243A] dark:text-[#F4F8FC] mt-0.5">
-                      83 MW Solar · 29.6 MW Wind
-                    </p>
-                  </div>
-                  <p className="sm:col-span-8 text-xs sm:text-sm text-[#465C72] dark:text-[#B5C5D7] leading-relaxed">
-                    Disclosed on the company sustainability page; reported separately from the 2.6 MW homepage solar installation notice pending scope reconciliation.
-                  </p>
-                </div>
-
-                <div className="py-5 grid grid-cols-1 sm:grid-cols-12 gap-3 items-baseline">
-                  <div className="sm:col-span-4">
-                    <p className="text-[11px] font-mono-tabular uppercase tracking-wider text-brand dark:text-[#69C5F5]">
-                      Planned Project Scope
-                    </p>
-                    <p className="font-display text-2xl font-bold text-[#10243A] dark:text-[#F4F8FC] mt-0.5">
-                      90 MW WHR + 2 × 1,000 TPD DRI
-                    </p>
-                  </div>
-                  <p className="sm:col-span-8 text-xs sm:text-sm text-[#465C72] dark:text-[#B5C5D7] leading-relaxed">
-                    Planned waste heat recovery and direct reduced iron expansion at Ghatsila alongside existing 24 MVA furnace operations.
-                  </p>
-                </div>
-
-                <div className="py-5 grid grid-cols-1 sm:grid-cols-12 gap-3 items-baseline">
-                  <div className="sm:col-span-4">
-                    <p className="text-[11px] font-mono-tabular uppercase tracking-wider text-[#465C72] dark:text-[#B5C5D7]">
-                      Exploratory Research
-                    </p>
-                    <p className="font-display text-2xl font-bold text-[#10243A] dark:text-[#F4F8FC] mt-0.5">
-                      Biomass Reductants
-                    </p>
-                  </div>
-                  <p className="sm:col-span-8 text-xs sm:text-sm text-[#465C72] dark:text-[#B5C5D7] leading-relaxed">
-                    Early-stage exploration of biomass carbon substitutes alongside AOD low-carbon ferro alloy grades and Q4 2023 CBAM reporting; no commercial substitution volume claimed.
-                  </p>
-                </div>
+                  </motion.div>
+                ))}
               </div>
 
-              <div>
-                <IndustrialButton to="/sustainability" variant="primary">
+              <div className="pt-1">
+                <PopButton to="/sustainability" variant="brand" size="md">
                   Full Sustainability Disclosures
                   <ArrowRight className="w-4 h-4" aria-hidden="true" />
-                </IndustrialButton>
+                </PopButton>
               </div>
             </div>
 
@@ -1479,6 +1565,30 @@ export function HomePage() {
                 slides={CSR_DIAGONAL_SLIDES}
                 eyebrow="CSR Fieldwork Archive"
               />
+
+              {/* Interactive PixelatedImageTrail — Community Education, Clean Water, Green Belt & Health Reel */}
+              <div className="pt-4">
+                <div className="relative overflow-hidden border border-[#10243A]/15 dark:border-[#F4F8FC]/16 bg-gradient-to-br from-[#07111F] via-[#0E243C] to-[#0A2B2A] min-h-[380px] sm:min-h-[440px]">
+                  <PixelatedImageTrail
+                    images={CSR_FIELDWORK_TRAIL_IMAGES}
+                    slices={5}
+                    spawnDistance={84}
+                    className="h-full min-h-[380px] sm:min-h-[440px] flex items-center justify-center p-6 sm:p-10"
+                  >
+                    <div className="pointer-events-none select-none max-w-2xl text-center space-y-3 z-0">
+                      <p className="text-[11px] font-mono-tabular uppercase tracking-[0.26em] text-[#69C5F5]">
+                        Interactive Grassroots Fieldwork Trail · 9 Community Photographs
+                      </p>
+                      <h4 className="font-display text-2xl sm:text-4xl font-bold uppercase tracking-tight text-white">
+                        Sweep across the canvas to reveal live community impact
+                      </h4>
+                      <p className="text-xs sm:text-sm text-white/75 leading-relaxed max-w-lg mx-auto">
+                        Move your cursor or drag a finger across this stage to scatter pixel-sliced frames from Berry Alloys’ school upgrades, RO clean water plants, native sapling drives, blood donation &amp; preventive health camps.
+                      </p>
+                    </div>
+                  </PixelatedImageTrail>
+                </div>
+              </div>
             </div>
 
             {/* Ecological Plantation Fieldwork + Memorial & Education Records */}
@@ -1581,6 +1691,30 @@ export function HomePage() {
           <GlobalPresenceSection />
 
           <LogisticsJourney />
+
+          {/* Interactive 3D Three.js Truck Loading/Unloading & Bulk Carrier Port Simulator */}
+          <div className="pt-6 space-y-4">
+            <div className="flex flex-col lg:flex-row lg:items-end justify-between gap-4">
+              <div className="space-y-1.5">
+                <p className="text-[11px] font-mono-tabular uppercase tracking-widest text-brand dark:text-[#69C5F5]">
+                  Interactive 3D Port &amp; Bulk Dispatch Simulator
+                </p>
+                <FlipText
+                  className="font-display text-xl sm:text-2xl font-bold uppercase tracking-[0.18em] text-[#C9233B] dark:text-[#69C5F5]"
+                  duration={2.4}
+                >
+                  PLANT TO VESSEL
+                </FlipText>
+                <h3 className="font-display text-2xl sm:text-3xl font-bold uppercase text-[#10243A] dark:text-[#F4F8FC]">
+                  3D Tipper Truck Loading, Hydraulic Unloading &amp; Ship Hoist
+                </h3>
+              </div>
+              <p className="text-xs sm:text-sm text-[#465C72] dark:text-[#B5C5D7] max-w-md lg:text-right leading-relaxed">
+                Drag to orbit in full 3D, switch camera angles between the smelter tipper truck and bulk carrier ship, or command hydraulic tipping and gantry crane loading manually.
+              </p>
+            </div>
+            <PortLogistics3DViewer />
+          </div>
 
           <FacilityCorridorMap />
 
@@ -1713,10 +1847,10 @@ export function HomePage() {
               <p className="text-xs sm:text-sm text-[#465C72] dark:text-[#B5C5D7] sm:text-right leading-relaxed">
                 From submerged-arc furnace shifts in Bobbili and Dhalbhumgarh to XRF spectroscopy labs and commercial desks in Kolkata and Visakhapatnam.
               </p>
-              <IndustrialButton to="/careers" variant="outline-light">
+              <PopButton to="/careers" variant="brand" size="md">
                 Explore Careers &amp; Apply
                 <ArrowRight className="w-4 h-4" aria-hidden="true" />
-              </IndustrialButton>
+              </PopButton>
             </div>
           </div>
 
@@ -1833,10 +1967,10 @@ export function HomePage() {
               <p className="text-xs sm:text-sm text-[#465C72] dark:text-[#B5C5D7] sm:text-right leading-relaxed">
                 Select any 3D hardcover volume below to inspect grade chemistry tables, AOD decarburisation notes, CSR chronicles, and Form MGT-7 disclosures (CIN {COMPANY_INFO.cin}).
               </p>
-              <IndustrialButton to="/documents" variant="outline-light">
+              <PopButton to="/documents" variant="brand" size="md">
                 Open Full Statutory Archive
                 <ArrowRight className="w-4 h-4" aria-hidden="true" />
-              </IndustrialButton>
+              </PopButton>
             </div>
           </div>
 
@@ -1907,6 +2041,44 @@ export function HomePage() {
       <HomeFaqSection />
 
       <InsightsPreview />
+
+      {/* 14B / INSTITUTIONAL ENDORSEMENTS — VengeanceUI 3D Stacked Rotating TestimonialsCard */}
+      <section
+        id="endorsements"
+        aria-labelledby="endorsements-heading"
+        className="scroll-mt-20 py-20 lg:py-28 bg-[#F1F6FB] text-[#10243A] dark:bg-[#0B1728] dark:text-[#F4F8FC] border-t border-[#10243A]/12 dark:border-[#F4F8FC]/12"
+      >
+        <div className="max-w-[1360px] mx-auto px-4 sm:px-6 lg:px-8 xl:px-14 2xl:px-8 space-y-12">
+          <div className="flex flex-col lg:flex-row lg:items-end justify-between gap-6 pb-8 border-b border-[#10243A]/14 dark:border-[#F4F8FC]/14">
+            <div className="space-y-2.5 max-w-2xl">
+              <p className="text-xs font-mono-tabular uppercase tracking-widest text-brand dark:text-[#69C5F5]">
+                Verified Institutional &amp; Market Endorsements
+              </p>
+              <FlipText
+                className="font-display text-xl sm:text-2xl font-bold uppercase tracking-[0.18em] text-[#C9233B] dark:text-[#69C5F5]"
+                duration={2.5}
+              >
+                TRUSTED BY STEELMAKERS
+              </FlipText>
+              <h2
+                id="endorsements-heading"
+                className="font-display fluid-section-title font-bold uppercase tracking-tight text-[#10243A] dark:text-[#F4F8FC]"
+              >
+                Credibility proven across audits, ports &amp; global furnaces
+              </h2>
+            </div>
+            <p className="text-xs sm:text-sm text-[#465C72] dark:text-[#B5C5D7] max-w-md leading-relaxed lg:text-right">
+              Click any card or step through the 3D deck to inspect Berry Alloys Limited’s verifiable third-party recognitions, EU CBAM compliance, and ~35-country export credentials.
+            </p>
+          </div>
+
+          <TestimonialsCard
+            items={INSTITUTIONAL_TESTIMONIAL_ITEMS}
+            autoPlay
+            autoPlayInterval={5400}
+          />
+        </div>
+      </section>
 
       {/* 15 / ENQUIRY — Commercial Quotation Desk & Offices */}
       <section

@@ -120,6 +120,15 @@ import scatterHomeSolarInspectionImg from '../assets/images/scatter_home_solar_i
 import scatterHomeDispatchYardImg from '../assets/images/scatter_home_dispatch_yard_1795088952345.jpg';
 import scatterHomeSafetyAwardImg from '../assets/images/scatter_home_safety_award_1795088951366.jpg';
 
+// Verified curated open-licensed web photography for CSR Fieldwork trail & Workforce Circular Gallery
+import webCsrClassroomImg from '../assets/images/curated/web_csr_classroom.jpg';
+import webCsrSaplingImg from '../assets/images/curated/web_csr_sapling.jpg';
+import webCsrHealthImg from '../assets/images/curated/web_csr_health.jpg';
+import webWorkforceLabImg from '../assets/images/curated/web_workforce_lab.jpg';
+import webWorkforceWeldingImg from '../assets/images/curated/web_workforce_welding.jpg';
+import webWorkforceLogisticsImg from '../assets/images/curated/web_workforce_logistics.jpg';
+import webWorkforceSolarImg from '../assets/images/curated/web_workforce_solar.jpg';
+
 export interface VisualAsset {
   id: string;
   src: string;
@@ -938,6 +947,55 @@ export const ASSETS = {
     alt: 'Indian industrial shift team in high-visibility vests and hard hats applauding during a safety milestone huddle',
     caption: 'Zero-harm shift milestone',
     category: 'People & Teams',
+  },
+  webCsrClassroom: {
+    id: 'web-csr-classroom',
+    src: webCsrClassroomImg,
+    alt: 'Students seated attentively in a bright modern classroom supported by educational community programmes',
+    caption: 'Rural classroom learning & digital education outreach',
+    category: 'Community & CSR',
+  },
+  webCsrSapling: {
+    id: 'web-csr-sapling',
+    src: webCsrSaplingImg,
+    alt: 'Hands gently cradling a young green native sapling ready for ecological green-belt planting',
+    caption: 'Native sapling stewardship around industrial corridors',
+    category: 'Community & CSR',
+  },
+  webCsrHealth: {
+    id: 'web-csr-health',
+    src: webCsrHealthImg,
+    alt: 'Medical diagnostic stethoscope and clinical care desk supporting preventive health screening camps',
+    caption: 'Preventive medical diagnostics & community care camps',
+    category: 'Community & CSR',
+  },
+  webWorkforceLab: {
+    id: 'web-workforce-lab',
+    src: webWorkforceLabImg,
+    alt: 'Industrial automation engineer configuring precision diagnostic hardware on an equipment bench',
+    caption: 'Instrumentation & technical automation engineering',
+    category: 'People & Teams',
+  },
+  webWorkforceWelding: {
+    id: 'web-workforce-welding',
+    src: webWorkforceWeldingImg,
+    alt: 'Plant fabrication technician cutting structural steel amidst bright sparks during facility maintenance',
+    caption: 'Heavy plant fabrication & mechanical uptime maintenance',
+    category: 'People & Teams',
+  },
+  webWorkforceLogistics: {
+    id: 'web-workforce-logistics',
+    src: webWorkforceLogisticsImg,
+    alt: 'Overhead aerial view of lined heavy freight trucks staged symmetrically in a dispatch logistics yard',
+    caption: 'Coordinated bulk fleet staging & port dispatch lanes',
+    category: 'Logistics',
+  },
+  webWorkforceSolar: {
+    id: 'web-workforce-solar',
+    src: webWorkforceSolarImg,
+    alt: 'Utility-scale photovoltaic solar panel rows angled toward a clear blue sky',
+    caption: 'Utility-scale renewable solar arrays supporting industrial power',
+    category: 'Energy',
   },
 } as const satisfies Record<string, VisualAsset>;
 

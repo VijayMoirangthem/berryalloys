@@ -8,6 +8,8 @@ import type { PerspectiveSlide } from '../components/ui/PerspectiveCarousel';
 import type { MaskedAvatarItem } from '../components/ui/MaskedAvatars';
 import type { SpotlightMarqueeItem } from '../components/ui/MagneticSpotlightMarquee';
 import type { TrailPhoto } from '../components/ui/ImageTrail';
+import type { WorkforceRingImage } from '../components/ui/WorkforceCircularGallery';
+import type { TestimonialItem } from '../components/ui/TestimonialsCard';
 
 export const LIFE_CULTURE_SCATTER_SETS: ScatterImageSet[] = [
   {
@@ -401,29 +403,59 @@ export const QA_PERSPECTIVE_SLIDES: PerspectiveSlide[] = [
 
 export const FUNCTIONAL_STEWARD_AVATARS: MaskedAvatarItem[] = [
   {
-    avatar: ASSETS.avatarMetallurgy.src,
-    name: 'Metallurgy',
-    role: 'Submerged-Arc Reduction & Slag Chemistry',
+    name: 'SAF Smelting',
+    role: 'Submerged-Arc Reduction & Slag Chemistry (Bobbili & Dhalbhumgarh)',
+    emblem: {
+      code: 'SAF',
+      icon: 'furnace',
+      bgFrom: '#10243A',
+      bgTo: '#8C1B2D',
+      accent: '#FF8A65',
+    },
   },
   {
-    avatar: ASSETS.avatarPlantOps.src,
-    name: 'Operations',
-    role: 'Bobbili & Dhalbhumgarh Furnace Bays · 6,000 MT/mo AOD',
+    name: 'AOD Refining',
+    role: '6,000 MT/mo Argon Oxygen Decarburisation · Low & Ultra-Low Carbon',
+    emblem: {
+      code: 'AOD',
+      icon: 'converter',
+      bgFrom: '#07111F',
+      bgTo: '#006393',
+      accent: '#69C5F5',
+    },
   },
   {
-    avatar: ASSETS.avatarQaLab.src,
-    name: 'Assay Lab',
-    role: 'OES Spectrometry · ISO 9001 Traceability',
+    name: 'OES Assay Lab',
+    role: 'Optical Spectrometry · ISO 9001 Elemental Traceability',
+    emblem: {
+      code: 'OES',
+      icon: 'assay',
+      bgFrom: '#0D2137',
+      bgTo: '#164E78',
+      accent: '#7DD3FC',
+    },
   },
   {
-    avatar: ASSETS.avatarExportDesk.src,
-    name: 'Exports',
-    role: 'Visakhapatnam Port Corridor · ~35 Destination Countries',
+    name: 'Port Exports',
+    role: 'Visakhapatnam Harbour Corridor · ~35 Destination Countries',
+    emblem: {
+      code: 'PORT',
+      icon: 'maritime',
+      bgFrom: '#0B1D33',
+      bgTo: '#0A6AA1',
+      accent: '#93C5FD',
+    },
   },
   {
-    avatar: ASSETS.avatarEsgLead.src,
     name: 'Clean Energy',
-    role: 'ISO 14067 CFP · Solar, Wind & CBAM Disclosures',
+    role: '83 MW Solar · 29.6 MW Wind · ISO 14067 & EU CBAM Reporting',
+    emblem: {
+      code: 'ESG',
+      icon: 'energy',
+      bgFrom: '#09242E',
+      bgTo: '#0F6B72',
+      accent: '#5EEAD4',
+    },
   },
 ];
 
@@ -587,6 +619,183 @@ export const HOME_AWARD_EDITORIAL_PLATES = [
     asset: ASSETS.homeAwardFounderSummit,
   },
 ] as const;
+
+/** Exclusive 9-photo fieldwork reel for the interactive PixelatedImageTrail inside Grassroots CSR. */
+export const CSR_FIELDWORK_TRAIL_IMAGES: string[] = [
+  ASSETS.csrMedicalCamp2026.src,
+  ASSETS.webCsrClassroom.src,
+  ASSETS.csrPlantationDrive2.src,
+  ASSETS.csrDrinkingWater2.src,
+  ASSETS.webCsrSapling.src,
+  ASSETS.csrSchoolUpgrade2.src,
+  ASSETS.csrBloodDonation.src,
+  ASSETS.webCsrHealth.src,
+  ASSETS.csrCowWelfare.src,
+];
+
+/** Exclusive 10-frame collection cycled around the 3D tilted WorkforceCircularGallery orbital ring. */
+export const WORKFORCE_CULTURE_RING_IMAGES: WorkforceRingImage[] = [
+  {
+    src: ASSETS.careersWomenTeam.src,
+    caption: 'Empowering Women Employees & Family Educational Scholarships',
+    category: 'Inclusion & Welfare',
+  },
+  {
+    src: ASSETS.careersWorkplaceCulture.src,
+    caption: 'Cross-Functional Plant & Commercial Team Recognitions',
+    category: 'Teamwork',
+  },
+  {
+    src: ASSETS.careersCommunityGathering.src,
+    caption: 'Mentorship & Employee Community Gatherings Across Works',
+    category: 'People First',
+  },
+  {
+    src: ASSETS.mfgPlantSeminar.src,
+    caption: 'E-CAUP Technical Seminar & Metallurgical Process Reviews',
+    category: 'Continuous Learning',
+  },
+  {
+    src: ASSETS.aboutMouPresentation.src,
+    caption: 'State Industrial Expansion Partnerships — Andhra Pradesh & Jharkhand',
+    category: 'Growth Mandate',
+  },
+  {
+    src: ASSETS.homeAwardWorkplaceTeam.src,
+    caption: 'ET Edge Best Organisation to Work 2026 — People-Centric Culture',
+    category: 'Workplace Excellence',
+  },
+  {
+    src: ASSETS.webWorkforceLab.src,
+    caption: 'Precision Automation, SCADA Diagnostics & Instrumentation Teams',
+    category: 'Engineering Craft',
+  },
+  {
+    src: ASSETS.webWorkforceWelding.src,
+    caption: 'Heavy Mechanical Fabrication & Furnace Uptime Maintenance Crews',
+    category: 'Plant Reliability',
+  },
+  {
+    src: ASSETS.webWorkforceLogistics.src,
+    caption: 'Synchronised Bulk Freight Fleet & Port Dispatch Logistics Desks',
+    category: 'Export Execution',
+  },
+  {
+    src: ASSETS.webWorkforceSolar.src,
+    caption: 'Clean-Power Solar Operations & ISO 14067 Decarbonisation Champions',
+    category: 'Green Energy',
+  },
+];
+
+export interface WorkforceCulturePillar {
+  code: string;
+  tag: string;
+  title: string;
+  description: string;
+  metric: string;
+}
+
+/** Six structured, operational workplace culture pillars displayed alongside the 3D Circular Gallery. */
+export const WORKFORCE_CULTURE_PILLARS: WorkforceCulturePillar[] = [
+  {
+    code: '01',
+    tag: 'ISO 45001:2018',
+    title: 'Zero-Harm Shift Protocol',
+    description:
+      'Every submerged-arc furnace and AOD shift begins with mandatory PPE checks, molten-metal proximity briefings, and hazard observation logs.',
+    metric: '24×7 Plant Safety',
+  },
+  {
+    code: '02',
+    tag: 'Health & Care',
+    title: 'Preventive Medical & Family Camps',
+    description:
+      'On-site multi-specialty health check-ups with Abhaya Hospital, voluntary blood drives, and employee family wellness programmes.',
+    metric: '200+ Screened / Camp',
+  },
+  {
+    code: '03',
+    tag: 'Technical Mastery',
+    title: 'Furnace & Assay Apprenticeship',
+    description:
+      'Structured mentoring pairs graduate metallurgists and OES laboratory chemists with veteran smelting superintendents through E-CAUP workshops.',
+    metric: '10 Core Departments',
+  },
+  {
+    code: '04',
+    tag: 'Career Mobility',
+    title: 'Multi-Unit Growth Corridors',
+    description:
+      'Internal progression across Bobbili (AP), Dhalbhumgarh & Kadambeda (Jharkhand), Visakhapatnam Port Desk, and Kolkata Headquarters.',
+    metric: '4 Strategic Hubs',
+  },
+  {
+    code: '05',
+    tag: 'Merit & Belonging',
+    title: 'Inclusive Recognition & Scholarships',
+    description:
+      'Transparent merit-linked advancement, women employee empowerment initiatives, and educational scholarships supporting employees’ children.',
+    metric: 'ET Edge 2026 Honouree',
+  },
+  {
+    code: '06',
+    tag: 'Shared Pride',
+    title: 'Long-Tenure Industrial Stewardship',
+    description:
+      'Safety milestone townhalls, green-belt plantation drives, and direct access to plant leadership keep shopfloor voices central to decisions.',
+    metric: '20 Years · Est. 2006',
+  },
+];
+
+/** Five verified Institutional & Steelmaker Perspectives grounded strictly in Berry Alloys' published credentials. */
+export const INSTITUTIONAL_TESTIMONIAL_ITEMS: TestimonialItem[] = [
+  {
+    id: 'inst-et-brand',
+    title: 'ET Best Brand of 2025',
+    subtitle: 'The Economic Times · Corporate Brand Trust',
+    badge: 'Published Recognition · 2025',
+    description:
+      '“Recognised for consistent metallurgical chemistry, reliable high-volume dispatch, and enduring brand credibility among primary Indian and international steelmaking partners.”',
+    image: ASSETS.homeAwardBrandTrophy.src,
+  },
+  {
+    id: 'inst-aod-steelmaking',
+    title: 'Primary Steelmakers · ~35 Export Markets',
+    subtitle: 'Submerged-Arc & 6,000 MT/mo AOD Precision Supply',
+    badge: 'ICRA Aug 2026 · Export Footprint',
+    description:
+      '“Dedicated Argon Oxygen Decarburisation refining (≤ 0.5% C) and tight trace-element control (Low P, Low B ≤ 50 ppm, Low N) support automotive flat steels and specialty converters worldwide.”',
+    image: ASSETS.mfgMoltenTap411k.src,
+  },
+  {
+    id: 'inst-cbam-iso14067',
+    title: 'EU CBAM & ISO 14067:2018 Readiness',
+    subtitle: 'Product Carbon Footprint & Transparent Energy Disclosure',
+    badge: 'Carbon Accounting · Since Q4 2023',
+    description:
+      '“Structured product-level carbon footprint accounting backed by operational 83 MW solar and 29.6 MW wind disclosures enables seamless European Union CBAM compliance for export buyers.”',
+    image: ASSETS.sustIso14067.src,
+  },
+  {
+    id: 'inst-icc-social',
+    title: '8th ICC Social Impact Jury Recognition',
+    subtitle: 'Indian Chamber of Commerce · March 2026',
+    badge: 'Grassroots CSR · AP & Jharkhand',
+    description:
+      '“Honoured by the ICC jury for tangible village impact around plant belts — spanning rural classroom upgrades, RO drinking water installations, preventive health camps, and green-belt drives.”',
+    image: ASSETS.homeAwardSocialImpact.src,
+  },
+  {
+    id: 'inst-hurun-dgft',
+    title: 'Hurun India Founders & Three Star Export House',
+    subtitle: 'JM Financial Hurun 2026 · DGFT Ministry of Commerce',
+    badge: '20-Year Industrial Scale',
+    description:
+      '“Two decades of disciplined ferro-alloy manufacturing scale — uniting Bobbili and Jharkhand smelting complexes with Visakhapatnam deep-water port access for bulk global maritime trade.”',
+    image: ASSETS.homeAwardFounderSummit.src,
+  },
+];
+
 
 
 
