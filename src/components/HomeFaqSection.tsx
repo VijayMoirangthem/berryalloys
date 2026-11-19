@@ -23,7 +23,7 @@ export function HomeFaqSection() {
           <div className="lg:col-span-5 space-y-6 lg:sticky lg:top-24">
             <div className="space-y-3">
               <p className="text-xs font-mono-tabular uppercase tracking-widest text-brand dark:text-[#69C5F5]">
-                11 / Frequently Asked Questions
+                14 / Frequently Asked Questions
               </p>
               <h2
                 id="home-faq-heading"

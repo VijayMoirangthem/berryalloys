@@ -9,6 +9,7 @@ import { OPERATIONS_SUBNAV_LINKS, SubNav } from '../components/SubNav';
 import { ImageReveal } from '../components/motion/ImageReveal';
 import { SplitText } from '../components/motion/SplitText';
 import { GooeyTextReveal } from '../components/ui/GooeyTextReveal';
+import { CleanEnergyJourney } from '../components/CleanEnergyJourney';
 
 type StageFilter = 'All' | SustainabilityInitiative['stage'];
 
@@ -132,6 +133,11 @@ export function SustainabilityPage() {
             ))}
           </div>
         </div>
+
+        {/* Interactive Animated Energy & Waste-Heat Recovery Schematic */}
+        <section aria-label="Renewable energy and waste heat recovery schematic" className="pt-4">
+          <CleanEnergyJourney />
+        </section>
 
         {/* Clean Energy & Carbon Verification Visuals */}
         <section aria-labelledby="clean-energy-visuals-heading" className="space-y-6">

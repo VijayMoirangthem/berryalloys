@@ -3,7 +3,10 @@ import { ArrowRight } from 'lucide-react';
 import { ASSETS } from '../data/assets';
 import { COMPANY_INFO, UPCOMING_OFFICE_NOTICE } from '../data/company';
 import { CredentialStackedMatrix } from '../data/CredentialMatrices';
-import { CORPORATE_DOSSIER_PAGES } from '../data/showcaseCollections';
+import {
+  CORPORATE_DOSSIER_PAGES,
+  INDUSTRIAL_ARCHIVE_TRAIL_PHOTOS,
+} from '../data/showcaseCollections';
 import { Breadcrumbs } from '../components/Breadcrumbs';
 import { DirectorPortraitSection } from '../components/DirectorPortraitSection';
 import { GrowthChronicle } from '../components/GrowthChronicle';
@@ -12,7 +15,9 @@ import { CORPORATE_SUBNAV_LINKS, SubNav } from '../components/SubNav';
 import { ImageReveal } from '../components/motion/ImageReveal';
 import { SplitText } from '../components/motion/SplitText';
 import { GooeyTextReveal } from '../components/ui/GooeyTextReveal';
+import { ImageTrail } from '../components/ui/ImageTrail';
 import { InteractiveBook } from '../components/ui/InteractiveBook';
+import { PerspectiveGrid } from '../components/ui/PerspectiveGrid';
 
 export function AboutPage() {
   return (
@@ -87,6 +92,43 @@ export function AboutPage() {
           coverSubtitle="DKG Group Heritage, Promoter Governance & Multi-Plant Milestones"
           pages={CORPORATE_DOSSIER_PAGES}
         />
+
+        {/* Restored Interactive Industrial Archive Banner with ImageTrail + 3D PerspectiveGrid */}
+        <section
+          aria-labelledby="archive-trail-heading"
+          className="relative overflow-hidden border border-[#10243A]/15 dark:border-[#F4F8FC]/15 bg-[#F1F6FB] dark:bg-[#0D1B2E]"
+        >
+          <div className="absolute inset-0 opacity-65 pointer-events-none">
+            <PerspectiveGrid
+              gridSize={20}
+              fadeRadius={76}
+              accent="berry"
+              className="[--fade-stop:#F1F6FB] dark:[--fade-stop:#0D1B2E]"
+            />
+          </div>
+          <ImageTrail
+            images={INDUSTRIAL_ARCHIVE_TRAIL_PHOTOS}
+            spawnDistance={72}
+            maxActive={6}
+            lifetimeMs={1320}
+            className="relative z-10 px-6 sm:px-10 py-14 sm:py-16"
+          >
+            <div className="max-w-3xl space-y-3 pointer-events-none select-none">
+              <p className="text-[11px] font-mono-tabular uppercase tracking-widest text-brand dark:text-[#69C5F5]">
+                Interactive Plant Archive · Move Cursor Or Tap Across Field
+              </p>
+              <h2
+                id="archive-trail-heading"
+                className="font-display text-3xl sm:text-4xl font-bold uppercase tracking-tight text-[#10243A] dark:text-[#F4F8FC]"
+              >
+                From Ore Yard &amp; EOT Ladle Cranes To Baghouse &amp; Weighbridge
+              </h2>
+              <p className="text-sm text-[#465C72] dark:text-[#B5C5D7] leading-relaxed max-w-2xl">
+                Sweep across this architectural stage to surface archival photography spanning crushing bays, raw ore yards, overhead molten transfers, dust-extraction towers, and dispatch weighbridges.
+              </p>
+            </div>
+          </ImageTrail>
+        </section>
 
         {/* Mission & Vision Split */}
         <section

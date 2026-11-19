@@ -5,158 +5,64 @@ import type { ImageRevealItem } from '../components/ui/ImageRevealList';
 import type { ScatterImageSet } from '../components/ui/ImageScatter';
 import type { InteractiveBookPage } from '../components/ui/InteractiveBook';
 import type { PerspectiveSlide } from '../components/ui/PerspectiveCarousel';
+import type { MaskedAvatarItem } from '../components/ui/MaskedAvatars';
+import type { SpotlightMarqueeItem } from '../components/ui/MagneticSpotlightMarquee';
+import type { TrailPhoto } from '../components/ui/ImageTrail';
 
 export const LIFE_CULTURE_SCATTER_SETS: ScatterImageSet[] = [
   {
-    id: 'workplace-culture',
-    label: 'People & Operations',
+    id: 'engineering-shopfloor',
+    label: 'Engineering & Plant Floor',
     subtitle:
-      'ET Edge Best Organization to Work 2026 culture — furnace crews, QA analysts, safety teams, and plant operations.',
+      'SCADA furnace control, optical QA/QC verification, ISO 45001 safety walks, and high-voltage plant maintenance.',
     images: [
       {
-        src: ASSETS.teamFurnaceEngineers.src,
-        alt: ASSETS.teamFurnaceEngineers.alt,
-        caption: 'Furnace Engineering Crew',
+        src: ASSETS.cultureControlRoom.src,
+        alt: ASSETS.cultureControlRoom.alt,
+        caption: 'SCADA Furnace Control',
       },
       {
-        src: ASSETS.awardEtEdge2026.src,
-        alt: ASSETS.awardEtEdge2026.alt,
-        caption: 'ET Edge 2026 Recognition',
-        isEmblem: true,
-      },
-      {
-        src: ASSETS.teamSafetyHuddle.src,
-        alt: ASSETS.teamSafetyHuddle.alt,
-        caption: 'ISO 45001 Shift Safety',
-      },
-      {
-        src: ASSETS.teamMetallurgyLab.src,
-        alt: ASSETS.teamMetallurgyLab.alt,
+        src: ASSETS.cultureLabChemists.src,
+        alt: ASSETS.cultureLabChemists.alt,
         caption: 'QA & Assay Specialists',
       },
       {
-        src: ASSETS.csrPlantation.src,
-        alt: ASSETS.csrPlantation.alt,
-        caption: 'Employee Green Drive',
+        src: ASSETS.cultureSafetyWalk.src,
+        alt: ASSETS.cultureSafetyWalk.alt,
+        caption: 'ISO 45001 Safety Walk',
       },
       {
-        src: ASSETS.newCorporateOffice.src,
-        alt: ASSETS.newCorporateOffice.alt,
-        caption: '56 Chowringhee Office',
-      },
-    ],
-  },
-  {
-    id: 'workforce-health',
-    label: 'Health & Medical Camps',
-    subtitle:
-      'Multi-specialty health screening in collaboration with Abhaya Hospital supporting 200+ plant personnel.',
-    images: [
-      {
-        src: ASSETS.csrMedicalCamp.src,
-        alt: ASSETS.csrMedicalCamp.alt,
-        caption: 'Abhaya Health Camp 2026',
-      },
-      {
-        src: ASSETS.teamSafetyHuddle.src,
-        alt: ASSETS.teamSafetyHuddle.alt,
-        caption: 'Zero Harm Shift Briefing',
-      },
-      {
-        src: ASSETS.csrWater.src,
-        alt: ASSETS.csrWater.alt,
-        caption: 'RO Clean Water Stations',
-      },
-      {
-        src: ASSETS.officialPlantOverview.src,
-        alt: ASSETS.officialPlantOverview.alt,
-        caption: 'Bobbili Plant Corridor',
-      },
-      {
-        src: ASSETS.csrPlantation.src,
-        alt: ASSETS.csrPlantation.alt,
-        caption: 'Workforce Sapling Drive',
-      },
-      {
-        src: ASSETS.csrSchool.src,
-        alt: ASSETS.csrSchool.alt,
-        caption: 'Community Outreach Desk',
+        src: ASSETS.cultureMechanicalMaint.src,
+        alt: ASSETS.cultureMechanicalMaint.alt,
+        caption: 'Substation & Switchgear',
       },
     ],
   },
   {
-    id: 'education-civic',
-    label: 'Schools & Civic Water',
+    id: 'mentorship-campus',
+    label: 'Mentorship, Campus & Trade',
     subtitle:
-      'Classroom construction, computer infrastructure, educational family stipends, and drinking water systems.',
+      'ET Edge Best Organization to Work 2026 — graduate mentoring, export logistics desks, landscaped campuses, and team townhalls.',
     images: [
       {
-        src: ASSETS.csrSchool.src,
-        alt: ASSETS.csrSchool.alt,
-        caption: 'Rural School Support',
+        src: ASSETS.cultureTrainingWorkshop.src,
+        alt: ASSETS.cultureTrainingWorkshop.alt,
+        caption: 'Technical Mentorship',
       },
       {
-        src: ASSETS.csrWater.src,
-        alt: ASSETS.csrWater.alt,
-        caption: 'Bobbili Drinking Water',
+        src: ASSETS.cultureLogisticsDesk.src,
+        alt: ASSETS.cultureLogisticsDesk.alt,
+        caption: 'Export Logistics Desk',
       },
       {
-        src: ASSETS.csrPlantation.src,
-        alt: ASSETS.csrPlantation.alt,
-        caption: 'Team Plantation Drive',
+        src: ASSETS.cultureCampusGreen.src,
+        alt: ASSETS.cultureCampusGreen.alt,
+        caption: 'Green Plant Campus',
       },
       {
-        src: ASSETS.csrMedicalCamp.src,
-        alt: ASSETS.csrMedicalCamp.alt,
-        caption: 'Community Health Screening',
-      },
-      {
-        src: ASSETS.officialGreenBelt.src,
-        alt: ASSETS.officialGreenBelt.alt,
-        caption: 'Ecological Buffer Belt',
-      },
-      {
-        src: ASSETS.corporateHouse.src,
-        alt: ASSETS.corporateHouse.alt,
-        caption: 'CSR Governance Committee',
-      },
-    ],
-  },
-  {
-    id: 'solar-green',
-    label: 'Solar & Plant Growth',
-    subtitle:
-      'Rooftop solar generation, native sapling drives, and capacity milestones across 2010–2026.',
-    images: [
-      {
-        src: ASSETS.officialSolarRoof.src,
-        alt: ASSETS.officialSolarRoof.alt,
-        caption: 'Rooftop Photovoltaic Array',
-      },
-      {
-        src: ASSETS.csrPlantation.src,
-        alt: ASSETS.csrPlantation.alt,
-        caption: 'Native Sapling Plantation',
-      },
-      {
-        src: ASSETS.milestone2025Visual.src,
-        alt: ASSETS.milestone2025Visual.alt,
-        caption: '2025 Scaling Phase',
-      },
-      {
-        src: ASSETS.milestone2010Visual.src,
-        alt: ASSETS.milestone2010Visual.alt,
-        caption: '2010 Commissioning',
-      },
-      {
-        src: ASSETS.officialAerialComplex.src,
-        alt: ASSETS.officialAerialComplex.alt,
-        caption: 'Solar Shed Roofs · Bobbili',
-      },
-      {
-        src: ASSETS.solarPlant.src,
-        alt: ASSETS.solarPlant.alt,
-        caption: 'Industrial Solar Complex',
+        src: ASSETS.cultureTownhallAward.src,
+        alt: ASSETS.cultureTownhallAward.alt,
+        caption: 'Milestone Townhalls',
       },
     ],
   },
@@ -169,8 +75,8 @@ export const PLANT_REVEAL_ROWS: ImageRevealItem[] = [
     label: 'Bobbili Growth Centre Complex',
     category: 'Vizianagaram · Andhra Pradesh',
     subtitle: 'Primary submerged-arc smelting, 6,000 MT/mo AOD converter & ₹1,200 Cr project site',
-    image: ASSETS.officialAerialComplex.src,
-    alt: ASSETS.officialAerialComplex.alt,
+    image: ASSETS.officialPlantOverview.src,
+    alt: ASSETS.officialPlantOverview.alt,
     to: '/manufacturing',
   },
   {
@@ -189,8 +95,8 @@ export const PLANT_REVEAL_ROWS: ImageRevealItem[] = [
     label: 'Visakhapatnam Port Gateway',
     category: 'Coastal Andhra · Export Corridor',
     subtitle: 'Director office (Visakhapatnam 530003) & Three Star Export House marine bulk dispatch',
-    image: ASSETS.portLogistics.src,
-    alt: ASSETS.portLogistics.alt,
+    image: ASSETS.siteVizagHarbour.src,
+    alt: ASSETS.siteVizagHarbour.alt,
     to: '/contact',
   },
   {
@@ -199,8 +105,8 @@ export const PLANT_REVEAL_ROWS: ImageRevealItem[] = [
     label: 'Kolkata Head Office & Chowringhee',
     category: '21A Shakespeare Sarani · 56 Chowringhee',
     subtitle: 'Registered corporate headquarters under RoC Kolkata (CIN U27310WB2006PLC145016)',
-    image: ASSETS.newCorporateOffice.src,
-    alt: ASSETS.newCorporateOffice.alt,
+    image: ASSETS.siteKolkataTower.src,
+    alt: ASSETS.siteKolkataTower.alt,
     to: '/about',
   },
   {
@@ -209,8 +115,8 @@ export const PLANT_REVEAL_ROWS: ImageRevealItem[] = [
     label: 'Captive Solar, Wind & Green Belt',
     category: 'ISO 14067 · CBAM · Clean Power',
     subtitle: '83 MW solar & 29.6 MW wind sustainability disclosures with planted ecological buffers',
-    image: ASSETS.sustainabilityFeature.src,
-    alt: ASSETS.sustainabilityFeature.alt,
+    image: ASSETS.officialGreenBelt.src,
+    alt: ASSETS.officialGreenBelt.alt,
     to: '/sustainability',
   },
 ];
@@ -397,8 +303,8 @@ export const CSR_DIAGONAL_SLIDES: DiagonalCarouselSlide[] = [
     title: 'Classroom Construction & Digital IT Support',
     summary:
       'Expanding rural school classrooms, supplying computers and educational materials, and supporting employee family academic programmes.',
-    image: ASSETS.csrSchool.src,
-    alt: ASSETS.csrSchool.alt,
+    image: ASSETS.csrDiagClassroom.src,
+    alt: ASSETS.csrDiagClassroom.alt,
     to: '/community',
     actionLabel: 'Inspect CSR Education Records',
   },
@@ -418,82 +324,270 @@ export const CSR_DIAGONAL_SLIDES: DiagonalCarouselSlide[] = [
     id: 'csr-plantation-slide',
     category: 'Ecological Care',
     location: 'Bobbili & Dhalbhumgarh',
-    title: 'Native Sapling Plantation & Green Belt Drives',
+    title: 'Native Sapling Nurseries & Green Belt Drives',
     summary:
-      'Plant personnel and CSR volunteers maintain woodland buffer belts alongside elder-care and gaushala animal welfare assistance.',
-    image: ASSETS.csrPlantation.src,
-    alt: ASSETS.csrPlantation.alt,
+      'Plant personnel and CSR volunteers nurture native woodland buffer belts alongside elder-care and gaushala animal welfare assistance.',
+    image: ASSETS.csrDiagSapling.src,
+    alt: ASSETS.csrDiagSapling.alt,
     to: '/sustainability',
     actionLabel: 'View Environmental Scope',
   },
   {
     id: 'csr-health-slide',
     category: 'Workforce & Family Health',
-    location: '7 Jan 2026 · Bobbili Works',
-    title: 'Abhaya Hospital Multi-Specialty Check-Up Camp',
+    location: 'Bobbili & Plant Belt',
+    title: 'Preventive Community Health Screening',
     summary:
-      'Preventive health screening conducted with Abhaya Hospital physicians covering more than 200 plant personnel on-site.',
-    image: ASSETS.csrMedicalCamp.src,
-    alt: ASSETS.csrMedicalCamp.alt,
+      'Regular multi-specialty diagnostic checkups conducted with regional physicians covering plant personnel and neighbouring village families.',
+    image: ASSETS.csrDiagMedical.src,
+    alt: ASSETS.csrDiagMedical.alt,
     to: '/community',
-    actionLabel: 'Read Camp Report',
+    actionLabel: 'Read Camp Reports',
   },
 ];
 
 export const QA_PERSPECTIVE_SLIDES: PerspectiveSlide[] = [
   {
-    id: 'qa-plate-lab',
-    title: 'Spectrometric Assay & Sieve Verification',
-    subtitle: 'Metallurgical QA chemists verifying Mn, Si, Cr, C, P, S, and ppm-level boron/nitrogen tolerances.',
-    badge: 'ISO 9001 · QA Team',
-    image: ASSETS.teamMetallurgyLab.src,
-    alt: ASSETS.teamMetallurgyLab.alt,
+    id: 'qa-plate-oes',
+    title: 'Optical Emission Spectrometry & Spark Assay',
+    subtitle: 'Rapid multi-element verification covering Mn, Si, Cr, C, P, S, and ppm-level boron/nitrogen ceilings before heat release.',
+    badge: 'ISO 9001 · OES Lab',
+    image: ASSETS.qaDeckSpectrometer.src,
+    alt: ASSETS.qaDeckSpectrometer.alt,
     to: '/manufacturing',
     actionLabel: 'Inspect QA Route',
   },
   {
-    id: 'qa-plate-femn',
-    title: 'Ferro Manganese Series (HC, MC, LC & ULC)',
-    subtitle: 'High Carbon (70–78% Mn, Low Phos & Low Boron) paired with 6,000 MT/mo AOD refined grades.',
-    badge: '4 Grade Series',
-    image: ASSETS.officialProdFeMn.src,
-    alt: ASSETS.officialProdFeMn.alt,
-    specimenPlate: true,
-    to: '/products/high-carbon-ferro-manganese',
-    actionLabel: 'Open FeMn Tables',
+    id: 'qa-plate-aod',
+    title: '6,000 MT/mo AOD Decarburisation Refining',
+    subtitle: 'Argon Oxygen Decarburisation converter lowering carbon bands down to 0.5% max for automotive and specialty flat steels.',
+    badge: 'AOD Converter',
+    image: ASSETS.qaDeckAodConverter.src,
+    alt: ASSETS.qaDeckAodConverter.alt,
+    to: '/products/medium-carbon-ferro-manganese',
+    actionLabel: 'Open AOD Grades',
   },
   {
-    id: 'qa-plate-simn',
-    title: 'Silico Manganese Series (HC, MC & LC)',
-    subtitle: 'Primary deoxidizer & manganese-silicon alloying agent covering 55–70% Mn bands.',
-    badge: '3 Grade Series',
-    image: ASSETS.officialProdSiMn.src,
-    alt: ASSETS.officialProdSiMn.alt,
-    specimenPlate: true,
-    to: '/products/high-carbon-silico-manganese',
-    actionLabel: 'Open SiMn Tables',
+    id: 'qa-plate-sieve',
+    title: 'Precision Crushing & Sieve Calibration',
+    subtitle: 'Calibrated screening across standard 10–50 mm, 10–60 mm, and custom ladle sizing tolerances with low-fines inspection.',
+    badge: 'Sizing & Screening',
+    image: ASSETS.qaDeckSieveSizing.src,
+    alt: ASSETS.qaDeckSieveSizing.alt,
+    to: '/products',
+    actionLabel: 'Compare 10 Grade Tables',
   },
   {
-    id: 'qa-plate-fecr',
-    title: 'Low & Medium Carbon Ferro Chrome',
-    subtitle: 'Silicothermic & vacuum-treated 60–65% Cr min alloy for stainless and heat-resistant steels.',
-    badge: '2 Grade Series',
-    image: ASSETS.officialProdFeCr.src,
-    alt: ASSETS.officialProdFeCr.alt,
-    specimenPlate: true,
-    to: '/products/low-medium-carbon-ferro-chrome',
-    actionLabel: 'Open FeCr Tables',
+    id: 'qa-plate-heritage',
+    title: 'Submerged-Arc Smelting Discipline (2010–2026)',
+    subtitle: 'Scaling from 2 × 10 MVA commissioning in 2010 to multi-unit submerged-arc capacity across Andhra Pradesh and Jharkhand.',
+    badge: 'SAF Operations',
+    image: ASSETS.milestone2010Visual.src,
+    alt: ASSETS.milestone2010Visual.alt,
+    to: '/about',
+    actionLabel: 'Read Growth Timeline',
   },
   {
-    id: 'qa-plate-fesi',
-    title: 'Ferro Silicon (FeSi 70 & FeSi 72)',
-    subtitle: 'High-silicon ladle deoxidizer (70–72% Si min) engineered for electric-arc & integrated mills.',
-    badge: 'FeSi 70 / 72',
-    image: ASSETS.officialProdFeSi.src,
-    alt: ASSETS.officialProdFeSi.alt,
-    specimenPlate: true,
-    to: '/products/ferro-silicon',
-    actionLabel: 'Open FeSi Tables',
+    id: 'qa-plate-export',
+    title: 'Certified FIBC Jumbo Bag Export Dispatch',
+    subtitle: 'Batch-tagged 1-tonne jumbo bags and bulk container loading routed directly through Visakhapatnam Harbour Port.',
+    badge: 'Three Star Export',
+    image: ASSETS.qaDeckExportBags.src,
+    alt: ASSETS.qaDeckExportBags.alt,
+    to: '/contact?tab=quote',
+    actionLabel: 'Request Export Quote',
   },
 ];
+
+export const FUNCTIONAL_STEWARD_AVATARS: MaskedAvatarItem[] = [
+  {
+    avatar: ASSETS.avatarMetallurgy.src,
+    name: 'Metallurgy',
+    role: 'Submerged-Arc Reduction & Slag Chemistry',
+  },
+  {
+    avatar: ASSETS.avatarPlantOps.src,
+    name: 'Operations',
+    role: 'Bobbili & Dhalbhumgarh Furnace Bays · 6,000 MT/mo AOD',
+  },
+  {
+    avatar: ASSETS.avatarQaLab.src,
+    name: 'Assay Lab',
+    role: 'OES Spectrometry · ISO 9001 Traceability',
+  },
+  {
+    avatar: ASSETS.avatarExportDesk.src,
+    name: 'Exports',
+    role: 'Visakhapatnam Port Corridor · ~35 Destination Countries',
+  },
+  {
+    avatar: ASSETS.avatarEsgLead.src,
+    name: 'Clean Energy',
+    role: 'ISO 14067 CFP · Solar, Wind & CBAM Disclosures',
+  },
+];
+
+export const INDUSTRIAL_ARCHIVE_TRAIL_PHOTOS: TrailPhoto[] = [
+  { src: ASSETS.trailArchiveCrusher.src, alt: ASSETS.trailArchiveCrusher.alt },
+  { src: ASSETS.trailArchiveOreYard.src, alt: ASSETS.trailArchiveOreYard.alt },
+  { src: ASSETS.trailArchiveLadleCrane.src, alt: ASSETS.trailArchiveLadleCrane.alt },
+  { src: ASSETS.trailArchiveBaghouse.src, alt: ASSETS.trailArchiveBaghouse.alt },
+  { src: ASSETS.trailArchiveWeighbridge.src, alt: ASSETS.trailArchiveWeighbridge.alt },
+];
+
+export const GLOBAL_CAPABILITY_SPOTLIGHT_ITEMS: SpotlightMarqueeItem[] = [
+  {
+    id: 'spot-export-reach',
+    eyebrow: 'Global Export Footprint',
+    title: '~35 Destination Countries',
+    metric: 'ICRA Aug 2026',
+    detail: 'Serving primary steelmakers across Europe, East Asia, Middle East, and the Americas via deep-water maritime lanes.',
+  },
+  {
+    id: 'spot-aod-refining',
+    eyebrow: 'Low-Carbon Refining',
+    title: '6,000 MT/mo AOD Line',
+    metric: '≤ 0.5% C',
+    detail: 'Argon Oxygen Decarburisation converter engineered for automotive flat steels and specialty low-nitrogen manganese alloys.',
+  },
+  {
+    id: 'spot-export-house',
+    eyebrow: 'DGFT Recognition',
+    title: 'Three Star Export House',
+    metric: 'Bulk Corridor',
+    detail: 'Direct port haulage connecting Vizianagaram and Singhbhum East works with Visakhapatnam Harbour Port.',
+  },
+  {
+    id: 'spot-trace-elements',
+    eyebrow: 'Specialty Chemistry',
+    title: 'Low P · Low B · Low N',
+    metric: '≤ 50 ppm B',
+    detail: 'Dedicated tight-specification heats for clean-steel converters, stainless mills, and foundry alloy additions.',
+  },
+  {
+    id: 'spot-cbam',
+    eyebrow: 'Carbon Accounting',
+    title: 'ISO 14067 & EU CBAM',
+    metric: 'Q4 2023 Ready',
+    detail: 'Product carbon footprint documentation structured for European Union Border Adjustment disclosures.',
+  },
+  {
+    id: 'spot-clean-power',
+    eyebrow: 'Renewable Disclosures',
+    title: '83 MW Solar · 29.6 MW Wind',
+    metric: 'Operational',
+    detail: 'Documented renewable portfolio kept transparent and distinct from planned 90 MW Ghatsila waste heat recovery.',
+  },
+  {
+    id: 'spot-expansion',
+    eyebrow: 'Next Capacity Horizon',
+    title: '₹1,200 Cr Bobbili Expansion',
+    metric: '93.43 Acres',
+    detail: 'Listed multi-furnace expansion alongside Kadambera DRI integration for next-decade global steel demand.',
+  },
+];
+
+export const HOME_PIXEL_TRAIL_IMAGES: string[] = [
+  ASSETS.pixelTrailTappingSparks.src,
+  ASSETS.pixelTrailElectrodeColumn.src,
+  ASSETS.pixelTrailManganeseCrystals.src,
+  ASSETS.pixelTrailCastingBeds.src,
+  ASSETS.pixelTrailSiliconSheen.src,
+  ASSETS.pixelTrailNightPlant.src,
+];
+
+export const HOME_CAREERS_SCATTER_SETS: ScatterImageSet[] = [
+  {
+    id: 'home-plant-engineering',
+    label: 'Smelting Floor, Assay & Zero-Harm Culture',
+    subtitle:
+      'ET Edge Best Organization to Work 2026 — morning furnace briefings, OES laboratory verification, and shift safety milestones.',
+    images: [
+      {
+        src: ASSETS.scatterHomeHelmetBriefing.src,
+        alt: ASSETS.scatterHomeHelmetBriefing.alt,
+        caption: ASSETS.scatterHomeHelmetBriefing.caption,
+      },
+      {
+        src: ASSETS.scatterHomeLabSpectrometer.src,
+        alt: ASSETS.scatterHomeLabSpectrometer.alt,
+        caption: ASSETS.scatterHomeLabSpectrometer.caption,
+      },
+      {
+        src: ASSETS.scatterHomeSafetyAward.src,
+        alt: ASSETS.scatterHomeSafetyAward.alt,
+        caption: ASSETS.scatterHomeSafetyAward.caption,
+      },
+    ],
+  },
+  {
+    id: 'home-energy-export',
+    label: 'Clean Power, Export Bay & Maritime Trade',
+    subtitle:
+      'Captive solar utility engineers, certified FIBC bulk bag dispatch teams, and ocean-going coastal vessel logistics.',
+    images: [
+      {
+        src: ASSETS.scatterHomeSolarInspection.src,
+        alt: ASSETS.scatterHomeSolarInspection.alt,
+        caption: ASSETS.scatterHomeSolarInspection.caption,
+      },
+      {
+        src: ASSETS.scatterHomeDispatchYard.src,
+        alt: ASSETS.scatterHomeDispatchYard.alt,
+        caption: ASSETS.scatterHomeDispatchYard.caption,
+      },
+      {
+        src: ASSETS.homeAwardExportStar.src,
+        alt: ASSETS.homeAwardExportStar.alt,
+        caption: 'Bay of Bengal bulk dispatch',
+      },
+    ],
+  },
+];
+
+export const HOME_AWARD_EDITORIAL_PLATES = [
+  {
+    id: 'plate-workplace',
+    category: 'Workplace' as const,
+    year: '2026',
+    title: 'ET Edge Best Organization to Work',
+    issuer: 'ET Edge · The Economic Times',
+    summary:
+      'Recognising Berry Alloys Limited’s employee-centric culture, preventive healthcare camps, and safe industrial workplaces across plant sites.',
+    asset: ASSETS.homeAwardWorkplaceTeam,
+  },
+  {
+    id: 'plate-brand',
+    category: 'Brand & Corporate' as const,
+    year: '2025',
+    title: 'ET Best Brand of 2025',
+    issuer: 'The Economic Times',
+    summary:
+      'Celebrating brand trust, supply reliability, and consistent metallurgical quality across domestic and global steelmaking partners.',
+    asset: ASSETS.homeAwardBrandTrophy,
+  },
+  {
+    id: 'plate-social',
+    category: 'Social Impact' as const,
+    year: '2026',
+    title: 'ICC Social Impact Jury Recognition',
+    issuer: 'Indian Chamber of Commerce',
+    summary:
+      'Honouring grassroots rural education infrastructure, clean drinking water plants, medical outreach, and ecological stewardship around plant belts.',
+    asset: ASSETS.homeAwardSocialImpact,
+  },
+  {
+    id: 'plate-leadership',
+    category: 'Leadership' as const,
+    year: '2026',
+    title: 'JM Financial Hurun India Founders’ Award',
+    issuer: 'Hurun India & JM Financial',
+    summary:
+      'Recognising entrepreneurial leadership and sustained value creation scaling Indian bulk ferro-alloy manufacturing to international markets.',
+    asset: ASSETS.homeAwardFounderSummit,
+  },
+] as const;
+
+
+
 

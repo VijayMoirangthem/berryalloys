@@ -34,13 +34,26 @@ export interface ImageScatterProps {
  * without touching stage walls or occluding the central text block.
  * Normalized in [-1..1] relative to mathematically clamped half-bounds.
  */
-const PERIMETER_SLOTS: Array<{ nx: number; ny: number; rot: number }> = [
+const PERIMETER_SLOTS_6: Array<{ nx: number; ny: number; rot: number }> = [
   { nx: -0.66, ny: -0.92, rot: -4.0 }, // Upper-Left (inward arc)
   { nx: 0.64, ny: -0.90, rot: 3.5 },   // Upper-Right (inward arc)
   { nx: -1.0, ny: 0.0, rot: 2.2 },     // Mid-Left (outer flank)
   { nx: 1.0, ny: 0.0, rot: -2.5 },     // Mid-Right (outer flank)
   { nx: -0.64, ny: 0.92, rot: -2.5 },  // Lower-Left (inward arc)
   { nx: 0.66, ny: 0.90, rot: 4.0 },    // Lower-Right (inward arc)
+];
+
+const PERIMETER_SLOTS_4: Array<{ nx: number; ny: number; rot: number }> = [
+  { nx: -0.78, ny: -0.76, rot: -3.2 }, // Upper-Left
+  { nx: 0.78, ny: -0.74, rot: 3.0 },   // Upper-Right
+  { nx: -0.76, ny: 0.76, rot: 2.4 },   // Lower-Left
+  { nx: 0.78, ny: 0.74, rot: -2.8 },   // Lower-Right
+];
+
+const PERIMETER_SLOTS_3: Array<{ nx: number; ny: number; rot: number }> = [
+  { nx: -0.84, ny: -0.62, rot: -3.4 }, // Upper-Left
+  { nx: 0.84, ny: -0.58, rot: 3.1 },   // Upper-Right
+  { nx: 0.72, ny: 0.76, rot: -2.4 },   // Lower-Right counterweight
 ];
 
 /**
@@ -91,7 +104,10 @@ export function ImageScatter({
   const cardGeometry = useMemo(() => {
     const w = stageSize.width;
     const h = stageSize.height;
-    const cardW = Math.round(Math.max(158, Math.min(224, w * 0.18)));
+    const isFourCardSet = (currentSet?.images.length ?? 6) <= 4;
+    const cardW = isFourCardSet
+      ? Math.round(Math.max(196, Math.min(276, w * 0.23)))
+      : Math.round(Math.max(158, Math.min(224, w * 0.18)));
     // Photo box = aspect-[16/10], plus 16px padding and ~28px caption row
     const photoH = Math.round((cardW - 16) * (10 / 16));
     const cardH = photoH + 44;
@@ -103,13 +119,16 @@ export function ImageScatter({
     const maxOffsetY = Math.max(110, h / 2 - cardH / 2 - edgePadY);
 
     return { cardW, cardH, maxOffsetX, maxOffsetY };
-  }, [stageSize.width, stageSize.height]);
+  }, [stageSize.width, stageSize.height, currentSet?.images.length]);
 
   const cardPositions = useMemo(() => {
     if (!currentSet) return [];
     const { maxOffsetX, maxOffsetY } = cardGeometry;
+    const len = currentSet.images.length;
+    const slots =
+      len <= 3 ? PERIMETER_SLOTS_3 : len <= 4 ? PERIMETER_SLOTS_4 : PERIMETER_SLOTS_6;
     return currentSet.images.map((_, index) => {
-      const slot = PERIMETER_SLOTS[index % PERIMETER_SLOTS.length];
+      const slot = slots[index % slots.length];
       return {
         x: Math.round(slot.nx * maxOffsetX),
         y: Math.round(slot.ny * maxOffsetY),
@@ -491,7 +510,7 @@ export function ImageScatter({
               </p>
             )}
             <p className="mt-2.5 pt-2 border-t border-[#10243A]/10 dark:border-[#F4F8FC]/10 text-[10px] font-mono-tabular uppercase tracking-wider text-[#465C72] dark:text-[#B5C5D7]">
-              {currentSet.images.length} Field Plates · Hover Frame To Focus
+              {currentSet.images.length} Field Plates · Hover Or Tap Frame
             </p>
           </div>
         </div>

@@ -1,6 +1,6 @@
 import { useEffect, useRef, useState } from 'react';
-import { Link } from 'react-router-dom';
-import { ArrowRight, ArrowUpRight, Mail, MapPin, Phone } from 'lucide-react';
+import { Link, useNavigate } from 'react-router-dom';
+import { ArrowRight, ArrowUpRight, Briefcase, FileText, Mail, MapPin, Phone } from 'lucide-react';
 import { motion } from 'motion/react';
 import gsap from 'gsap';
 import { ScrollTrigger } from 'gsap/ScrollTrigger';
@@ -13,13 +13,30 @@ import {
   OFFICES,
   UPCOMING_OFFICE_NOTICE,
 } from '../data/company';
-import { CSR_STORIES, NEWS_ITEMS } from '../data/communityNewsCareersDocs';
+import {
+  CAREERS_DEPARTMENTS,
+  CORPORATE_DOCUMENT_GROUPS,
+  CSR_STORIES,
+  JOB_VACANCIES,
+  NEWS_ITEMS,
+} from '../data/communityNewsCareersDocs';
 import { CredentialLogoMarquee, CredentialStackedMatrix } from '../data/CredentialMatrices';
-import { CORPORATE_DOSSIER_PAGES } from '../data/showcaseCollections';
+import {
+  BERRY_COMPENDIUM_BOOKS,
+  CORPORATE_DOSSIER_PAGES,
+  CSR_DIAGONAL_SLIDES,
+  FUNCTIONAL_STEWARD_AVATARS,
+  GLOBAL_CAPABILITY_SPOTLIGHT_ITEMS,
+  HOME_CAREERS_SCATTER_SETS,
+  HOME_PIXEL_TRAIL_IMAGES,
+  PLANT_REVEAL_ROWS,
+  QA_PERSPECTIVE_SLIDES,
+} from '../data/showcaseCollections';
 import { useGuide } from '../context/GuideContext';
 import { BerryMonogram } from '../components/BerryMonogram';
 import { BrandLockup } from '../components/BrandLockup';
 import { ChapterRail } from '../components/ChapterRail';
+import { CleanEnergyJourney } from '../components/CleanEnergyJourney';
 import { ClientLogoStrip } from '../components/ClientLogoStrip';
 import { InsightsPreview } from '../components/InsightsPreview';
 import { DirectorPortraitSection } from '../components/DirectorPortraitSection';
@@ -29,11 +46,13 @@ import { GlobalPresenceSection } from '../components/GlobalPresenceSection';
 import { LogisticsJourney } from '../components/LogisticsJourney';
 import { GrowthChronicle } from '../components/GrowthChronicle';
 import { HomeAlloyShowcase } from '../components/HomeAlloyShowcase';
+import { HomeAwardsSection } from '../components/HomeAwardsSection';
 import { HomeFaqSection } from '../components/HomeFaqSection';
 import { ManufacturingScrollStory } from '../components/ManufacturingScrollStory';
 import { MetallicShaderCanvas } from '../components/MetallicShaderCanvas';
 import { PlantMediaGallery } from '../components/PlantMediaGallery';
 import { ResilientImage } from '../components/ResilientImage';
+import { SmeltingRefiningJourney } from '../components/SmeltingRefiningJourney';
 import { ImageReveal } from '../components/motion/ImageReveal';
 import { ScrollReveal } from '../components/motion/ScrollReveal';
 import { useIndustrialReveals } from '../components/motion/useIndustrialReveals';
@@ -42,18 +61,30 @@ import { ScrollCue } from '../components/motion/ScrollCue';
 import { SplitText } from '../components/motion/SplitText';
 import { SpotlightSurface } from '../components/motion/SpotlightSurface';
 import { AnimatedTooltip } from '../components/ui/AnimatedTooltip';
+import { BookCfg, BooksShowcase } from '../components/ui/BooksShowcase';
+import { CursorCard } from '../components/ui/CursorCard';
+import { DiagonalCarousel } from '../components/ui/DiagonalCarousel';
 import { FlipFadeText } from '../components/ui/FlipFadeText';
 import { FlipText } from '../components/ui/FlipText';
 import { GooeyTextReveal } from '../components/ui/GooeyTextReveal';
+import { ImageRevealList } from '../components/ui/ImageRevealList';
+import { ImageScatter } from '../components/ui/ImageScatter';
 import { IndustrialButton } from '../components/ui/IndustrialButton';
 import { InteractiveBook } from '../components/ui/InteractiveBook';
 import { InteractiveParticles } from '../components/ui/InteractiveParticles';
+import { MagneticSpotlightMarquee } from '../components/ui/MagneticSpotlightMarquee';
+import { MaskedAvatars } from '../components/ui/MaskedAvatars';
 import { MorphText } from '../components/ui/MorphText';
+import { PerspectiveCarousel } from '../components/ui/PerspectiveCarousel';
+import { PerspectiveGrid } from '../components/ui/PerspectiveGrid';
+import { PixelatedImageTrail } from '../components/ui/PixelatedImageTrail';
+import { ScrollDissolveReveal } from '../components/ui/ScrollDissolveReveal';
 import { onLoaderCleared, setMotionInitStatus } from '../lib/motionDiagnostics';
 
 gsap.registerPlugin(ScrollTrigger);
 
 export function HomePage() {
+  const navigate = useNavigate();
   const pageRootRef = useRef<HTMLDivElement>(null);
   const heroSectionRef = useRef<HTMLElement>(null);
   const heroMediaRef = useRef<HTMLDivElement>(null);
@@ -171,6 +202,26 @@ export function HomePage() {
   const handleEnquireAlloy = (slug: string) => {
     setEnquiryProductSlug(slug);
     scrollToChapter('enquiry');
+  };
+
+  const handleBookPrimary = (book: BookCfg) => {
+    if (book.targetRoute) {
+      navigate(book.targetRoute);
+      return;
+    }
+    navigate('/documents');
+  };
+
+  const handleBookSecondary = (book: BookCfg) => {
+    if (book.id === 'femn-aod-handbook' || book.id === 'simn-fesi-fecr-compendium') {
+      scrollToChapter('enquiry');
+      return;
+    }
+    if (book.id === 'csr-community-chronicle') {
+      navigate('/careers');
+      return;
+    }
+    navigate(book.targetRoute ?? '/documents');
   };
 
   useIndustrialReveals(pageRootRef, ['overview', 'process', 'leadership', 'alloys']);
@@ -422,9 +473,12 @@ export function HomePage() {
                 </p>
                 <p className="text-xs text-[#F4F8FC]/75">
                   <AnimatedTooltip
-                    variant="copper"
-                    label="DGFT Three Star Export House"
-                    sublabel="Recognized sustained bulk export track record from eastern India."
+                    variant="smaug"
+                    content="DGFT Three Star Export House"
+                    sublabel="Sustained bulk export corridor"
+                    accentColor="#69C5F5"
+                    shapeColor="#07111F"
+                    textColor="#F4F8FC"
                   >
                     <span
                       tabIndex={0}
@@ -523,17 +577,41 @@ export function HomePage() {
                 </p>
                 <p>
                   From first submerged-arc furnaces commissioned in 2010 to multi-unit operations spanning{' '}
-                  <strong className="font-semibold text-[#10243A] dark:text-[#F4F8FC]">
+                  <CursorCard
+                    image={ASSETS.cursorBobbiliSubstation.src}
+                    imageAlt={ASSETS.cursorBobbiliSubstation.alt}
+                    eyebrow="Andhra Pradesh · Primary Complex"
+                    title="Bobbili Growth Centre"
+                    badge="Captive 132kV Feed"
+                    description="Primary submerged-arc smelting bays, 6,000 MT/mo AOD converter, and ₹1,200 Cr expansion hub in Vizianagaram."
+                    to="/manufacturing"
+                  >
                     Bobbili Growth Centre
-                  </strong>{' '}
+                  </CursorCard>{' '}
                   (Vizianagaram, Andhra Pradesh) and{' '}
-                  <strong className="font-semibold text-[#10243A] dark:text-[#F4F8FC]">
+                  <CursorCard
+                    image={ASSETS.cursorJharkhandFurnace.src}
+                    imageAlt={ASSETS.cursorJharkhandFurnace.alt}
+                    eyebrow="Jharkhand · Mineral Belt Works"
+                    title="Kadambeda / Dhalbhumgarh"
+                    badge="24 MVA + DRI Site"
+                    description="Singhbhum East smelting complex positioned directly in eastern India's manganese and chrome mineral belt."
+                    to="/manufacturing"
+                  >
                     Kadambeda Village / Dhalbhumgarh
-                  </strong>{' '}
+                  </CursorCard>{' '}
                   (Singhbhum East, Jharkhand), the company links eastern India’s mineral belt directly to global vessels via{' '}
-                  <strong className="font-semibold text-[#10243A] dark:text-[#F4F8FC]">
+                  <CursorCard
+                    image={ASSETS.cursorVizagVessel.src}
+                    imageAlt={ASSETS.cursorVizagVessel.alt}
+                    eyebrow="Maritime Export Corridor"
+                    title="Visakhapatnam Harbour Port"
+                    badge="Three Star Export"
+                    description="Deep-water east-coast berth routing containerised FIBC jumbo bags and bulk alloy shipments to ~35 countries."
+                    to="/contact"
+                  >
                     Visakhapatnam Harbour Port
-                  </strong>
+                  </CursorCard>
                   .
                 </p>
               </div>
@@ -746,6 +824,28 @@ export function HomePage() {
               </div>
             </div>
 
+            {/* VengeanceUI MaskedAvatars — Cross-Functional Operational Stewards */}
+            <div className="bg-[#F1F6FB] dark:bg-[#12243B] border border-[#10243A]/12 dark:border-[#F4F8FC]/14 p-5 sm:p-6 flex flex-col lg:flex-row lg:items-center justify-between gap-6">
+              <div className="space-y-1.5 max-w-md">
+                <p className="text-[11px] font-mono-tabular uppercase tracking-widest text-brand dark:text-[#69C5F5]">
+                  Cross-Functional Operational Stewards
+                </p>
+                <h4 className="font-display text-xl sm:text-2xl font-bold uppercase text-[#10243A] dark:text-[#F4F8FC]">
+                  Five Engineering Disciplines Behind Every Heat
+                </h4>
+                <p className="text-xs text-[#465C72] dark:text-[#B5C5D7] leading-relaxed">
+                  Metallurgy, continuous furnace operations, optical spectrometry QA/QC, maritime export logistics, and clean-energy compliance work as one integrated chain.
+                </p>
+              </div>
+              <MaskedAvatars
+                avatars={FUNCTIONAL_STEWARD_AVATARS}
+                size={76}
+                column={46}
+                border={7}
+                ringed
+              />
+            </div>
+
             <div className="grid grid-cols-2 lg:grid-cols-4 border-t border-b border-[#10243A]/12 dark:border-[#F4F8FC]/12 divide-y sm:divide-y-0 sm:divide-x divide-[#10243A]/12 dark:divide-[#F4F8FC]/12 bg-white dark:bg-[#12243B]">
               {COMPANY_INFO.workforceStory.highlights.map((item, idx) => (
                 <motion.div
@@ -878,8 +978,52 @@ export function HomePage() {
       {/* 05 / ALLOYS — Interactive Alloy Explorer (#alloys) */}
       <HomeAlloyShowcase onEnquireAlloy={handleEnquireAlloy} />
 
+      {/* Restored WebGL Sobel-Edge + FBM Noise Scroll Dissolve Bridge: Molten Furnace Tap -> Deep-Water Export Berth */}
+      <ScrollDissolveReveal
+        image1={ASSETS.dissolveFurnaceTap.src}
+        image2={ASSETS.dissolveRefinedAlloyShip.src}
+        image1Alt={ASSETS.dissolveFurnaceTap.alt}
+        image2Alt={ASSETS.dissolveRefinedAlloyShip.alt}
+        edgeColor="#69C5F5"
+        leftKicker="Stage A · Submerged-Arc Reduction"
+        leftTitle="1,500°C Molten Alloy Tapping"
+        leftDescription="Continuous high-temperature reduction across Bobbili and Dhalbhumgarh furnaces establishes primary manganese, silicon, and chromium alloy chemistry."
+        rightKicker="Stage B · Deep-Water Maritime Berth"
+        rightTitle="Precision Export Vessel Dispatch"
+        rightDescription="Assayed, sized, and packed into certified FIBC jumbo bags and bulk lots for direct maritime export through Visakhapatnam Harbour Port."
+      />
+
       {/* 06 / PROCESS — Pinned Desktop Manufacturing Sequence (#process) */}
       <ManufacturingScrollStory />
+
+      {/* Restored Kinetic PixelatedImageTrail Interlude — Exclusive Furnace & Macro Photography */}
+      <section
+        aria-label="Interactive Furnace Floor & Alloy Macro Photographic Stage"
+        className="relative bg-[#07111F] text-[#F4F8FC] border-t border-[#F4F8FC]/12"
+      >
+        <PixelatedImageTrail
+          images={HOME_PIXEL_TRAIL_IMAGES}
+          slices={4}
+          className="min-h-[420px] sm:min-h-[500px] lg:min-h-[560px] flex items-center justify-center bg-[#07111F]"
+        >
+          <div className="max-w-3xl mx-auto px-6 py-16 text-center space-y-5">
+            <p className="text-[11px] font-mono-tabular uppercase tracking-[0.26em] text-[#69C5F5]">
+              Kinetic Plant Floor &amp; Macro Metallurgy
+            </p>
+            <h2 className="font-display text-3xl sm:text-5xl lg:text-6xl font-bold uppercase tracking-tight leading-[0.96] text-[#F4F8FC]">
+              Move Across Heat, Arc &amp; Crystalline Grain
+            </h2>
+            <p className="text-xs sm:text-sm text-[#B5C5D7] max-w-xl mx-auto leading-relaxed">
+              Sweep your cursor or drag across the viewport to release sliced close-ups of submerged-arc tapping, Soderberg electrodes, cast alloy beds, and night smelter operations.
+            </p>
+            <div className="pt-2 flex flex-wrap items-center justify-center gap-4 text-[11px] font-mono-tabular uppercase tracking-widest text-[#69C5F5]/90">
+              <span>6 Exclusive Furnace &amp; Alloy Plates</span>
+              <span aria-hidden="true" className="text-[#F4F8FC]/30">/</span>
+              <span>Pointer &amp; Touch Responsive</span>
+            </div>
+          </div>
+        </PixelatedImageTrail>
+      </section>
 
       {/* 07 / QUALITY — Systems, Ratings, ET Edge 2026 & Chemistry Table */}
       <section
@@ -909,26 +1053,33 @@ export function HomePage() {
                   Website-Reported ISO Management Systems
                 </h3>
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 text-xs">
-                  {CERTIFICATIONS.map((c) => (
-                    <SpotlightSurface
-                      key={c.code}
-                      className="border border-[#10243A]/12 dark:border-[#F4F8FC]/14 bg-white dark:bg-[#12243B] p-3.5"
-                    >
-                      <AnimatedTooltip
-                        variant="graphite"
-                        label={c.code}
-                        sublabel={c.scope}
+                  {CERTIFICATIONS.map((c, idx) => {
+                    const bubbleVariants = ['dori', 'smaug', 'indis', 'sadoc'] as const;
+                    const bubbleVariant = bubbleVariants[idx % bubbleVariants.length];
+                    return (
+                      <SpotlightSurface
+                        key={c.code}
+                        className="border border-[#10243A]/12 dark:border-[#F4F8FC]/14 bg-white dark:bg-[#12243B] p-3.5"
                       >
-                        <p
-                          tabIndex={0}
-                          className="font-mono-tabular font-semibold text-[#10243A] dark:text-[#F4F8FC] underline decoration-dotted underline-offset-4 cursor-help focus-visible:outline-none"
+                        <AnimatedTooltip
+                          variant={bubbleVariant}
+                          content={c.code}
+                          sublabel="Audited Management System"
+                          accentColor={idx % 2 === 0 ? '#006393' : '#C9233B'}
+                          shapeColor="#10243A"
+                          textColor="#F4F8FC"
                         >
-                          {c.code}
-                        </p>
-                      </AnimatedTooltip>
-                      <p className="text-[#465C72] dark:text-[#B5C5D7] mt-0.5">{c.scope}</p>
-                    </SpotlightSurface>
-                  ))}
+                          <p
+                            tabIndex={0}
+                            className="font-mono-tabular font-semibold text-[#10243A] dark:text-[#F4F8FC] underline decoration-dotted underline-offset-4 cursor-help focus-visible:outline-none"
+                          >
+                            {c.code}
+                          </p>
+                        </AnimatedTooltip>
+                        <p className="text-[#465C72] dark:text-[#B5C5D7] mt-0.5">{c.scope}</p>
+                      </SpotlightSurface>
+                    );
+                  })}
                 </div>
               </div>
 
@@ -1115,6 +1266,32 @@ export function HomePage() {
             </div>
           </div>
 
+          {/* Restored Interactive 3D Perspective QA & Refining Inspection Deck */}
+          <div className="pt-10 border-t border-[#10243A]/14 dark:border-[#F4F8FC]/14 space-y-5">
+            <div className="flex flex-col sm:flex-row sm:items-end justify-between gap-2">
+              <div>
+                <p className="text-[11px] font-mono-tabular uppercase tracking-widest text-brand dark:text-[#69C5F5]">
+                  3D Quality &amp; Refining Deck
+                </p>
+                <h3 className="font-display text-2xl sm:text-3xl font-bold uppercase text-[#10243A] dark:text-[#F4F8FC]">
+                  From Spectrometer Spark To Export Packaging
+                </h3>
+              </div>
+              <p className="text-xs text-[#465C72] dark:text-[#B5C5D7]">
+                Swipe or select any plate to inspect refining, sizing, and laboratory controls.
+              </p>
+            </div>
+            <PerspectiveCarousel
+              slides={QA_PERSPECTIVE_SLIDES}
+              heading="QA, Refining & Export Inspection Deck"
+            />
+          </div>
+
+          {/* Animated Metallurgical Process Schematic */}
+          <div className="pt-10 border-t border-[#10243A]/14 dark:border-[#F4F8FC]/14">
+            <SmeltingRefiningJourney />
+          </div>
+
           {/* Interactive 4x2 Stacked Credential Hover Grid */}
           <div className="pt-10 border-t border-[#10243A]/14 dark:border-[#F4F8FC]/14 space-y-5">
             <div className="flex flex-col sm:flex-row sm:items-end justify-between gap-2">
@@ -1135,7 +1312,10 @@ export function HomePage() {
         </div>
       </section>
 
-      {/* 08 / RESPONSIBILITY — Sustainability Scope & Visual Grassroots CSR */}
+      {/* 08 / AWARDS — Awards, Recognitions & Verified Achievements (#awards) */}
+      <HomeAwardsSection />
+
+      {/* 09 / RESPONSIBILITY — Sustainability Scope & Visual Grassroots CSR */}
       <section
         id="responsibility"
         aria-labelledby="responsibility-heading"
@@ -1147,7 +1327,7 @@ export function HomePage() {
             <div className="lg:col-span-6 space-y-6">
               <div className="space-y-4">
                 <p className="text-xs font-mono-tabular uppercase tracking-widest text-brand dark:text-[#69C5F5]">
-                  08 / Sustainability & Community Stewardship
+                  09 / Sustainability & Community Stewardship
                 </p>
                 <h2
                   id="responsibility-heading"
@@ -1233,6 +1413,11 @@ export function HomePage() {
             </div>
           </div>
 
+          {/* Interactive Clean Energy & Planned Waste-Heat Recovery Schematic */}
+          <div className="pt-12 border-t border-[#10243A]/14 dark:border-[#F4F8FC]/12">
+            <CleanEnergyJourney />
+          </div>
+
           {/* Part 2: Grassroots CSR Photography & Featured Camp */}
           <div className="pt-14 border-t border-[#10243A]/14 dark:border-[#F4F8FC]/12 space-y-10">
             <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-stretch bg-white dark:bg-[#12243B] border border-[#10243A]/14 dark:border-[#F4F8FC]/14 overflow-hidden">
@@ -1275,7 +1460,28 @@ export function HomePage() {
               </div>
             </div>
 
-            {/* Ecological Plantation Fieldwork (Exclusive Placement) + Memorial & Education Records */}
+            {/* Restored Interactive Diagonal CSR Fieldwork Carousel */}
+            <div className="space-y-4">
+              <div className="flex flex-col sm:flex-row sm:items-end justify-between gap-2">
+                <div>
+                  <p className="text-[11px] font-mono-tabular uppercase tracking-widest text-brand dark:text-[#69C5F5]">
+                    Grassroots CSR Fieldwork Sequence
+                  </p>
+                  <h3 className="font-display text-2xl sm:text-3xl font-bold uppercase text-[#10243A] dark:text-[#F4F8FC]">
+                    Education, Clean Water, Green Belt &amp; Health
+                  </h3>
+                </div>
+                <p className="text-xs text-[#465C72] dark:text-[#B5C5D7]">
+                  Swipe or step through documented community programmes across plant belts.
+                </p>
+              </div>
+              <DiagonalCarousel
+                slides={CSR_DIAGONAL_SLIDES}
+                eyebrow="CSR Fieldwork Archive"
+              />
+            </div>
+
+            {/* Ecological Plantation Fieldwork + Memorial & Education Records */}
             <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-stretch">
               <figure className="lg:col-span-6 bg-white dark:bg-[#12243B] border border-[#10243A]/14 dark:border-[#F4F8FC]/14 overflow-hidden flex flex-col">
                 <ImageReveal direction="up" className="aspect-[16/10] bg-[#10243A]">
@@ -1334,7 +1540,7 @@ export function HomePage() {
         </div>
       </section>
 
-      {/* 09 / PRESENCE — Interactive Indian Facilities & Port Corridor */}
+      {/* 10 / PRESENCE — Interactive Indian Facilities & Port Corridor */}
       <section
         id="presence"
         aria-labelledby="presence-heading"
@@ -1344,7 +1550,7 @@ export function HomePage() {
           <div className="flex flex-col lg:flex-row lg:items-end justify-between gap-6 pb-8 border-b border-[#10243A]/15 dark:border-[#F4F8FC]/12">
             <div className="space-y-3 max-w-2xl">
               <p className="text-xs font-mono-tabular uppercase tracking-widest text-brand dark:text-[#69C5F5]">
-                09 / Global Presence
+                10 / Global Presence
               </p>
               <h2
                 id="presence-heading"
@@ -1358,94 +1564,49 @@ export function HomePage() {
             </p>
           </div>
 
+          {/* VengeanceUI Magnetic Spotlight Marquee — Global Corridors & Metallurgical Benchmarks */}
+          <div className="space-y-3">
+            <div className="flex flex-wrap items-center justify-between gap-2 text-[11px] font-mono-tabular uppercase tracking-widest text-[#465C72] dark:text-[#B5C5D7]">
+              <span className="text-brand dark:text-[#69C5F5]">
+                Magnetic Spotlight Corridors &amp; Export Capabilities
+              </span>
+              <span>Hover or touch any tile to illuminate &amp; pause</span>
+            </div>
+            <MagneticSpotlightMarquee
+              items={GLOBAL_CAPABILITY_SPOTLIGHT_ITEMS}
+              speedSeconds={40}
+            />
+          </div>
+
           <GlobalPresenceSection />
 
           <LogisticsJourney />
 
           <FacilityCorridorMap />
 
+          {/* Restored Interactive Site Directory with Floating Hover/Tap Image Reveal */}
           <div className="pt-8 border-t border-[#10243A]/14 dark:border-[#F4F8FC]/12 space-y-5">
             <div className="flex flex-col sm:flex-row sm:items-end justify-between gap-2">
               <div>
                 <p className="text-[11px] font-mono-tabular uppercase tracking-widest text-brand dark:text-[#69C5F5]">
-                  Site Directory
+                  Interactive Site Directory
                 </p>
                 <h3 className="font-display text-2xl sm:text-3xl font-bold uppercase text-[#10243A] dark:text-[#F4F8FC]">
                   Works, Export Gateways &amp; Corporate Hubs
                 </h3>
               </div>
               <p className="text-xs text-[#465C72] dark:text-[#B5C5D7]">
-                Select any facility corridor or corporate hub to inspect operational details.
+                Hover or tap any corridor row to unveil its site visual and inspect details.
               </p>
             </div>
-            <div className="divide-y divide-[#10243A]/12 dark:divide-[#F4F8FC]/12 border-t border-b border-[#10243A]/12 dark:border-[#F4F8FC]/12 bg-white dark:bg-[#12243B]">
-              {[
-                {
-                  index: '01',
-                  label: 'Bobbili Growth Centre Complex',
-                  category: 'Vizianagaram · Andhra Pradesh',
-                  subtitle: 'Primary submerged-arc smelting, 6,000 MT/mo AOD converter & ₹1,200 Cr project site',
-                  to: '/manufacturing',
-                },
-                {
-                  index: '02',
-                  label: 'Dhalbhumgarh & Ghatsila Works',
-                  category: 'Singhbhum East · Jharkhand',
-                  subtitle: '24 MVA furnaces, Unit-2 Kadambera DRI & planned 90 MW waste heat recovery integration',
-                  to: '/manufacturing',
-                },
-                {
-                  index: '03',
-                  label: 'Visakhapatnam Port Gateway',
-                  category: 'Coastal Andhra · Export Corridor',
-                  subtitle: 'Director office (Visakhapatnam 530003) & Three Star Export House marine bulk dispatch',
-                  to: '/contact',
-                },
-                {
-                  index: '04',
-                  label: 'Kolkata Head Office & Chowringhee',
-                  category: '21A Shakespeare Sarani · 56 Chowringhee',
-                  subtitle: 'Registered corporate headquarters under RoC Kolkata (CIN U27310WB2006PLC145016)',
-                  to: '/about',
-                },
-                {
-                  index: '05',
-                  label: 'Captive Solar, Wind & Green Belt',
-                  category: 'ISO 14067 · CBAM · Clean Power',
-                  subtitle: '83 MW solar & 29.6 MW wind sustainability disclosures with planted ecological buffers',
-                  to: '/sustainability',
-                },
-              ].map((site) => (
-                <Link
-                  key={site.index}
-                  to={site.to}
-                  className="group px-5 py-4 grid grid-cols-1 md:grid-cols-12 gap-3 items-baseline hover:bg-[#F1F6FB] dark:hover:bg-[#0D1B2E] transition-colors"
-                >
-                  <div className="md:col-span-4 flex items-baseline gap-3">
-                    <span className="font-mono-tabular text-xs text-brand dark:text-[#69C5F5]">
-                      {site.index}
-                    </span>
-                    <span className="font-display text-xl font-bold uppercase text-[#10243A] dark:text-[#F4F8FC] group-hover:text-brand dark:group-hover:text-[#69C5F5] transition-colors">
-                      {site.label}
-                    </span>
-                  </div>
-                  <p className="md:col-span-3 text-xs font-mono-tabular text-[#465C72] dark:text-[#B5C5D7]">
-                    {site.category}
-                  </p>
-                  <p className="md:col-span-4 text-xs text-[#465C72] dark:text-[#B5C5D7] leading-relaxed">
-                    {site.subtitle}
-                  </p>
-                  <span className="md:col-span-1 md:text-right inline-flex md:justify-end items-center text-brand dark:text-[#69C5F5]">
-                    <ArrowRight className="w-4 h-4 transition-transform group-hover:translate-x-1" aria-hidden="true" />
-                  </span>
-                </Link>
-              ))}
+            <div className="bg-white dark:bg-[#12243B]">
+              <ImageRevealList items={PLANT_REVEAL_ROWS} />
             </div>
           </div>
         </div>
       </section>
 
-      {/* 10 / UPDATES — Plant Gallery & Editorial Company Updates */}
+      {/* 11 / UPDATES — Plant Gallery & Editorial Company Updates */}
       <section
         id="updates"
         aria-labelledby="news-heading"
@@ -1459,7 +1620,7 @@ export function HomePage() {
               <div className="flex flex-col sm:flex-row sm:items-end justify-between gap-4">
                 <div>
                   <p className="text-xs font-mono-tabular uppercase tracking-widest text-brand dark:text-[#69C5F5] mb-2">
-                    10 / News &amp; Technical Articles
+                    11 / News &amp; Technical Articles
                   </p>
                   <h2
                     id="news-heading"
@@ -1529,17 +1690,239 @@ export function HomePage() {
         </div>
       </section>
 
-      {/* 11 / FAQ — Concise Pre-Enquiry Questions */}
+      {/* 12 / CAREERS & LIFE — Restored ImageScatter Polaroid Stage & Published Openings */}
+      <section
+        id="careers-life"
+        aria-labelledby="home-careers-heading"
+        className="scroll-mt-20 py-20 lg:py-28 bg-[#F1F6FB] text-[#10243A] dark:bg-[#0D1B2E] dark:text-[#F4F8FC] border-t border-[#10243A]/12 dark:border-[#F4F8FC]/12"
+      >
+        <div className="max-w-[1360px] mx-auto px-4 sm:px-6 lg:px-8 xl:px-14 2xl:px-8 space-y-12">
+          <div className="flex flex-col lg:flex-row lg:items-end justify-between gap-6 pb-8 border-b border-[#10243A]/14 dark:border-[#F4F8FC]/12">
+            <div className="space-y-3 max-w-2xl">
+              <p className="text-xs font-mono-tabular uppercase tracking-widest text-brand dark:text-[#69C5F5]">
+                12 / People, Culture &amp; Careers
+              </p>
+              <h2
+                id="home-careers-heading"
+                className="font-display fluid-section-title font-bold uppercase tracking-tight text-[#10243A] dark:text-[#F4F8FC]"
+              >
+                Built by metallurgists, shift engineers &amp; export teams.
+              </h2>
+            </div>
+            <div className="flex flex-col sm:items-end gap-3 max-w-md">
+              <p className="text-xs sm:text-sm text-[#465C72] dark:text-[#B5C5D7] sm:text-right leading-relaxed">
+                From submerged-arc furnace shifts in Bobbili and Dhalbhumgarh to XRF spectroscopy labs and commercial desks in Kolkata and Visakhapatnam.
+              </p>
+              <IndustrialButton to="/careers" variant="outline-light">
+                Explore Careers &amp; Apply
+                <ArrowRight className="w-4 h-4" aria-hidden="true" />
+              </IndustrialButton>
+            </div>
+          </div>
+
+          {/* Restored Interactive ImageScatter Polaroid Stage — 6 Exclusive Workplace & Export Photographs */}
+          <div className="border border-[#10243A]/14 dark:border-[#F4F8FC]/14 bg-[#07111F] overflow-hidden">
+            <ImageScatter
+              imageSets={HOME_CAREERS_SCATTER_SETS}
+              interval={5800}
+              animationDuration={900}
+            />
+          </div>
+
+          {/* Published Vacancies + Functional Disciplines */}
+          <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
+            <div className="lg:col-span-7 space-y-4">
+              <div className="flex items-center justify-between gap-3">
+                <p className="text-xs font-mono-tabular uppercase tracking-widest text-brand dark:text-[#69C5F5] inline-flex items-center gap-2">
+                  <Briefcase className="w-3.5 h-3.5" aria-hidden="true" />
+                  Published Career Listings
+                </p>
+                <span className="text-[11px] font-mono-tabular text-[#465C72] dark:text-[#B5C5D7]">
+                  HR-verified intake
+                </span>
+              </div>
+
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                {JOB_VACANCIES.map((role) => (
+                  <article
+                    key={role.id}
+                    className="bg-white dark:bg-[#12243B] border border-[#10243A]/14 dark:border-[#F4F8FC]/14 p-5 flex flex-col justify-between gap-4"
+                  >
+                    <div className="space-y-2">
+                      <p className="text-[10px] font-mono-tabular uppercase tracking-widest text-brand dark:text-[#69C5F5]">
+                        {role.department} · {role.experience}
+                      </p>
+                      <h3 className="font-display text-xl font-bold uppercase text-[#10243A] dark:text-[#F4F8FC]">
+                        {role.title}
+                      </h3>
+                      <p className="text-xs text-[#465C72] dark:text-[#B5C5D7] flex items-center gap-1.5">
+                        <MapPin className="w-3.5 h-3.5 text-brand dark:text-[#69C5F5] shrink-0" aria-hidden="true" />
+                        <span>{role.location}</span>
+                      </p>
+                      <p className="text-xs text-[#465C72] dark:text-[#B5C5D7] leading-relaxed pt-1">
+                        {role.responsibilities[0]}.
+                      </p>
+                    </div>
+                    <div className="pt-3 border-t border-[#10243A]/10 dark:border-[#F4F8FC]/10 flex items-center justify-between gap-2">
+                      <span className="text-[11px] text-[#465C72] dark:text-[#B5C5D7]">
+                        {role.qualification.split(' ')[0]} · Full-time
+                      </span>
+                      <Link
+                        to="/careers"
+                        className="inline-flex items-center gap-1 text-xs font-semibold text-brand dark:text-[#69C5F5] hover:underline whitespace-nowrap"
+                      >
+                        Role Details
+                        <ArrowRight className="w-3.5 h-3.5" aria-hidden="true" />
+                      </Link>
+                    </div>
+                  </article>
+                ))}
+              </div>
+            </div>
+
+            <div className="lg:col-span-5 bg-white dark:bg-[#12243B] border border-[#10243A]/14 dark:border-[#F4F8FC]/14 p-6 space-y-4">
+              <div className="space-y-1.5">
+                <p className="text-[11px] font-mono-tabular uppercase tracking-widest text-brand dark:text-[#69C5F5]">
+                  Core Operating Functions
+                </p>
+                <h3 className="font-display text-2xl font-bold uppercase text-[#10243A] dark:text-[#F4F8FC]">
+                  {CAREERS_DEPARTMENTS.length} Technical &amp; Corporate Departments
+                </h3>
+                <p className="text-xs text-[#465C72] dark:text-[#B5C5D7] leading-relaxed">
+                  Qualified engineers, metallurgists, laboratory chemists, and commercial professionals may submit general applications directly via our careers desk.
+                </p>
+              </div>
+              <div className="grid grid-cols-2 gap-2 pt-1">
+                {CAREERS_DEPARTMENTS.map((dept, i) => (
+                  <div
+                    key={dept}
+                    className="flex items-center gap-2 px-3 py-2 border border-[#10243A]/10 dark:border-[#F4F8FC]/12 bg-[#F1F6FB]/55 dark:bg-[#0D1B2E]/60 text-xs text-[#10243A] dark:text-[#F4F8FC]"
+                  >
+                    <span className="text-[10px] font-mono-tabular text-brand dark:text-[#69C5F5]">
+                      {String(i + 1).padStart(2, '0')}
+                    </span>
+                    <span className="truncate font-medium">{dept}</span>
+                  </div>
+                ))}
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      {/* 13 / COMPENDIUM — Restored 3D Three.js BooksShowcase & Statutory Filings */}
+      <section
+        id="compendium"
+        aria-labelledby="home-compendium-heading"
+        className="scroll-mt-20 py-20 lg:py-28 bg-[#FFFFFF] text-[#10243A] dark:bg-[#07111F] dark:text-[#F4F8FC] border-t border-[#10243A]/12 dark:border-[#F4F8FC]/12"
+      >
+        <div className="max-w-[1360px] mx-auto px-4 sm:px-6 lg:px-8 xl:px-14 2xl:px-8 space-y-12">
+          <div className="flex flex-col lg:flex-row lg:items-end justify-between gap-6 pb-8 border-b border-[#10243A]/14 dark:border-[#F4F8FC]/12">
+            <div className="space-y-3 max-w-2xl">
+              <p className="text-xs font-mono-tabular uppercase tracking-widest text-brand dark:text-[#69C5F5]">
+                13 / Statutory Filings &amp; 3D Compendium
+              </p>
+              <h2
+                id="home-compendium-heading"
+                className="font-display fluid-section-title font-bold uppercase tracking-tight text-[#10243A] dark:text-[#F4F8FC]"
+              >
+                Inspect bound technical handbooks &amp; MCA disclosures.
+              </h2>
+            </div>
+            <div className="flex flex-col sm:items-end gap-3 max-w-md">
+              <p className="text-xs sm:text-sm text-[#465C72] dark:text-[#B5C5D7] sm:text-right leading-relaxed">
+                Select any 3D hardcover volume below to inspect grade chemistry tables, AOD decarburisation notes, CSR chronicles, and Form MGT-7 disclosures (CIN {COMPANY_INFO.cin}).
+              </p>
+              <IndustrialButton to="/documents" variant="outline-light">
+                Open Full Statutory Archive
+                <ArrowRight className="w-4 h-4" aria-hidden="true" />
+              </IndustrialButton>
+            </div>
+          </div>
+
+          {/* Restored Interactive 3D Three.js BooksShowcase */}
+          <div className="border border-[#10243A]/15 dark:border-[#F4F8FC]/15 overflow-hidden">
+            <BooksShowcase
+              books={BERRY_COMPENDIUM_BOOKS}
+              heroTitle="Compendia"
+              navTitle="Berry Alloys Library"
+              onPrimaryAction={handleBookPrimary}
+              onSecondaryAction={handleBookSecondary}
+            />
+          </div>
+
+          {/* Statutory Filing Groups Summary */}
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+            {CORPORATE_DOCUMENT_GROUPS.map((group) => (
+              <div
+                key={group.id}
+                className="bg-[#F1F6FB]/55 dark:bg-[#0D1B2E]/85 border border-[#10243A]/12 dark:border-[#F4F8FC]/14 p-6 flex flex-col justify-between gap-4"
+              >
+                <div className="space-y-2.5">
+                  <div className="flex items-center justify-between gap-2">
+                    <span className="inline-flex items-center gap-1.5 text-[11px] font-mono-tabular uppercase tracking-widest text-brand dark:text-[#69C5F5]">
+                      <FileText className="w-3.5 h-3.5" aria-hidden="true" />
+                      {group.items.length} Records
+                    </span>
+                    <span className="text-[10px] font-mono-tabular uppercase text-[#465C72] dark:text-[#B5C5D7]">
+                      Public Index
+                    </span>
+                  </div>
+                  <h3 className="font-display text-xl font-bold uppercase text-[#10243A] dark:text-[#F4F8FC]">
+                    {group.type}
+                  </h3>
+                  <p className="text-xs text-[#465C72] dark:text-[#B5C5D7] leading-relaxed">
+                    {group.description}
+                  </p>
+                  <ul className="pt-2 space-y-1.5 border-t border-[#10243A]/10 dark:border-[#F4F8FC]/10">
+                    {group.items.slice(0, 3).map((doc) => (
+                      <li
+                        key={doc.title}
+                        className="flex items-baseline justify-between gap-2 text-xs text-[#10243A] dark:text-[#F4F8FC]/90"
+                      >
+                        <span className="truncate">{doc.title}</span>
+                        <span className="text-[10px] font-mono-tabular text-brand dark:text-[#69C5F5] shrink-0">
+                          {doc.yearOrScope}
+                        </span>
+                      </li>
+                    ))}
+                  </ul>
+                </div>
+                <div className="pt-3 border-t border-[#10243A]/10 dark:border-[#F4F8FC]/10">
+                  <Link
+                    to="/documents"
+                    className="inline-flex items-center gap-1.5 text-xs font-semibold text-brand dark:text-[#69C5F5] hover:underline"
+                  >
+                    Inspect Filing Register
+                    <ArrowRight className="w-3.5 h-3.5" aria-hidden="true" />
+                  </Link>
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      {/* 14 / FAQ — Concise Pre-Enquiry Questions */}
       <HomeFaqSection />
 
       <InsightsPreview />
 
-      {/* 12 / ENQUIRY — Commercial Quotation Desk & Offices */}
+      {/* 15 / ENQUIRY — Commercial Quotation Desk & Offices */}
       <section
         id="enquiry"
         aria-labelledby="home-enquiry-heading"
         className="scroll-mt-20 relative overflow-hidden bg-[#FFFFFF] text-[#10243A] dark:bg-[#10243A] dark:text-[#F4F8FC] border-t border-[#10243A]/12 dark:border-[#F4F8FC]/12 py-20 lg:py-28"
       >
+        {/* Interactive 3D PerspectiveGrid backdrop in light mode; MetallicShaderCanvas in dark mode */}
+        <div className="dark:hidden absolute inset-0 opacity-75">
+          <PerspectiveGrid
+            gridSize={22}
+            fadeRadius={74}
+            accent="berry"
+            className="[--fade-stop:#FFFFFF]"
+          />
+        </div>
         <div className="hidden dark:block absolute inset-0 opacity-85 pointer-events-none">
           <MetallicShaderCanvas />
         </div>
@@ -1550,7 +1933,7 @@ export function HomePage() {
             <div className="lg:col-span-5 space-y-8">
               <div className="space-y-4">
                 <p className="text-xs font-mono-tabular uppercase tracking-widest text-brand dark:text-[#69C5F5]">
-                  12 / Commercial Quotation Desk
+                  15 / Commercial Quotation Desk
                 </p>
                 <h2
                   id="home-enquiry-heading"

@@ -66,6 +66,60 @@ import detailSiMnImg from '../assets/images/detail_simn_specimen_1795083486308.j
 import detailFeCrImg from '../assets/images/detail_fecr_refined_1795083485511.jpg';
 import detailFeSiImg from '../assets/images/detail_fesi_ingots_1795083487886.jpg';
 
+// Exclusive editorial photography for restored interactive showcases (Site Directory, CSR Diagonal, QA 3D Deck, Careers Scatter)
+import siteVizagHarbourImg from '../assets/images/site_vizag_harbour_berth_1795086002141.jpg';
+import siteKolkataTowerImg from '../assets/images/site_kolkata_business_tower_1795086001657.jpg';
+import csrDiagClassroomImg from '../assets/images/csr_diag_classroom_it_1795086004852.jpg';
+import csrDiagSaplingImg from '../assets/images/csr_diag_sapling_nursery_1795086031990.jpg';
+import csrDiagMedicalImg from '../assets/images/csr_diag_medical_outreach_1795086003995.jpg';
+import qaDeckSpectrometerImg from '../assets/images/qa_deck_oes_spectrometer_1795086002382.jpg';
+import qaDeckAodConverterImg from '../assets/images/qa_deck_aod_converter_1795086061185.jpg';
+import qaDeckSieveSizingImg from '../assets/images/qa_deck_sieve_sizing_1795086060550.jpg';
+import qaDeckExportBagsImg from '../assets/images/qa_deck_export_jumbo_bags_1795086061437.jpg';
+import cultureControlRoomImg from '../assets/images/culture_control_room_1795086061365.jpg';
+import cultureTrainingWorkshopImg from '../assets/images/culture_training_workshop_1795086059238.jpg';
+import cultureLabChemistsImg from '../assets/images/culture_lab_chemists_1795086097623.jpg';
+import cultureSafetyWalkImg from '../assets/images/culture_safety_walk_1795086094822.jpg';
+import cultureLogisticsDeskImg from '../assets/images/culture_logistics_desk_1795086094918.jpg';
+import cultureCampusGreenImg from '../assets/images/culture_campus_green_1795086101587.jpg';
+import cultureMechanicalMaintImg from '../assets/images/culture_mechanical_maint_1795086095256.jpg';
+import cultureTownhallAwardImg from '../assets/images/culture_townhall_award_1795086095270.jpg';
+
+// Exclusive editorial photography for ScrollDissolveReveal, CursorCard, MaskedAvatars, and ImageTrail
+import dissolveFurnaceTapImg from '../assets/images/dissolve_furnace_tap_1795087831635.jpg';
+import dissolveRefinedAlloyShipImg from '../assets/images/dissolve_refined_alloy_ship_1795087828594.jpg';
+import cursorBobbiliSubstationImg from '../assets/images/cursor_bobbili_substation_1795087859493.jpg';
+import cursorJharkhandFurnaceImg from '../assets/images/cursor_jharkhand_furnace_1795087834126.jpg';
+import cursorVizagVesselImg from '../assets/images/cursor_vizag_vessel_1795087847333.jpg';
+import avatarMetallurgyImg from '../assets/images/avatar_steward_metallurgy_1795087978525.jpg';
+import avatarQaLabImg from '../assets/images/avatar_steward_qa_lab_1795087979152.jpg';
+import avatarPlantOpsImg from '../assets/images/avatar_steward_plant_ops_1795088051108.jpg';
+import avatarExportDeskImg from '../assets/images/avatar_steward_export_desk_1795087978723.jpg';
+import avatarEsgLeadImg from '../assets/images/avatar_steward_esg_lead_1795087981761.jpg';
+import trailArchiveCrusherImg from '../assets/images/trail_archive_crusher_1795088055709.jpg';
+import trailArchiveOreYardImg from '../assets/images/trail_archive_ore_yard_1795088052617.jpg';
+import trailArchiveLadleCraneImg from '../assets/images/trail_archive_ladle_crane_1795088062424.jpg';
+import trailArchiveBaghouseImg from '../assets/images/trail_archive_baghouse_1795088078373.jpg';
+import trailArchiveWeighbridgeImg from '../assets/images/trail_archive_weighbridge_1795088053922.jpg';
+
+// Exclusive editorial visuals for Homepage Awards, PixelatedImageTrail, and Homepage Careers ImageScatter
+import homeAwardBrandTrophyImg from '../assets/images/home_award_brand_trophy_1795088851579.jpg';
+import homeAwardWorkplaceTeamImg from '../assets/images/home_award_workplace_team_1795088851033.jpg';
+import homeAwardSocialImpactImg from '../assets/images/home_award_social_impact_1795088907844.jpg';
+import homeAwardFounderSummitImg from '../assets/images/home_award_founder_summit_1795088891510.jpg';
+import homeAwardExportStarImg from '../assets/images/home_award_export_star_1795088852846.jpg';
+import pixelTrailTappingSparksImg from '../assets/images/pixel_trail_tapping_sparks_1795088863151.jpg';
+import pixelTrailElectrodeColumnImg from '../assets/images/pixel_trail_electrode_column_1795088852692.jpg';
+import pixelTrailManganeseCrystalsImg from '../assets/images/pixel_trail_manganese_crystals_1795088897739.jpg';
+import pixelTrailCastingBedsImg from '../assets/images/pixel_trail_casting_beds_1795088899955.jpg';
+import pixelTrailSiliconSheenImg from '../assets/images/pixel_trail_silicon_sheen_1795089024088.jpg';
+import pixelTrailNightPlantImg from '../assets/images/pixel_trail_night_plant_1795088950978.jpg';
+import scatterHomeHelmetBriefingImg from '../assets/images/scatter_home_helmet_briefing_1795088948763.jpg';
+import scatterHomeLabSpectrometerImg from '../assets/images/scatter_home_lab_spectrometer_1795088951653.jpg';
+import scatterHomeSolarInspectionImg from '../assets/images/scatter_home_solar_inspection_1795088951857.jpg';
+import scatterHomeDispatchYardImg from '../assets/images/scatter_home_dispatch_yard_1795088952345.jpg';
+import scatterHomeSafetyAwardImg from '../assets/images/scatter_home_safety_award_1795088951366.jpg';
+
 export interface VisualAsset {
   id: string;
   src: string;
@@ -548,6 +602,342 @@ export const ASSETS = {
     alt: 'High-resolution laboratory photograph of Ferro Silicon 70/72 blue-silver crystalline lumps',
     caption: 'Representative Ferro Silicon 70/72 high-silicon fracture planes',
     category: 'Material Specimen',
+  },
+  siteVizagHarbour: {
+    id: 'site-vizag-harbour',
+    src: siteVizagHarbourImg,
+    alt: 'East-coast deep-water bulk export cargo berth with steel gantry cranes and dry-bulk vessel at golden hour',
+    caption: 'Visakhapatnam deep-water coastal gateway for bulk ferro alloy export shipments',
+    category: 'Logistics',
+  },
+  siteKolkataTower: {
+    id: 'site-kolkata-tower',
+    src: siteKolkataTowerImg,
+    alt: 'Contemporary limestone and glass corporate headquarters tower along a tree-lined business avenue in Kolkata',
+    caption: 'Kolkata commercial & statutory governance hub under RoC Kolkata',
+    category: 'Corporate',
+  },
+  csrDiagClassroom: {
+    id: 'csr-diag-classroom',
+    src: csrDiagClassroomImg,
+    alt: 'Sunlit rural school computer classroom with wooden desks, desktop monitors, and learning resources',
+    caption: 'Rural classroom upgrades and digital IT laboratory support around plant belts',
+    category: 'Community & CSR',
+  },
+  csrDiagSapling: {
+    id: 'csr-diag-sapling',
+    src: csrDiagSaplingImg,
+    alt: 'Rows of native green tree saplings nurtured in terracotta and nursery pots along an industrial green-belt buffer',
+    caption: 'Native sapling nursery supporting annual ecological green-belt plantations',
+    category: 'Community & CSR',
+  },
+  csrDiagMedical: {
+    id: 'csr-diag-medical',
+    src: csrDiagMedicalImg,
+    alt: 'Community preventive health screening station under a bright canopy with physician checking blood pressure',
+    caption: 'Preventive multi-specialty health screening for workforce and neighbouring villages',
+    category: 'Community & CSR',
+  },
+  qaDeckSpectrometer: {
+    id: 'qa-deck-spectrometer',
+    src: qaDeckSpectrometerImg,
+    alt: 'Optical emission spectrometer spark chamber analyzing a polished ferro manganese alloy disc specimen',
+    caption: 'Optical emission spectrometry verifying elemental composition and ppm trace limits',
+    category: 'Quality Lab',
+  },
+  qaDeckAodConverter: {
+    id: 'qa-deck-aod-converter',
+    src: qaDeckAodConverterImg,
+    alt: 'Argon Oxygen Decarburisation converter bay pouring refined molten alloy under an overhead ladle crane',
+    caption: '6,000 MT/month AOD converter refining low and ultra-low carbon ferro manganese grades',
+    category: 'Smelting',
+  },
+  qaDeckSieveSizing: {
+    id: 'qa-deck-sieve-sizing',
+    src: qaDeckSieveSizingImg,
+    alt: 'Precision stainless-steel ISO laboratory test sieves beside calibrated crushed ferro manganese lumps',
+    caption: 'Calibrated sieve sizing and dimensional verification across 10–50 mm lump bands',
+    category: 'Quality Lab',
+  },
+  qaDeckExportBags: {
+    id: 'qa-deck-export-bags',
+    src: qaDeckExportBagsImg,
+    alt: 'Palletised white woven 1-tonne FIBC jumbo bulk bags staged inside a clean ferro alloy export bay',
+    caption: 'Container-ready FIBC bulk packaging staged for inspected export dispatch',
+    category: 'Logistics',
+  },
+  cultureControlRoom: {
+    id: 'culture-control-room',
+    src: cultureControlRoomImg,
+    alt: 'Metallurgical furnace control engineers reviewing real-time submerged-arc SCADA screens in a bright control room',
+    caption: 'SCADA furnace control room engineers monitoring reduction stability',
+    category: 'People & Teams',
+  },
+  cultureTrainingWorkshop: {
+    id: 'culture-training-workshop',
+    src: cultureTrainingWorkshopImg,
+    alt: 'Senior engineers mentoring graduate trainees over plant engineering blueprints in a sunlit training room',
+    caption: 'Structured engineering mentorship and technical training workshops',
+    category: 'People & Teams',
+  },
+  cultureLabChemists: {
+    id: 'culture-lab-chemists',
+    src: cultureLabChemistsImg,
+    alt: 'Quality assurance chemists inspecting ferro alloy samples beside precision analytical balances in the laboratory',
+    caption: 'Metallurgical QA/QC chemists validating heat chemistry and trace tolerances',
+    category: 'People & Teams',
+  },
+  cultureSafetyWalk: {
+    id: 'culture-safety-walk',
+    src: cultureSafetyWalkImg,
+    alt: 'Plant safety engineers in high-visibility vests conducting a morning ISO 45001 shopfloor safety walk',
+    caption: 'Daily ISO 45001 safety walks across smelting yards and walkways',
+    category: 'People & Teams',
+  },
+  cultureLogisticsDesk: {
+    id: 'culture-logistics-desk',
+    src: cultureLogisticsDeskImg,
+    alt: 'Commercial and export logistics specialists coordinating international port schedules at a bright office table',
+    caption: 'Export commercial and marine dispatch coordination teams',
+    category: 'People & Teams',
+  },
+  cultureCampusGreen: {
+    id: 'culture-campus-green',
+    src: cultureCampusGreenImg,
+    alt: 'Tree-lined landscaped administration promenade and manicured lawns across an industrial plant campus',
+    caption: 'Green landscaped administration avenues across works campuses',
+    category: 'Plant Complex',
+  },
+  cultureMechanicalMaint: {
+    id: 'culture-mechanical-maint',
+    src: cultureMechanicalMaintImg,
+    alt: 'Electrical maintenance engineers checking switchgear instrumentation panels in a plant substation room',
+    caption: 'Electrical and mechanical maintenance teams safeguarding continuous furnace uptime',
+    category: 'People & Teams',
+  },
+  cultureTownhallAward: {
+    id: 'culture-townhall-award',
+    src: cultureTownhallAwardImg,
+    alt: 'Employees applauding colleagues during a bright plant townhall milestone recognition gathering',
+    caption: 'Employee milestone townhalls celebrating workplace teamwork and safety streaks',
+    category: 'People & Teams',
+  },
+  dissolveFurnaceTap: {
+    id: 'dissolve-furnace-tap',
+    src: dissolveFurnaceTapImg,
+    alt: 'Submerged-arc ferro-manganese electric furnace tapping glowing molten alloy into a heavy refractory steel ladle',
+    caption: 'Live molten alloy tapping from submerged-arc furnace into refractory transfer ladle',
+    category: 'Smelting',
+  },
+  dissolveRefinedAlloyShip: {
+    id: 'dissolve-refined-alloy-ship',
+    src: dissolveRefinedAlloyShipImg,
+    alt: 'Graded metallic ferro-alloy bulk cargo and woven export jumbo bags staged beside a deep-water coastal export berth',
+    caption: 'Inspected ferro-alloy export cargo staged for bulk vessel loading at deep-water coastal port',
+    category: 'Logistics',
+  },
+  cursorBobbiliSubstation: {
+    id: 'cursor-bobbili-substation',
+    src: cursorBobbiliSubstationImg,
+    alt: 'Captive 132kV high-voltage electrical switchyard and transformer bay serving Bobbili ferro-alloy complex',
+    caption: 'Captive 132kV substation and continuous transformer feed at Bobbili Growth Centre',
+    category: 'Plant Complex',
+  },
+  cursorJharkhandFurnace: {
+    id: 'cursor-jharkhand-furnace',
+    src: cursorJharkhandFurnaceImg,
+    alt: 'Integrated submerged-arc ferro-alloy smelting bay exterior and inclined ore conveyor galleries in eastern India',
+    caption: 'Dhalbhumgarh & Kadambeda smelting complex with mineral conveyor integration',
+    category: 'Plant Complex',
+  },
+  cursorVizagVessel: {
+    id: 'cursor-vizag-vessel',
+    src: cursorVizagVesselImg,
+    alt: 'Bulk carrier vessel docked beneath illuminated loading cranes at an east-coast Indian deep-water port at twilight',
+    caption: 'Visakhapatnam Harbour Port deep-water bulk export loading corridor',
+    category: 'Logistics',
+  },
+  avatarMetallurgy: {
+    id: 'avatar-steward-metallurgy',
+    src: avatarMetallurgyImg,
+    alt: 'Chief Metallurgist steward overseeing alloy chemistry and submerged-arc reduction',
+    caption: 'Chief Metallurgy & Reduction Engineering',
+    category: 'People & Teams',
+  },
+  avatarQaLab: {
+    id: 'avatar-steward-qa-lab',
+    src: avatarQaLabImg,
+    alt: 'QA/QC Assay Laboratory Lead overseeing optical emission spectrometry and ISO 9001 heat release',
+    caption: 'QA/QC Assay & ISO 9001 Certification',
+    category: 'People & Teams',
+  },
+  avatarPlantOps: {
+    id: 'avatar-steward-plant-ops',
+    src: avatarPlantOpsImg,
+    alt: 'Plant Operations Director overseeing continuous furnace uptime and AOD decarburisation lines',
+    caption: 'Smelting & AOD Operations',
+    category: 'People & Teams',
+  },
+  avatarExportDesk: {
+    id: 'avatar-steward-export-desk',
+    src: avatarExportDeskImg,
+    alt: 'International Trade & Maritime Logistics Lead managing global steelmaker exports',
+    caption: 'Global Trade & Port Dispatch',
+    category: 'People & Teams',
+  },
+  avatarEsgLead: {
+    id: 'avatar-steward-esg-lead',
+    src: avatarEsgLeadImg,
+    alt: 'Sustainability & Clean Energy Lead coordinating solar, wind, WHR, and ISO 14067 reporting',
+    caption: 'Clean Power, CBAM & ESG Stewardship',
+    category: 'People & Teams',
+  },
+  trailArchiveCrusher: {
+    id: 'trail-archive-crusher',
+    src: trailArchiveCrusherImg,
+    alt: 'Heavy metallic jaw crusher and vibrating screen sizing bright silvery ferro-alloy lumps',
+    caption: 'Precision crushing and lump-sizing processing hall',
+    category: 'Smelting',
+  },
+  trailArchiveOreYard: {
+    id: 'trail-archive-ore-yard',
+    src: trailArchiveOreYardImg,
+    alt: 'Graded manganese and chrome mineral ore stockpiles with wheel loader in golden morning sunlight',
+    caption: 'Blended manganese and chrome ore yard logistics',
+    category: 'Plant Complex',
+  },
+  trailArchiveLadleCrane: {
+    id: 'trail-archive-ladle-crane',
+    src: trailArchiveLadleCraneImg,
+    alt: 'Heavy overhead gantry crane lifting a glowing hot-metal refractory ladle across the smelting shop',
+    caption: 'Overhead hot-metal ladle transfer across high-bay smelting shop',
+    category: 'Smelting',
+  },
+  trailArchiveBaghouse: {
+    id: 'trail-archive-baghouse',
+    src: trailArchiveBaghouseImg,
+    alt: 'Industrial stainless steel baghouse dust extraction and gas-cleaning towers against blue sky',
+    caption: 'High-efficiency baghouse filtration and emissions control towers',
+    category: 'Energy',
+  },
+  trailArchiveWeighbridge: {
+    id: 'trail-archive-weighbridge',
+    src: trailArchiveWeighbridgeImg,
+    alt: 'Bulk export freight haulage trucks lined neatly at an automated industrial weighbridge gate',
+    caption: 'Automated plant weighbridge and export consignment verification',
+    category: 'Logistics',
+  },
+  homeAwardBrandTrophy: {
+    id: 'home-award-brand-trophy',
+    src: homeAwardBrandTrophyImg,
+    alt: 'Brushed stainless steel and deep cobalt glass corporate excellence sculpture on dark slate plinth',
+    caption: 'Brand & Corporate Excellence — ET Best Brand of 2025 recognition',
+    category: 'Corporate',
+  },
+  homeAwardWorkplaceTeam: {
+    id: 'home-award-workplace-team',
+    src: homeAwardWorkplaceTeamImg,
+    alt: 'Indian industrial engineers, chemists, and plant leaders smiling together inside a sunlit steel-and-glass corporate atrium',
+    caption: 'Workplace Excellence — ET Edge Best Organization to Work 2026 people-first culture',
+    category: 'People & Teams',
+  },
+  homeAwardSocialImpact: {
+    id: 'home-award-social-impact',
+    src: homeAwardSocialImpactImg,
+    alt: 'Modern rural village school courtyard and shaded community pavilion framed by neem trees at golden hour',
+    caption: 'Social Impact — ICC Social Impact Jury Recognition for grassroots community stewardship',
+    category: 'Community & CSR',
+  },
+  homeAwardFounderSummit: {
+    id: 'home-award-founder-summit',
+    src: homeAwardFounderSummitImg,
+    alt: 'Executive business leadership awards gala hall with midnight-navy acoustics and warm architectural stage lighting',
+    caption: 'Entrepreneurial Leadership — JM Financial Hurun India Founders’ Award 2026',
+    category: 'Corporate',
+  },
+  homeAwardExportStar: {
+    id: 'home-award-export-star',
+    src: homeAwardExportStarImg,
+    alt: 'Loaded ocean-going bulk cargo ship gliding from an Indian east-coast harbour channel toward golden Bay of Bengal waters',
+    caption: 'Global Maritime Trade — Three Star Export House bulk vessel corridor',
+    category: 'Logistics',
+  },
+  pixelTrailTappingSparks: {
+    id: 'pixel-trail-tapping-sparks',
+    src: pixelTrailTappingSparksImg,
+    alt: 'Golden-orange sparks cascading from a molten ferro-manganese furnace tap stream in a dark smelting bay',
+    caption: 'Live furnace tap-hole sparks during high-temperature alloy pour',
+    category: 'Smelting',
+  },
+  pixelTrailElectrodeColumn: {
+    id: 'pixel-trail-electrode-column',
+    src: pixelTrailElectrodeColumnImg,
+    alt: 'Towering carbon submerged-arc furnace electrode columns and heavy copper busbar clamps inside a smelting hall',
+    caption: 'Submerged-arc Söderberg electrode columns and copper busbar assemblies',
+    category: 'Smelting',
+  },
+  pixelTrailManganeseCrystals: {
+    id: 'pixel-trail-manganese-crystals',
+    src: pixelTrailManganeseCrystalsImg,
+    alt: 'Macro close-up of freshly fractured silvery ferro-manganese crystal facets under cool cobalt rim lighting',
+    caption: 'Freshly fractured crystalline high-carbon ferro-manganese macro texture',
+    category: 'Material Specimen',
+  },
+  pixelTrailCastingBeds: {
+    id: 'pixel-trail-casting-beds',
+    src: pixelTrailCastingBedsImg,
+    alt: 'Rows of incandescent amber molten ferro-alloy cooling evenly inside heavy cast-iron ingot beds',
+    caption: 'Controlled solidification across cast-iron ferro-alloy ingot pans',
+    category: 'Smelting',
+  },
+  pixelTrailSiliconSheen: {
+    id: 'pixel-trail-silicon-sheen',
+    src: pixelTrailSiliconSheenImg,
+    alt: 'Mirror-silver crystalline ferro-silicon alloy lumps arranged on matte dark slate',
+    caption: 'High-lustre crystalline ferro-silicon metallurgical specimen',
+    category: 'Material Specimen',
+  },
+  pixelTrailNightPlant: {
+    id: 'pixel-trail-night-plant',
+    src: pixelTrailNightPlantImg,
+    alt: 'Modern Indian ferro-alloy smelting complex illuminated at twilight under a deep cobalt blue sky',
+    caption: 'Continuous 24×7 twilight smelting operations across integrated plant bays',
+    category: 'Plant Complex',
+  },
+  scatterHomeHelmetBriefing: {
+    id: 'scatter-home-helmet-briefing',
+    src: scatterHomeHelmetBriefingImg,
+    alt: 'Three Indian plant engineers in white hard hats reviewing furnace engineering schematics outdoors at sunrise',
+    caption: 'Morning engineering blueprint review',
+    category: 'People & Teams',
+  },
+  scatterHomeLabSpectrometer: {
+    id: 'scatter-home-lab-spectrometer',
+    src: scatterHomeLabSpectrometerImg,
+    alt: 'Metallurgical QA chemist loading a polished ferro-alloy specimen into an optical emission spectrometer',
+    caption: 'OES spark chemistry verification',
+    category: 'Quality Lab',
+  },
+  scatterHomeSolarInspection: {
+    id: 'scatter-home-solar-inspection',
+    src: scatterHomeSolarInspectionImg,
+    alt: 'Clean-energy engineers inspecting rows of industrial rooftop photovoltaic solar arrays overlooking hills',
+    caption: 'Captive solar utility audit',
+    category: 'Energy',
+  },
+  scatterHomeDispatchYard: {
+    id: 'scatter-home-dispatch-yard',
+    src: scatterHomeDispatchYardImg,
+    alt: 'Logistics supervisors checking rows of palletised white 1-tonne woven export alloy jumbo bags in a bright bay',
+    caption: 'Export FIBC consignment check',
+    category: 'Logistics',
+  },
+  scatterHomeSafetyAward: {
+    id: 'scatter-home-safety-award',
+    src: scatterHomeSafetyAwardImg,
+    alt: 'Indian industrial shift team in high-visibility vests and hard hats applauding during a safety milestone huddle',
+    caption: 'Zero-harm shift milestone',
+    category: 'People & Teams',
   },
 } as const satisfies Record<string, VisualAsset>;
 

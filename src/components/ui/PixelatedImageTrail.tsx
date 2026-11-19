@@ -7,16 +7,12 @@ import { useInViewActive, useMotion } from '../../context/MotionContext';
 import { useIsCompactMobile } from '../../hooks/useIsCompactMobile';
 
 const DEFAULT_TRAIL_IMAGES = [
-  ASSETS.officialPlantGate.src,
-  ASSETS.officialAerialComplex.src,
-  ASSETS.heroSmelting.src,
-  ASSETS.officialProdFeMn.src,
-  ASSETS.officialProdSiMn.src,
-  ASSETS.officialProdFeCr.src,
-  ASSETS.officialProdFeSi.src,
-  ASSETS.csrMedicalCamp.src,
-  ASSETS.csrPlantation.src,
-  ASSETS.officialSolarRoof.src,
+  ASSETS.pixelTrailTappingSparks.src,
+  ASSETS.pixelTrailElectrodeColumn.src,
+  ASSETS.pixelTrailManganeseCrystals.src,
+  ASSETS.pixelTrailCastingBeds.src,
+  ASSETS.pixelTrailSiliconSheen.src,
+  ASSETS.pixelTrailNightPlant.src,
 ];
 
 interface PixelatedImageTrailProps {

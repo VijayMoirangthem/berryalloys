@@ -674,3 +674,189 @@ html[data-ambient="paused"] [class*="animate-[berrySheen"] {
   animation: none !important;
 }
 
+/* ---------- Architectural Skeleton Shimmer & Route Loading Transitions ---------- */
+@keyframes berry-skeleton-sweep {
+  0% {
+    transform: translate3d(-100%, 0, 0);
+  }
+  100% {
+    transform: translate3d(100%, 0, 0);
+  }
+}
+
+.berry-skeleton {
+  position: relative;
+  overflow: hidden;
+  background-color: #E7F0F8;
+}
+
+.dark .berry-skeleton {
+  background-color: #12243B;
+}
+
+.berry-skeleton::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  transform: translate3d(-100%, 0, 0);
+  background: linear-gradient(
+    90deg,
+    transparent 0%,
+    rgba(255, 255, 255, 0.58) 48%,
+    transparent 100%
+  );
+  animation: berry-skeleton-sweep 1.45s cubic-bezier(0.22, 1, 0.36, 1) infinite;
+  will-change: transform;
+}
+
+.dark .berry-skeleton::after {
+  background: linear-gradient(
+    90deg,
+    transparent 0%,
+    rgba(105, 197, 245, 0.16) 48%,
+    transparent 100%
+  );
+}
+
+@keyframes route-enter-fade {
+  from {
+    opacity: 0.96;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+/* IMPORTANT: Never apply transform/filter/perspective here — doing so creates a containing block
+   that breaks position:fixed/sticky and GSAP ScrollTrigger pinning, causing blank white gaps. */
+.route-enter-shell {
+  animation: route-enter-fade 220ms ease-out;
+}
+
+@keyframes route-bar-sweep {
+  0% {
+    transform: scaleX(0.08);
+    transform-origin: left center;
+  }
+  60% {
+    transform: scaleX(0.76);
+    transform-origin: left center;
+  }
+  100% {
+    transform: scaleX(1);
+    transform-origin: left center;
+  }
+}
+
+.route-progress-bar {
+  animation: route-bar-sweep 420ms cubic-bezier(0.22, 1, 0.36, 1) forwards;
+}
+
+/* ---------- Circular Orbital Loading Pattern Keyframes ---------- */
+@keyframes berry-orbit-cw {
+  from {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+@keyframes berry-orbit-ccw {
+  from {
+    transform: rotate(360deg);
+  }
+  to {
+    transform: rotate(0deg);
+  }
+}
+
+.berry-orbit-cw {
+  animation: berry-orbit-cw 6.4s linear infinite;
+  transform-origin: center;
+}
+
+.berry-orbit-ccw {
+  animation: berry-orbit-ccw 9.5s linear infinite;
+  transform-origin: center;
+}
+
+.berry-orbit-fast {
+  animation: berry-orbit-cw 1.35s cubic-bezier(0.55, 0.15, 0.45, 0.85) infinite;
+  transform-origin: center;
+}
+
+/* ---------- Schematic Industrial Journey Animations (iPhone-safe GPU/SVG) ---------- */
+@keyframes diagram-flow-dash {
+  to {
+    stroke-dashoffset: -36;
+  }
+}
+
+@keyframes diagram-molten-pulse {
+  0%, 100% {
+    opacity: 0.72;
+  }
+  50% {
+    opacity: 1;
+  }
+}
+
+@keyframes diagram-ring-ping {
+  0% {
+    transform: scale(1);
+    opacity: 0.65;
+  }
+  100% {
+    transform: scale(1.65);
+    opacity: 0;
+  }
+}
+
+.diagram-flow-dash {
+  animation: diagram-flow-dash 1.8s linear infinite;
+}
+
+.diagram-molten-pulse {
+  animation: diagram-molten-pulse 2.2s ease-in-out infinite;
+}
+
+.diagram-ring-ping {
+  transform-box: fill-box;
+  transform-origin: center;
+  animation: diagram-ring-ping 1.9s cubic-bezier(0.22, 1, 0.36, 1) infinite;
+}
+
+@keyframes berry-marquee-scroll {
+  0% {
+    transform: translate3d(0, 0, 0);
+  }
+  100% {
+    transform: translate3d(-50%, 0, 0);
+  }
+}
+
+html[data-ambient="paused"] .berry-skeleton::after,
+html[data-ambient="paused"] .berry-orbit-cw,
+html[data-ambient="paused"] .berry-orbit-ccw,
+html[data-ambient="paused"] .diagram-flow-dash,
+html[data-ambient="paused"] .diagram-molten-pulse,
+html[data-ambient="paused"] .diagram-ring-ping {
+  animation: none !important;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .berry-skeleton::after,
+  .route-enter-shell,
+  .route-progress-bar,
+  .berry-orbit-cw,
+  .berry-orbit-ccw,
+  .berry-orbit-fast,
+  .diagram-flow-dash,
+  .diagram-molten-pulse,
+  .diagram-ring-ping {
+    animation: none !important;
+  }
+}
+
+

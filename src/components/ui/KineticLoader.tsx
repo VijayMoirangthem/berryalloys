@@ -1,17 +1,9 @@
-import { useCallback, useEffect, useRef, useState } from 'react';
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { ScrollTrigger } from 'gsap/ScrollTrigger';
 import { OFFICIAL_BRAND_MARK, OFFICIAL_BRAND_MARK_DARK } from '../../data/assets';
 import { useTheme } from '../../context/ThemeContext';
 import { useMotion } from '../../context/MotionContext';
 import { setLoaderState, triggerHeroEntranceRipple } from '../../lib/motionDiagnostics';
-
-/**
- * Exact quadratic curve following the authentic Berry sweep above the BERRY wordmark
- * on the 339x114 official raster artwork (berry_logo_clean.png & berry_logo_dark.png).
- */
-const SWEEP_START = { x: 102, y: 45 };
-const SWEEP_CTRL = { x: 178, y: 12 };
-const SWEEP_END = { x: 279, y: 5 };
 
 // In-memory guard so in-app SPA navigation never replays the splash, while every fresh load/reload of `/` plays it cleanly.
 let introPlayedThisDocumentLoad = false;
@@ -22,50 +14,33 @@ export function triggerReplayIntro() {
   }
 }
 
-function evalSweepPoint(t: number): { x: number; y: number } {
-  const u = 1 - t;
-  const x = u * u * SWEEP_START.x + 2 * u * t * SWEEP_CTRL.x + t * t * SWEEP_END.x;
-  const y = u * u * SWEEP_START.y + 2 * u * t * SWEEP_CTRL.y + t * t * SWEEP_END.y;
-  return { x, y };
-}
-
-interface SparkFragment {
-  id: number;
-  spawnAt: number;
-  fanX: number;
-  fanY: number;
-  size: number;
-  color: 'blue' | 'red' | 'silver';
-}
-
-const SPARK_FRAGMENTS: SparkFragment[] = [
-  { id: 0, spawnAt: 0.12, fanX: -14, fanY: -10, size: 3.2, color: 'red' },
-  { id: 1, spawnAt: 0.22, fanX: -9, fanY: 12, size: 2.6, color: 'silver' },
-  { id: 2, spawnAt: 0.34, fanX: -16, fanY: -13, size: 3.4, color: 'blue' },
-  { id: 3, spawnAt: 0.46, fanX: -7, fanY: 11, size: 2.8, color: 'red' },
-  { id: 4, spawnAt: 0.58, fanX: -17, fanY: -9, size: 3.2, color: 'blue' },
-  { id: 5, spawnAt: 0.70, fanX: -10, fanY: 10, size: 2.5, color: 'silver' },
-  { id: 6, spawnAt: 0.82, fanX: -12, fanY: -8, size: 2.9, color: 'blue' },
-];
-
 function easeOutCubic(t: number): number {
-  return 1 - Math.pow(1 - Math.min(1, Math.max(0, t)), 3);
+  const c = Math.min(1, Math.max(0, t));
+  return 1 - Math.pow(1 - c, 3);
 }
 
-function easeInOutQuad(t: number): number {
+function easeInOutQuart(t: number): number {
   const c = Math.min(1, Math.max(0, t));
-  return c < 0.5 ? 2 * c * c : 1 - Math.pow(-2 * c + 2, 2) / 2;
+  return c < 0.5 ? 8 * c * c * c * c : 1 - Math.pow(-2 * c + 2, 4) / 2;
 }
+
+const DIAL_SIZE = 264;
+const DIAL_CENTER = DIAL_SIZE / 2;
+const MAIN_RADIUS = 104;
+const MAIN_CIRCUMFERENCE = 2 * Math.PI * MAIN_RADIUS;
+const INNER_RADIUS = 88;
+const OUTER_TICK_RADIUS_IN = 116;
+const OUTER_TICK_RADIUS_OUT = 122;
 
 /**
- * KineticLoader — Signature ~1.6s Berry Alloys corporate logo entrance.
- * Uses native <img> layers clipped with GPU-accelerated CSS clip-path (avoiding iOS WebKit
- * SVG <image>+<clipPath> repaint bugs) overlaid with a sharp SVG spark & alloy fragment trail:
- *   0–220 ms     Clean theme field; spark ignites at Berry's sweep origin.
- *   220–720 ms   Spark accelerates along the authentic sweep curve with metallic alloy fragments.
- *   540–1180 ms  Traveling left-to-right mask reveals the crisp official BERRY wordmark + holds legible.
- *   1180–1560 ms Field dissolves into the homepage and triggers one left-to-right handoff ripple
- *                across the hero particle lettering.
+ * KineticLoader — Executive Circular Orbital Berry Alloys Loading Splash (~1.55s).
+ * Immediately animated from frame 0 (zero blank white delay):
+ *  - Precision 36-tick outer furnace-dial compass ring rotating counter-clockwise
+ *  - Smooth SVG circular orbital progress arc sweeping 0% -> 100% in Berry Blue -> Sky -> Crimson
+ *    led by a luminous molten orbital spark traveling cleanly along the circumference
+ *  - Dual counter-rotating split inner orbital arcs framing a crisp glass-etched circular medallion
+ *  - Authentic Berry Alloys official mark centered cleanly inside the circular dial
+ *  - Clean circular expansion dissolve into the homepage + hero particle ripple handoff
  */
 export function KineticLoader() {
   const { theme } = useTheme();
@@ -80,15 +55,38 @@ export function KineticLoader() {
   });
   const [exiting, setExiting] = useState(false);
 
-  // Direct DOM refs for jitter-free 60fps animation on mobile & desktop
-  const sweepLayerRef = useRef<HTMLDivElement>(null);
-  const wordmarkLayerRef = useRef<HTMLDivElement>(null);
-  const progressHairlineRef = useRef<HTMLDivElement>(null);
-  const subtitleRef = useRef<HTMLParagraphElement>(null);
+  // Direct DOM refs for jitter-free 60fps orbital animation on iPhone & desktop
+  const progressArcRef = useRef<SVGCircleElement>(null);
+  const glowArcRef = useRef<SVGCircleElement>(null);
   const sparkHeadRef = useRef<SVGCircleElement>(null);
   const sparkHaloRef = useRef<SVGCircleElement>(null);
-  const fragmentRefs = useRef<Array<SVGRectElement | null>>([]);
+  const innerArcGroupRef = useRef<SVGGElement>(null);
+  const tickRingRef = useRef<SVGGElement>(null);
+  const logoWrapRef = useRef<HTMLDivElement>(null);
+  const percentRef = useRef<HTMLSpanElement>(null);
+  const statusRef = useRef<HTMLSpanElement>(null);
   const dismissedRef = useRef(false);
+
+  // Precompute 36 radial precision ticks around the orbital dial
+  const dialTicks = useMemo(() => {
+    return Array.from({ length: 36 }, (_, idx) => {
+      const deg = idx * 10;
+      const rad = ((deg - 90) * Math.PI) / 180;
+      const isMajor = idx % 9 === 0;
+      const isMid = idx % 3 === 0;
+      const rIn = isMajor ? OUTER_TICK_RADIUS_IN - 3 : OUTER_TICK_RADIUS_IN;
+      const rOut = isMajor ? OUTER_TICK_RADIUS_OUT + 2 : isMid ? OUTER_TICK_RADIUS_OUT : OUTER_TICK_RADIUS_OUT - 2;
+      return {
+        idx,
+        isMajor,
+        isMid,
+        x1: DIAL_CENTER + rIn * Math.cos(rad),
+        y1: DIAL_CENTER + rIn * Math.sin(rad),
+        x2: DIAL_CENTER + rOut * Math.cos(rad),
+        y2: DIAL_CENTER + rOut * Math.sin(rad),
+      };
+    });
+  }, []);
 
   const finishSplash = useCallback(
     (status: 'ready' | 'skipped' | 'recovered', reason: string) => {
@@ -104,7 +102,7 @@ export function KineticLoader() {
         setMounted(false);
         setExiting(false);
         ScrollTrigger.refresh();
-      }, reducedMotion ? 160 : 380);
+      }, reducedMotion ? 150 : 380);
     },
     [reducedMotion]
   );
@@ -131,22 +129,27 @@ export function KineticLoader() {
 
     dismissedRef.current = false;
     introPlayedThisDocumentLoad = true;
-    setLoaderState('pending', reducedMotion ? 'Reduced-motion logo reveal' : 'Berry logo splash active');
+    setLoaderState(
+      'pending',
+      reducedMotion ? 'Reduced-motion circular emblem reveal' : 'Berry circular orbital splash active'
+    );
 
     const prevBodyOverflow = document.body.style.overflow;
     document.body.style.overflow = 'hidden';
 
-    // Reduced-motion path: immediate crisp logo reveal, brief readable hold, clean exit
+    // Reduced-motion path: complete circular emblem & crisp logo immediately, brief readable hold, clean exit
     if (reducedMotion) {
-      if (sweepLayerRef.current) sweepLayerRef.current.style.clipPath = 'inset(0% 0% 59% 0%)';
-      if (wordmarkLayerRef.current) wordmarkLayerRef.current.style.clipPath = 'inset(41% 0% 0% 0%)';
-      if (progressHairlineRef.current) progressHairlineRef.current.style.transform = 'scaleX(1)';
-      if (subtitleRef.current) subtitleRef.current.style.opacity = '1';
-      if (sparkHeadRef.current) sparkHeadRef.current.style.opacity = '0';
-      if (sparkHaloRef.current) sparkHaloRef.current.style.opacity = '0';
+      if (progressArcRef.current) progressArcRef.current.style.strokeDashoffset = '0';
+      if (glowArcRef.current) glowArcRef.current.style.strokeDashoffset = '0';
+      if (percentRef.current) percentRef.current.textContent = '100%';
+      if (statusRef.current) statusRef.current.textContent = 'READY';
+      if (logoWrapRef.current) {
+        logoWrapRef.current.style.opacity = '1';
+        logoWrapRef.current.style.transform = 'scale(1)';
+      }
 
       const timer = window.setTimeout(() => {
-        finishSplash('ready', 'Reduced-motion immediate logo reveal completed');
+        finishSplash('ready', 'Reduced-motion circular emblem completed');
       }, 520);
 
       return () => {
@@ -155,123 +158,99 @@ export function KineticLoader() {
       };
     }
 
-    // Reset initial masked frame before first paint
-    if (sweepLayerRef.current) sweepLayerRef.current.style.clipPath = 'inset(0% 100% 59% 0%)';
-    if (wordmarkLayerRef.current) wordmarkLayerRef.current.style.clipPath = 'inset(41% 100% 0% 0%)';
-    if (progressHairlineRef.current) progressHairlineRef.current.style.transform = 'scaleX(0)';
-    if (subtitleRef.current) {
-      subtitleRef.current.style.opacity = '0';
-      subtitleRef.current.style.transform = 'translate3d(0, 6px, 0)';
-    }
-
     let rafId = 0;
     let handoffFired = false;
     let lastNow: number | null = null;
     let elapsed = 0;
+
+    const DURATION_SWEEP = 1120; // Smooth 0% -> 100% circular orbital sweep
+    const DURATION_TOTAL = 1520; // Brief crisp completed hold before circular bloom exit
 
     const step = (now: number) => {
       if (dismissedRef.current) return;
       if (lastNow === null) {
         lastNow = now;
       } else {
-        // Clamp frame delta so initial hydration / Three.js init stalls can never skip past the splash
         const dt = Math.max(0, Math.min(48, now - lastNow));
         elapsed += dt;
         lastNow = now;
       }
 
-      // Subtle architectural hairline progress across 0..1360ms
-      if (progressHairlineRef.current) {
-        const lineP = Math.min(1, elapsed / 1320);
-        progressHairlineRef.current.style.transform = `scaleX(${easeOutCubic(lineP).toFixed(4)})`;
+      const sweepLinear = Math.min(1, elapsed / DURATION_SWEEP);
+      const sweepProgress = easeInOutQuart(sweepLinear);
+      const dashOffset = MAIN_CIRCUMFERENCE * (1 - sweepProgress);
+
+      if (progressArcRef.current) {
+        progressArcRef.current.style.strokeDashoffset = dashOffset.toFixed(2);
+      }
+      if (glowArcRef.current) {
+        glowArcRef.current.style.strokeDashoffset = dashOffset.toFixed(2);
       }
 
-      // Phase 1 (0–220ms): Point of light ignites at sweep origin
-      if (elapsed < 220) {
-        const p = easeOutCubic(elapsed / 220);
-        if (sparkHeadRef.current) {
-          sparkHeadRef.current.setAttribute('cx', String(SWEEP_START.x));
-          sparkHeadRef.current.setAttribute('cy', String(SWEEP_START.y));
-          sparkHeadRef.current.setAttribute('r', (1.4 + p * 3.0).toFixed(2));
-          sparkHeadRef.current.style.opacity = p.toFixed(2);
-        }
-        if (sparkHaloRef.current) {
-          sparkHaloRef.current.setAttribute('cx', String(SWEEP_START.x));
-          sparkHaloRef.current.setAttribute('cy', String(SWEEP_START.y));
-          sparkHaloRef.current.setAttribute('r', (5 + p * 11).toFixed(2));
-          sparkHaloRef.current.style.opacity = (p * 0.5).toFixed(2);
-        }
+      // Orbiting molten spark traveling at the tip of the circular progress arc (starts at 12 o'clock)
+      const angleRad = -Math.PI / 2 + sweepProgress * Math.PI * 2;
+      const sx = DIAL_CENTER + MAIN_RADIUS * Math.cos(angleRad);
+      const sy = DIAL_CENTER + MAIN_RADIUS * Math.sin(angleRad);
+      const sparkAlpha = sweepLinear < 0.96 ? 1 : Math.max(0, 1 - (elapsed - DURATION_SWEEP) / 220);
+
+      if (sparkHeadRef.current) {
+        sparkHeadRef.current.setAttribute('cx', sx.toFixed(2));
+        sparkHeadRef.current.setAttribute('cy', sy.toFixed(2));
+        sparkHeadRef.current.style.opacity = sparkAlpha.toFixed(2);
+      }
+      if (sparkHaloRef.current) {
+        sparkHaloRef.current.setAttribute('cx', sx.toFixed(2));
+        sparkHaloRef.current.setAttribute('cy', sy.toFixed(2));
+        sparkHaloRef.current.style.opacity = (sparkAlpha * 0.55).toFixed(2);
       }
 
-      // Phase 2 (220–760ms): Spark accelerates along Berry's actual sweep curve with alloy fragments
-      if (elapsed >= 220 && elapsed <= 880) {
-        const sweepT = easeInOutQuad((elapsed - 220) / 540);
-        const pt = evalSweepPoint(sweepT);
-        const tailFade = elapsed > 760 ? Math.max(0, 1 - (elapsed - 760) / 120) : 1;
+      // Counter-rotating concentric architectural rings
+      if (innerArcGroupRef.current) {
+        const innerDeg = -(elapsed * 0.085);
+        innerArcGroupRef.current.setAttribute(
+          'transform',
+          `rotate(${innerDeg.toFixed(1)} ${DIAL_CENTER} ${DIAL_CENTER})`
+        );
+      }
+      if (tickRingRef.current) {
+        const tickDeg = elapsed * 0.018;
+        tickRingRef.current.setAttribute(
+          'transform',
+          `rotate(${tickDeg.toFixed(1)} ${DIAL_CENTER} ${DIAL_CENTER})`
+        );
+      }
 
-        if (sparkHeadRef.current) {
-          sparkHeadRef.current.setAttribute('cx', pt.x.toFixed(1));
-          sparkHeadRef.current.setAttribute('cy', pt.y.toFixed(1));
-          sparkHeadRef.current.setAttribute('r', (4.0 * tailFade + 0.7).toFixed(2));
-          sparkHeadRef.current.style.opacity = tailFade.toFixed(2);
-        }
-        if (sparkHaloRef.current) {
-          sparkHaloRef.current.setAttribute('cx', pt.x.toFixed(1));
-          sparkHaloRef.current.setAttribute('cy', pt.y.toFixed(1));
-          sparkHaloRef.current.setAttribute('r', (14 * tailFade + 2.5).toFixed(2));
-          sparkHaloRef.current.style.opacity = (tailFade * 0.48).toFixed(2);
-        }
-        if (sweepLayerRef.current) {
-          const revealPct = Math.min(100, Math.max(0, ((pt.x + 12) / 339) * 100));
-          sweepLayerRef.current.style.clipPath = `inset(0% ${(100 - revealPct).toFixed(2)}% 59% 0%)`;
-        }
+      // Immediately visible Berry logo gently crystallising from scale 0.93 -> 1.00
+      if (logoWrapRef.current) {
+        const logoP = easeOutCubic(Math.min(1, elapsed / 620));
+        const scale = 0.93 + 0.07 * logoP;
+        const opacity = 0.35 + 0.65 * logoP;
+        logoWrapRef.current.style.opacity = opacity.toFixed(3);
+        logoWrapRef.current.style.transform = `scale(${scale.toFixed(4)})`;
+      }
 
-        for (let i = 0; i < SPARK_FRAGMENTS.length; i++) {
-          const frag = SPARK_FRAGMENTS[i];
-          const el = fragmentRefs.current[i];
-          if (!el) continue;
-          const localAge = (sweepT - frag.spawnAt) / 0.38;
-          if (localAge <= 0 || localAge >= 1.15) {
-            el.style.opacity = '0';
-          } else {
-            const origin = evalSweepPoint(frag.spawnAt);
-            const fanCurve = Math.sin(Math.min(1, localAge) * Math.PI);
-            const fx = origin.x + frag.fanX * fanCurve;
-            const fy = origin.y + frag.fanY * fanCurve;
-            const alpha = localAge < 0.2 ? localAge / 0.2 : Math.max(0, 1 - (localAge - 0.2) / 0.95);
-            el.setAttribute('x', (fx - frag.size / 2).toFixed(1));
-            el.setAttribute('y', (fy - frag.size / 2).toFixed(1));
-            el.setAttribute('transform', `rotate(${(localAge * 48 + i * 28).toFixed(0)} ${fx.toFixed(1)} ${fy.toFixed(1)})`);
-            el.style.opacity = (alpha * 0.92 * tailFade).toFixed(2);
-          }
-        }
-      } else if (elapsed > 880) {
-        if (sweepLayerRef.current) sweepLayerRef.current.style.clipPath = 'inset(0% 0% 59% 0%)';
-        if (sparkHeadRef.current) sparkHeadRef.current.style.opacity = '0';
-        if (sparkHaloRef.current) sparkHaloRef.current.style.opacity = '0';
-        for (let i = 0; i < SPARK_FRAGMENTS.length; i++) {
-          const el = fragmentRefs.current[i];
-          if (el) el.style.opacity = '0';
+      // Live orbital telemetry percentage
+      if (percentRef.current) {
+        const pct = Math.min(100, Math.round(sweepProgress * 100));
+        percentRef.current.textContent = `${String(pct).padStart(2, '0')}%`;
+      }
+      if (statusRef.current) {
+        if (sweepProgress < 0.35) {
+          statusRef.current.textContent = 'IGNITING ARC';
+        } else if (sweepProgress < 0.85) {
+          statusRef.current.textContent = 'REFINING GRADE';
+        } else {
+          statusRef.current.textContent = 'BERRY ALLOYS';
         }
       }
 
-      // Phase 3 (520–1420ms): Traveling left-to-right mask reveals crisp BERRY wordmark, then holds cleanly to read
-      if (elapsed >= 520) {
-        const wordP = easeOutCubic((elapsed - 520) / 500);
-        if (wordmarkLayerRef.current) {
-          wordmarkLayerRef.current.style.clipPath = `inset(41% ${((1 - wordP) * 100).toFixed(2)}% 0% 0%)`;
-        }
-        if (subtitleRef.current) {
-          const subP = easeOutCubic((elapsed - 720) / 320);
-          subtitleRef.current.style.opacity = subP.toFixed(2);
-          subtitleRef.current.style.transform = `translate3d(0, ${((1 - subP) * 6).toFixed(1)}px, 0)`;
-        }
-      }
-
-      // Phase 4 (1420–1800ms): Dissolve into homepage & hand off ripple into hero particle lettering
-      if (elapsed >= 1420 && !handoffFired) {
+      if (elapsed >= 1340 && !handoffFired) {
         handoffFired = true;
-        finishSplash('ready', 'Signature Berry sweep splash completed');
+        triggerHeroEntranceRipple();
+      }
+
+      if (elapsed >= DURATION_TOTAL) {
+        finishSplash('ready', 'Circular orbital Berry logo splash completed');
         return;
       }
 
@@ -280,15 +259,14 @@ export function KineticLoader() {
 
     rafId = window.requestAnimationFrame(step);
 
-    // Bounded recovery failsafe so the homepage is always usable even if rAF throttles
-    const failsafe = window.setTimeout(() => {
-      finishSplash('recovered', 'Bounded splash recovery timer elapsed');
-    }, 4500);
+    // Bounded failsafe so the splash can never stall on any browser or tab switch
+    const hardFailsafe = window.setTimeout(() => {
+      finishSplash('recovered', 'Circular orbital splash bounded failsafe exit');
+    }, 2400);
 
     return () => {
-      window.cancelAnimationFrame(rafId);
-      window.clearTimeout(failsafe);
-      document.documentElement.style.overflow = '';
+      if (rafId) window.cancelAnimationFrame(rafId);
+      window.clearTimeout(hardFailsafe);
       document.body.style.overflow = prevBodyOverflow;
     };
   }, [mounted, runId, reducedMotion, finishSplash]);
@@ -296,160 +274,252 @@ export function KineticLoader() {
   if (!mounted) return null;
 
   const isDark = theme === 'dark';
-  const logoSrc = isDark ? OFFICIAL_BRAND_MARK_DARK : OFFICIAL_BRAND_MARK;
-  const sparkCoreColor = isDark ? '#F4F8FC' : '#FFFFFF';
-  const sparkHaloColor = isDark ? '#69C5F5' : '#006393';
-  const fragmentColors: Record<SparkFragment['color'], string> = {
-    blue: isDark ? '#69C5F5' : '#006393',
-    red: '#C9233B',
-    silver: isDark ? '#C8D8EA' : '#5E748B',
-  };
 
   return (
     <div
-      data-berry-splash={exiting ? 'exiting' : 'active'}
       role="status"
       aria-live="polite"
-      aria-label="Berry Alloys Limited entrance"
-      className={`fixed inset-0 z-[95] flex flex-col items-center justify-center px-6 select-none transition-opacity duration-[380ms] ease-[cubic-bezier(0.22,1,0.36,1)] ${
-        isDark ? 'bg-[#07111F] text-[#F4F8FC]' : 'bg-[#FFFFFF] text-[#10243A]'
-      } ${exiting ? 'opacity-0 pointer-events-none' : 'opacity-100'}`}
+      aria-label="Berry Alloys Limited loading"
+      data-berry-splash="active"
+      className={`fixed inset-0 z-[95] flex flex-col items-center justify-center px-6 transition-all duration-400 ease-[cubic-bezier(0.22,1,0.36,1)] ${
+        exiting ? 'opacity-0 scale-[1.03] pointer-events-none' : 'opacity-100 scale-100'
+      }`}
+      style={{
+        backgroundColor: isDark ? '#07111F' : '#F8FBFE',
+        backgroundImage: isDark
+          ? 'radial-gradient(circle at 50% 48%, rgba(0, 99, 147, 0.24) 0%, rgba(7, 17, 31, 0.96) 56%, #07111F 100%)'
+          : 'radial-gradient(circle at 50% 48%, rgba(105, 197, 245, 0.18) 0%, rgba(248, 251, 254, 0.98) 54%, #F1F6FB 100%)',
+      }}
     >
-      {/* Subtle architectural drafting grid */}
+      {/* Subtle architectural reticle crosshairs behind the circular medallion */}
       <div
         aria-hidden="true"
-        className={`pointer-events-none absolute inset-0 ${isDark ? 'opacity-15' : 'opacity-[0.06]'}`}
-        style={{
-          backgroundImage: isDark
-            ? 'linear-gradient(to right, rgba(105,197,245,0.22) 1px, transparent 1px), linear-gradient(to bottom, rgba(105,197,245,0.22) 1px, transparent 1px)'
-            : 'linear-gradient(to right, rgba(16,36,58,0.28) 1px, transparent 1px), linear-gradient(to bottom, rgba(16,36,58,0.28) 1px, transparent 1px)',
-          backgroundSize: '84px 84px',
-        }}
-      />
-
-      <div className="relative z-10 flex flex-col items-center gap-5 w-full max-w-[300px] sm:max-w-[390px]">
-        {/* Authentic high-resolution Berry logo revealed via native HTML <img> + GPU clip-path */}
+        className="pointer-events-none absolute inset-0 overflow-hidden opacity-45"
+      >
         <div
-          className="relative w-full"
-          style={{ aspectRatio: '339 / 114' }}
-          role="img"
-          aria-label="Berry Alloys Limited official logo"
+          className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 w-[min(86vw,540px)] h-[1px]"
+          style={{
+            background: isDark
+              ? 'linear-gradient(90deg, transparent, rgba(105,197,245,0.22), transparent)'
+              : 'linear-gradient(90deg, transparent, rgba(0,99,147,0.16), transparent)',
+          }}
+        />
+        <div
+          className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 h-[min(70vh,420px)] w-[1px]"
+          style={{
+            background: isDark
+              ? 'linear-gradient(180deg, transparent, rgba(105,197,245,0.22), transparent)'
+              : 'linear-gradient(180deg, transparent, rgba(0,99,147,0.16), transparent)',
+          }}
+        />
+      </div>
+
+      {/* Circular Orbital Loading Medallion */}
+      <div className="relative flex flex-col items-center justify-center">
+        <div
+          className={`relative w-[228px] h-[228px] sm:w-[264px] sm:h-[264px] flex items-center justify-center transition-transform duration-400 ease-[cubic-bezier(0.22,1,0.36,1)] ${
+            exiting ? 'scale-110' : 'scale-100'
+          }`}
         >
-          {/* Upper Berry brand sweep layer (native <img> for instant WebKit/iOS paint) */}
+          {/* Ambient circular halo behind the dial */}
           <div
-            ref={sweepLayerRef}
-            className="absolute inset-0 will-change-[clip-path]"
-            style={{ clipPath: reducedMotion ? 'inset(0% 0% 59% 0%)' : 'inset(0% 100% 59% 0%)' }}
-          >
-            <img
-              src={logoSrc}
-              alt=""
-              width={339}
-              height={114}
-              decoding="sync"
-              fetchPriority="high"
-              className="w-full h-full object-contain block"
-            />
-          </div>
-
-          {/* Lower authentic BERRY wordmark layer */}
-          <div
-            ref={wordmarkLayerRef}
-            className="absolute inset-0 will-change-[clip-path]"
-            style={{ clipPath: reducedMotion ? 'inset(41% 0% 0% 0%)' : 'inset(41% 100% 0% 0%)' }}
-          >
-            <img
-              src={logoSrc}
-              alt="Berry Alloys Limited"
-              width={339}
-              height={114}
-              decoding="sync"
-              fetchPriority="high"
-              className="w-full h-full object-contain block"
-            />
-          </div>
-
-          {/* Sharp SVG overlay strictly for the traveling alloy spark & trailing fragments */}
-          <svg
-            viewBox="0 0 339 114"
             aria-hidden="true"
-            className="pointer-events-none absolute inset-0 w-full h-full overflow-visible"
+            className="absolute inset-5 rounded-full pointer-events-none"
+            style={{
+              background: isDark
+                ? 'radial-gradient(circle, rgba(10, 106, 161, 0.22) 0%, rgba(13, 27, 46, 0.85) 68%, transparent 100%)'
+                : 'radial-gradient(circle, rgba(255, 255, 255, 0.98) 0%, rgba(241, 246, 251, 0.92) 72%, transparent 100%)',
+              boxShadow: isDark
+                ? '0 0 60px rgba(0, 99, 147, 0.28), inset 0 0 32px rgba(105, 197, 245, 0.08)'
+                : '0 22px 60px -18px rgba(16, 36, 58, 0.16), inset 0 0 0 1px rgba(16, 36, 58, 0.06)',
+            }}
+          />
+
+          {/* Precision Concentric Circular SVG Orbital Dial */}
+          <svg
+            viewBox={`0 0 ${DIAL_SIZE} ${DIAL_SIZE}`}
+            className="absolute inset-0 w-full h-full overflow-visible"
+            aria-hidden="true"
           >
             <defs>
-              <radialGradient id="berrySparkGlow" cx="50%" cy="50%" r="50%">
-                <stop offset="0%" stopColor={sparkHaloColor} stopOpacity="0.9" />
-                <stop offset="48%" stopColor={sparkHaloColor} stopOpacity="0.32" />
-                <stop offset="100%" stopColor={sparkHaloColor} stopOpacity="0" />
+              <linearGradient id="berry-orbital-grad" x1="0%" y1="0%" x2="100%" y2="100%">
+                <stop offset="0%" stopColor="#006393" />
+                <stop offset="55%" stopColor="#69C5F5" />
+                <stop offset="100%" stopColor="#C9233B" />
+              </linearGradient>
+              <linearGradient id="berry-inner-arc-grad" x1="0%" y1="0%" x2="100%" y2="0%">
+                <stop offset="0%" stopColor={isDark ? '#69C5F5' : '#006393'} stopOpacity="0.85" />
+                <stop offset="100%" stopColor="#C9233B" stopOpacity="0.15" />
+              </linearGradient>
+              <radialGradient id="berry-spark-glow" cx="50%" cy="50%" r="50%">
+                <stop offset="0%" stopColor="#FFFFFF" stopOpacity="1" />
+                <stop offset="35%" stopColor="#C9233B" stopOpacity="0.85" />
+                <stop offset="100%" stopColor="#006393" stopOpacity="0" />
               </radialGradient>
+              <filter id="berry-arc-blur" x="-30%" y="-30%" width="160%" height="160%">
+                <feGaussianBlur stdDeviation="3.5" />
+              </filter>
             </defs>
-            {SPARK_FRAGMENTS.map((frag, idx) => (
-              <rect
-                key={frag.id}
-                ref={(el) => {
-                  fragmentRefs.current[idx] = el;
-                }}
-                x={SWEEP_START.x}
-                y={SWEEP_START.y}
-                width={frag.size}
-                height={frag.size}
-                fill={fragmentColors[frag.color]}
-                style={{ opacity: 0 }}
+
+            {/* Outer 36-tick furnace dial compass ring */}
+            <g ref={tickRingRef}>
+              {dialTicks.map((t) => (
+                <line
+                  key={t.idx}
+                  x1={t.x1.toFixed(2)}
+                  y1={t.y1.toFixed(2)}
+                  x2={t.x2.toFixed(2)}
+                  y2={t.y2.toFixed(2)}
+                  stroke={
+                    t.isMajor
+                      ? '#C9233B'
+                      : isDark
+                      ? 'rgba(105, 197, 245, 0.42)'
+                      : 'rgba(16, 36, 58, 0.24)'
+                  }
+                  strokeWidth={t.isMajor ? 1.8 : t.isMid ? 1.2 : 0.85}
+                  strokeLinecap="round"
+                />
+              ))}
+            </g>
+
+            {/* Base orbital track circle */}
+            <circle
+              cx={DIAL_CENTER}
+              cy={DIAL_CENTER}
+              r={MAIN_RADIUS}
+              fill="none"
+              stroke={isDark ? 'rgba(244, 248, 252, 0.1)' : 'rgba(16, 36, 58, 0.1)'}
+              strokeWidth="2.5"
+            />
+
+            {/* Soft luminous under-glow arc */}
+            <circle
+              ref={glowArcRef}
+              cx={DIAL_CENTER}
+              cy={DIAL_CENTER}
+              r={MAIN_RADIUS}
+              fill="none"
+              stroke="url(#berry-orbital-grad)"
+              strokeWidth="6"
+              strokeLinecap="round"
+              strokeDasharray={MAIN_CIRCUMFERENCE}
+              strokeDashoffset={MAIN_CIRCUMFERENCE}
+              transform={`rotate(-90 ${DIAL_CENTER} ${DIAL_CENTER})`}
+              opacity={isDark ? 0.55 : 0.34}
+              filter="url(#berry-arc-blur)"
+            />
+
+            {/* Primary razor-sharp circular progress sweep */}
+            <circle
+              ref={progressArcRef}
+              cx={DIAL_CENTER}
+              cy={DIAL_CENTER}
+              r={MAIN_RADIUS}
+              fill="none"
+              stroke="url(#berry-orbital-grad)"
+              strokeWidth="3.2"
+              strokeLinecap="round"
+              strokeDasharray={MAIN_CIRCUMFERENCE}
+              strokeDashoffset={MAIN_CIRCUMFERENCE}
+              transform={`rotate(-90 ${DIAL_CENTER} ${DIAL_CENTER})`}
+            />
+
+            {/* Counter-rotating inner split orbital arcs */}
+            <g ref={innerArcGroupRef}>
+              <circle
+                cx={DIAL_CENTER}
+                cy={DIAL_CENTER}
+                r={INNER_RADIUS}
+                fill="none"
+                stroke="url(#berry-inner-arc-grad)"
+                strokeWidth="1.35"
+                strokeLinecap="round"
+                strokeDasharray="115 161 115 162"
               />
-            ))}
+              <circle
+                cx={DIAL_CENTER}
+                cy={DIAL_CENTER}
+                r={INNER_RADIUS - 8}
+                fill="none"
+                stroke={isDark ? 'rgba(105, 197, 245, 0.18)' : 'rgba(0, 99, 147, 0.15)'}
+                strokeWidth="0.9"
+                strokeDasharray="3 7"
+              />
+            </g>
+
+            {/* Orbiting molten alloy spark leading the circular progress sweep */}
             <circle
               ref={sparkHaloRef}
-              cx={SWEEP_START.x}
-              cy={SWEEP_START.y}
-              r="6"
-              fill="url(#berrySparkGlow)"
-              style={{ opacity: 0 }}
+              cx={DIAL_CENTER}
+              cy={DIAL_CENTER - MAIN_RADIUS}
+              r="11"
+              fill="url(#berry-spark-glow)"
+              style={{ opacity: reducedMotion ? 0 : 0.55 }}
             />
             <circle
               ref={sparkHeadRef}
-              cx={SWEEP_START.x}
-              cy={SWEEP_START.y}
-              r="2.4"
-              fill={sparkCoreColor}
+              cx={DIAL_CENTER}
+              cy={DIAL_CENTER - MAIN_RADIUS}
+              r="3.6"
+              fill="#FFFFFF"
               stroke="#C9233B"
-              strokeWidth="0.9"
-              style={{ opacity: 0 }}
+              strokeWidth="1.2"
+              style={{ opacity: reducedMotion ? 0 : 1 }}
             />
           </svg>
-        </div>
 
-        {/* Fine Berry-blue-to-red architectural hairline */}
-        <div
-          aria-hidden="true"
-          className={`w-48 sm:w-56 h-[1.5px] overflow-hidden ${
-            isDark ? 'bg-[#F4F8FC]/12' : 'bg-[#10243A]/10'
-          }`}
-        >
+          {/* Centered Authentic Berry Alloys Brand Mark inside the Circular Medallion */}
           <div
-            ref={progressHairlineRef}
-            className="h-full w-full origin-left bg-gradient-to-r from-[#006393] via-[#69C5F5] to-[#C9233B] will-change-transform"
-            style={{ transform: reducedMotion ? 'scaleX(1)' : 'scaleX(0)' }}
-          />
+            ref={logoWrapRef}
+            className="relative z-10 flex flex-col items-center justify-center px-6 will-change-transform"
+            style={{ opacity: 0.9, transform: 'scale(0.96)' }}
+          >
+            <img
+              src={isDark ? OFFICIAL_BRAND_MARK_DARK : OFFICIAL_BRAND_MARK}
+              alt="Berry Alloys Limited"
+              width={148}
+              height={50}
+              draggable={false}
+              className="w-[126px] sm:w-[144px] h-auto object-contain select-none"
+            />
+            <div className="mt-2.5 flex items-center gap-1.5 text-[10px] font-mono-tabular tracking-[0.22em] uppercase">
+              <span
+                ref={statusRef}
+                className={isDark ? 'text-[#69C5F5]' : 'text-[#006393]'}
+              >
+                IGNITING ARC
+              </span>
+              <span className={isDark ? 'text-[#F4F8FC]/30' : 'text-[#10243A]/25'}>·</span>
+              <span
+                ref={percentRef}
+                className={isDark ? 'text-[#F4F8FC]/90 font-semibold' : 'text-[#10243A] font-semibold'}
+              >
+                00%
+              </span>
+            </div>
+          </div>
         </div>
 
+        {/* Clean architectural subtitle below the circular medallion */}
         <p
-          ref={subtitleRef}
-          style={{ opacity: reducedMotion ? 1 : 0 }}
-          className={`font-mono-tabular text-[10px] sm:text-[11px] uppercase tracking-[0.22em] text-center sm:whitespace-nowrap ${
-            isDark ? 'text-[#B5C5D7]' : 'text-[#465C72]'
-          }`}
+          className="mt-6 text-[11px] font-mono-tabular uppercase tracking-[0.24em] text-center"
+          style={{ color: isDark ? 'rgba(181, 197, 215, 0.85)' : 'rgba(70, 92, 114, 0.9)' }}
         >
-          Berry Alloys Limited · From Heat to Precision
+          From Heat to Precision · Est. 2006
         </p>
       </div>
 
+      {/* Subtle Skip intro control */}
       <button
         type="button"
-        onClick={() => finishSplash('ready', 'Skipped by visitor')}
-        className={`absolute bottom-6 right-6 sm:bottom-8 sm:right-8 min-h-[44px] px-4 py-2 text-[11px] font-mono-tabular uppercase tracking-wider border transition-colors cursor-pointer ${
-          isDark
-            ? 'text-[#B5C5D7] hover:text-[#F4F8FC] border-[#F4F8FC]/20 hover:border-[#69C5F5]'
-            : 'text-[#465C72] hover:text-[#10243A] border-[#10243A]/20 hover:border-brand'
-        }`}
+        onClick={() => finishSplash('skipped', 'Skipped by visitor')}
+        className="fixed bottom-6 right-6 z-10 min-h-[38px] px-3.5 py-1.5 text-[11px] font-mono-tabular uppercase tracking-widest border transition-colors cursor-pointer"
+        style={{
+          color: isDark ? 'rgba(244, 248, 252, 0.72)' : 'rgba(16, 36, 58, 0.68)',
+          borderColor: isDark ? 'rgba(244, 248, 252, 0.16)' : 'rgba(16, 36, 58, 0.14)',
+          backgroundColor: isDark ? 'rgba(13, 27, 46, 0.78)' : 'rgba(255, 255, 255, 0.84)',
+        }}
       >
         Skip intro
       </button>

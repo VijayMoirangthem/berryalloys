@@ -1,6 +1,7 @@
-import { useEffect, useRef } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { useInViewActive, useMotion } from '../context/MotionContext';
 import { AmbientMotionToggle } from './AmbientMotionToggle';
+import { cn } from '../lib/utils';
 
 /**
  * LogisticsJourney — a schematic manufacturing-to-delivery illustration:
@@ -9,8 +10,8 @@ import { AmbientMotionToggle } from './AmbientMotionToggle';
  * It is a diagram, not tracking: the road/sea routes are illustrative and no shipping lane is asserted.
  * The truck follows the land route only and the ship follows the sea route only (separate paths, so a
  * vehicle can never leave its medium). Motion is native SVG (SMIL animateMotion with rotate="auto"), paused
- * when offscreen, in a hidden tab, or when the visitor pauses ambient motion. Under reduced motion the
- * vehicles are drawn at fixed, meaningful positions. Labels live in HTML below so they stay readable.
+ * when offscreen, in a hidden tab, or when the visitor pauses ambient motion. Visitors can also tap or click
+ * any numbered stage below to spotlight its corresponding station on the schematic.
  */
 
 const LAND_ROUTE = 'M 112 252 C 215 252, 262 206, 372 218 S 560 268, 662 238';
@@ -72,6 +73,7 @@ export function LogisticsJourney() {
   const wrapRef = useRef<HTMLDivElement>(null);
   const svgRef = useRef<SVGSVGElement>(null);
   const active = useInViewActive(wrapRef, '80px');
+  const [selectedStep, setSelectedStep] = useState<number | null>(null);
   const animated = !reducedMotion;
   const running = animated && ambientActive && active;
 
@@ -91,7 +93,18 @@ export function LogisticsJourney() {
             From furnace floor to vessel
           </h3>
         </div>
-        <AmbientMotionToggle />
+        <div className="flex flex-wrap items-center gap-3">
+          {selectedStep !== null && (
+            <button
+              type="button"
+              onClick={() => setSelectedStep(null)}
+              className="text-[11px] font-mono-tabular uppercase tracking-wider text-brand hover:underline cursor-pointer"
+            >
+              Reset Focus
+            </button>
+          )}
+          <AmbientMotionToggle />
+        </div>
       </div>
 
       <div className="overflow-hidden border border-subtle bg-card">
@@ -104,7 +117,17 @@ export function LogisticsJourney() {
         >
           <defs>
             <pattern id="lj-waves" width="46" height="18" patternUnits="userSpaceOnUse">
-              <path d="M0 9 Q11 4 23 9 T46 9" fill="none" className="stroke-brand" strokeOpacity="0.28" strokeWidth="1.2" />
+              <path d="M0 9 Q11 4 23 9 T46 9" fill="none" className="stroke-brand" strokeOpacity="0.3" strokeWidth="1.2" />
+              {animated && (
+                <animateTransform
+                  attributeName="patternTransform"
+                  type="translate"
+                  from="0 0"
+                  to="46 0"
+                  dur="6.5s"
+                  repeatCount="indefinite"
+                />
+              )}
             </pattern>
           </defs>
 
@@ -116,9 +139,23 @@ export function LogisticsJourney() {
 
           {/* Road */}
           <path d={LAND_ROUTE} fill="none" className="stroke-subtle" strokeWidth="16" strokeLinecap="round" />
-          <path d={LAND_ROUTE} fill="none" className="stroke-control" strokeWidth="1.5" strokeDasharray="9 9" />
+          <path
+            d={LAND_ROUTE}
+            fill="none"
+            className={cn('stroke-control', running && 'diagram-flow-dash')}
+            strokeWidth="1.6"
+            strokeDasharray="9 9"
+          />
           {/* Sea lane (illustrative) */}
-          <path d={SEA_ROUTE} fill="none" className="stroke-brand" strokeOpacity="0.55" strokeWidth="1.6" strokeDasharray="3 8" strokeLinecap="round" />
+          <path
+            d={SEA_ROUTE}
+            fill="none"
+            className={cn('stroke-brand', running && 'diagram-flow-dash')}
+            strokeOpacity="0.6"
+            strokeWidth="1.8"
+            strokeDasharray="4 8"
+            strokeLinecap="round"
+          />
 
           {/* Plant */}
           <g transform="translate(26 206)">
@@ -151,16 +188,49 @@ export function LogisticsJourney() {
             ))}
           </g>
 
-          {/* Stage discs, highlighted in turn while the scene runs */}
-          {DISC_X.map((x, i) => (
-            <g key={x} transform={`translate(${x} ${DISC_Y[i]})`}>
-              <circle r="15" className="fill-card stroke-brand" strokeWidth="2" />
-              <circle r="15" className="lj-disc fill-brand" style={{ animationDelay: `${(i * CYCLE) / 5}s` }} />
-              <text textAnchor="middle" dy="4.5" fontSize="13" fontWeight="700" className="fill-ink" fontFamily="IBM Plex Mono, monospace">
-                {i + 1}
-              </text>
-            </g>
-          ))}
+          {/* Stage discs, highlighted in turn while the scene runs or spotlighted on user tap */}
+          {DISC_X.map((x, i) => {
+            const stepNumber = i + 1;
+            const isSelected = selectedStep === stepNumber;
+            return (
+              <g
+                key={x}
+                transform={`translate(${x} ${DISC_Y[i]})`}
+                onClick={() => setSelectedStep((prev) => (prev === stepNumber ? null : stepNumber))}
+                className="cursor-pointer"
+              >
+                {isSelected && (
+                  <circle
+                    r="21"
+                    fill="none"
+                    className={cn('stroke-accent-red', running && 'diagram-ring-ping')}
+                    strokeWidth="2.5"
+                  />
+                )}
+                <circle
+                  r="15"
+                  className={cn(
+                    'transition-colors',
+                    isSelected ? 'fill-accent-red stroke-accent-red' : 'fill-card stroke-brand'
+                  )}
+                  strokeWidth="2"
+                />
+                {!isSelected && selectedStep === null && (
+                  <circle r="15" className="lj-disc fill-brand" style={{ animationDelay: `${(i * CYCLE) / 5}s` }} />
+                )}
+                <text
+                  textAnchor="middle"
+                  dy="4.5"
+                  fontSize="13"
+                  fontWeight="700"
+                  className={isSelected ? 'fill-on-accent' : 'fill-ink'}
+                  fontFamily="IBM Plex Mono, monospace"
+                >
+                  {stepNumber}
+                </text>
+              </g>
+            );
+          })}
 
           {/* Vehicles */}
           {animated ? (
@@ -213,22 +283,42 @@ export function LogisticsJourney() {
       </div>
 
       <ol className="grid gap-3 sm:grid-cols-2 lg:grid-cols-5">
-        {STEPS.map((s) => (
-          <li key={s.n} className="flex gap-3 border border-subtle bg-card p-3">
-            <span className="flex h-7 w-7 shrink-0 items-center justify-center bg-brand font-mono-tabular text-xs font-bold text-on-brand">
-              {s.n}
-            </span>
-            <span className="min-w-0">
-              <span className="block text-sm font-semibold leading-tight text-ink">{s.title}</span>
-              <span className="mt-0.5 block text-xs leading-snug text-ink-2">{s.text}</span>
-            </span>
-          </li>
-        ))}
+        {STEPS.map((s) => {
+          const isSelected = selectedStep === s.n;
+          return (
+            <li key={s.n}>
+              <button
+                type="button"
+                onClick={() => setSelectedStep((prev) => (prev === s.n ? null : s.n))}
+                aria-pressed={isSelected}
+                className={cn(
+                  'w-full h-full text-left flex gap-3 border p-3 transition-colors cursor-pointer',
+                  isSelected
+                    ? 'border-accent-red bg-accent-red-soft/60 dark:bg-elevated'
+                    : 'border-subtle bg-card hover:border-brand'
+                )}
+              >
+                <span
+                  className={cn(
+                    'flex h-7 w-7 shrink-0 items-center justify-center font-mono-tabular text-xs font-bold transition-colors',
+                    isSelected ? 'bg-accent-red text-on-accent' : 'bg-brand text-on-brand'
+                  )}
+                >
+                  {s.n}
+                </span>
+                <span className="min-w-0">
+                  <span className="block text-sm font-semibold leading-tight text-ink">{s.title}</span>
+                  <span className="mt-0.5 block text-xs leading-snug text-ink-2">{s.text}</span>
+                </span>
+              </button>
+            </li>
+          );
+        })}
       </ol>
 
       <p className="text-[11px] text-ink-muted">
-        Schematic illustration of a typical manufacturing-to-delivery journey. Routes are illustrative, not exact shipping
-        lanes, and the vehicles do not represent live tracking.
+        Schematic illustration of a typical manufacturing-to-delivery journey. Tap any stage to highlight it on the diagram.
+        Routes are illustrative, not exact shipping lanes, and vehicles do not represent live tracking.
       </p>
     </div>
   );

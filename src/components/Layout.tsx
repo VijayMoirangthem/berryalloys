@@ -22,6 +22,7 @@ import { LanguageSelector } from './localized/LanguageSelector';
 import { ScrollProgress } from './motion/ScrollProgress';
 import { AnimatedFooterCanvas } from './ui/AnimatedFooterCanvas';
 import { triggerReplayIntro } from './ui/KineticLoader';
+import { RouteTransitionLoader } from './ui/RouteTransitionLoader';
 import { SocialFlipButton } from './ui/SocialFlipButton';
 
 interface LayoutProps {
@@ -406,6 +407,7 @@ export function Layout({ children }: LayoutProps) {
 
   return (
     <div className="min-h-screen flex flex-col bg-[#FFFFFF] text-[#10243A] dark:bg-[#07111F] dark:text-[#F4F8FC] transition-colors duration-200">
+      <RouteTransitionLoader />
       <ScrollProgress />
       <a
         href="#main-content"
@@ -848,7 +850,7 @@ export function Layout({ children }: LayoutProps) {
         )}
       </AnimatePresence>
 
-      {/* Main Content */}
+      {/* Main Content — intentionally free of transform/filter wrappers so GSAP ScrollTrigger pinning & position:sticky remain viewport-anchored */}
       <main id="main-content" className="flex-1">
         {children}
       </main>

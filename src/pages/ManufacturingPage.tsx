@@ -12,6 +12,7 @@ import { SpotlightSurface } from '../components/motion/SpotlightSurface';
 import { FlipText } from '../components/ui/FlipText';
 import { GooeyTextReveal } from '../components/ui/GooeyTextReveal';
 import { WaveGridBackground } from '../components/ui/WaveGridBackground';
+import { SmeltingRefiningJourney } from '../components/SmeltingRefiningJourney';
 
 export function ManufacturingPage() {
   return (
@@ -149,6 +150,10 @@ export function ManufacturingPage() {
                 </p>
               </article>
             </SpotlightSurface>
+          </div>
+
+          <div className="pt-8 border-t border-[#10243A]/14 dark:border-[#F4F8FC]/12">
+            <SmeltingRefiningJourney />
           </div>
         </section>
 

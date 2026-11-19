@@ -83,6 +83,7 @@ export function ManufacturingScrollStory() {
         start: 'top 64px',
         end: '+=180%',
         pin: true,
+        anticipatePin: 1,
         scrub: 0.4,
         onUpdate: (self) => {
           const nextIdx = Math.min(

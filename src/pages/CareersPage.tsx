@@ -10,7 +10,9 @@ import { CORPORATE_SUBNAV_LINKS, SubNav } from '../components/SubNav';
 import { SplitText } from '../components/motion/SplitText';
 import { CreepyButton } from '../components/ui/CreepyButton';
 import { FlipFadeText } from '../components/ui/FlipFadeText';
+import { ImageScatter } from '../components/ui/ImageScatter';
 import { IndustrialButton } from '../components/ui/IndustrialButton';
+import { LIFE_CULTURE_SCATTER_SETS } from '../data/showcaseCollections';
 
 interface CareersFormState {
   mode: 'role' | 'general';
@@ -247,25 +249,27 @@ export function CareersPage() {
             </div>
           </div>
 
-          <div className="mt-8 bg-[#07111F] text-[#F4F8FC] border border-[#10243A]/18 dark:border-[#F4F8FC]/14 p-8 sm:p-10 flex flex-col md:flex-row md:items-end justify-between gap-6">
-            <div className="space-y-3 max-w-2xl">
-              <p className="text-[11px] font-mono-tabular uppercase tracking-widest text-[#69C5F5]">
-                Life at Berry Alloys · ET Edge 2026
-              </p>
-              <h3 className="font-display text-2xl sm:text-3xl font-bold uppercase tracking-tight text-[#F4F8FC]">
-                Recognized Workplace Culture Across Eleven Departments
-              </h3>
-              <p className="text-sm text-[#F4F8FC]/82 leading-relaxed">
-                From submerged-arc furnace operations in Bobbili and Dhalbhumgarh to commercial logistics and laboratories in Kolkata and Visakhapatnam.
-              </p>
+          {/* Restored Interactive GSAP Life & Culture Scatter Stage (8 exclusive workplace visuals) */}
+          <div className="mt-8 space-y-4">
+            <div className="flex flex-col sm:flex-row sm:items-end justify-between gap-2">
+              <div>
+                <p className="text-[11px] font-mono-tabular uppercase tracking-widest text-brand dark:text-[#69C5F5]">
+                  Interactive Workplace Stage · ET Edge 2026
+                </p>
+                <h3 className="font-display text-2xl sm:text-3xl font-bold uppercase text-[#10243A] dark:text-[#F4F8FC]">
+                  Inside Our Control Rooms, Labs &amp; Campuses
+                </h3>
+              </div>
+              <Link
+                to="/awards-achievements"
+                className="inline-flex items-center gap-1.5 text-xs font-semibold text-brand dark:text-[#69C5F5] hover:underline whitespace-nowrap"
+              >
+                View Workplace &amp; Industry Recognitions
+                <ArrowRight className="w-3.5 h-3.5" aria-hidden="true" />
+              </Link>
             </div>
-            <Link
-              to="/awards-achievements"
-              className="inline-flex items-center gap-1.5 min-h-[44px] px-5 py-2.5 text-xs font-semibold border border-[#F4F8FC]/25 text-[#F4F8FC] hover:bg-[#F4F8FC] hover:text-[#10243A] transition-colors whitespace-nowrap shrink-0"
-            >
-              View Workplace &amp; Industry Recognitions
-              <ArrowRight className="w-3.5 h-3.5" aria-hidden="true" />
-            </Link>
+
+            <ImageScatter imageSets={LIFE_CULTURE_SCATTER_SETS} />
           </div>
         </section>
 
