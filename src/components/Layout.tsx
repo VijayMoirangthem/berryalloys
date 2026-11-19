@@ -20,6 +20,7 @@ import { ThemeToggle } from './ThemeToggle';
 import { AmbientMotionToggle } from './AmbientMotionToggle';
 import { LanguageSelector } from './localized/LanguageSelector';
 import { ScrollProgress } from './motion/ScrollProgress';
+import { useTapTargets } from './motion/useTapTargets';
 import { AnimatedFooterCanvas } from './ui/AnimatedFooterCanvas';
 import { triggerReplayIntro } from './ui/KineticLoader';
 import { RouteTransitionLoader } from './ui/RouteTransitionLoader';
@@ -234,6 +235,7 @@ const MOBILE_ACCORDION_GROUPS = [
 export function Layout({ children }: LayoutProps) {
   const { pathname, search, hash } = useLocation();
   const { openSearch } = useSearch();
+  useTapTargets();
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [sectionsMenuOpen, setSectionsMenuOpen] = useState(false);
   const [activeMegaKey, setActiveMegaKey] = useState<string | null>(null);
