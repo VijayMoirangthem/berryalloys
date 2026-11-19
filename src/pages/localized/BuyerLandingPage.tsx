@@ -5,7 +5,6 @@ import { DICTIONARIES } from '../../i18n';
 import { DEMO_PRODUCT_SLUG, INSIGHT_SLUGS, insightsHref, localePath, type LocaleCode } from '../../i18n/locales';
 import { seoFor } from '../../seo/registry';
 import { seoEnv, useSeo } from '../../seo/useSeo';
-import { ASSETS } from '../../data/assets';
 import { ClientLogoStrip } from '../../components/ClientLogoStrip';
 import { useGuide } from '../../context/GuideContext';
 
@@ -38,11 +37,41 @@ export function BuyerLandingPage({ locale }: { locale: LocaleCode }) {
             </div>
             <p className="text-xs text-ink-muted">{t.landing.demoLangNote}</p>
           </div>
-          <figure className="lg:col-span-5">
-            <div className="aspect-[4/3] overflow-hidden border border-subtle bg-card">
-              <img src={ASSETS.officialProdFeMn.src} alt={t.product.imageAlt} width={800} height={600} className="h-full w-full object-cover" />
+          <div className="lg:col-span-5">
+            <div className="border border-subtle bg-card p-6 sm:p-8 space-y-5">
+              <div className="flex items-start justify-between gap-4 border-b border-subtle pb-4">
+                <div>
+                  <p className="text-xs font-semibold uppercase tracking-widest text-brand">
+                    {t.product.eyebrow}
+                  </p>
+                  <p className="mt-1 font-display text-4xl font-bold tracking-tight text-ink" dir="ltr">
+                    FeMn · SiMn · FeCr · FeSi
+                  </p>
+                </div>
+              </div>
+              <dl className="grid grid-cols-2 gap-4 text-xs">
+                <div>
+                  <dt className="text-ink-muted">{t.product.keyFactLabels.mn}</dt>
+                  <dd className="mt-1 text-base font-bold text-ink" dir="ltr">70–78% Mn</dd>
+                </div>
+                <div>
+                  <dt className="text-ink-muted">{t.product.keyFactLabels.c}</dt>
+                  <dd className="mt-1 text-base font-bold text-ink" dir="ltr">6.0–8.0% C</dd>
+                </div>
+                <div>
+                  <dt className="text-ink-muted">{t.product.keyFactLabels.p}</dt>
+                  <dd className="mt-1 text-sm font-semibold text-ink" dir="ltr">0.15–0.35% max</dd>
+                </div>
+                <div>
+                  <dt className="text-ink-muted">{t.product.keyFactLabels.s}</dt>
+                  <dd className="mt-1 text-sm font-semibold text-ink" dir="ltr">0.03–0.05% max</dd>
+                </div>
+              </dl>
+              <p className="border-t border-subtle pt-4 text-xs text-ink-2">
+                {t.product.imageAlt}
+              </p>
             </div>
-          </figure>
+          </div>
         </div>
       </section>
 

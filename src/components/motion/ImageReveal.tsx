@@ -1,6 +1,7 @@
 import { ReactNode, useEffect, useRef } from 'react';
 import gsap from 'gsap';
 import { ScrollTrigger } from 'gsap/ScrollTrigger';
+import { onLoaderCleared } from '../../lib/motionDiagnostics';
 
 gsap.registerPlugin(ScrollTrigger);
 ScrollTrigger.config({ ignoreMobileResize: true });
@@ -13,8 +14,7 @@ interface ImageRevealProps {
 
 /**
  * ImageReveal — Scroll-linked editorial image curtain wipe + subtle photographic settle.
- * Uses GSAP ScrollTrigger with clearProps across mobile & desktop so iPhone WebKit
- * executes every curtain wipe reliably without CSS-transition frame skips.
+ * Uses GSAP ScrollTrigger with clearProps and viewport sweep failsafe across mobile & desktop.
  */
 export function ImageReveal({
   children,
@@ -38,37 +38,46 @@ export function ImageReveal({
         : 'inset(14% 0% 0% 0%)';
 
     const isCompact = window.matchMedia('(max-width: 767px)').matches;
+    let clipTween: gsap.core.Tween | null = null;
+    let scaleTween: gsap.core.Tween | null = null;
+
+    const ensurePlayed = () => {
+      if (frame.getBoundingClientRect().top <= window.innerHeight * 0.96) {
+        if (clipTween && clipTween.progress() === 0) clipTween.play();
+        if (scaleTween && scaleTween.progress() === 0) scaleTween.play();
+      }
+    };
 
     const ctx = gsap.context(() => {
-      gsap.fromTo(
+      clipTween = gsap.fromTo(
         frame,
         { clipPath: fromClip, opacity: 0.7 },
         {
           clipPath: 'inset(0% 0% 0% 0%)',
           opacity: 1,
-          duration: isCompact ? 0.85 : 1.18,
+          duration: isCompact ? 0.8 : 1.18,
           ease: 'power3.out',
           clearProps: 'clipPath,opacity',
           scrollTrigger: {
             trigger: frame,
-            start: isCompact ? 'top 93%' : 'top 86%',
+            start: isCompact ? 'top 95%' : 'top 86%',
             once: true,
             invalidateOnRefresh: true,
           },
         }
       );
 
-      gsap.fromTo(
+      scaleTween = gsap.fromTo(
         inner,
         { scale: 1.07 },
         {
           scale: 1,
-          duration: isCompact ? 1.0 : 1.4,
+          duration: isCompact ? 0.95 : 1.4,
           ease: 'power2.out',
           clearProps: 'transform',
           scrollTrigger: {
             trigger: frame,
-            start: isCompact ? 'top 93%' : 'top 86%',
+            start: isCompact ? 'top 95%' : 'top 86%',
             once: true,
             invalidateOnRefresh: true,
           },
@@ -76,7 +85,18 @@ export function ImageReveal({
       );
     }, frameRef);
 
-    return () => ctx.revert();
+    const onScroll = () => ensurePlayed();
+    window.addEventListener('scroll', onScroll, { passive: true });
+    const unsub = onLoaderCleared(() => {
+      ScrollTrigger.refresh();
+      ensurePlayed();
+    });
+
+    return () => {
+      unsub();
+      window.removeEventListener('scroll', onScroll);
+      ctx.revert();
+    };
   }, [direction]);
 
   return (

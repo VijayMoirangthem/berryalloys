@@ -16,6 +16,7 @@ export function SubNav({ links, ariaLabel }: SubNavProps) {
 
 export const CORPORATE_SUBNAV_LINKS: SubNavLink[] = [
   { label: 'About, Legacy & Leadership', to: '/about' },
+  { label: 'Awards & Achievements', to: '/awards-achievements' },
   { label: 'Community & CSR', to: '/community' },
   { label: 'Careers', to: '/careers' },
   { label: 'Corporate Documents', to: '/documents' },

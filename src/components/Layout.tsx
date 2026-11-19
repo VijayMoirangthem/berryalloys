@@ -21,6 +21,7 @@ import { AmbientMotionToggle } from './AmbientMotionToggle';
 import { LanguageSelector } from './localized/LanguageSelector';
 import { ScrollProgress } from './motion/ScrollProgress';
 import { AnimatedFooterCanvas } from './ui/AnimatedFooterCanvas';
+import { triggerReplayIntro } from './ui/KineticLoader';
 import { SocialFlipButton } from './ui/SocialFlipButton';
 
 interface LayoutProps {
@@ -149,6 +150,11 @@ const PRIMARY_NAV: MegaMenuItem[] = [
             to: '/about',
           },
           {
+            label: 'Awards & Achievements',
+            meta: 'ET Best Brand 2025, ET Edge 2026, ICC & Export House',
+            to: '/awards-achievements',
+          },
+          {
             label: 'Corporate Filings (MGT-7 & Policies)',
             meta: 'Annual returns FY 2019–26 & charters',
             to: '/documents',
@@ -173,8 +179,8 @@ const PRIMARY_NAV: MegaMenuItem[] = [
     ],
     spotlightTitle: 'ET Edge Best Organization to Work 2026',
     spotlightSummary:
-      'Explore statutory filings, promoter stewardship since 2006, and community welfare initiatives surrounding plant belts.',
-    spotlightCta: { label: 'Read Corporate Profile', to: '/about' },
+      'Explore published brand, workplace, social impact, and export recognitions alongside statutory filings and promoter stewardship since 2006.',
+    spotlightCta: { label: 'View Awards & Achievements', to: '/awards-achievements' },
   },
   {
     key: 'news',
@@ -209,6 +215,7 @@ const MOBILE_ACCORDION_GROUPS = [
     label: 'Corporate, CSR & Filings',
     links: [
       { label: 'About, Legacy & Leadership', to: '/about' },
+      { label: 'Awards & Achievements', to: '/awards-achievements' },
       { label: 'Community & CSR', to: '/community' },
       { label: 'News & Technical Articles', to: '/news' },
       { label: 'Careers', to: '/careers' },
@@ -908,7 +915,12 @@ export function Layout({ children }: LayoutProps) {
                 </li>
                 <li>
                   <Link to="/about" className="hover:text-[#10243A] dark:hover:text-[#F4F8FC] transition-colors">
-                    Company & Leadership
+                    Company &amp; Leadership
+                  </Link>
+                </li>
+                <li>
+                  <Link to="/awards-achievements" className="hover:text-[#10243A] dark:hover:text-[#F4F8FC] transition-colors">
+                    Awards &amp; Achievements
                   </Link>
                 </li>
                 <li>
@@ -976,6 +988,14 @@ export function Layout({ children }: LayoutProps) {
             <p>© 2026 Berry Alloys Limited. Presentation prototype.</p>
             <div className="flex flex-wrap items-center gap-4">
               <AmbientMotionToggle />
+              <button
+                type="button"
+                onClick={triggerReplayIntro}
+                className="hover:text-[#10243A] dark:hover:text-[#F4F8FC] transition-colors cursor-pointer"
+              >
+                Replay intro
+              </button>
+              <span aria-hidden="true">·</span>
               <Link to="/faq" className="hover:text-[#10243A] dark:hover:text-[#F4F8FC] transition-colors">
                 FAQs
               </Link>

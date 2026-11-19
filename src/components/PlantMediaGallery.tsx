@@ -97,6 +97,11 @@ export function PlantMediaGallery({ embedded = false }: PlantMediaGalleryProps) 
     }
     el.scrollLeft = d.startScroll - dx;
   };
+  const suppressTimerRef = useRef<number | null>(null);
+  useEffect(() => () => {
+    if (suppressTimerRef.current !== null) window.clearTimeout(suppressTimerRef.current);
+  }, []);
+
   const endDrag = () => {
     const d = drag.current;
     if (!d.active) return;
@@ -106,10 +111,10 @@ export function PlantMediaGallery({ embedded = false }: PlantMediaGalleryProps) 
     setMouseDragging(false);
     if (wasDrag) {
       suppressClick.current = true;
-      window.setTimeout(() => {
+      if (suppressTimerRef.current !== null) window.clearTimeout(suppressTimerRef.current);
+      suppressTimerRef.current = window.setTimeout(() => {
         suppressClick.current = false;
       }, 0);
-      // Gentle settle onto the nearest card.
       const el = scrollerRef.current;
       if (el) el.scrollTo({ left: Math.round(el.scrollLeft / cardStep()) * cardStep(), behavior: reducedMotion ? 'auto' : 'smooth' });
     }
@@ -208,12 +213,15 @@ export function PlantMediaGallery({ embedded = false }: PlantMediaGalleryProps) 
             >
               {GALLERY_ITEMS.map((item, idx) => {
                 const info = describeProvenance(item);
+                const isActive = idx === activeSlide;
                 return (
                   <figure
                     key={item.id}
                     aria-roledescription="slide"
                     aria-label={`${idx + 1} of ${GALLERY_ITEMS.length}`}
-                    className="snap-start shrink-0 w-[80vw] sm:w-[400px] lg:w-[440px] bg-card border border-subtle flex flex-col group"
+                    className={`snap-start shrink-0 w-[80vw] sm:w-[400px] lg:w-[440px] bg-card border transition-colors duration-300 flex flex-col group ${
+                      isActive ? 'border-brand' : 'border-subtle'
+                    }`}
                   >
                     <button
                       type="button"
@@ -249,11 +257,27 @@ export function PlantMediaGallery({ embedded = false }: PlantMediaGalleryProps) 
               })}
             </div>
 
-            <div className="h-[2px] w-full bg-subtle overflow-hidden" aria-hidden="true">
-              <div
-                className="h-full bg-brand origin-left transition-transform duration-150"
-                style={{ transform: `scaleX(${Math.max(1 / GALLERY_ITEMS.length, scrollRatio)})` }}
-              />
+            <div className="space-y-2.5">
+              <div className="h-[2px] w-full bg-subtle overflow-hidden" aria-hidden="true">
+                <div
+                  className="h-full bg-brand origin-left transition-transform duration-150"
+                  style={{ transform: `scaleX(${Math.max(1 / GALLERY_ITEMS.length, scrollRatio)})` }}
+                />
+              </div>
+              <div className="flex flex-wrap items-center justify-center gap-1.5" aria-label="Jump to gallery frame">
+                {GALLERY_ITEMS.map((item, idx) => (
+                  <button
+                    key={item.id}
+                    type="button"
+                    onClick={() => goTo(idx)}
+                    aria-label={`View gallery slide ${idx + 1}: ${item.category}`}
+                    aria-current={idx === activeSlide ? 'true' : undefined}
+                    className={`h-1.5 transition-all cursor-pointer ${
+                      idx === activeSlide ? 'w-5 bg-brand' : 'w-2 bg-ink-2/25 hover:bg-brand/60'
+                    }`}
+                  />
+                ))}
+              </div>
             </div>
           </div>
         )}

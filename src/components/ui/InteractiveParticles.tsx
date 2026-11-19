@@ -2,6 +2,17 @@ import { useEffect, useRef, useState } from 'react';
 import * as THREE from 'three';
 import { cn } from '../../lib/utils';
 import { useTheme } from '../../context/ThemeContext';
+import { useMotion } from '../../context/MotionContext';
+import {
+  incrementCanvasFrame,
+  isLoaderCleared,
+  onHeroEntranceRipple,
+  onLoaderCleared,
+  recordRuntimeError,
+  reportWebGLInfo,
+  setMotionInitStatus,
+  upsertCanvasTelemetry,
+} from '../../lib/motionDiagnostics';
 
 const VERTEX_SHADER = `
   precision highp float;
@@ -19,6 +30,9 @@ const VERTEX_SHADER = `
   uniform float uSize;
   uniform float uIntro;
   uniform float uAmbient;
+  uniform float uHandoffX;
+  uniform float uHandoffStrength;
+  uniform float uAmbientSweepX;
   uniform vec2 uTextureSize;
   uniform sampler2D uTexture;
   uniform sampler2D uTouch;
@@ -26,6 +40,8 @@ const VERTEX_SHADER = `
   varying vec2 vPUv;
   varying vec2 vUv;
   varying float vWave;
+  varying float vCrest;
+  varying float vRedEdge;
 
   vec3 mod289(vec3 x) { return x - floor(x * (1.0 / 289.0)) * 289.0; }
   vec4 mod289(vec4 x) { return x - floor(x * (1.0 / 289.0)) * 289.0; }
@@ -88,21 +104,34 @@ const VERTEX_SHADER = `
     float grey = colA.r * 0.21 + colA.g * 0.71 + colA.b * 0.07;
 
     vec3 displaced = offset;
-    float wavePhase = sin(puv.x * 7.5 - uTime * 1.4) * cos(puv.y * 5.0 + uTime * 0.85) * uAmbient;
-    float drift = snoise(vec3(puv * 4.5, uTime * 0.32)) * uAmbient;
+    float wavePhase = sin(puv.x * 7.2 - uTime * 1.45) * cos(puv.y * 4.8 + uTime * 0.85) * uAmbient;
+    float drift = snoise(vec3(puv * 4.5, uTime * 0.34)) * uAmbient;
     vWave = clamp(wavePhase * 0.5 + 0.5, 0.0, 1.0);
 
+    // Traveling left-to-right splash handoff ripple + restrained ambient wave across lettering
+    float handoffDist = abs(puv.x - uHandoffX);
+    float handoffCrest = exp(-handoffDist * handoffDist * 42.0) * uHandoffStrength;
+    float ambientDist = abs(puv.x - uAmbientSweepX);
+    float ambientCrest = exp(-ambientDist * ambientDist * 32.0) * 0.62 * uAmbient;
+    float crest = clamp(handoffCrest + ambientCrest, 0.0, 1.15);
+    vCrest = crest;
+
+    // Brief Berry red leading-edge accent on the crest
+    float redLeadHandoff = exp(-pow(puv.x - (uHandoffX + 0.035), 2.0) * 170.0) * uHandoffStrength;
+    float redLeadAmbient = exp(-pow(puv.x - (uAmbientSweepX + 0.03), 2.0) * 150.0) * 0.42 * uAmbient;
+    vRedEdge = clamp(redLeadHandoff + redLeadAmbient, 0.0, 1.0);
+
     displaced.xy += vec2(random(pindex) - 0.5, random(offset.x + pindex) - 0.5) * uRandom;
-    displaced.xy += vec2(drift * 1.65, wavePhase * 1.35);
+    displaced.xy += vec2(drift * 1.7 + crest * 4.2, wavePhase * 1.45 + sin(puv.y * 6.0 + uTime) * crest * 3.4);
     float rndz = (random(pindex) + snoise(vec3(pindex * 0.1, uTime * 0.24 * max(uAmbient, 0.15), 0.0)));
-    displaced.z += rndz * (random(pindex) * 2.4 * uDepth) + wavePhase * 4.5;
+    displaced.z += rndz * (random(pindex) * 2.4 * uDepth) + wavePhase * 4.8 + crest * 18.0;
     displaced.xy -= uTextureSize * 0.5;
 
     // Entrance magnetic convergence into typography
     float inv = 1.0 - uIntro;
     float inv2 = inv * inv;
-    displaced.xy += vec2(cos(angle), sin(angle)) * inv2 * (95.0 + 160.0 * random(pindex + 3.0));
-    displaced.z += inv2 * 70.0 * (random(pindex + 7.0) - 0.5);
+    displaced.xy += vec2(cos(angle), sin(angle)) * inv2 * (85.0 + 135.0 * random(pindex + 3.0));
+    displaced.z += inv2 * 64.0 * (random(pindex + 7.0) - 0.5);
 
     // Interactive cursor / tap / swipe burst displacement
     float t = texture2D(uTouch, puv).r;
@@ -110,9 +139,9 @@ const VERTEX_SHADER = `
     displaced.x += cos(angle) * t * 38.0 * (0.4 + rndz);
     displaced.y += sin(angle) * t * 38.0 * (0.4 + rndz);
 
-    float psize = (snoise(vec3(uTime * 0.55 * max(uAmbient, 0.1), puv * 3.0)) + 2.15 + wavePhase * 0.28);
+    float psize = (snoise(vec3(uTime * 0.55 * max(uAmbient, 0.1), puv * 3.0)) + 2.15 + wavePhase * 0.28 + crest * 0.55);
     psize *= max(grey, 0.34);
-    psize *= uSize * mix(0.62, 1.0, uIntro) * (1.0 + t * 0.42);
+    psize *= uSize * mix(0.65, 1.0, uIntro) * (1.0 + t * 0.42);
 
     vec4 mvPosition = modelViewMatrix * vec4(displaced, 1.0);
     mvPosition.xyz += position * psize;
@@ -125,9 +154,12 @@ const FRAGMENT_SHADER = `
   uniform sampler2D uTexture;
   uniform vec3 uColor;
   uniform vec3 uAccentColor;
+  uniform vec3 uRedColor;
   varying vec2 vPUv;
   varying vec2 vUv;
   varying float vWave;
+  varying float vCrest;
+  varying float vRedEdge;
 
   void main() {
     vec4 colA = texture2D(uTexture, vPUv);
@@ -136,12 +168,12 @@ const FRAGMENT_SHADER = `
     vec2 uv = vUv;
     vec2 center = vec2(0.5);
     float dist = distance(uv, center);
-    // Crisp metallic bead alpha falloff so particles stay distinct instead of smearing
     float alpha = smoothstep(0.5, 0.24, dist) * smoothstep(0.08, 0.65, grey);
 
-    // Traveling brand-blue / metallic shimmer blended with crisp primary typography tint
-    float shimmer = mix(0.22, 0.92, clamp(grey * 0.78 + vWave * 0.28, 0.0, 1.0));
+    float shimmer = mix(0.24, 0.94, clamp(grey * 0.78 + vWave * 0.24, 0.0, 1.0));
     vec3 tint = mix(uAccentColor, uColor, smoothstep(0.25, 0.9, shimmer));
+    tint = mix(tint, uAccentColor, clamp(vCrest * 0.85, 0.0, 0.92));
+    tint = mix(tint, uRedColor, clamp(vRedEdge * 0.78, 0.0, 0.82));
     if (alpha < 0.06) discard;
     gl_FragColor = vec4(tint, alpha);
   }
@@ -183,6 +215,9 @@ class TouchTexture {
       force = 0.65;
     }
     this.trail.push({ x: point.x, y: point.y, age: 0, force });
+    if (this.trail.length > 48) {
+      this.trail.splice(0, this.trail.length - 48);
+    }
   }
 
   update() {
@@ -240,17 +275,19 @@ export interface InteractiveParticlesProps {
   particleSize?: number;
 }
 
-/**
- * Generates an offscreen high-contrast bitmap typography texture for particle sampling.
- * Adapts canvas aspect for narrow mobile screens so glyphs retain heavy fill weight and density.
- */
+type ViewportTier = 'mobile' | 'tablet' | 'desktop';
+
+function getViewportTier(viewportWidth: number): ViewportTier {
+  return viewportWidth < 640 ? 'mobile' : viewportWidth < 1024 ? 'tablet' : 'desktop';
+}
+
 function createTypographySampleCanvas(
   text: string,
   lines: string[] | undefined,
   subtitle: string | undefined,
   viewportWidth: number
-): { canvas: HTMLCanvasElement | null; width: number; height: number } {
-  const tier = viewportWidth < 640 ? 'mobile' : viewportWidth < 1024 ? 'tablet' : 'desktop';
+): { canvas: HTMLCanvasElement | null; width: number; height: number; tier: ViewportTier } {
+  const tier = getViewportTier(viewportWidth);
   const sampleWidth = tier === 'mobile' ? 420 : tier === 'tablet' ? 620 : 720;
   const sampleHeight = tier === 'mobile' ? 240 : tier === 'tablet' ? 255 : 270;
 
@@ -258,7 +295,7 @@ function createTypographySampleCanvas(
   canvas.width = sampleWidth;
   canvas.height = sampleHeight;
   const ctx = canvas.getContext('2d');
-  if (!ctx) return { canvas: null, width: sampleWidth, height: sampleHeight };
+  if (!ctx) return { canvas: null, width: sampleWidth, height: sampleHeight, tier };
 
   ctx.fillStyle = '#000000';
   ctx.fillRect(0, 0, canvas.width, canvas.height);
@@ -331,7 +368,7 @@ function createTypographySampleCanvas(
       ctx.font = `700 ${subFontSize}px "Barlow Condensed", sans-serif`;
       ctx.fillStyle = '#C6D9EC';
       ctx.fillText(subParts[0], canvas.width / 2, canvas.height * 0.78, maxTextWidth);
-      ctx.fillText(subParts[1], canvas.width / 2, canvas.height * 0.90, maxTextWidth);
+      ctx.fillText(subParts[1], canvas.width / 2, canvas.height * 0.9, maxTextWidth);
     } else if (subParts.length === 1) {
       ctx.font = `700 ${subFontSize}px "Barlow Condensed", sans-serif`;
       ctx.fillStyle = '#C6D9EC';
@@ -355,7 +392,7 @@ function createTypographySampleCanvas(
         : 118;
     ctx.font = `800 ${titleFontSize}px "Barlow Condensed", sans-serif`;
     ctx.fillStyle = '#FFFFFF';
-    ctx.fillText(single, canvas.width / 2, hasSub ? canvas.height * 0.40 : canvas.height * 0.5, maxTextWidth);
+    ctx.fillText(single, canvas.width / 2, hasSub ? canvas.height * 0.4 : canvas.height * 0.5, maxTextWidth);
 
     if (subParts.length >= 2) {
       ctx.font = `700 ${subFontSize}px "Barlow Condensed", sans-serif`;
@@ -373,13 +410,369 @@ function createTypographySampleCanvas(
     canvas,
     width: sampleWidth,
     height: sampleHeight,
+    tier,
   };
+}
+
+interface Particle2D {
+  homeX: number;
+  homeY: number;
+  x: number;
+  y: number;
+  vx: number;
+  vy: number;
+  phase: number;
+  grey: number;
+  isAccent: boolean;
+}
+
+/**
+ * Animated 2D Canvas particle typography fallback used if WebGL is unavailable,
+ * loses context permanently, or throws on a mobile GPU. Preserves kinetic arrival,
+ * ambient shimmer, and touch/pointer tap & swipe dispersion without a static screen.
+ */
+function InteractiveParticles2DFallback({
+  text,
+  lines,
+  subtitle,
+  displayLines,
+  className,
+  primaryColor,
+  accentColor,
+}: {
+  text: string;
+  lines?: string[];
+  subtitle?: string;
+  displayLines: string[];
+  className?: string;
+  primaryColor: string;
+  accentColor: string;
+}) {
+  const containerRef = useRef<HTMLDivElement>(null);
+  const { reducedMotion, ambientActive } = useMotion();
+  const colorsRef = useRef({ primary: primaryColor, accent: accentColor });
+  colorsRef.current = { primary: primaryColor, accent: accentColor };
+  const [domFallback, setDomFallback] = useState(false);
+
+  const linesKey = lines ? lines.join('|') : '';
+
+  useEffect(() => {
+    const container = containerRef.current;
+    if (!container) return;
+
+    const canvas = document.createElement('canvas');
+    canvas.style.width = '100%';
+    canvas.style.height = '100%';
+    canvas.style.display = 'block';
+    const ctx2d = canvas.getContext('2d');
+    if (!ctx2d) {
+      setDomFallback(true);
+      setMotionInitStatus('heroParticles', 'fallback-dom');
+      return;
+    }
+    container.appendChild(canvas);
+
+    let particles: Particle2D[] = [];
+    let cssWidth = Math.max(1, container.clientWidth);
+    let cssHeight = Math.max(1, container.clientHeight);
+    let dpr = Math.min(window.devicePixelRatio || 1, cssWidth < 640 ? 1.5 : 2);
+    let disposed = false;
+    let rafId = 0;
+    let isVisible = true;
+    let introProgress = reducedMotion ? 1 : isLoaderCleared() ? 0.25 : 0.08;
+    let introStart = isLoaderCleared() ? performance.now() : 0;
+    let handoffStart = 0;
+    let lastInteraction = 0;
+    let pointerX = -9999;
+    let pointerY = -9999;
+    let pointerForce = 0;
+
+    const build2DParticles = () => {
+      if (disposed) return;
+      cssWidth = container.clientWidth;
+      cssHeight = container.clientHeight;
+      if (cssWidth < 2 || cssHeight < 2) return;
+
+      dpr = Math.min(window.devicePixelRatio || 1, cssWidth < 640 ? 1.5 : 2);
+      canvas.width = Math.round(cssWidth * dpr);
+      canvas.height = Math.round(cssHeight * dpr);
+
+      const sample = createTypographySampleCanvas(text, lines, subtitle, cssWidth);
+      if (!sample.canvas) return;
+      const sctx = sample.canvas.getContext('2d');
+      if (!sctx) return;
+
+      const data = sctx.getImageData(0, 0, sample.width, sample.height).data;
+      const step = cssWidth < 640 ? 4 : 5;
+      const scale = Math.min((cssWidth * 0.92) / sample.width, (cssHeight * 0.86) / sample.height);
+      const offsetX = (cssWidth - sample.width * scale) / 2;
+      const offsetY = (cssHeight - sample.height * scale) / 2;
+
+      const next: Particle2D[] = [];
+      for (let y = 0; y < sample.height; y += step) {
+        for (let x = 0; x < sample.width; x += step) {
+          const idx = (y * sample.width + x) * 4;
+          const lum = data[idx];
+          if (lum > 34) {
+            const hx = offsetX + x * scale;
+            const hy = offsetY + y * scale;
+            const angle = ((x * 37 + y * 17) % 360) * (Math.PI / 180);
+            const spread = reducedMotion ? 0 : 75;
+            next.push({
+              homeX: hx,
+              homeY: hy,
+              x: hx + Math.cos(angle) * spread * (1 - introProgress),
+              y: hy + Math.sin(angle) * spread * (1 - introProgress),
+              vx: 0,
+              vy: 0,
+              phase: (x * 0.08 + y * 0.11) % (Math.PI * 2),
+              grey: lum / 255,
+              isAccent: (x + y) % 5 === 0,
+            });
+          }
+        }
+      }
+      particles = next;
+      upsertCanvasTelemetry('hero-particles', {
+        backend: 'canvas-2d',
+        contextLost: false,
+        width: cssWidth,
+        height: cssHeight,
+      });
+      setMotionInitStatus('heroParticles', 'canvas-2d');
+    };
+
+    const drawOnce = (now: number) => {
+      if (disposed || canvas.width < 2 || canvas.height < 2) return;
+      ctx2d.save();
+      ctx2d.setTransform(dpr, 0, 0, dpr, 0, 0);
+      ctx2d.clearRect(0, 0, cssWidth, cssHeight);
+
+      if (introProgress < 1) {
+        if (isLoaderCleared()) {
+          if (introStart === 0) introStart = now;
+          const p = Math.min(1, (now - introStart) / 900);
+          introProgress = 0.08 + 0.92 * (1 - Math.pow(1 - p, 3));
+        }
+      }
+
+      const ambientMul = reducedMotion || !ambientActive ? 0 : 1;
+      const t = now * 0.001;
+
+      // Splash-to-hero handoff wave (left-to-right over 900ms)
+      let handoffX = -1;
+      let handoffAmp = 0;
+      if (!reducedMotion && handoffStart > 0) {
+        const hp = (now - handoffStart) / 900;
+        if (hp >= 0 && hp <= 1) {
+          handoffX = cssWidth * (-0.08 + 1.16 * hp);
+          handoffAmp = Math.sin(hp * Math.PI);
+        }
+      }
+
+      // Restrained idle left-to-right wave every ~5.2s so untouched mobile views visibly move
+      const cyclePos = ((t * 0.22) % 1.35) - 0.15;
+      const ambientSweepX = ambientMul ? cssWidth * cyclePos : -9999;
+
+      const activeTouch = now - lastInteraction < 1800 ? pointerForce : 0;
+      pointerForce *= 0.94;
+
+      const dotR = cssWidth < 640 ? 1.55 : 1.75;
+      const radiusSq = cssWidth < 640 ? 4800 : 7200;
+
+      for (let i = 0; i < particles.length; i++) {
+        const p = particles[i];
+        const shimmerX = ambientMul ? Math.sin(t * 1.3 + p.phase) * 1.35 : 0;
+        const shimmerY = ambientMul ? Math.cos(t * 1.1 + p.phase) * 1.1 : 0;
+
+        let waveGlow = 0;
+        let redGlow = false;
+        let crestOffsetY = 0;
+        if (handoffAmp > 0.02) {
+          const d = Math.abs(p.homeX - handoffX);
+          if (d < cssWidth * 0.12) {
+            waveGlow = Math.max(waveGlow, (1 - d / (cssWidth * 0.12)) * handoffAmp);
+            crestOffsetY -= waveGlow * 4.5;
+            if (p.homeX - handoffX > 4 && p.homeX - handoffX < cssWidth * 0.045) redGlow = true;
+          }
+        }
+        if (ambientMul && cyclePos > -0.1 && cyclePos < 1.1) {
+          const d = Math.abs(p.homeX - ambientSweepX);
+          if (d < cssWidth * 0.11) {
+            const g = (1 - d / (cssWidth * 0.11)) * 0.72;
+            waveGlow = Math.max(waveGlow, g);
+            crestOffsetY -= g * 3.2;
+            if (p.homeX - ambientSweepX > 4 && p.homeX - ambientSweepX < cssWidth * 0.035) redGlow = true;
+          }
+        }
+
+        const targetX = p.homeX + shimmerX;
+        const targetY = p.homeY + shimmerY + crestOffsetY;
+
+        if (!reducedMotion && activeTouch > 0.02) {
+          const dx = p.x - pointerX;
+          const dy = p.y - pointerY;
+          const d2 = dx * dx + dy * dy;
+          if (d2 > 1 && d2 < radiusSq) {
+            const d = Math.sqrt(d2);
+            const push = (1 - d / Math.sqrt(radiusSq)) * 3.8 * activeTouch;
+            p.vx += (dx / d) * push;
+            p.vy += (dy / d) * push;
+          }
+        }
+
+        p.vx += (targetX - p.x) * (reducedMotion ? 1 : 0.16);
+        p.vy += (targetY - p.y) * (reducedMotion ? 1 : 0.16);
+        p.vx *= 0.78;
+        p.vy *= 0.78;
+        p.x += p.vx;
+        p.y += p.vy;
+
+        ctx2d.globalAlpha = Math.max(0.35, Math.min(0.96, p.grey + waveGlow * 0.2));
+        ctx2d.fillStyle = redGlow
+          ? '#C9233B'
+          : waveGlow > 0.25 || p.isAccent
+          ? colorsRef.current.accent
+          : colorsRef.current.primary;
+        ctx2d.beginPath();
+        ctx2d.arc(p.x, p.y, dotR + waveGlow * 0.45, 0, Math.PI * 2);
+        ctx2d.fill();
+      }
+
+      ctx2d.restore();
+      incrementCanvasFrame('hero-particles');
+    };
+
+    const unsubLoader = onLoaderCleared(() => {
+      if (introStart === 0) introStart = performance.now();
+    });
+    const unsubRipple = onHeroEntranceRipple(() => {
+      handoffStart = performance.now();
+    });
+
+    const onImpulse = (clientX: number, clientY: number, force: number) => {
+      if (reducedMotion) return;
+      const rect = container.getBoundingClientRect();
+      pointerX = clientX - rect.left;
+      pointerY = clientY - rect.top;
+      pointerForce = Math.max(pointerForce, force);
+      lastInteraction = performance.now();
+    };
+
+    const onPointerDown = (e: PointerEvent) => onImpulse(e.clientX, e.clientY, 1.35);
+    const onPointerMove = (e: PointerEvent) =>
+      onImpulse(e.clientX, e.clientY, e.pointerType === 'touch' ? 0.95 : 0.55);
+    const onTouchStart = (e: TouchEvent) => {
+      const t = e.touches[0];
+      if (t) onImpulse(t.clientX, t.clientY, 1.35);
+    };
+    const onTouchMove = (e: TouchEvent) => {
+      const t = e.touches[0];
+      if (t) onImpulse(t.clientX, t.clientY, 0.95);
+    };
+
+    container.addEventListener('pointerdown', onPointerDown, { passive: true });
+    container.addEventListener('pointermove', onPointerMove, { passive: true });
+    container.addEventListener('touchstart', onTouchStart, { passive: true });
+    container.addEventListener('touchmove', onTouchMove, { passive: true });
+
+    const io = new IntersectionObserver(
+      (entries) => {
+        isVisible = entries[entries.length - 1]?.isIntersecting ?? true;
+      },
+      { threshold: 0.02 }
+    );
+    io.observe(container);
+
+    const ro = new ResizeObserver(() => {
+      build2DParticles();
+      drawOnce(performance.now());
+    });
+    ro.observe(container);
+
+    const fontRace = document.fonts?.ready
+      ? Promise.race([document.fonts.ready, new Promise((r) => window.setTimeout(r, 180))])
+      : Promise.resolve();
+    void fontRace.then(() => {
+      if (!disposed) {
+        build2DParticles();
+        drawOnce(performance.now());
+      }
+    });
+
+    const tick = (now: number) => {
+      if (disposed || reducedMotion) return;
+      if (isVisible && !document.hidden) {
+        drawOnce(now);
+      }
+      rafId = window.requestAnimationFrame(tick);
+    };
+
+    if (!reducedMotion) {
+      rafId = window.requestAnimationFrame(tick);
+    }
+
+    return () => {
+      disposed = true;
+      unsubLoader();
+      unsubRipple();
+      window.cancelAnimationFrame(rafId);
+      io.disconnect();
+      ro.disconnect();
+      container.removeEventListener('pointerdown', onPointerDown);
+      container.removeEventListener('pointermove', onPointerMove);
+      container.removeEventListener('touchstart', onTouchStart);
+      container.removeEventListener('touchmove', onTouchMove);
+      if (canvas.parentNode === container) container.removeChild(canvas);
+    };
+  }, [ambientActive, lines, linesKey, reducedMotion, subtitle, text]);
+
+  if (domFallback) {
+    return (
+      <div className={cn('relative flex flex-col items-center justify-center py-12 px-4 text-center overflow-hidden', className)}>
+        {displayLines.map((line, i) => (
+          <p
+            key={line}
+            className={cn(
+              'font-display font-bold uppercase tracking-tight leading-[0.92]',
+              i === 0 ? 'text-5xl sm:text-7xl md:text-8xl' : 'text-3xl sm:text-5xl md:text-6xl mt-1',
+              reducedMotion
+                ? i === 0
+                  ? 'text-ink'
+                  : 'text-ink/85'
+                : 'bg-clip-text text-transparent bg-[length:220%_100%] bg-[linear-gradient(105deg,var(--text-primary)_36%,var(--brand-primary)_48%,#C9233B_51%,var(--text-primary)_64%)] animate-[berrySheen_4.8s_ease-in-out_infinite]'
+            )}
+          >
+            {line}
+          </p>
+        ))}
+        {subtitle && (
+          <p className="font-mono-tabular text-xs sm:text-sm uppercase tracking-[0.28em] text-brand mt-4">
+            {subtitle}
+          </p>
+        )}
+      </div>
+    );
+  }
+
+  return (
+    <div
+      ref={containerRef}
+      role="img"
+      aria-label={`${displayLines.join(' ')} — ${subtitle ?? 'interactive metallurgical particle typography'}`}
+      className={cn(
+        'relative w-full h-full min-h-[260px] sm:min-h-[340px] select-none overflow-hidden cursor-crosshair touch-pan-y',
+        className
+      )}
+    />
+  );
 }
 
 /**
  * InteractiveParticles — GPU WebGL Three.js instanced particle field sampling
  * the Berry Alloys Limited monumental mark across desktop, tablet, and touch phones
- * with responsive density scaling and cursor/tap/swipe magnetic dispersion.
+ * with nonzero-size initialization guard, context-loss recovery, animated 2D canvas
+ * fallback, and responsive touch/tap/swipe dispersion.
  */
 export function InteractiveParticles({
   text = 'BERRY ALLOYS LIMITED',
@@ -392,21 +785,23 @@ export function InteractiveParticles({
 }: InteractiveParticlesProps) {
   const containerRef = useRef<HTMLDivElement>(null);
   const { theme } = useTheme();
-  const [fallback, setFallback] = useState(false);
+  const { reducedMotion, ambientActive } = useMotion();
+  const [fallbackMode, setFallbackMode] = useState<'none' | 'canvas-2d'>('none');
   const resolvedPrimary = particleColor ?? (theme === 'dark' ? '#F4F8FC' : '#10243A');
   const resolvedAccent = accentColor ?? (theme === 'dark' ? '#69C5F5' : '#006393');
   const colorsRef = useRef({ primary: resolvedPrimary, accent: resolvedAccent });
   colorsRef.current = { primary: resolvedPrimary, accent: resolvedAccent };
   const applyColorsRef = useRef<(() => void) | null>(null);
+  const ambientRef = useRef(ambientActive);
+  ambientRef.current = ambientActive;
 
   const linesKey = lines ? lines.join('|') : '';
   const displayLines = lines && lines.length > 0 ? lines : [text];
 
   useEffect(() => {
+    if (fallbackMode !== 'none') return;
     const container = containerRef.current;
     if (!container) return;
-
-    const prefersReduced = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
 
     let renderer: THREE.WebGLRenderer | null = null;
     try {
@@ -415,24 +810,25 @@ export function InteractiveParticles({
         alpha: true,
         powerPreference: 'high-performance',
       });
-    } catch {
-      setFallback(true);
+    } catch (err) {
+      recordRuntimeError('InteractiveParticles.WebGLInit', err);
+      upsertCanvasTelemetry('hero-particles', { backend: 'canvas-2d', contextLost: false });
+      setFallbackMode('canvas-2d');
       return;
     }
 
     const gl = renderer.getContext();
+    if (!gl || gl.isContextLost()) {
+      renderer.dispose();
+      upsertCanvasTelemetry('hero-particles', { backend: 'canvas-2d', contextLost: true });
+      setFallbackMode('canvas-2d');
+      return;
+    }
+
     const dbg = gl.getExtension('WEBGL_debug_renderer_info');
-    const rendererStr = dbg ? String(gl.getParameter(dbg.UNMASKED_RENDERER_WEBGL)) : '';
+    const rendererStr = dbg ? String(gl.getParameter(dbg.UNMASKED_RENDERER_WEBGL)) : 'standard';
     const isSoftwareGl = /(swiftshader|llvmpipe|software|softpipe)/i.test(rendererStr);
-
-    const width = Math.max(1, container.clientWidth);
-    const height = Math.max(1, container.clientHeight);
-    const isCompactStage = width < 640;
-    const sampleStep = 3;
-
-    renderer.setPixelRatio(Math.min(window.devicePixelRatio || 1, isSoftwareGl ? 1.5 : 2));
-    renderer.setSize(width, height);
-    renderer.setClearColor(0x000000, 0);
+    reportWebGLInfo(true, rendererStr);
 
     const canvasEl = renderer.domElement;
     canvasEl.style.width = '100%';
@@ -441,14 +837,13 @@ export function InteractiveParticles({
     container.appendChild(canvasEl);
 
     const scene = new THREE.Scene();
-    const camera = new THREE.PerspectiveCamera(42, width / height, 1, 3000);
+    const camera = new THREE.PerspectiveCamera(42, 1, 1, 3000);
     camera.position.z = 420;
 
     const touch = new TouchTexture();
     const raycaster = new THREE.Raycaster();
     const mouse = new THREE.Vector2(-99, -99);
 
-    // 1x1 plane dynamically scaled to match particlesMesh exact world dimensions
     const hitGeo = new THREE.PlaneGeometry(1, 1, 1, 1);
     const hitMat = new THREE.MeshBasicMaterial({ visible: false });
     const hitMesh = new THREE.Mesh(hitGeo, hitMat);
@@ -456,42 +851,84 @@ export function InteractiveParticles({
 
     let particlesMesh: THREE.Mesh<THREE.InstancedBufferGeometry, THREE.RawShaderMaterial> | null = null;
     let sampledTexture: THREE.Texture | null = null;
-    const sampledDims = {
-      width: width < 640 ? 420 : width < 1024 ? 620 : 720,
-      height: width < 640 ? 240 : width < 1024 ? 255 : 270,
-    };
+    const sampledDims = { width: 420, height: 240 };
+    let builtTier: ViewportTier | null = null;
     let disposed = false;
     let isVisible = true;
+    let contextLost = false;
+    let contextLostTimer = 0;
     let rafId = 0;
     let timeoutId = 0;
     const clock = new THREE.Clock();
-    let introStart = 0;
+    let introStart = isLoaderCleared() ? performance.now() : 0;
+    let handoffStart = 0;
+
+    const sampleStep = 3;
 
     const computeFitScale = (w: number, h: number, imgW: number, imgH: number) => {
       const fovRad = (camera.fov * Math.PI) / 180;
       const visibleHeight = 2 * Math.tan(fovRad / 2) * camera.position.z;
       const visibleWidth = visibleHeight * (w / Math.max(1, h));
       const fillRatioW = w < 640 ? 0.94 : 0.88;
-      const fillRatioH = w < 640 ? 0.86 : 0.86;
+      const fillRatioH = 0.86;
       const raw = Math.min((visibleWidth * fillRatioW) / imgW, (visibleHeight * fillRatioH) / imgH);
       return Math.max(0.36, Math.min(1.38, raw));
     };
 
     const computeParticleSize = (fitScale: number, containerW: number) => {
-      // psize is applied in view-space after modelViewMatrix scale, so scale linearly with sampleStep * fitScale
-      // to keep particles crisp & stippled without smearing on portrait mobile or tablet stages.
       const densityBoost = containerW < 640 ? 1.18 : 1.05;
       return sampleStep * fitScale * (particleSize / 2.05) * densityBoost * 0.72;
     };
 
-    const buildParticlesFromBitmap = () => {
-      if (disposed) return;
+    const syncRendererSize = () => {
+      if (!renderer) return null;
+      const w = container.clientWidth;
+      const h = container.clientHeight;
+      if (w < 2 || h < 2) return null;
+      const compact = w < 640;
+      const dprCap = isSoftwareGl ? 1.25 : compact ? 1.5 : 2;
+      renderer.setPixelRatio(Math.min(window.devicePixelRatio || 1, dprCap));
+      renderer.setSize(w, h);
+      renderer.setClearColor(0x000000, 0);
+      camera.aspect = w / h;
+      camera.updateProjectionMatrix();
+      return { w, h };
+    };
 
-      const sample = createTypographySampleCanvas(text, lines, subtitle, width);
+    const disposeCurrentParticles = () => {
+      sampledTexture?.dispose();
+      sampledTexture = null;
+      if (particlesMesh) {
+        particlesMesh.geometry.dispose();
+        particlesMesh.material.dispose();
+        scene.remove(particlesMesh);
+        particlesMesh = null;
+      }
+    };
+
+    const buildParticlesFromBitmap = () => {
+      if (disposed || !renderer || contextLost) return;
+      const dims = syncRendererSize();
+      if (!dims) return;
+
+      const { w: currW, h: currH } = dims;
+      const isCompactStage = currW < 640;
+      const sample = createTypographySampleCanvas(text, lines, subtitle, currW);
       if (!sample.canvas) {
-        setFallback(true);
+        upsertCanvasTelemetry('hero-particles', { backend: 'canvas-2d', contextLost: false });
+        setFallbackMode('canvas-2d');
         return;
       }
+
+      const ctx = sample.canvas.getContext('2d');
+      if (!ctx) {
+        upsertCanvasTelemetry('hero-particles', { backend: 'canvas-2d', contextLost: false });
+        setFallbackMode('canvas-2d');
+        return;
+      }
+
+      disposeCurrentParticles();
+      builtTier = sample.tier;
 
       const imgW = sample.width;
       const imgH = sample.height;
@@ -505,15 +942,7 @@ export function InteractiveParticles({
       texture.needsUpdate = true;
       sampledTexture = texture;
 
-      const ctx = sample.canvas.getContext('2d');
-      if (!ctx) {
-        setFallback(true);
-        return;
-      }
       const imgData = ctx.getImageData(0, 0, imgW, imgH).data;
-
-      const currW = Math.max(1, container.clientWidth);
-      const currH = Math.max(1, container.clientHeight);
       const indicesList: number[] = [];
       const offsetsList: number[] = [];
       const anglesList: number[] = [];
@@ -560,16 +989,20 @@ export function InteractiveParticles({
       const material = new THREE.RawShaderMaterial({
         uniforms: {
           uTime: { value: 0 },
-          uRandom: { value: prefersReduced ? 0.0 : isCompactStage ? 0.42 : 0.48 },
-          uDepth: { value: prefersReduced ? 0.0 : isCompactStage ? 1.5 : 1.35 },
+          uRandom: { value: reducedMotion ? 0.0 : isCompactStage ? 0.42 : 0.48 },
+          uDepth: { value: reducedMotion ? 0.0 : isCompactStage ? 1.5 : 1.35 },
           uSize: { value: computedSize },
           uTextureSize: { value: new THREE.Vector2(imgW, imgH) },
           uTexture: { value: texture },
           uTouch: { value: touch.texture },
-          uIntro: { value: prefersReduced || isSoftwareGl ? 1 : 0.12 },
-          uAmbient: { value: prefersReduced ? 0 : 1 },
+          uIntro: { value: reducedMotion || isSoftwareGl ? 1 : 0.14 },
+          uAmbient: { value: reducedMotion || !ambientRef.current ? 0 : 1 },
+          uHandoffX: { value: -0.4 },
+          uHandoffStrength: { value: 0 },
+          uAmbientSweepX: { value: -0.4 },
           uColor: { value: new THREE.Color(colorsRef.current.primary) },
           uAccentColor: { value: new THREE.Color(colorsRef.current.accent) },
+          uRedColor: { value: new THREE.Color('#C9233B') },
         },
         vertexShader: VERTEX_SHADER,
         fragmentShader: FRAGMENT_SHADER,
@@ -580,22 +1013,53 @@ export function InteractiveParticles({
       particlesMesh = new THREE.Mesh(geometry, material);
       particlesMesh.frustumCulled = false;
       particlesMesh.scale.setScalar(fitScale);
-
       scene.add(particlesMesh);
-      renderer?.render(scene, camera);
+
+      try {
+        renderer.render(scene, camera);
+        incrementCanvasFrame('hero-particles');
+        upsertCanvasTelemetry('hero-particles', {
+          backend: 'webgl',
+          contextLost: false,
+          width: currW,
+          height: currH,
+        });
+        setMotionInitStatus('heroParticles', 'webgl-ready');
+      } catch (err) {
+        recordRuntimeError('InteractiveParticles.render', err);
+        setFallbackMode('canvas-2d');
+      }
     };
 
+    const unsubLoader = onLoaderCleared(() => {
+      if (introStart === 0) introStart = performance.now();
+    });
+    const unsubRipple = onHeroEntranceRipple(() => {
+      handoffStart = performance.now();
+    });
+
+    // Wait for nonzero dimensions before building; font race has 180ms timeout so slow fonts never block initial draw.
+    const fontRace = document.fonts?.ready
+      ? Promise.race([document.fonts.ready, new Promise((resolve) => window.setTimeout(resolve, 180))])
+      : Promise.resolve();
+    void fontRace.then(() => {
+      if (!disposed && !particlesMesh) {
+        buildParticlesFromBitmap();
+      }
+    });
     if (document.fonts?.ready) {
-      document.fonts.ready.then(buildParticlesFromBitmap);
-    } else {
-      buildParticlesFromBitmap();
+      void document.fonts.ready.then(() => {
+        if (!disposed) {
+          buildParticlesFromBitmap();
+        }
+      });
     }
 
     let lastInteractionAt = 0;
     let sweepCooldown = 0;
 
     const scatterAtClientPoint = (clientX: number, clientY: number, minForce = 0) => {
-      if (prefersReduced || !particlesMesh) return;
+      if (reducedMotion || !particlesMesh) return;
       lastInteractionAt = performance.now();
       const rect = container.getBoundingClientRect();
       mouse.x = ((clientX - rect.left) / Math.max(1, rect.width)) * 2 - 1;
@@ -610,18 +1074,13 @@ export function InteractiveParticles({
     const onPointerDown = (e: PointerEvent) => {
       scatterAtClientPoint(e.clientX, e.clientY, 0.98);
     };
-
     const onPointerMove = (e: PointerEvent) => {
       scatterAtClientPoint(e.clientX, e.clientY, e.pointerType === 'touch' ? 0.62 : 0.28);
     };
-
-    // Native touch listeners guarantee iPhone Chrome (WKWebView) keeps feeding scatter ripples
-    // even when iOS claims pointermove for native vertical scroll.
     const onTouchStart = (e: TouchEvent) => {
       const t = e.touches[0];
       if (t) scatterAtClientPoint(t.clientX, t.clientY, 0.98);
     };
-
     const onTouchMove = (e: TouchEvent) => {
       const t = e.touches[0];
       if (t) scatterAtClientPoint(t.clientX, t.clientY, 0.62);
@@ -632,12 +1091,34 @@ export function InteractiveParticles({
     container.addEventListener('touchstart', onTouchStart, { passive: true });
     container.addEventListener('touchmove', onTouchMove, { passive: true });
 
+    const onContextLost = (e: Event) => {
+      e.preventDefault();
+      contextLost = true;
+      upsertCanvasTelemetry('hero-particles', { contextLost: true });
+      setMotionInitStatus('heroParticles', 'webgl-context-lost');
+      window.clearTimeout(contextLostTimer);
+      contextLostTimer = window.setTimeout(() => {
+        if (!disposed && contextLost) {
+          setFallbackMode('canvas-2d');
+        }
+      }, 900);
+    };
+
+    const onContextRestored = () => {
+      window.clearTimeout(contextLostTimer);
+      contextLost = false;
+      buildParticlesFromBitmap();
+    };
+
+    canvasEl.addEventListener('webglcontextlost', onContextLost);
+    canvasEl.addEventListener('webglcontextrestored', onContextRestored);
+
     applyColorsRef.current = () => {
       if (!particlesMesh) return;
       const u = particlesMesh.material.uniforms;
       u.uColor.value.set(colorsRef.current.primary);
       u.uAccentColor.value.set(colorsRef.current.accent);
-      if (prefersReduced) renderer?.render(scene, camera);
+      if (reducedMotion && !contextLost) renderer?.render(scene, camera);
     };
 
     const observer = new IntersectionObserver(
@@ -649,19 +1130,24 @@ export function InteractiveParticles({
     observer.observe(container);
 
     const onResize = () => {
-      if (!container || !renderer) return;
-      const w = Math.max(1, container.clientWidth);
-      const h = Math.max(1, container.clientHeight);
-      camera.aspect = w / h;
-      camera.updateProjectionMatrix();
-      renderer.setSize(w, h);
-      if (particlesMesh) {
-        const nextScale = computeFitScale(w, h, sampledDims.width, sampledDims.height);
-        particlesMesh.scale.setScalar(nextScale);
-        particlesMesh.material.uniforms.uSize.value = computeParticleSize(nextScale, w);
-        hitMesh.scale.set(sampledDims.width * nextScale, sampledDims.height * nextScale, 1);
+      if (disposed || !renderer || contextLost) return;
+      const w = container.clientWidth;
+      const h = container.clientHeight;
+      if (w < 2 || h < 2) return;
+
+      const nextTier = getViewportTier(w);
+      if (!particlesMesh || (builtTier && nextTier !== builtTier)) {
+        buildParticlesFromBitmap();
+        return;
       }
-      if (prefersReduced && particlesMesh) {
+
+      syncRendererSize();
+      const nextScale = computeFitScale(w, h, sampledDims.width, sampledDims.height);
+      particlesMesh.scale.setScalar(nextScale);
+      particlesMesh.material.uniforms.uSize.value = computeParticleSize(nextScale, w);
+      hitMesh.scale.set(sampledDims.width * nextScale, sampledDims.height * nextScale, 1);
+      upsertCanvasTelemetry('hero-particles', { width: w, height: h });
+      if (reducedMotion) {
         renderer.render(scene, camera);
       }
     };
@@ -671,7 +1157,7 @@ export function InteractiveParticles({
     window.addEventListener('resize', onResize);
 
     const afterDraw = () => {
-      if (disposed || prefersReduced) return;
+      if (disposed || reducedMotion) return;
       if (!isSoftwareGl) {
         rafId = window.requestAnimationFrame(tick);
         return;
@@ -706,98 +1192,110 @@ export function InteractiveParticles({
     };
 
     const tick = () => {
-      if (disposed || prefersReduced) return;
-      if (isVisible && !document.hidden && particlesMesh) {
+      if (disposed || reducedMotion) return;
+      if (isVisible && !document.hidden && !contextLost && particlesMesh) {
         const dt = Math.min(clock.getDelta(), 0.05);
-        const ambientPaused = document.documentElement.dataset.ambient === 'paused';
-        particlesMesh.material.uniforms.uAmbient.value = ambientPaused ? 0 : 1;
+        const ambientEnabled = ambientRef.current;
+        const currW = container.clientWidth || 390;
+        const isCompactStage = currW < 640;
 
+        const u = particlesMesh.material.uniforms;
+        u.uAmbient.value = ambientEnabled ? 1 : 0;
         touch.update();
-        if (!ambientPaused) {
-          particlesMesh.material.uniforms.uTime.value += dt;
+
+        const now = performance.now();
+        if (ambientEnabled) {
+          u.uTime.value += dt;
+          // Restrained periodic left-to-right Berry blue/red wave across lettering (runs in shader even on software GL)
+          const cycle = ((u.uTime.value * 0.22) % 1.45) - 0.22;
+          u.uAmbientSweepX.value = cycle;
+        } else {
+          u.uAmbientSweepX.value = -0.4;
         }
-        const intro = particlesMesh.material.uniforms.uIntro;
-        if (intro.value < 1) {
-          // Wait for initial KineticLoader curtain to clear so arrival convergence is actually seen on mobile/desktop
-          const loaderActive = Boolean(document.querySelector('[aria-label="Loading Berry Alloys Limited presentation"]'));
-          if (!loaderActive) {
-            if (introStart === 0) introStart = performance.now();
-            const p = Math.min(1, (performance.now() - introStart) / 1050);
-            intro.value = 0.12 + 0.88 * (1 - Math.pow(1 - p, 3));
+
+        // Splash-to-hero left-to-right handoff ripple (900ms sweep)
+        if (handoffStart > 0) {
+          const hp = (now - handoffStart) / 900;
+          if (hp >= 0 && hp <= 1) {
+            u.uHandoffX.value = -0.1 + 1.2 * hp;
+            u.uHandoffStrength.value = Math.sin(hp * Math.PI);
+          } else {
+            u.uHandoffStrength.value = 0;
+            handoffStart = 0;
           }
-        } else if (!ambientPaused && !isSoftwareGl) {
-          // Emit a gentle periodic magnetic shimmer pulse across the alloy wordmark when untouched (especially on phones)
-          const now = performance.now();
-          if (now - lastInteractionAt > 2200 && now > sweepCooldown) {
-            const elapsed = particlesMesh.material.uniforms.uTime.value;
-            const sweepX = 0.12 + 0.76 * ((elapsed * 0.22) % 1);
-            const sweepY = 0.48 + 0.16 * Math.sin(elapsed * 1.4);
-            touch.addTouch({ x: sweepX, y: sweepY }, isCompactStage ? 0.34 : 0.26);
+        }
+
+        const intro = u.uIntro;
+        if (intro.value < 1) {
+          if (isLoaderCleared()) {
+            if (introStart === 0) introStart = now;
+            const p = Math.min(1, (now - introStart) / 900);
+            intro.value = 0.14 + 0.86 * (1 - Math.pow(1 - p, 3));
+          }
+        } else if (ambientEnabled && !isSoftwareGl) {
+          if (now - lastInteractionAt > 2400 && now > sweepCooldown) {
+            const elapsed = u.uTime.value;
+            const sweepX = 0.1 + 0.8 * ((elapsed * 0.22) % 1);
+            const sweepY = 0.5 + 0.12 * Math.sin(elapsed * 1.2);
+            touch.addTouch({ x: sweepX, y: sweepY }, isCompactStage ? 0.34 : 0.24);
             sweepCooldown = now + (isCompactStage ? 180 : 240);
           }
         }
+
         renderer?.render(scene, camera);
+        incrementCanvasFrame('hero-particles');
       }
       afterDraw();
     };
 
-    if (!prefersReduced) {
+    if (!reducedMotion) {
       rafId = window.requestAnimationFrame(tick);
     }
 
     return () => {
       disposed = true;
+      unsubLoader();
+      unsubRipple();
       window.cancelAnimationFrame(rafId);
       window.clearTimeout(timeoutId);
+      window.clearTimeout(contextLostTimer);
       observer.disconnect();
       resizeObserver.disconnect();
       container.removeEventListener('pointerdown', onPointerDown);
       container.removeEventListener('pointermove', onPointerMove);
       container.removeEventListener('touchstart', onTouchStart);
       container.removeEventListener('touchmove', onTouchMove);
+      canvasEl.removeEventListener('webglcontextlost', onContextLost);
+      canvasEl.removeEventListener('webglcontextrestored', onContextRestored);
       applyColorsRef.current = null;
       window.removeEventListener('resize', onResize);
 
       hitGeo.dispose();
       hitMat.dispose();
       touch.dispose();
-      sampledTexture?.dispose();
-      if (particlesMesh) {
-        particlesMesh.geometry.dispose();
-        particlesMesh.material.dispose();
-        scene.remove(particlesMesh);
-      }
+      disposeCurrentParticles();
       renderer?.dispose();
       if (canvasEl.parentNode === container) {
         container.removeChild(canvasEl);
       }
     };
-  }, [linesKey, particleSize, subtitle, text]);
+  }, [fallbackMode, lines, linesKey, particleSize, reducedMotion, subtitle, text]);
 
   useEffect(() => {
     applyColorsRef.current?.();
   }, [resolvedPrimary, resolvedAccent]);
 
-  if (fallback) {
+  if (fallbackMode === 'canvas-2d') {
     return (
-      <div className={cn('flex flex-col items-center justify-center py-12 px-4 text-center', className)}>
-        {displayLines.map((line, i) => (
-          <p
-            key={line}
-            className={cn(
-              'font-display font-bold uppercase tracking-tight text-ink leading-[0.92]',
-              i === 0 ? 'text-5xl sm:text-7xl md:text-8xl' : 'text-3xl sm:text-5xl md:text-6xl text-ink/85 mt-1'
-            )}
-          >
-            {line}
-          </p>
-        ))}
-        {subtitle && (
-          <p className="font-mono-tabular text-xs sm:text-sm uppercase tracking-[0.28em] text-brand mt-4">
-            {subtitle}
-          </p>
-        )}
-      </div>
+      <InteractiveParticles2DFallback
+        text={text}
+        lines={lines}
+        subtitle={subtitle}
+        displayLines={displayLines}
+        className={className}
+        primaryColor={resolvedPrimary}
+        accentColor={resolvedAccent}
+      />
     );
   }
 
@@ -815,3 +1313,4 @@ export function InteractiveParticles({
 }
 
 export default InteractiveParticles;
+

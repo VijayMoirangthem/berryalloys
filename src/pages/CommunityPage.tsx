@@ -2,18 +2,15 @@ import { Link } from 'react-router-dom';
 import { ArrowRight } from 'lucide-react';
 import { ASSETS } from '../data/assets';
 import { CSR_STORIES } from '../data/communityNewsCareersDocs';
-import { CSR_DIAGONAL_SLIDES, LIFE_CULTURE_SCATTER_SETS } from '../data/showcaseCollections';
 import { Breadcrumbs } from '../components/Breadcrumbs';
 import { ResilientImage } from '../components/ResilientImage';
 import { CORPORATE_SUBNAV_LINKS, SubNav } from '../components/SubNav';
 import { SplitText } from '../components/motion/SplitText';
-import { DiagonalCarousel } from '../components/ui/DiagonalCarousel';
-import { ImageScatter } from '../components/ui/ImageScatter';
 
 const CSR_PHOTO_MAP: Record<string, { src: string; alt: string } | undefined> = {
-  'school-infrastructure': ASSETS.csrSchool,
-  'bobbili-civic-water': ASSETS.csrWater,
-  'environment-gaushala-marathon': ASSETS.csrPlantation,
+  'school-infrastructure': ASSETS.csrSchoolUpgrade2,
+  'bobbili-civic-water': ASSETS.csrDrinkingWater2,
+  'environment-gaushala-marathon': ASSETS.csrPlantationDrive2,
 };
 
 export function CommunityPage() {
@@ -40,15 +37,21 @@ export function CommunityPage() {
           </p>
         </div>
 
-        {/* Lead CSR Feature with Authentic Camp Photo */}
+        {/* Lead CSR Feature — Official Health Checkup Camp Photograph */}
         <article className="bg-[#10243A] text-[#F4F8FC] border border-[#10243A] dark:border-[#F4F8FC]/14 grid grid-cols-1 lg:grid-cols-12 overflow-hidden">
-          <div className="lg:col-span-5 aspect-video lg:aspect-auto min-h-[260px]">
-            <ResilientImage
-              src={ASSETS.csrMedicalCamp.src}
-              alt={ASSETS.csrMedicalCamp.alt}
-              containerClassName="w-full h-full"
-            />
-          </div>
+          <figure className="lg:col-span-5 bg-[#07111F] border-b lg:border-b-0 lg:border-r border-[#F4F8FC]/12 flex flex-col">
+            <div className="aspect-[16/10] lg:aspect-auto lg:flex-1 overflow-hidden">
+              <ResilientImage
+                src={ASSETS.csrMedicalCamp2026.src}
+                alt={ASSETS.csrMedicalCamp2026.alt}
+                className="w-full h-full object-cover object-top"
+                containerClassName="w-full h-full"
+              />
+            </div>
+            <figcaption className="px-5 py-3 text-[11px] font-mono-tabular text-[#B5C5D7] border-t border-[#F4F8FC]/10">
+              {ASSETS.csrMedicalCamp2026.caption}
+            </figcaption>
+          </figure>
           <div className="lg:col-span-7 p-8 sm:p-10 space-y-4 flex flex-col justify-between">
             <div className="space-y-3">
               <div className="flex flex-wrap items-center justify-between gap-2 text-xs font-mono-tabular">
@@ -67,33 +70,6 @@ export function CommunityPage() {
             </ul>
           </div>
         </article>
-
-        {/* Slanted Fieldwork Deck */}
-        <DiagonalCarousel
-          slides={CSR_DIAGONAL_SLIDES}
-          eyebrow="Grassroots Field Highlights · Education, Water & Health"
-        />
-
-        {/* Interactive Scattered Photo Showcase */}
-        <section aria-labelledby="community-scatter-heading" className="pt-4 space-y-6">
-          <div className="flex flex-col sm:flex-row sm:items-end justify-between gap-2">
-            <div>
-              <p className="text-xs font-mono-tabular uppercase tracking-widest text-brand dark:text-[#69C5F5]">
-                Life & Community Fieldwork
-              </p>
-              <h2
-                id="community-scatter-heading"
-                className="font-display text-3xl font-bold uppercase text-[#10243A] dark:text-[#F4F8FC]"
-              >
-                Plant Culture, Health & Ecological Programs
-              </h2>
-            </div>
-            <p className="text-xs text-[#465C72] dark:text-[#B5C5D7]">
-              Switch sets or pause playback to inspect each community field archive.
-            </p>
-          </div>
-          <ImageScatter imageSets={LIFE_CULTURE_SCATTER_SETS} />
-        </section>
 
         {/* Documented CSR Stories Index */}
         <section aria-labelledby="csr-stories-heading" className="pt-4">
@@ -118,6 +94,7 @@ export function CommunityPage() {
                         <ResilientImage
                           src={photo.src}
                           alt={photo.alt}
+                          className="w-full h-full object-cover object-top"
                           containerClassName="w-full h-full"
                         />
                       </div>
@@ -143,6 +120,56 @@ export function CommunityPage() {
                 </article>
               );
             })}
+          </div>
+        </section>
+
+        {/* Additional Community Fieldwork Visuals */}
+        <section aria-labelledby="csr-fieldwork-heading" className="space-y-6">
+          <div className="max-w-2xl space-y-1.5">
+            <p className="text-xs font-mono-tabular uppercase tracking-widest text-brand dark:text-[#69C5F5]">
+              Community Fieldwork Archive
+            </p>
+            <h2
+              id="csr-fieldwork-heading"
+              className="font-display text-2xl sm:text-3xl font-bold uppercase text-[#10243A] dark:text-[#F4F8FC]"
+            >
+              Voluntary Blood Donation &amp; Gaushala Animal Welfare
+            </h2>
+          </div>
+
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+            {[
+              {
+                label: 'Healthcare Outreach · Plant Campus',
+                asset: ASSETS.csrBloodDonation,
+              },
+              {
+                label: 'Animal Welfare · Srikakulam Gaushala',
+                asset: ASSETS.csrCowWelfare,
+              },
+            ].map((item) => (
+              <figure
+                key={item.asset.id}
+                className="bg-[#F1F6FB] dark:bg-[#12243B] border border-[#10243A]/12 dark:border-[#F4F8FC]/14 overflow-hidden"
+              >
+                <div className="aspect-[16/10] bg-[#10243A] overflow-hidden">
+                  <ResilientImage
+                    src={item.asset.src}
+                    alt={item.asset.alt}
+                    className="w-full h-full object-cover object-top"
+                    containerClassName="w-full h-full"
+                  />
+                </div>
+                <figcaption className="p-4 space-y-1 border-t border-[#10243A]/10 dark:border-[#F4F8FC]/10">
+                  <p className="text-[11px] font-mono-tabular uppercase tracking-wider text-brand dark:text-[#69C5F5]">
+                    {item.label}
+                  </p>
+                  <p className="text-xs text-[#465C72] dark:text-[#B5C5D7] leading-relaxed">
+                    {item.asset.caption}
+                  </p>
+                </figcaption>
+              </figure>
+            ))}
           </div>
         </section>
 

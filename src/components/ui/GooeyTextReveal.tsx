@@ -2,6 +2,7 @@ import React, { forwardRef, useCallback, useEffect, useId, useMemo, useRef } fro
 import gsap from 'gsap';
 import { ScrollTrigger } from 'gsap/ScrollTrigger';
 import { SplitText as GsapSplitText } from 'gsap/SplitText';
+import { onLoaderCleared } from '../../lib/motionDiagnostics';
 
 gsap.registerPlugin(ScrollTrigger, GsapSplitText);
 
@@ -127,7 +128,7 @@ export const GooeyTextReveal = forwardRef<HTMLDivElement, GooeyTextRevealProps>(
               : {
                   scrollTrigger: {
                     trigger: container,
-                    start: 'top 93%',
+                    start: 'top 95%',
                     once,
                     invalidateOnRefresh: true,
                   },
@@ -135,7 +136,20 @@ export const GooeyTextReveal = forwardRef<HTMLDivElement, GooeyTextRevealProps>(
           }
         );
 
+        const ensureMobilePlayed = () => {
+          if (mode === 'scroll' && tweenMobile.progress() === 0 && container.getBoundingClientRect().top <= window.innerHeight * 0.96) {
+            tweenMobile.play();
+          }
+        };
+        window.addEventListener('scroll', ensureMobilePlayed, { passive: true });
+        const unsub = onLoaderCleared(() => {
+          ScrollTrigger.refresh();
+          ensureMobilePlayed();
+        });
+
         return () => {
+          unsub();
+          window.removeEventListener('scroll', ensureMobilePlayed);
           tweenMobile.scrollTrigger?.kill();
           tweenMobile.kill();
         };

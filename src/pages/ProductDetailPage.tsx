@@ -6,11 +6,27 @@ import { Breadcrumbs } from '../components/Breadcrumbs';
 import { ResilientImage } from '../components/ResilientImage';
 import { IndustrialButton } from '../components/ui/IndustrialButton';
 
-const FAMILY_IMAGE_MAP: Record<AlloyFamily, VisualAsset> = {
-  'Ferro Manganese': ASSETS.officialProdFeMn,
-  'Silico Manganese': ASSETS.officialProdSiMn,
-  'Ferro Chrome': ASSETS.officialProdFeCr,
-  'Ferro Silicon': ASSETS.officialProdFeSi,
+const FAMILY_SYMBOL_MAP: Record<AlloyFamily, { symbol: string; atomicNote: string; asset: VisualAsset }> = {
+  'Ferro Manganese': {
+    symbol: 'FeMn',
+    atomicNote: 'Mn-Fe · Deoxidiser & Desulphuriser',
+    asset: ASSETS.detailAlloyFeMn,
+  },
+  'Silico Manganese': {
+    symbol: 'SiMn',
+    atomicNote: 'Mn-Si-Fe · Dual Deoxidiser',
+    asset: ASSETS.detailAlloySiMn,
+  },
+  'Ferro Chrome': {
+    symbol: 'FeCr',
+    atomicNote: 'Cr-Fe · Stainless & Alloy Refining',
+    asset: ASSETS.detailAlloyFeCr,
+  },
+  'Ferro Silicon': {
+    symbol: 'FeSi',
+    atomicNote: 'Si-Fe · High-Purity Deoxidiser',
+    asset: ASSETS.detailAlloyFeSi,
+  },
 };
 
 export function ProductDetailPage() {
@@ -41,7 +57,7 @@ export function ProductDetailPage() {
     );
   }
 
-  const familyImage = FAMILY_IMAGE_MAP[product.family];
+  const familyMeta = FAMILY_SYMBOL_MAP[product.family];
   const relatedProducts = PRODUCTS.filter(
     (p) => p.slug !== product.slug && (p.family === product.family || p.carbonTier === product.carbonTier)
   ).slice(0, 3);
@@ -103,18 +119,69 @@ export function ProductDetailPage() {
             </div>
 
             <div className="lg:col-span-5">
-              <figure className="bg-[#0D1B2E] border border-[#F4F8FC]/14 overflow-hidden">
-                <div className="aspect-[4/3] bg-[#FFFFFF] p-4 overflow-hidden">
+              <figure className="bg-[#07111F] border border-[#F4F8FC]/16 overflow-hidden">
+                <div className="aspect-[16/10] bg-[#040B14] overflow-hidden border-b border-[#F4F8FC]/12">
                   <ResilientImage
-                    src={familyImage.src}
-                    alt={`${product.name} — ${familyImage.alt}`}
-                    className="w-full h-full object-contain"
+                    src={familyMeta.asset.src}
+                    alt={familyMeta.asset.alt}
+                    className="w-full h-full object-cover"
                     containerClassName="w-full h-full"
                   />
                 </div>
-                <figcaption className="px-4 py-3 text-xs text-[#B5C5D7] border-t border-[#F4F8FC]/10">
-                  {familyImage.caption} · Sizing & packing per customer specification.
-                </figcaption>
+                <div className="p-5 sm:p-6 space-y-5">
+                  <div className="flex items-start justify-between gap-4 pb-4 border-b border-[#F4F8FC]/12">
+                    <div>
+                      <p className="text-[11px] font-mono-tabular uppercase tracking-widest text-[#69C5F5]">
+                        {familyMeta.atomicNote}
+                      </p>
+                      <p className="font-display text-4xl font-bold uppercase tracking-tight text-[#F4F8FC] mt-0.5">
+                        {familyMeta.symbol}
+                      </p>
+                    </div>
+                    <span className="font-mono-tabular text-xs uppercase tracking-widest text-[#B5C5D7] border border-[#F4F8FC]/20 px-2.5 py-1">
+                      {product.shortName}
+                    </span>
+                  </div>
+
+                  <dl className="grid grid-cols-2 gap-x-5 gap-y-3.5 text-xs">
+                    <div>
+                      <dt className="font-mono-tabular uppercase tracking-wider text-[#B5C5D7]">
+                        {product.comparison.primaryElementLabel}
+                      </dt>
+                      <dd className="font-mono-tabular text-base font-semibold text-[#F4F8FC] mt-0.5">
+                        {product.comparison.primaryElementRange}
+                      </dd>
+                    </div>
+                    <div>
+                      <dt className="font-mono-tabular uppercase tracking-wider text-[#B5C5D7]">
+                        Carbon Range
+                      </dt>
+                      <dd className="font-mono-tabular text-base font-semibold text-[#F4F8FC] mt-0.5">
+                        {product.comparison.carbonRange}
+                      </dd>
+                    </div>
+                    <div>
+                      <dt className="font-mono-tabular uppercase tracking-wider text-[#B5C5D7]">
+                        Phosphorus
+                      </dt>
+                      <dd className="font-mono-tabular text-sm text-[#F4F8FC] mt-0.5">
+                        {product.comparison.phosphorusRange}
+                      </dd>
+                    </div>
+                    <div>
+                      <dt className="font-mono-tabular uppercase tracking-wider text-[#B5C5D7]">
+                        Sulfur
+                      </dt>
+                      <dd className="font-mono-tabular text-sm text-[#F4F8FC] mt-0.5">
+                        {product.comparison.sulfurRange}
+                      </dd>
+                    </div>
+                  </dl>
+
+                  <figcaption className="pt-3 border-t border-[#F4F8FC]/12 text-[11px] text-[#B5C5D7]">
+                    {familyMeta.asset.caption} · {product.tables.length} chemistry {product.tables.length === 1 ? 'table' : 'tables'} below.
+                  </figcaption>
+                </div>
               </figure>
             </div>
           </div>

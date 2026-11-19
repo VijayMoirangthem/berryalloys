@@ -1,26 +1,53 @@
 import { useEffect, useRef, useState } from 'react';
+import { useMotion } from '../context/MotionContext';
+import { incrementCanvasFrame, upsertCanvasTelemetry } from '../lib/motionDiagnostics';
 
 /**
  * MetallicShaderCanvas — Self-contained WebGL fragment shader rendering a brushed-graphite
- * and warm-copper thermal sheen (concept inspired by shaders.com).
- * Tracks gentle pointer specular reflection, pauses when offscreen or tab-hidden,
- * freezes animation under prefers-reduced-motion, and degrades cleanly to CSS if WebGL fails.
+ * and warm-copper thermal sheen. Gates WebGL allocation behind viewport proximity so
+ * offscreen sections never exhaust mobile WKWebView WebGL context budgets.
  */
 export function MetallicShaderCanvas({ className = '' }: { className?: string }) {
-  const canvasRef = useRef<HTMLCanvasElement>(null);
+  const hostRef = useRef<HTMLDivElement>(null);
+  const { reducedMotion, ambientActive } = useMotion();
   const [fallbackMode, setFallbackMode] = useState(false);
+  const [inProximity, setInProximity] = useState(false);
+  const ambientRef = useRef(ambientActive);
+  ambientRef.current = ambientActive;
 
   useEffect(() => {
-    const canvas = canvasRef.current;
-    if (!canvas) return;
+    const host = hostRef.current;
+    if (!host) return;
+    const io = new IntersectionObserver(
+      (entries) => {
+        const entry = entries[entries.length - 1];
+        if (!entry) return;
+        setInProximity(entry.isIntersecting);
+      },
+      { rootMargin: '420px 0px', threshold: 0.01 }
+    );
+    io.observe(host);
+    return () => io.disconnect();
+  }, []);
 
-    const prefersReduced = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+  useEffect(() => {
+    if (!inProximity || fallbackMode) return;
+    const host = hostRef.current;
+    if (!host) return;
+
+    const canvas = document.createElement('canvas');
+    canvas.setAttribute('aria-hidden', 'true');
+    canvas.className = 'pointer-events-none block w-full h-full';
+    host.appendChild(canvas);
+
     const gl = canvas.getContext('webgl', {
       alpha: false,
       antialias: false,
       powerPreference: 'low-power',
     });
     if (!gl) {
+      if (canvas.parentNode === host) host.removeChild(canvas);
+      upsertCanvasTelemetry('metallic-shader', { backend: 'fallback-css', contextLost: false });
       setFallbackMode(true);
       return;
     }
@@ -57,16 +84,15 @@ export function MetallicShaderCanvas({ className = '' }: { className?: string })
         vec2 uv = gl_FragCoord.xy / u_resolution.xy;
         float t = u_time * 0.22;
 
-        // Brushed metallic directional anisotropy along horizontal rolling axis
         float grain = noise(vec2(uv.x * 7.0 + t * 0.35, uv.y * 110.0));
         float fineStreak = noise(vec2(uv.x * 22.0 - t * 0.2, uv.y * 180.0));
         float wave = sin(uv.x * 3.4 + uv.y * 2.1 - t) * 0.5 + 0.5;
         float sheen = smoothstep(0.26, 0.86, wave * 0.6 + grain * 0.28 + fineStreak * 0.12);
 
-        vec3 graphite = vec3(0.075, 0.082, 0.090);   // #131517
-        vec3 steel    = vec3(0.145, 0.160, 0.180);   // #19314B
-        vec3 copper   = vec3(0.663, 0.337, 0.196);   // #A95632
-        vec3 ember    = vec3(0.925, 0.455, 0.235);   // #EC743C
+        vec3 graphite = vec3(0.075, 0.082, 0.090);
+        vec3 steel    = vec3(0.145, 0.160, 0.180);
+        vec3 copper   = vec3(0.663, 0.337, 0.196);
+        vec3 ember    = vec3(0.925, 0.455, 0.235);
 
         vec3 col = mix(graphite, steel, grain * 0.6 + fineStreak * 0.2);
 
@@ -94,13 +120,9 @@ export function MetallicShaderCanvas({ className = '' }: { className?: string })
 
     const vs = compileShader(gl.VERTEX_SHADER, vertexSource);
     const fs = compileShader(gl.FRAGMENT_SHADER, fragmentSource);
-    if (!vs || !fs) {
-      setFallbackMode(true);
-      return;
-    }
-
-    const program = gl.createProgram();
-    if (!program) {
+    const program = vs && fs ? gl.createProgram() : null;
+    if (!vs || !fs || !program) {
+      if (canvas.parentNode === host) host.removeChild(canvas);
       setFallbackMode(true);
       return;
     }
@@ -108,6 +130,7 @@ export function MetallicShaderCanvas({ className = '' }: { className?: string })
     gl.attachShader(program, fs);
     gl.linkProgram(program);
     if (!gl.getProgramParameter(program, gl.LINK_STATUS)) {
+      if (canvas.parentNode === host) host.removeChild(canvas);
       setFallbackMode(true);
       return;
     }
@@ -128,44 +151,54 @@ export function MetallicShaderCanvas({ className = '' }: { className?: string })
     const mouseTarget = { x: 0.76, y: 0.32 };
     const mouseCurrent = { x: 0.76, y: 0.32 };
 
-    const onPointerMove = (e: PointerEvent) => {
-      if (prefersReduced) return;
-      const parent = canvas.parentElement;
-      if (!parent) return;
-      const rect = parent.getBoundingClientRect();
+    const updateMouse = (clientX: number, clientY: number) => {
+      if (reducedMotion) return;
+      const rect = host.getBoundingClientRect();
       if (
-        e.clientX >= rect.left &&
-        e.clientX <= rect.right &&
-        e.clientY >= rect.top &&
-        e.clientY <= rect.bottom
+        clientX >= rect.left &&
+        clientX <= rect.right &&
+        clientY >= rect.top &&
+        clientY <= rect.bottom
       ) {
-        mouseTarget.x = Math.min(1, Math.max(0, (e.clientX - rect.left) / Math.max(1, rect.width)));
-        mouseTarget.y = Math.min(
-          1,
-          Math.max(0, 1 - (e.clientY - rect.top) / Math.max(1, rect.height))
-        );
+        mouseTarget.x = Math.min(1, Math.max(0, (clientX - rect.left) / Math.max(1, rect.width)));
+        mouseTarget.y = Math.min(1, Math.max(0, 1 - (clientY - rect.top) / Math.max(1, rect.height)));
       }
     };
 
+    const onPointerMove = (e: PointerEvent) => updateMouse(e.clientX, e.clientY);
+    const onTouchUpdate = (e: TouchEvent) => {
+      const t = e.touches[0];
+      if (t) updateMouse(t.clientX, t.clientY);
+    };
     window.addEventListener('pointermove', onPointerMove, { passive: true });
+    window.addEventListener('touchstart', onTouchUpdate, { passive: true });
+    window.addEventListener('touchmove', onTouchUpdate, { passive: true });
 
     const resize = () => {
+      const rect = host.getBoundingClientRect();
+      if (rect.width < 2 || rect.height < 2) return;
       const dpr = Math.min(window.devicePixelRatio || 1, 1.5);
-      const rect = canvas.getBoundingClientRect();
-      const w = Math.max(1, Math.floor(rect.width * dpr));
-      const h = Math.max(1, Math.floor(rect.height * dpr));
+      const w = Math.max(2, Math.floor(rect.width * dpr));
+      const h = Math.max(2, Math.floor(rect.height * dpr));
       if (canvas.width !== w || canvas.height !== h) {
         canvas.width = w;
         canvas.height = h;
       }
       gl.viewport(0, 0, canvas.width, canvas.height);
+      upsertCanvasTelemetry('metallic-shader', {
+        backend: 'webgl',
+        contextLost: false,
+        width: Math.round(rect.width),
+        height: Math.round(rect.height),
+      });
     };
 
     resize();
+    const ro = new ResizeObserver(resize);
+    ro.observe(host);
     window.addEventListener('resize', resize);
 
     let isVisible = true;
-    let isTabActive = !document.hidden;
     let rafId = 0;
     const startTime = performance.now();
 
@@ -175,15 +208,17 @@ export function MetallicShaderCanvas({ className = '' }: { className?: string })
       },
       { threshold: 0.05 }
     );
-    observer.observe(canvas);
+    observer.observe(host);
 
-    const onVisibilityChange = () => {
-      isTabActive = !document.hidden;
+    const onContextLost = (e: Event) => {
+      e.preventDefault();
+      upsertCanvasTelemetry('metallic-shader', { contextLost: true, backend: 'fallback-css' });
+      setFallbackMode(true);
     };
-    document.addEventListener('visibilitychange', onVisibilityChange);
+    canvas.addEventListener('webglcontextlost', onContextLost);
 
     const drawFrame = (now: number) => {
-      if (isVisible && isTabActive) {
+      if (isVisible && !document.hidden && (ambientRef.current || now === startTime)) {
         mouseCurrent.x += (mouseTarget.x - mouseCurrent.x) * 0.06;
         mouseCurrent.y += (mouseTarget.y - mouseCurrent.y) * 0.06;
 
@@ -192,29 +227,38 @@ export function MetallicShaderCanvas({ className = '' }: { className?: string })
         gl.enableVertexAttribArray(posLoc);
         gl.vertexAttribPointer(posLoc, 2, gl.FLOAT, false, 0, 0);
         gl.uniform2f(resLoc, canvas.width, canvas.height);
-        gl.uniform1f(timeLoc, prefersReduced ? 0.0 : (now - startTime) * 0.001);
+        gl.uniform1f(timeLoc, reducedMotion || !ambientRef.current ? 0.0 : (now - startTime) * 0.001);
         gl.uniform2f(mouseLoc, mouseCurrent.x, mouseCurrent.y);
         gl.drawArrays(gl.TRIANGLES, 0, 6);
+        incrementCanvasFrame('metallic-shader');
       }
-      if (!prefersReduced) {
+      if (!reducedMotion) {
         rafId = requestAnimationFrame(drawFrame);
       }
     };
 
-    rafId = requestAnimationFrame(drawFrame);
+    drawFrame(startTime);
+    if (!reducedMotion) {
+      rafId = requestAnimationFrame(drawFrame);
+    }
 
     return () => {
       cancelAnimationFrame(rafId);
       observer.disconnect();
+      ro.disconnect();
+      canvas.removeEventListener('webglcontextlost', onContextLost);
       window.removeEventListener('pointermove', onPointerMove);
+      window.removeEventListener('touchstart', onTouchUpdate);
+      window.removeEventListener('touchmove', onTouchUpdate);
       window.removeEventListener('resize', resize);
-      document.removeEventListener('visibilitychange', onVisibilityChange);
       gl.deleteBuffer(buffer);
       gl.deleteProgram(program);
       gl.deleteShader(vs);
       gl.deleteShader(fs);
+      gl.getExtension('WEBGL_lose_context')?.loseContext();
+      if (canvas.parentNode === host) host.removeChild(canvas);
     };
-  }, []);
+  }, [fallbackMode, inProximity, reducedMotion]);
 
   if (fallbackMode) {
     return (
@@ -225,11 +269,6 @@ export function MetallicShaderCanvas({ className = '' }: { className?: string })
     );
   }
 
-  return (
-    <canvas
-      ref={canvasRef}
-      aria-hidden="true"
-      className={`pointer-events-none block w-full h-full ${className}`}
-    />
-  );
+  return <div ref={hostRef} aria-hidden="true" className={`pointer-events-none ${className}`} />;
 }
+

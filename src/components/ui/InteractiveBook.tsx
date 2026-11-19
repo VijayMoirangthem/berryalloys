@@ -9,9 +9,11 @@ import {
   useState,
 } from 'react';
 import { BookOpen, ChevronLeft, ChevronRight, X } from 'lucide-react';
-import { animate, motion, useReducedMotion } from 'motion/react';
+import { animate, motion } from 'motion/react';
 import { useDrag } from '@use-gesture/react';
 import { OFFICIAL_BRAND_MARK_DARK } from '../../data/assets';
+import { useMotion } from '../../context/MotionContext';
+import { setMotionInitStatus } from '../../lib/motionDiagnostics';
 import { cn } from '../../lib/utils';
 
 export interface BookPageMetric {
@@ -216,10 +218,10 @@ function NarrativePage({
     <article
       className={cn(
         'h-full flex flex-col justify-between bg-[#FBFDFF] dark:bg-[#10243A]',
-        compact ? 'p-3.5 gap-2.5 overflow-y-auto' : 'p-6 sm:p-8 gap-5'
+        compact ? 'p-3.5 pl-5 gap-2 overflow-hidden' : 'p-6 sm:p-8 gap-5'
       )}
     >
-      <div className={compact ? 'space-y-1.5' : 'space-y-3'}>
+      <div className={compact ? 'space-y-1.5 min-h-0' : 'space-y-3'}>
         <div className="flex items-center justify-between gap-2 text-[10px] font-mono-tabular uppercase tracking-widest text-brand dark:text-[#69C5F5]">
           <span className="truncate">{page.kicker}</span>
           <span className="text-[#465C72] dark:text-[#B5C5D7] shrink-0">Folio 0{page.pageNumber}</span>
@@ -227,7 +229,7 @@ function NarrativePage({
         <h3
           className={cn(
             'font-display font-bold uppercase tracking-tight text-[#10243A] dark:text-[#F4F8FC]',
-            compact ? 'text-[21px] leading-[1.08]' : 'text-2xl sm:text-3xl'
+            compact ? 'text-[20px] leading-[1.06]' : 'text-2xl sm:text-3xl'
           )}
         >
           {page.title}
@@ -235,7 +237,7 @@ function NarrativePage({
         <div
           className={cn(
             'text-[#465C72] dark:text-[#F4F8FC]/84',
-            compact ? 'space-y-1.5 text-[12px] leading-[1.44]' : 'space-y-3 text-xs sm:text-sm leading-relaxed'
+            compact ? 'space-y-1 text-[11.5px] leading-[1.38]' : 'space-y-3 text-xs sm:text-sm leading-relaxed'
           )}
         >
           {page.paragraphs.map((p) => (
@@ -247,7 +249,7 @@ function NarrativePage({
         <dl
           className={cn(
             'grid grid-cols-2 gap-3 border-t border-[#10243A]/12 dark:border-[#F4F8FC]/12 shrink-0',
-            compact ? 'pt-2.5' : 'pt-4'
+            compact ? 'pt-2' : 'pt-4'
           )}
         >
           {page.metrics.map((m) => (
@@ -258,7 +260,7 @@ function NarrativePage({
               <dd
                 className={cn(
                   'font-display font-bold uppercase text-[#10243A] dark:text-[#F4F8FC]',
-                  compact ? 'text-base leading-tight mt-0.5' : 'text-lg'
+                  compact ? 'text-[15px] leading-tight mt-0.5' : 'text-lg'
                 )}
               >
                 {m.value}
@@ -284,12 +286,39 @@ function PlatePage({ page, pages, activeIndex, interactive, onJump, onNext }: Pl
   const nextPage = pages[activeIndex + 1];
   return (
     <div className="h-full p-6 sm:p-8 flex flex-col justify-between gap-5 bg-[#F1F6FB] dark:bg-[#0D1B2E]">
-      {page.image && (
+      {page.image ? (
         <figure className="border border-[#10243A]/14 dark:border-[#F4F8FC]/14 bg-[#10243A] overflow-hidden">
           <div className="aspect-[16/10] overflow-hidden">
             <img src={page.image} alt={page.imageAlt ?? page.title} className="w-full h-full object-cover" draggable={false} />
           </div>
         </figure>
+      ) : (
+        <div className="border border-[#10243A]/14 dark:border-[#F4F8FC]/14 bg-[#10243A] text-[#F4F8FC] p-5 flex flex-col justify-between min-h-[172px] relative overflow-hidden">
+          <span aria-hidden="true" className="absolute top-0 inset-x-0 h-[2px] bg-gradient-to-r from-[#006393] via-[#69C5F5] to-[#C9233B]" />
+          <div className="flex items-center justify-between gap-2 text-[10px] font-mono-tabular uppercase tracking-widest text-[#69C5F5]">
+            <span>Berry Alloys Archive</span>
+            <span>Folio 0{page.pageNumber} / 0{pages.length}</span>
+          </div>
+          <div className="py-3">
+            <p className="font-display text-5xl font-bold leading-none text-[#F4F8FC]/18 select-none">
+              0{page.pageNumber}
+            </p>
+            <p className="font-display text-xl font-bold uppercase tracking-tight text-[#F4F8FC] -mt-2">
+              {page.title}
+            </p>
+            <p className="text-[11px] font-mono-tabular text-[#B5C5D7] mt-1">{page.kicker}</p>
+          </div>
+          {page.metrics && page.metrics.length > 0 && (
+            <div className="flex flex-wrap items-center gap-x-5 gap-y-1 pt-2.5 border-t border-[#F4F8FC]/14 text-[10.5px] font-mono-tabular text-[#F4F8FC]/85">
+              {page.metrics.map((m) => (
+                <span key={m.label}>
+                  <span className="text-[#94A9BF]">{m.label}: </span>
+                  <strong className="text-[#69C5F5] font-semibold">{m.value}</strong>
+                </span>
+              ))}
+            </div>
+          )}
+        </div>
       )}
 
       <div className="space-y-3">
@@ -433,7 +462,7 @@ function MobileSheet({ page, hasNext, onTapNext }: MobileSheetProps) {
         className="pointer-events-none absolute inset-y-0 right-0 w-[3px] z-10 bg-[repeating-linear-gradient(0deg,rgba(16,36,58,0.16)_0,rgba(16,36,58,0.16)_1px,transparent_1px,transparent_3px)]"
       />
 
-      {page.image && (
+      {page.image ? (
         <div className="relative h-[96px] w-full shrink-0 overflow-hidden bg-[#10243A] border-b border-[#10243A]/14 dark:border-[#F4F8FC]/12">
           <img
             src={page.image}
@@ -449,6 +478,16 @@ function MobileSheet({ page, hasNext, onTapNext }: MobileSheetProps) {
             Plate 0{page.pageNumber} · Official Archive
           </span>
         </div>
+      ) : (
+        <div className="relative shrink-0 bg-[#10243A] text-[#F4F8FC] px-4 py-2.5 pl-5 border-b border-[#10243A]/14 dark:border-[#F4F8FC]/12 flex items-center justify-between gap-2">
+          <span aria-hidden="true" className="absolute top-0 inset-x-0 h-[2px] bg-gradient-to-r from-[#006393] via-[#69C5F5] to-[#C9233B]" />
+          <span className="text-[9.5px] font-mono-tabular uppercase tracking-widest text-[#69C5F5]">
+            Folio 0{page.pageNumber} · Corporate Archive
+          </span>
+          <span className="text-[9.5px] font-mono-tabular text-[#B5C5D7] truncate">
+            {page.kicker}
+          </span>
+        </div>
       )}
 
       <div className="flex-1 min-h-0 flex flex-col">
@@ -461,7 +500,7 @@ function MobileSheet({ page, hasNext, onTapNext }: MobileSheetProps) {
           type="button"
           onClick={onTapNext}
           aria-label={`Turn to folio 0${page.pageNumber + 1}`}
-          className="group absolute bottom-0 right-0 z-20 flex items-end justify-end w-16 h-12 cursor-pointer focus:outline-none"
+          className="group absolute bottom-0 right-0 z-30 flex items-end justify-end w-16 h-12 cursor-pointer focus:outline-none"
         >
           <motion.span
             aria-hidden="true"
@@ -486,7 +525,7 @@ interface Turn {
   manual?: boolean;
 }
 
-const MOBILE_BOOK_HEIGHT = 396;
+const MOBILE_BOOK_HEIGHT = 412;
 
 /**
  * InteractiveBook — a corporate heritage dossier with a genuine 3-strip curved 3D leaf turn:
@@ -500,7 +539,7 @@ export function InteractiveBook({
   pages,
   className,
 }: InteractiveBookProps) {
-  const prefersReduced = useReducedMotion();
+  const { reducedMotion: prefersReduced } = useMotion();
   const total = pages.length;
   const [pos, setPos] = useState(-1); // -1 closed, 0..total-1 folio
   const [turn, setTurn] = useState<Turn | null>(null);
@@ -519,6 +558,10 @@ export function InteractiveBook({
   const lastDragProgressRef = useRef(0);
 
   const turning = turn !== null;
+
+  useEffect(() => {
+    setMotionInitStatus('interactiveBook', prefersReduced ? 'reduced-motion' : 'active');
+  }, [prefersReduced]);
 
   useEffect(() => {
     const mq = window.matchMedia('(min-width: 768px)');
@@ -786,7 +829,7 @@ export function InteractiveBook({
 
     return (
       <div
-        className="relative h-[396px] shadow-[0_22px_40px_-20px_rgba(7,17,31,0.52)]"
+        className="relative h-[412px] shadow-[0_22px_40px_-20px_rgba(7,17,31,0.52)]"
         style={perspectiveStyle}
       >
         {/* Base sheet pushed back slightly in Z so iOS WebKit sorts Leaf cleanly above */}

@@ -6,9 +6,12 @@ import { SearchProvider } from './context/SearchContext';
 import { Layout } from './components/Layout';
 import { BerryAlloysGuide } from './components/BerryAlloysGuide';
 import { SearchCommandModal } from './components/SearchCommandModal';
+import { MotionDebugPanel } from './components/MotionDebugPanel';
 import { KineticLoader } from './components/ui/KineticLoader';
+import { installRuntimeErrorCapture, setLoaderState } from './lib/motionDiagnostics';
 import { HomePage } from './pages/HomePage';
 import { AboutPage } from './pages/AboutPage';
+import { AwardsAchievementsPage } from './pages/AwardsAchievementsPage';
 import { ProductsPage } from './pages/ProductsPage';
 import { ProductDetailPage } from './pages/ProductDetailPage';
 import { ManufacturingPage } from './pages/ManufacturingPage';
@@ -31,12 +34,21 @@ import { LocalizedLayout } from './components/localized/LocalizedLayout';
 import { RfqProvider } from './rfq/RfqContext';
 import { AssistantProvider } from './assistant/AssistantContext';
 import { DEMO_PRODUCT_SLUG, LOCALES, parseLocalePath } from './i18n/locales';
-import { useState } from 'react';
+import { useEffect } from 'react';
 
-/** The opening splash is for the English homepage experience only. Buyers arriving on a language URL (or the presentation view) go straight to content. */
+/** The signature Berry logo splash auto-plays on fresh homepage (/) visits only; direct links open immediately while still allowing manual "Replay intro" from the footer. */
 function LoaderGate() {
-  const [allow] = useState(() => typeof window !== 'undefined' && !parseLocalePath(window.location.pathname).locale && window.location.pathname !== '/presentation');
-  return allow ? <KineticLoader /> : null;
+  useEffect(() => {
+    installRuntimeErrorCapture();
+    if (typeof window !== 'undefined') {
+      const path = window.location.pathname;
+      const isHome = !parseLocalePath(path).locale && (path === '/' || path === '');
+      if (!isHome) {
+        setLoaderState('skipped', 'Direct non-homepage entry route');
+      }
+    }
+  }, []);
+  return <KineticLoader />;
 }
 
 /** Existing (English) site chrome wrapped as a layout route so localised routes can use their own layout. */
@@ -73,6 +85,7 @@ export default function App() {
                 <Route element={<LegacyShell />}>
                 <Route path="/" element={<HomePage />} />
                 <Route path="/about" element={<AboutPage />} />
+                <Route path="/awards-achievements" element={<AwardsAchievementsPage />} />
                 <Route path="/products" element={<ProductsPage />} />
                 <Route path="/products/:slug" element={<ProductDetailPage />} />
                 <Route path="/manufacturing" element={<ManufacturingPage />} />
@@ -91,6 +104,7 @@ export default function App() {
               </Routes>
             <SearchCommandModal />
             <BerryAlloysGuide />
+            <MotionDebugPanel />
           </GuideProvider>
           </AssistantProvider>
           </RfqProvider>

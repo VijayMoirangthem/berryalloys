@@ -347,8 +347,6 @@ export const CORPORATE_DOSSIER_PAGES: InteractiveBookPage[] = [
       { label: 'Incorporation', value: '29 Sept 2006' },
       { label: 'Registry', value: 'RoC Kolkata' },
     ],
-    image: ASSETS.corporateHouse.src,
-    imageAlt: ASSETS.corporateHouse.alt,
   },
   {
     pageNumber: 2,
@@ -362,8 +360,6 @@ export const CORPORATE_DOSSIER_PAGES: InteractiveBookPage[] = [
       { label: 'Chairman', value: 'Shri Sanjay Gupta' },
       { label: 'Managing Director', value: 'Shri Vijay Gupta' },
     ],
-    image: ASSETS.officialPlantGate.src,
-    imageAlt: ASSETS.officialPlantGate.alt,
   },
   {
     pageNumber: 3,
@@ -377,23 +373,19 @@ export const CORPORATE_DOSSIER_PAGES: InteractiveBookPage[] = [
       { label: 'Timeline Scale', value: '3,20,000 TPA' },
       { label: 'AOD Capacity', value: '6,000 MT/mo' },
     ],
-    image: ASSETS.officialAerialComplex.src,
-    imageAlt: ASSETS.officialAerialComplex.alt,
   },
   {
     pageNumber: 4,
     kicker: 'Ratings, Quality & Future Expansion',
-    title: 'Ratings & 2026+ Milestones',
+    title: 'Credentials & 2026+ Milestones',
     paragraphs: [
-      'Published company credentials highlight Three Star Export House status, ISO 9001/14001/45001/14067 systems, Q4 2023 CBAM reporting, CRISIL A- and ICRA AA- ratings, and ET Edge Best Organization to Work 2026 recognition.',
+      'Published company records highlight Three Star Export House status, ISO 9001/14001/45001/14067 management systems, Q4 2023 CBAM reporting, ET Edge Best Organization to Work 2026, and ET Best Brand of 2025 recognition.',
       'Listed expansions cover ₹1,200 crore (93.43 acres) at Bobbili Growth Centre, Unit-2 Kadambera DRI & 90 MW waste heat recovery plans, and the announced 56 Chowringhee Road corporate office.',
     ],
     metrics: [
       { label: 'Export Status', value: 'Three Star' },
-      { label: 'Credit Strip', value: 'CRISIL A- / ICRA AA-' },
+      { label: 'Governance', value: 'ISO 9001–14067' },
     ],
-    image: ASSETS.milestone2025Visual.src,
-    imageAlt: ASSETS.milestone2025Visual.alt,
   },
 ];
 

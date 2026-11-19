@@ -9,7 +9,6 @@ import { OPERATIONS_SUBNAV_LINKS, SubNav } from '../components/SubNav';
 import { ImageReveal } from '../components/motion/ImageReveal';
 import { SplitText } from '../components/motion/SplitText';
 import { SpotlightSurface } from '../components/motion/SpotlightSurface';
-import { CursorCard } from '../components/ui/CursorCard';
 import { FlipText } from '../components/ui/FlipText';
 import { GooeyTextReveal } from '../components/ui/GooeyTextReveal';
 import { WaveGridBackground } from '../components/ui/WaveGridBackground';
@@ -41,16 +40,37 @@ export function ManufacturingPage() {
             </div>
 
             <div className="lg:col-span-5">
-              <figure className="bg-[#0D1B2E] border border-[#F4F8FC]/14 overflow-hidden">
-                <div className="aspect-video overflow-hidden">
+              <figure className="bg-[#0D1B2E] border border-[#F4F8FC]/14 overflow-hidden relative">
+                <span aria-hidden="true" className="absolute top-0 inset-x-0 z-10 h-[2px] bg-gradient-to-r from-[#006393] via-[#69C5F5] to-[#C9233B]" />
+                <ImageReveal direction="up" className="aspect-[16/10] bg-[#07111F]">
                   <ResilientImage
-                    src={ASSETS.officialAerialComplex.src}
-                    alt={ASSETS.officialAerialComplex.alt}
+                    src={ASSETS.mfgMoltenTap411k.src}
+                    alt={ASSETS.mfgMoltenTap411k.alt}
                     containerClassName="w-full h-full"
                   />
-                </div>
-                <figcaption className="px-4 py-3 text-xs text-[#B5C5D7] border-t border-[#F4F8FC]/10">
-                  {ASSETS.officialAerialComplex.caption}
+                </ImageReveal>
+                <figcaption className="p-4 sm:p-5 space-y-3 border-t border-[#F4F8FC]/12">
+                  <p className="text-xs text-[#B5C5D7] leading-relaxed">
+                    {ASSETS.mfgMoltenTap411k.caption}
+                  </p>
+                  <dl className="grid grid-cols-2 gap-3 pt-2 border-t border-[#F4F8FC]/10 text-xs">
+                    <div>
+                      <dt className="text-[10px] font-mono-tabular uppercase tracking-wider text-[#94A9BF]">
+                        Timeline Scale
+                      </dt>
+                      <dd className="font-mono-tabular font-semibold text-[#F4F8FC] mt-0.5">
+                        3,20,000 TPA (2023)
+                      </dd>
+                    </div>
+                    <div>
+                      <dt className="text-[10px] font-mono-tabular uppercase tracking-wider text-[#94A9BF]">
+                        AOD Refining
+                      </dt>
+                      <dd className="font-mono-tabular font-semibold text-[#F4F8FC] mt-0.5">
+                        6,000 MT / month
+                      </dd>
+                    </div>
+                  </dl>
                 </figcaption>
               </figure>
             </div>
@@ -87,14 +107,9 @@ export function ManufacturingPage() {
                 </h3>
                 <p className="text-sm text-[#465C72] dark:text-[#B5C5D7] leading-relaxed">
                   Used for{' '}
-                  <CursorCard
-                    imageSrc={ASSETS.heroSmelting.src}
-                    imageAlt={ASSETS.heroSmelting.alt}
-                    caption="Submerged-Arc Tapping"
-                    description="High-temperature carbothermic reduction producing HC FeMn, HC SiMn, and Ferro Silicon batches."
-                  >
+                  <strong className="font-semibold text-[#10243A] dark:text-[#F4F8FC]">
                     High Carbon Ferro Manganese
-                  </CursorCard>
+                  </strong>
                   , High Carbon Silico Manganese, and Ferro Silicon (70/72). Controlled slag chemistry regulates manganese, silicon, and residual phosphorus. Existing 24 MVA furnace operations are documented at Ghatsila, Jharkhand alongside Bobbili capacity milestones.
                 </p>
               </article>
@@ -109,15 +124,10 @@ export function ManufacturingPage() {
                   Argon Oxygen Decarburisation
                 </h3>
                 <p className="text-sm text-[#465C72] dark:text-[#B5C5D7] leading-relaxed">
-                  <CursorCard
-                    imageSrc={ASSETS.officialProdFeMn.src}
-                    imageAlt={ASSETS.officialProdFeMn.alt}
-                    caption="2023 Converter Line"
-                    description="Commissioned 6,000 MT/month AOD refinement line reducing carbon down to Medium, Low, and Ultra Low limits."
-                  >
+                  <strong className="font-semibold text-[#10243A] dark:text-[#F4F8FC]">
                     6,000 MT/month converter capacity
-                  </CursorCard>{' '}
-                  commissioned in 2023 produces Medium, Low & Ultra Low Carbon Ferro Manganese grades (down to 0.5% carbon in standard rows), supporting automotive flat steels and specialty low-nitrogen steelmaking.
+                  </strong>{' '}
+                  commissioned in 2023 produces Medium, Low &amp; Ultra Low Carbon Ferro Manganese grades (down to 0.5% carbon in standard rows), supporting automotive flat steels and specialty low-nitrogen steelmaking.
                 </p>
               </article>
             </SpotlightSurface>
@@ -128,18 +138,13 @@ export function ManufacturingPage() {
                   03. Silicothermic Route
                 </p>
                 <h3 className="font-display text-2xl font-bold uppercase text-[#10243A] dark:text-[#F4F8FC]">
-                  Silicothermic & Vacuum Treatment
+                  Silicothermic &amp; Vacuum Treatment
                 </h3>
                 <p className="text-sm text-[#465C72] dark:text-[#B5C5D7] leading-relaxed">
                   Documented for{' '}
-                  <CursorCard
-                    imageSrc={ASSETS.officialProdFeCr.src}
-                    imageAlt={ASSETS.officialProdFeCr.alt}
-                    caption="Refined Ferro Chrome"
-                    description="60–65% Cr min with vacuum carbon refinement tailored for 304L and 316L stainless steels."
-                  >
-                    Low & Medium Carbon Ferro Chrome
-                  </CursorCard>{' '}
+                  <strong className="font-semibold text-[#10243A] dark:text-[#F4F8FC]">
+                    Low &amp; Medium Carbon Ferro Chrome
+                  </strong>{' '}
                   (60–65% Cr min, 0.1%–0.5% C max), where optional vacuum treatment lowers residual carbon for 304L and 316L stainless steel production.
                 </p>
               </article>
@@ -150,7 +155,7 @@ export function ManufacturingPage() {
         {/* Quality Systems */}
         <section
           aria-labelledby="qa-heading"
-          className="pt-12 border-t border-[#10243A]/15 dark:border-[#F4F8FC]/14 grid grid-cols-1 lg:grid-cols-12 gap-10 items-center"
+          className="pt-12 border-t border-[#10243A]/15 dark:border-[#F4F8FC]/14 grid grid-cols-1 lg:grid-cols-12 gap-10 items-start"
         >
           <div className="lg:col-span-6 space-y-5">
             <p className="text-xs font-mono-tabular uppercase tracking-widest text-brand dark:text-[#69C5F5]">
@@ -179,23 +184,45 @@ export function ManufacturingPage() {
             </dl>
           </div>
 
-          <div className="lg:col-span-6">
-            <figure className="bg-[#F1F6FB] dark:bg-[#12243B] border border-[#10243A]/12 dark:border-[#F4F8FC]/14 overflow-hidden">
-              <ImageReveal direction="left" className="aspect-video bg-[#10243A]">
+          <div className="lg:col-span-6 space-y-5">
+            <figure className="bg-[#10243A] text-[#F4F8FC] border border-[#10243A] dark:border-[#F4F8FC]/14 overflow-hidden relative">
+              <span aria-hidden="true" className="absolute top-0 inset-x-0 z-10 h-[2px] bg-gradient-to-r from-[#006393] via-[#69C5F5] to-[#C9233B]" />
+              <div className="aspect-[16/10] bg-[#07111F] overflow-hidden">
                 <ResilientImage
-                  src={ASSETS.qualityLab.src}
-                  alt={ASSETS.qualityLab.alt}
+                  src={ASSETS.mfgPlantSeminar.src}
+                  alt={ASSETS.mfgPlantSeminar.alt}
+                  className="w-full h-full object-cover object-top"
                   containerClassName="w-full h-full"
                 />
-              </ImageReveal>
-              <figcaption className="px-4 py-3 text-xs text-[#465C72] dark:text-[#B5C5D7] border-t border-[#10243A]/10 dark:border-[#F4F8FC]/10">
-                {ASSETS.qualityLab.caption}
+              </div>
+              <figcaption className="p-5 sm:p-6 space-y-4">
+                <p className="text-xs text-[#B5C5D7] leading-relaxed">
+                  {ASSETS.mfgPlantSeminar.caption}
+                </p>
+                <dl className="grid grid-cols-2 gap-x-5 gap-y-3 pt-3 border-t border-[#F4F8FC]/12 text-xs">
+                  <div>
+                    <dt className="text-[#94A9BF]">Low-Phosphorus</dt>
+                    <dd className="font-mono-tabular font-semibold text-[#F4F8FC] mt-0.5">P ≤ 0.1%</dd>
+                  </div>
+                  <div>
+                    <dt className="text-[#94A9BF]">Low-Boron Control</dt>
+                    <dd className="font-mono-tabular font-semibold text-[#F4F8FC] mt-0.5">B ≤ 50 ppm</dd>
+                  </div>
+                  <div>
+                    <dt className="text-[#94A9BF]">Low-Nitrogen</dt>
+                    <dd className="font-mono-tabular font-semibold text-[#F4F8FC] mt-0.5">N ≤ 100 ppm</dd>
+                  </div>
+                  <div>
+                    <dt className="text-[#94A9BF]">Carbon Accounting</dt>
+                    <dd className="font-mono-tabular font-semibold text-[#F4F8FC] mt-0.5">ISO 14067:2018</dd>
+                  </div>
+                </dl>
               </figcaption>
             </figure>
           </div>
         </section>
 
-        {/* Plant & Port Corridor */}
+        {/* Unit-2 Kadambeda Expansion & Plant Corridor */}
         <section aria-labelledby="corridor-heading" className="pt-12 border-t border-[#10243A]/15 dark:border-[#F4F8FC]/14 space-y-8">
           <div className="flex flex-col sm:flex-row sm:items-end justify-between gap-4">
             <div>
@@ -213,6 +240,43 @@ export function ManufacturingPage() {
               Inspect Product Chemistry Tables
               <ArrowRight className="w-3.5 h-3.5" aria-hidden="true" />
             </Link>
+          </div>
+
+          {/* Authentic Unit-2 Kadambeda Expansion Visual Feature */}
+          <div className="bg-[#F1F6FB] dark:bg-[#0D1B2E] border border-[#10243A]/14 dark:border-[#F4F8FC]/14 grid grid-cols-1 lg:grid-cols-12 overflow-hidden">
+            <div className="lg:col-span-6 aspect-[16/10] lg:aspect-auto bg-[#07111F] overflow-hidden">
+              <ResilientImage
+                src={ASSETS.mfgUnit2Kadambeda.src}
+                alt={ASSETS.mfgUnit2Kadambeda.alt}
+                className="w-full h-full object-cover"
+                containerClassName="w-full h-full"
+              />
+            </div>
+            <div className="lg:col-span-6 p-6 sm:p-8 flex flex-col justify-between gap-5">
+              <div className="space-y-3">
+                <p className="text-[11px] font-mono-tabular uppercase tracking-widest text-brand dark:text-[#69C5F5]">
+                  Jharkhand Expansion Corridor · August 2026 Disclosure
+                </p>
+                <h3 className="font-display text-2xl sm:text-3xl font-bold uppercase text-[#10243A] dark:text-[#F4F8FC]">
+                  Unit-2 Integrated Complex at Kadambeda, Jharkhand
+                </h3>
+                <p className="text-sm text-[#465C72] dark:text-[#B5C5D7] leading-relaxed">
+                  Published expansion announcements outline two 1,000 TPD rotary DRI (sponge iron) kilns alongside multi-furnace ferro alloy capacity additions at Kadambeda (Ghatsila belt), complementing existing 24 MVA operations and Andhra Pradesh smelting lines.
+                </p>
+              </div>
+              <div className="pt-4 border-t border-[#10243A]/12 dark:border-[#F4F8FC]/12 flex flex-wrap items-center justify-between gap-3">
+                <span className="text-[11px] font-mono-tabular text-[#465C72] dark:text-[#B5C5D7]">
+                  {ASSETS.mfgUnit2Kadambeda.caption}
+                </span>
+                <Link
+                  to="/news"
+                  className="inline-flex items-center gap-1.5 text-xs font-semibold text-brand dark:text-[#69C5F5] hover:underline whitespace-nowrap"
+                >
+                  Read Expansion Disclosures
+                  <ArrowRight className="w-3.5 h-3.5" aria-hidden="true" />
+                </Link>
+              </div>
+            </div>
           </div>
 
           <FacilityCorridorMap />

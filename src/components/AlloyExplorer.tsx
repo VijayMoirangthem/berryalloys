@@ -1,7 +1,6 @@
 import { useEffect, useMemo, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { ArrowRight, Check, GitCompare, Search, X } from 'lucide-react';
-import { ASSETS, VisualAsset } from '../data/assets';
 import {
   ALLOY_FAMILIES,
   AlloyFamily,
@@ -9,13 +8,15 @@ import {
   PRODUCTS,
 } from '../data/products';
 import { CompareModal } from './CompareModal';
-import { ResilientImage } from './ResilientImage';
 
-const FAMILY_IMAGE_MAP: Record<AlloyFamily, VisualAsset> = {
-  'Ferro Manganese': ASSETS.officialProdFeMn,
-  'Silico Manganese': ASSETS.officialProdSiMn,
-  'Ferro Chrome': ASSETS.officialProdFeCr,
-  'Ferro Silicon': ASSETS.officialProdFeSi,
+const FAMILY_PLATE_META: Record<
+  AlloyFamily,
+  { symbol: string; atomic: string; route: string }
+> = {
+  'Ferro Manganese': { symbol: 'FeMn', atomic: 'Mn 25', route: 'SAF / AOD' },
+  'Silico Manganese': { symbol: 'SiMn', atomic: 'Si 14 · Mn 25', route: 'SAF Reduction' },
+  'Ferro Chrome': { symbol: 'FeCr', atomic: 'Cr 24', route: 'Silicothermic' },
+  'Ferro Silicon': { symbol: 'FeSi', atomic: 'Si 14', route: 'SAF Reduction' },
 };
 
 interface AlloyExplorerProps {
@@ -228,22 +229,32 @@ export function AlloyExplorer({ initialFamily = 'All' }: AlloyExplorerProps) {
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
           {filteredProducts.map((product) => {
             const isSelected = compareSlugs.includes(product.slug);
-            const familyImage = FAMILY_IMAGE_MAP[product.family];
+            const plate = FAMILY_PLATE_META[product.family];
             return (
               <article
                 key={product.slug}
                 className="bg-white dark:bg-[#12243B] border border-[#10243A]/14 dark:border-[#F4F8FC]/14 grid grid-cols-1 sm:grid-cols-12 overflow-hidden transition-colors hover:border-[#10243A]/40 dark:hover:border-[#69C5F5]/60"
               >
-                <div className="sm:col-span-5 bg-[#FFFFFF] border-b sm:border-b-0 sm:border-r border-[#10243A]/10 relative min-h-[190px] p-3 flex items-center justify-center">
-                  <ResilientImage
-                    src={familyImage.src}
-                    alt={`${product.name} — ${familyImage.alt}`}
-                    className="w-full h-full object-contain"
-                    containerClassName="w-full h-full max-h-[210px]"
-                  />
+                <div className="sm:col-span-4 bg-[#10243A] text-[#F4F8FC] border-b sm:border-b-0 sm:border-r border-[#10243A]/10 relative min-h-[168px] p-5 flex flex-col justify-between overflow-hidden">
+                  <span aria-hidden="true" className="absolute top-0 inset-x-0 h-[2px] bg-gradient-to-r from-[#006393] via-[#69C5F5] to-[#C9233B]" />
+                  <div className="flex items-center justify-between gap-2 text-[10px] font-mono-tabular uppercase tracking-widest text-[#69C5F5]">
+                    <span>{plate.atomic}</span>
+                    <span>{plate.route}</span>
+                  </div>
+                  <div className="py-3">
+                    <p className="font-display text-4xl sm:text-5xl font-bold leading-none text-[#F4F8FC]">
+                      {plate.symbol}
+                    </p>
+                    <p className="text-[11px] font-mono-tabular text-[#B5C5D7] mt-1.5">
+                      {product.shortName}
+                    </p>
+                  </div>
+                  <p className="text-[10.5px] font-mono-tabular text-[#94A9BF] border-t border-[#F4F8FC]/14 pt-2">
+                    {product.tables.length} spec table{product.tables.length === 1 ? '' : 's'}
+                  </p>
                 </div>
 
-                <div className="sm:col-span-7 p-6 flex flex-col justify-between space-y-5">
+                <div className="sm:col-span-8 p-6 flex flex-col justify-between space-y-5">
                   <div>
                     <div className="flex items-center justify-between gap-2 text-xs text-[#465C72] dark:text-[#B5C5D7] mb-2">
                       <span>

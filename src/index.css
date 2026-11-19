@@ -203,7 +203,12 @@ body, header, footer, section, nav, main {
   animation-direction: reverse;
 }
 
-.logo-slider[data-pause-on-hover="true"]:hover .logo-slider__track,
+@media (hover: hover) and (pointer: fine) {
+  .logo-slider[data-pause-on-hover="true"]:hover .logo-slider__track {
+    animation-play-state: paused;
+  }
+}
+
 .logo-slider[data-user-paused="true"] .logo-slider__track {
   animation-play-state: paused;
 }
@@ -636,3 +641,36 @@ html[data-ambient="paused"] .scroll-cue-dot { animation: none; }
   -webkit-mask-image: none;
   mask-image: none;
 }
+
+/* On-device ?motionDebug=1 independent CSS transform probe */
+@keyframes motion-debug-css-sweep {
+  0%, 100% {
+    transform: translate3d(0px, 0, 0);
+  }
+  50% {
+    transform: translate3d(84px, 0, 0);
+  }
+}
+
+.motion-debug-css-dot {
+  will-change: transform;
+  animation: motion-debug-css-sweep 1.6s ease-in-out infinite;
+}
+
+/* Hero DOM fallback restrained left-to-right metallic sheen when WebGL & 2D canvas are unavailable */
+@keyframes berrySheen {
+  0% {
+    background-position: 110% 50%;
+  }
+  50% {
+    background-position: -10% 50%;
+  }
+  100% {
+    background-position: 110% 50%;
+  }
+}
+
+html[data-ambient="paused"] [class*="animate-[berrySheen"] {
+  animation: none !important;
+}
+

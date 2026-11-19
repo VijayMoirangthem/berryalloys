@@ -42,6 +42,7 @@ export function ResilientImage({
       loading={loading}
       fetchPriority={fetchPriority}
       referrerPolicy="no-referrer"
+      draggable={false}
       onError={() => setHasError(true)}
       className={className}
     />

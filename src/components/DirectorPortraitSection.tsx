@@ -5,6 +5,7 @@ import gsap from 'gsap';
 import { ScrollTrigger } from 'gsap/ScrollTrigger';
 import { ASSETS } from '../data/assets';
 import { COMPANY_INFO } from '../data/company';
+import { onLoaderCleared, setMotionInitStatus } from '../lib/motionDiagnostics';
 
 gsap.registerPlugin(ScrollTrigger);
 
@@ -38,17 +39,22 @@ export function DirectorPortraitSection({ variant = 'home' }: DirectorPortraitSe
     if (!root) return;
 
     const prefersReduced = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
-    if (prefersReduced) return;
+    if (prefersReduced) {
+      setMotionInitStatus('directorPortrait', 'reduced-motion');
+      return;
+    }
 
     ScrollTrigger.config({ ignoreMobileResize: true });
     const isDesktop = window.matchMedia('(min-width: 1024px)').matches;
+    setMotionInitStatus('directorPortrait', 'active');
 
+    let ensureFn: (() => void) | null = null;
     const ctx = gsap.context(() => {
       const tl = gsap.timeline({
         paused: true,
         scrollTrigger: {
           trigger: root,
-          start: isDesktop ? 'top 86%' : 'top 93%',
+          start: isDesktop ? 'top 86%' : 'top 95%',
           once: true,
           invalidateOnRefresh: true,
         },
@@ -57,11 +63,11 @@ export function DirectorPortraitSection({ variant = 'home' }: DirectorPortraitSe
       if (frameLayerRef.current) {
         tl.fromTo(
           frameLayerRef.current,
-          { opacity: 0.25, scale: 0.96 },
+          { opacity: 0.28, scale: 0.96 },
           {
             opacity: 1,
             scale: 1,
-            duration: isDesktop ? 0.72 : 0.58,
+            duration: isDesktop ? 0.72 : 0.54,
             ease: 'power2.out',
             clearProps: 'opacity,transform',
           },
@@ -72,11 +78,11 @@ export function DirectorPortraitSection({ variant = 'home' }: DirectorPortraitSe
       if (portraitEntranceRef.current) {
         tl.fromTo(
           portraitEntranceRef.current,
-          { y: isDesktop ? 24 : 20, opacity: 0.22 },
+          { y: isDesktop ? 24 : 18, opacity: 0.25 },
           {
             y: 0,
             opacity: 1,
-            duration: isDesktop ? 0.88 : 0.68,
+            duration: isDesktop ? 0.88 : 0.62,
             ease: 'power3.out',
             clearProps: 'transform,opacity',
           },
@@ -88,12 +94,12 @@ export function DirectorPortraitSection({ variant = 'home' }: DirectorPortraitSe
       if (editorialItems.length > 0) {
         tl.fromTo(
           editorialItems,
-          { y: 16, opacity: 0.22 },
+          { y: 14, opacity: 0.25 },
           {
             y: 0,
             opacity: 1,
-            duration: isDesktop ? 0.68 : 0.54,
-            stagger: isDesktop ? 0.08 : 0.055,
+            duration: isDesktop ? 0.68 : 0.5,
+            stagger: isDesktop ? 0.08 : 0.05,
             ease: 'power3.out',
             clearProps: 'transform,opacity',
           },
@@ -101,14 +107,15 @@ export function DirectorPortraitSection({ variant = 'home' }: DirectorPortraitSe
         );
       }
 
-      // Mobile scroll-scrubbed 3D layer separation so thumb scrolling glides portrait over frame
+      // Mobile scroll-scrubbed depth separation on outer/background/foreground accent layers only
+      // so portraitLayerRef remains 100% exclusively owned by touch/pointer 3D tilt (zero collisions).
       if (!isDesktop) {
-        if (portraitLayerRef.current) {
+        if (shadowLayerRef.current) {
           gsap.fromTo(
-            portraitLayerRef.current,
-            { y: 12 },
+            shadowLayerRef.current,
+            { y: 8 },
             {
-              y: -4,
+              y: -8,
               ease: 'none',
               scrollTrigger: {
                 trigger: root,
@@ -141,10 +148,11 @@ export function DirectorPortraitSection({ variant = 'home' }: DirectorPortraitSe
       }
 
       const ensureEnteredPlayed = () => {
-        if (tl.progress() === 0 && root.getBoundingClientRect().top <= window.innerHeight * 0.94) {
+        if (tl.progress() === 0 && root.getBoundingClientRect().top <= window.innerHeight * 0.96) {
           tl.play();
         }
       };
+      ensureFn = ensureEnteredPlayed;
 
       const onScrollCheck = () => ensureEnteredPlayed();
       window.addEventListener('scroll', onScrollCheck, { passive: true });
@@ -156,7 +164,15 @@ export function DirectorPortraitSection({ variant = 'home' }: DirectorPortraitSe
       };
     }, root);
 
-    return () => ctx.revert();
+    const unsubLoader = onLoaderCleared(() => {
+      ScrollTrigger.refresh();
+      ensureFn?.();
+    });
+
+    return () => {
+      unsubLoader();
+      ctx.revert();
+    };
   }, []);
 
   // Desktop fine-pointer damped rAF 5-layer depth parallax (never updates React state on pointermove)
@@ -330,81 +346,122 @@ export function DirectorPortraitSection({ variant = 'home' }: DirectorPortraitSe
 
   return (
     <div ref={rootRef} className="grid grid-cols-1 lg:grid-cols-12 gap-10 lg:gap-14 items-center">
-      {/* Left: Sculptural 5-Layer Architectural Portrait Composition */}
+      {/* Left: Sculptural 5-Layer Architectural Portrait Composition on Homepage; Executive Credential Plate on About */}
       <div className="lg:col-span-5">
-        <figure className="relative">
-          {/* Stage Area: portrait head rises slightly above the architectural backdrop frame */}
-          <div
-            ref={stageRef}
-            className="relative pt-7 sm:pt-9 px-3 sm:px-5 overflow-hidden select-none"
-          >
-            {/* Layer 2: Restrained Background Architectural Frame (inset from top so head overlaps above edge) */}
+        {variant === 'home' ? (
+          <figure className="relative">
+            {/* Stage Area: portrait head rises slightly above the architectural backdrop frame */}
             <div
-              ref={frameLayerRef}
-              aria-hidden="true"
-              className="pointer-events-none absolute top-14 sm:top-18 inset-x-3 sm:inset-x-5 bottom-0 bg-gradient-to-br from-[#FFFFFF] via-[#F6FAFE] to-[#E4EEF7] dark:from-[#2B5078] dark:via-[#1E3E62] dark:to-[#12294A] border border-[#10243A]/14 dark:border-[#F4F8FC]/14 transition-[border-color] duration-500 will-change-transform"
+              ref={stageRef}
+              className="relative pt-7 sm:pt-9 px-3 sm:px-5 overflow-hidden select-none"
             >
-              {/* Restrained horizontal copper accent hairline inside top edge of backdrop frame */}
-              <div className="h-[2px] w-16 bg-brand dark:bg-[#69C5F5] mt-4 ml-4" />
-              {/* Subtle drafting coordinate index inside backdrop frame */}
-              <span className="hidden sm:block absolute top-3.5 right-4 text-[10px] font-mono-tabular uppercase tracking-widest text-[#10243A]/38 dark:text-[#F4F8FC]/32">
-                DKG · EST. 2006
-              </span>
-              {/* Fine horizontal drafting grid lines */}
-              <div className="absolute inset-x-5 bottom-1/3 h-px bg-[#10243A]/8 dark:bg-[#F4F8FC]/8" />
-            </div>
-
-            {/* Layer 3: Soft Depth Shadow behind portrait silhouette */}
-            <div
-              ref={shadowLayerRef}
-              aria-hidden="true"
-              className="pointer-events-none absolute left-1/2 -translate-x-1/2 bottom-0 w-[78%] h-[82%] rounded-full bg-white/90 dark:bg-[#9AD9FA]/30 blur-3xl will-change-transform"
-            />
-
-            {/* Layer 4 (Outer GSAP Entrance -> Inner rAF Tilt): Intact Original Cutout Portrait */}
-            <div ref={portraitEntranceRef} className="relative z-10 flex justify-center">
+              {/* Layer 2: Restrained Background Architectural Frame (inset from top so head overlaps above edge) */}
               <div
-                ref={portraitLayerRef}
-                className="w-full max-w-[360px] sm:max-w-[390px] translate-y-[8px] will-change-transform"
+                ref={frameLayerRef}
+                aria-hidden="true"
+                className="pointer-events-none absolute top-14 sm:top-18 inset-x-3 sm:inset-x-5 bottom-0 bg-gradient-to-br from-[#FFFFFF] via-[#F6FAFE] to-[#E4EEF7] dark:from-[#2B5078] dark:via-[#1E3E62] dark:to-[#12294A] border border-[#10243A]/14 dark:border-[#F4F8FC]/14 transition-[border-color] duration-500 will-change-transform"
               >
-                <img
-                  src={ASSETS.vijayGuptaPortrait.src}
-                  alt={ASSETS.vijayGuptaPortrait.alt}
-                  width={1024}
-                  height={1536}
-                  loading="lazy"
-                  decoding="async"
-                  // Supplied transparent studio cutout. No colour filters are applied; only a soft ground shadow.
-                  className="block w-full h-auto max-h-[500px] sm:max-h-[540px] object-contain object-bottom drop-shadow-[0_12px_20px_rgba(16,36,58,0.16)] dark:drop-shadow-[0_16px_28px_rgba(0,0,0,0.45)]"
-                />
+                {/* Restrained horizontal accent hairline inside top edge of backdrop frame */}
+                <div className="h-[2px] w-16 bg-brand dark:bg-[#69C5F5] mt-4 ml-4" />
+                {/* Subtle drafting coordinate index inside backdrop frame */}
+                <span className="hidden sm:block absolute top-3.5 right-4 text-[10px] font-mono-tabular uppercase tracking-widest text-[#10243A]/38 dark:text-[#F4F8FC]/32">
+                  DKG · EST. 2006
+                </span>
+                {/* Fine horizontal drafting grid lines */}
+                <div className="absolute inset-x-5 bottom-1/3 h-px bg-[#10243A]/8 dark:bg-[#F4F8FC]/8" />
+              </div>
+
+              {/* Layer 3: Soft Depth Shadow behind portrait silhouette (zero expensive CSS blur pass on mobile GPUs) */}
+              <div
+                ref={shadowLayerRef}
+                aria-hidden="true"
+                className="pointer-events-none absolute left-1/2 -translate-x-1/2 bottom-0 w-[82%] h-[84%] rounded-full bg-[radial-gradient(closest-side,rgba(255,255,255,0.88),rgba(255,255,255,0.32)_58%,transparent)] dark:bg-[radial-gradient(closest-side,rgba(154,217,250,0.32),rgba(105,197,245,0.12)_58%,transparent)]"
+              />
+
+              {/* Layer 4 (Outer GSAP Entrance -> Inner rAF Tilt): Intact Original Cutout Portrait */}
+              <div ref={portraitEntranceRef} className="relative z-10 flex justify-center">
+                <div
+                  ref={portraitLayerRef}
+                  className="w-full max-w-[360px] sm:max-w-[390px] translate-y-[8px] will-change-transform"
+                >
+                  <img
+                    src={ASSETS.vijayGuptaPortrait.src}
+                    alt={ASSETS.vijayGuptaPortrait.alt}
+                    width={1024}
+                    height={1536}
+                    loading="lazy"
+                    decoding="async"
+                    // Supplied transparent studio cutout. No colour filters are applied; only a soft ground shadow.
+                    className="block w-full h-auto max-h-[500px] sm:max-h-[540px] object-contain object-bottom drop-shadow-[0_12px_20px_rgba(16,36,58,0.16)] dark:drop-shadow-[0_16px_28px_rgba(0,0,0,0.45)]"
+                  />
+                </div>
+              </div>
+
+              {/* Layer 5: Restrained Foreground Architectural Bracket */}
+              <div
+                ref={accentLayerRef}
+                aria-hidden="true"
+                className="pointer-events-none absolute bottom-3 right-5 sm:right-7 z-20 will-change-transform"
+              >
+                <div className="w-6 h-6 border-r-2 border-b-2 border-brand dark:border-[#69C5F5]" />
               </div>
             </div>
 
-            {/* Layer 5: Restrained Copper Foreground Architectural Bracket */}
-            <div
-              ref={accentLayerRef}
-              aria-hidden="true"
-              className="pointer-events-none absolute bottom-3 right-5 sm:right-7 z-20 will-change-transform"
-            >
-              <div className="w-6 h-6 border-r-2 border-b-2 border-brand dark:border-[#69C5F5]" />
+            {/* Crisp Architectural Base Plinth Caption */}
+            <figcaption className="mx-3 sm:mx-5 pt-4 pb-3 px-4 bg-white dark:bg-[#0D1B2E] border border-[#10243A]/14 dark:border-[#F4F8FC]/14 flex items-baseline justify-between gap-4">
+              <div>
+                <p className="text-[11px] font-mono-tabular uppercase tracking-wider text-brand dark:text-[#69C5F5]">
+                  Managing Director & Founder
+                </p>
+                <p className="font-display text-2xl font-bold uppercase tracking-tight text-[#10243A] dark:text-[#F4F8FC]">
+                  {COMPANY_INFO.managingDirector.name}
+                </p>
+              </div>
+              <span className="text-[11px] font-mono-tabular text-[#465C72] dark:text-[#B5C5D7] whitespace-nowrap">
+                25+ Yrs Experience
+              </span>
+            </figcaption>
+          </figure>
+        ) : (
+          <figure className="bg-[#10243A] text-[#F4F8FC] border border-[#10243A] dark:border-[#F4F8FC]/14 overflow-hidden relative">
+            <span aria-hidden="true" className="absolute top-0 inset-x-0 z-10 h-[2px] bg-gradient-to-r from-[#006393] via-[#69C5F5] to-[#C9233B]" />
+            <div className="aspect-[16/11] bg-[#07111F] overflow-hidden">
+              <img
+                src={ASSETS.aboutBoardroomStrategy.src}
+                alt={ASSETS.aboutBoardroomStrategy.alt}
+                loading="lazy"
+                decoding="async"
+                className="w-full h-full object-cover object-top"
+              />
             </div>
-          </div>
-
-          {/* Crisp Architectural Base Plinth Caption */}
-          <figcaption className="mx-3 sm:mx-5 pt-4 pb-3 px-4 bg-white dark:bg-[#0D1B2E] border border-[#10243A]/14 dark:border-[#F4F8FC]/14 flex items-baseline justify-between gap-4">
-            <div>
-              <p className="text-[11px] font-mono-tabular uppercase tracking-wider text-brand dark:text-[#69C5F5]">
-                Managing Director & Founder
-              </p>
-              <p className="font-display text-2xl font-bold uppercase tracking-tight text-[#10243A] dark:text-[#F4F8FC]">
-                {COMPANY_INFO.managingDirector.name}
-              </p>
-            </div>
-            <span className="text-[11px] font-mono-tabular text-[#465C72] dark:text-[#B5C5D7] whitespace-nowrap">
-              25+ Yrs Experience
-            </span>
-          </figcaption>
-        </figure>
+            <figcaption className="p-6 sm:p-7 space-y-5">
+              <div className="flex items-center justify-between text-[11px] font-mono-tabular uppercase tracking-widest text-[#69C5F5]">
+                <span>DKG Group Promoters</span>
+                <span>Est. 2006 · RoC Kolkata</span>
+              </div>
+              <div className="space-y-1.5 border-y border-[#F4F8FC]/14 py-4">
+                <p className="font-display text-2xl sm:text-3xl font-bold uppercase tracking-tight text-[#F4F8FC]">
+                  {COMPANY_INFO.managingDirector.name}
+                </p>
+                <p className="text-xs text-[#B5C5D7] leading-relaxed">
+                  {ASSETS.aboutBoardroomStrategy.caption} — over 25 years across ferro alloys, steelmaking, and international alloy trade.
+                </p>
+              </div>
+              <div className="flex items-center justify-between gap-4">
+                <span className="text-[11px] font-mono-tabular text-[#94A9BF]">
+                  Hurun India Founders’ Awards 2026
+                </span>
+                <Link
+                  to="/awards-achievements"
+                  className="inline-flex items-center gap-1.5 text-xs font-semibold uppercase tracking-wider text-[#69C5F5] hover:underline whitespace-nowrap"
+                >
+                  Leadership Recognitions
+                  <ArrowRight className="w-3.5 h-3.5" aria-hidden="true" />
+                </Link>
+              </div>
+            </figcaption>
+          </figure>
+        )}
       </div>
 
       {/* Right: Editorial Leadership Narrative & Verified Company Context */}

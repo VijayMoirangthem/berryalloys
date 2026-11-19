@@ -1,11 +1,9 @@
 import { useState } from 'react';
 import { Link } from 'react-router-dom';
 import { ArrowRight, ExternalLink } from 'lucide-react';
-import { GALLERY_ITEMS } from '../data/assets';
 import { NEWS_ITEMS, NewsItem } from '../data/communityNewsCareersDocs';
 import { Breadcrumbs } from '../components/Breadcrumbs';
 import { SplitText } from '../components/motion/SplitText';
-import { ImageTrail } from '../components/ui/ImageTrail';
 
 type NewsFilter = 'All' | NewsItem['type'];
 
@@ -19,10 +17,7 @@ export function NewsPage() {
   return (
     <div className="bg-[#FFFFFF] dark:bg-[#07111F] text-[#10243A] dark:text-[#F4F8FC] py-12 lg:py-16">
       <div className="max-w-[1360px] mx-auto px-4 sm:px-6 lg:px-8 space-y-12">
-        <ImageTrail
-          images={GALLERY_ITEMS.slice(0, 6).map((i) => ({ src: i.src, alt: i.alt }))}
-          className="border border-[#10243A]/12 dark:border-[#F4F8FC]/14 bg-[#F1F6FB]/55 dark:bg-[#0D1B2E]/70 p-6 sm:p-10"
-        >
+        <div className="border border-[#10243A]/12 dark:border-[#F4F8FC]/14 bg-[#F1F6FB]/55 dark:bg-[#0D1B2E]/70 p-6 sm:p-10">
           <div className="max-w-3xl space-y-4">
             <Breadcrumbs items={[{ label: 'News & Media' }]} />
 
@@ -38,7 +33,7 @@ export function NewsPage() {
               Dated announcements and educational metallurgical articles indexed from the Berry Alloys Limited website. Where only an announcement excerpt was archived in our source bundle, each detail view links directly to the published company portal.
             </p>
           </div>
-        </ImageTrail>
+        </div>
 
         {/* Filter Bar */}
         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-6 border-b border-[#10243A]/15 dark:border-[#F4F8FC]/14">

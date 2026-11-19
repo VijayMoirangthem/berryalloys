@@ -13,7 +13,7 @@ import { getProductBySlug } from '../data/products';
  *  - Machine-draft translations are never indexable, whatever the environment says.
  *  - Structured data mirrors visible content and never fabricates prices, offers, ratings or reviews.
  */
-export type SeoKind = 'landing' | 'product' | 'rfq' | 'insights' | 'article' | 'presentation' | 'notfound';
+export type SeoKind = 'landing' | 'product' | 'rfq' | 'insights' | 'article' | 'awards' | 'presentation' | 'notfound';
 
 export interface SeoEntry {
   kind: SeoKind;
@@ -119,6 +119,27 @@ export function seoFor(kind: SeoKind, locale: LocaleCode, env: SeoEnv, slug?: st
       ],
     };
   }
+  if (kind === 'awards') {
+    const path = '/awards-achievements';
+    return {
+      kind,
+      locale: 'en',
+      reviewStatus: 'source',
+      indexable: env.indexable,
+      ogType: 'website',
+      path,
+      title: 'Awards & Achievements | Berry Alloys Limited',
+      description:
+        'Verified archive of Berry Alloys Limited’s published corporate, workplace, sustainability, leadership, and export recognitions alongside ISO management system credentials.',
+      alternates: [],
+      jsonLd: [
+        breadcrumb(env, [
+          { name: 'Home', path: '/' },
+          { name: 'Awards & Achievements', path },
+        ]),
+      ],
+    };
+  }
   if (kind === 'notfound') {
     return { kind, locale: 'en', reviewStatus: 'source', indexable: false, ogType: 'website', path: '/', title: 'Page not found | Berry Alloys', description: 'The requested page does not exist.', alternates: [], jsonLd: [] };
   }
@@ -133,6 +154,7 @@ export function staticRoutes(env: SeoEnv): SeoEntry[] {
     out.push(seoFor('landing', l, env), seoFor('product', l, env, DEMO_PRODUCT_SLUG), seoFor('rfq', l, env), seoFor('insights', l, env));
   }
   for (const s of INSIGHT_SLUGS) out.push(seoFor('article', 'en', env, s));
+  out.push(seoFor('awards', 'en', env));
   return out;
 }
 

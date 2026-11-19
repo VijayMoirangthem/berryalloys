@@ -1,5 +1,7 @@
 import * as React from 'react';
-import { useState } from 'react';
+import { useRef, useState } from 'react';
+import { Pause, Play } from 'lucide-react';
+import { useMotion } from '../../context/MotionContext';
 import { cn } from '../../lib/utils';
 
 export interface LogoSliderItem {
@@ -24,8 +26,9 @@ export interface LogoSliderProps extends React.HTMLAttributes<HTMLDivElement> {
 }
 
 /**
- * LogoSlider — Continuous marquee ribbon with hover-pause on desktop,
- * tap-to-pause/resume on touch screens, and ambient-motion awareness.
+ * LogoSlider — Continuous marquee ribbon with hover-pause on fine pointers,
+ * explicit tap-to-pause/resume (ignoring scroll drags) on touch screens,
+ * and ambient-motion awareness.
  */
 export function LogoSlider({
   items,
@@ -45,17 +48,31 @@ export function LogoSlider({
 }: LogoSliderProps) {
   const safeSpeed = Math.max(8, speed);
   const safeBlurLayers = Math.max(1, Math.min(8, blurLayers));
+  const { ambientActive, reducedMotion } = useMotion();
   const [tapPaused, setTapPaused] = useState(false);
+  const downPosRef = useRef<{ x: number; y: number } | null>(null);
+
+  const effectivelyPaused = tapPaused || !ambientActive || reducedMotion;
 
   return (
     <div
-      className={cn('logo-slider', pauseOnHover && 'cursor-pointer', className)}
+      className={cn('logo-slider relative', pauseOnHover && 'cursor-pointer', className)}
       data-direction={direction}
       data-pause-on-hover={String(pauseOnHover)}
-      data-user-paused={String(tapPaused)}
+      data-user-paused={String(effectivelyPaused)}
       data-edge-fade={String(edgeFade)}
-      onClick={() => {
-        if (pauseOnHover) setTapPaused((p) => !p);
+      onPointerDown={(e) => {
+        downPosRef.current = { x: e.clientX, y: e.clientY };
+      }}
+      onClick={(e) => {
+        if (!pauseOnHover) return;
+        const start = downPosRef.current;
+        downPosRef.current = null;
+        if (start) {
+          const moved = Math.hypot(e.clientX - start.x, e.clientY - start.y);
+          if (moved > 8) return;
+        }
+        setTapPaused((p) => !p);
       }}
       style={
         {
@@ -69,6 +86,35 @@ export function LogoSlider({
       }
       {...props}
     >
+      {pauseOnHover && !reducedMotion && ambientActive && tapPaused && (
+        <button
+          type="button"
+          onClick={(e) => {
+            e.stopPropagation();
+            setTapPaused(false);
+          }}
+          aria-label="Resume logo ribbon motion"
+          className="absolute right-2 top-1.5 z-20 inline-flex items-center gap-1 border border-brand/60 bg-card/95 px-2 py-0.5 text-[10px] font-mono-tabular uppercase tracking-wider text-brand shadow-sm cursor-pointer"
+        >
+          <Play className="h-2.5 w-2.5" aria-hidden="true" />
+          Paused · Resume
+        </button>
+      )}
+      {pauseOnHover && !reducedMotion && ambientActive && !tapPaused && (
+        <button
+          type="button"
+          onClick={(e) => {
+            e.stopPropagation();
+            setTapPaused(true);
+          }}
+          aria-label="Pause logo ribbon motion"
+          className="sr-only focus:not-sr-only focus:absolute focus:right-2 focus:top-1.5 focus:z-20 inline-flex items-center gap-1 border border-control bg-card px-2 py-0.5 text-[10px] font-mono-tabular uppercase tracking-wider text-ink"
+        >
+          <Pause className="h-2.5 w-2.5" aria-hidden="true" />
+          Pause
+        </button>
+      )}
+
       <div className="logo-slider__viewport">
         {showBlur && (
           <>
@@ -113,3 +159,4 @@ export function LogoSlider({
 }
 
 export default LogoSlider;
+

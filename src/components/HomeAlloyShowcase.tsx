@@ -15,31 +15,31 @@ import { useIsCompactMobile } from '../hooks/useIsCompactMobile';
 
 const FAMILY_MEDIA: Record<
   AlloyFamily,
-  { index: string; tagline: string; officialSpecimen: VisualAsset; fractureScene: VisualAsset }
+  { index: string; symbol: string; tagline: string; officialSpecimen: VisualAsset }
 > = {
   'Ferro Manganese': {
     index: '01',
+    symbol: 'FeMn',
     tagline: 'High, medium, low, and ultra-low carbon manganese grades with low-phosphorus and low-boron options.',
     officialSpecimen: ASSETS.officialProdFeMn,
-    fractureScene: ASSETS.alloySamples,
   },
   'Silico Manganese': {
     index: '02',
+    symbol: 'SiMn',
     tagline: 'Combined silicon-manganese deoxidation and alloying across standard, medium, and low-carbon melts.',
     officialSpecimen: ASSETS.officialProdSiMn,
-    fractureScene: ASSETS.silicoManganese,
   },
   'Ferro Chrome': {
     index: '03',
+    symbol: 'FeCr',
     tagline: 'Silicothermic and vacuum-treated low & medium carbon chromium (60–65% Cr min) for stainless steels.',
     officialSpecimen: ASSETS.officialProdFeCr,
-    fractureScene: ASSETS.ferroChrome,
   },
   'Ferro Silicon': {
     index: '04',
+    symbol: 'FeSi',
     tagline: '70% and 72% minimum silicon alloy for steel deoxidation, electrical steel cores, and foundry inoculation.',
     officialSpecimen: ASSETS.officialProdFeSi,
-    fractureScene: ASSETS.ferroSilicon,
   },
 };
 
@@ -56,6 +56,7 @@ export function HomeAlloyShowcase({ onEnquireAlloy }: HomeAlloyShowcaseProps) {
   );
 
   const [selectedSlug, setSelectedSlug] = useState<string>(PRODUCTS[0].slug);
+  const [slideDirection, setSlideDirection] = useState<1 | -1>(1);
   const [compareSlugs, setCompareSlugs] = useState<string[]>([
     'high-carbon-ferro-manganese',
     'high-carbon-silico-manganese',
@@ -80,6 +81,7 @@ export function HomeAlloyShowcase({ onEnquireAlloy }: HomeAlloyShowcaseProps) {
   );
 
   const handleSelectFamily = (family: AlloyFamily) => {
+    setSlideDirection(1);
     setActiveFamily(family);
     const firstInFamily = PRODUCTS.find((p) => p.family === family);
     if (firstInFamily) setSelectedSlug(firstInFamily.slug);
@@ -105,6 +107,7 @@ export function HomeAlloyShowcase({ onEnquireAlloy }: HomeAlloyShowcaseProps) {
   );
 
   const stepProduct = (delta: number) => {
+    setSlideDirection(delta >= 0 ? 1 : -1);
     const nextIdx = (activeGlobalIndex + delta + PRODUCTS.length) % PRODUCTS.length;
     const nextProduct = PRODUCTS[nextIdx];
     if (!nextProduct) return;
@@ -116,22 +119,28 @@ export function HomeAlloyShowcase({ onEnquireAlloy }: HomeAlloyShowcaseProps) {
   const springDragX = useSpring(dragOffsetX, { stiffness: 360, damping: 32 });
 
   const bindSwipe = useDrag(
-    ({ active, movement: [mx], velocity: [vx], direction: [dx], last, cancel }) => {
+    ({ active, movement: [mx], velocity: [vx], direction: [dx], last, memo }) => {
+      if (memo?.swiped) {
+        if (last) dragOffsetX.set(0);
+        return memo;
+      }
       if (active) {
-        dragOffsetX.set(Math.max(-22, Math.min(22, mx * 0.22)));
+        dragOffsetX.set(Math.max(-24, Math.min(24, mx * 0.28)));
       }
       if (last) {
         dragOffsetX.set(0);
-        if (Math.abs(mx) > 42 || vx > 0.35) {
-          stepProduct(dx < 0 || mx < 0 ? 1 : -1);
-          cancel();
+        if (Math.abs(mx) > 32 || (vx > 0.25 && Math.abs(mx) > 14)) {
+          stepProduct(mx < 0 || dx < 0 ? 1 : -1);
+          return { swiped: true };
         }
       }
+      return { swiped: false };
     },
     {
       axis: 'x',
       filterTaps: true,
-      threshold: 8,
+      threshold: 6,
+      preventScroll: true,
       pointer: { capture: false },
     }
   );
@@ -367,46 +376,65 @@ export function HomeAlloyShowcase({ onEnquireAlloy }: HomeAlloyShowcaseProps) {
 
           {/* Right: Official Specimen Tray + Specification Card */}
           <div className="lg:col-span-7">
-            <div {...bindSwipe()} style={{ touchAction: 'pan-y' }}>
+            <div
+              {...bindSwipe()}
+              onDragStart={(e) => e.preventDefault()}
+              onPointerDownCapture={(e) => {
+                const target = e.target as HTMLElement | null;
+                if (target?.closest('button, a')) {
+                  dragOffsetX.set(0);
+                }
+              }}
+              className="select-none"
+              style={{ touchAction: 'pan-y' }}
+            >
               <motion.div style={{ x: springDragX }}>
-            <SpotlightSurface className="bg-white dark:bg-[#12243B] border border-[#10243A]/14 dark:border-[#F4F8FC]/14">
-              <AnimatePresence mode="wait">
+            <SpotlightSurface className="bg-white dark:bg-[#12243B] border border-[#10243A]/14 dark:border-[#F4F8FC]/14 overflow-hidden">
+              {/* Persistent Specimen Header & Touch Arrow Bar (never unmounts mid-transition) */}
+              <div className="px-4 sm:px-5 pt-4 sm:pt-5 pb-3 bg-[#FFFFFF] border-b border-[#10243A]/10 flex flex-wrap items-center justify-between gap-2 text-[11px] font-mono-tabular uppercase tracking-wider text-[#465C72]">
+                <span>Official Alloy Specimen Plate · {activeProduct.family}</span>
+                <div className="flex items-center gap-2">
+                  <span className="text-brand font-semibold">
+                    {String(activeGlobalIndex + 1).padStart(2, '0')} / {String(PRODUCTS.length).padStart(2, '0')}
+                  </span>
+                  <div className="flex items-center gap-1 lg:hidden">
+                    <button
+                      type="button"
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        stepProduct(-1);
+                      }}
+                      aria-label="Previous alloy grade series"
+                      className="inline-flex items-center justify-center w-9 h-9 border border-[#10243A]/18 bg-[#F1F6FB] text-[#10243A] hover:border-brand cursor-pointer"
+                    >
+                      <ChevronLeft className="w-4 h-4" aria-hidden="true" />
+                    </button>
+                    <button
+                      type="button"
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        stepProduct(1);
+                      }}
+                      aria-label="Next alloy grade series"
+                      className="inline-flex items-center justify-center w-9 h-9 border border-[#10243A]/18 bg-[#F1F6FB] text-[#10243A] hover:border-brand cursor-pointer"
+                    >
+                      <ChevronRight className="w-4 h-4" aria-hidden="true" />
+                    </button>
+                  </div>
+                </div>
+              </div>
+
+              <AnimatePresence mode="wait" initial={false}>
                 <motion.div
                   key={activeProduct.slug}
-                  initial={{ opacity: 0.15, y: 12, scale: 0.985 }}
-                  animate={{ opacity: 1, y: 0, scale: 1 }}
-                  exit={{ opacity: 0.15, y: -10, scale: 0.985 }}
-                  transition={{ duration: isCompactMobile ? 0.28 : 0.4, ease: [0.22, 1, 0.36, 1] }}
+                  initial={isCompactMobile ? { opacity: 0.25, x: slideDirection * 24 } : { opacity: 0.15, y: 12, scale: 0.985 }}
+                  animate={{ opacity: 1, x: 0, y: 0, scale: 1 }}
+                  exit={isCompactMobile ? { opacity: 0.25, x: -slideDirection * 24 } : { opacity: 0.15, y: -10, scale: 0.985 }}
+                  transition={{ duration: isCompactMobile ? 0.18 : 0.34, ease: [0.22, 1, 0.36, 1] }}
                 >
                   {/* Framed Official Specimen Plate (consistent studio tray in both themes) */}
                   <div className="p-4 sm:p-5 bg-[#FFFFFF] border-b border-[#10243A]/14 dark:border-[#F4F8FC]/14">
-                    <div className="flex flex-wrap items-center justify-between gap-2 pb-3 text-[11px] font-mono-tabular uppercase tracking-wider text-[#465C72]">
-                      <span>Official Alloy Specimen Plate · {activeProduct.family}</span>
-                      <div className="flex items-center gap-2">
-                        <span className="text-brand font-semibold">
-                          {String(activeGlobalIndex + 1).padStart(2, '0')} / {String(PRODUCTS.length).padStart(2, '0')}
-                        </span>
-                        <div className="flex items-center gap-1 lg:hidden">
-                          <button
-                            type="button"
-                            onClick={() => stepProduct(-1)}
-                            aria-label="Previous alloy grade series"
-                            className="inline-flex items-center justify-center w-9 h-9 border border-[#10243A]/18 bg-[#F1F6FB] text-[#10243A] hover:border-brand cursor-pointer"
-                          >
-                            <ChevronLeft className="w-4 h-4" aria-hidden="true" />
-                          </button>
-                          <button
-                            type="button"
-                            onClick={() => stepProduct(1)}
-                            aria-label="Next alloy grade series"
-                            className="inline-flex items-center justify-center w-9 h-9 border border-[#10243A]/18 bg-[#F1F6FB] text-[#10243A] hover:border-brand cursor-pointer"
-                          >
-                            <ChevronRight className="w-4 h-4" aria-hidden="true" />
-                          </button>
-                        </div>
-                      </div>
-                    </div>
-                    <div className="grid grid-cols-1 sm:grid-cols-12 gap-4 items-center">
+                    <div className="grid grid-cols-1 sm:grid-cols-12 gap-4 items-stretch">
                       <motion.div
                         initial={{ scale: 0.96, opacity: 0.7 }}
                         animate={{ scale: 1, opacity: 1 }}
@@ -420,18 +448,23 @@ export function HomeAlloyShowcase({ onEnquireAlloy }: HomeAlloyShowcaseProps) {
                           containerClassName="w-full h-full"
                         />
                       </motion.div>
-                      <motion.div
-                        initial={{ scale: 1.07 }}
-                        animate={{ scale: 1 }}
-                        transition={{ duration: 0.6, ease: [0.22, 1, 0.36, 1] }}
-                        className="sm:col-span-4 aspect-[16/10] sm:aspect-square bg-[#10243A] border border-[#10243A]/15 overflow-hidden"
-                      >
-                        <ResilientImage
-                          src={activeFamilyMedia.fractureScene.src}
-                          alt={activeFamilyMedia.fractureScene.alt}
-                          containerClassName="w-full h-full"
-                        />
-                      </motion.div>
+                      <div className="sm:col-span-4 bg-[#10243A] text-[#F4F8FC] border border-[#10243A]/15 p-4 flex flex-col justify-between gap-3">
+                        <div className="flex items-center justify-between text-[10px] font-mono-tabular uppercase tracking-widest text-[#69C5F5]">
+                          <span>Series {activeFamilyMedia.index}</span>
+                          <span>{activeProduct.carbonTier}</span>
+                        </div>
+                        <div className="py-1">
+                          <p className="font-display text-4xl sm:text-5xl font-bold leading-none text-[#F4F8FC]">
+                            {activeFamilyMedia.symbol}
+                          </p>
+                          <p className="text-[11px] font-mono-tabular text-[#B5C5D7] mt-1">
+                            {activeProduct.comparison.primaryElementLabel}: {activeProduct.comparison.primaryElementRange}
+                          </p>
+                        </div>
+                        <p className="text-[10.5px] font-mono-tabular text-[#94A9BF] border-t border-[#F4F8FC]/14 pt-2">
+                          Sizing &amp; packing per mill specification
+                        </p>
+                      </div>
                     </div>
                     <p className="pt-3 text-[11px] font-mono-tabular text-[#465C72]">
                       {activeImage.caption}

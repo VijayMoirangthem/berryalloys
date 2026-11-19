@@ -6,7 +6,6 @@ import { DEMO_PRODUCT_SLUG, localePath, type LocaleCode } from '../../i18n/local
 import { seoFor } from '../../seo/registry';
 import { seoEnv, useSeo } from '../../seo/useSeo';
 import { getProductBySlug } from '../../data/products';
-import { ASSETS } from '../../data/assets';
 import { Ltr } from '../../components/localized/Ltr';
 import { useGuide } from '../../context/GuideContext';
 import { useRfq } from '../../rfq/RfqContext';
@@ -77,11 +76,27 @@ export function LocalizedProductPage({ locale }: { locale: LocaleCode }) {
             </button>
           </div>
         </div>
-        <figure className="lg:col-span-5">
-          <div className="aspect-[4/3] overflow-hidden border border-subtle bg-card">
-            <img src={ASSETS.officialProdFeMn.src} alt={P.imageAlt} width={800} height={600} className="h-full w-full object-cover" />
+        <div className="lg:col-span-5">
+          <div className="border border-subtle bg-card p-6 space-y-4">
+            <div className="flex items-center justify-between border-b border-subtle pb-3">
+              <span className="font-display text-4xl font-bold text-ink" dir="ltr">FeMn</span>
+              <span className="text-xs font-semibold uppercase tracking-wider text-brand" dir="ltr">
+                {product.shortName}
+              </span>
+            </div>
+            <dl className="grid grid-cols-2 gap-3 text-xs">
+              {facts.slice(0, 4).map((f) => (
+                <div key={f.key}>
+                  <dt className="text-ink-muted">{P.keyFactLabels[f.key]}</dt>
+                  <dd className="mt-0.5 text-sm font-bold text-ink">
+                    <Ltr>{qualify(f.value, P.qualifier)}</Ltr>
+                  </dd>
+                </div>
+              ))}
+            </dl>
+            <p className="border-t border-subtle pt-3 text-xs text-ink-2">{P.imageAlt}</p>
           </div>
-        </figure>
+        </div>
       </header>
 
       <section className="grid gap-8 md:grid-cols-2" aria-labelledby="prod-process">

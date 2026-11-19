@@ -4,6 +4,8 @@ import { ArrowRight } from 'lucide-react';
 import gsap from 'gsap';
 import { ScrollTrigger } from 'gsap/ScrollTrigger';
 import { ASSETS, VisualAsset } from '../data/assets';
+import { useMotion } from '../context/MotionContext';
+import { onLoaderCleared, setMotionInitStatus } from '../lib/motionDiagnostics';
 import { ResilientImage } from './ResilientImage';
 
 gsap.registerPlugin(ScrollTrigger);
@@ -65,19 +67,11 @@ export function ManufacturingScrollStory() {
   const lastStageRef = useRef(0);
   const [activeStage, setActiveStage] = useState(0);
   const [activeMobileStage, setActiveMobileStage] = useState(0);
-  const [prefersReducedMotion, setPrefersReducedMotion] = useState(() =>
-    typeof window !== 'undefined'
-      ? window.matchMedia('(prefers-reduced-motion: reduce)').matches
-      : false
-  );
+  const { reducedMotion: prefersReducedMotion } = useMotion();
 
   useEffect(() => {
-    const mq = window.matchMedia('(prefers-reduced-motion: reduce)');
-    const onChange = () => setPrefersReducedMotion(mq.matches);
-    onChange();
-    mq.addEventListener('change', onChange);
-    return () => mq.removeEventListener('change', onChange);
-  }, []);
+    setMotionInitStatus('manufacturingStory', prefersReducedMotion ? 'reduced-motion' : 'active');
+  }, [prefersReducedMotion]);
 
   useEffect(() => {
     const isDesktop = window.matchMedia('(min-width: 1024px)').matches;
@@ -123,11 +117,12 @@ export function ManufacturingScrollStory() {
       fill.style.transition = 'transform 280ms cubic-bezier(0.22, 1, 0.36, 1)';
     }
 
+    const cardTweens: gsap.core.Tween[] = [];
     const ctx = gsap.context(() => {
       cards.forEach((card) => {
-        gsap.fromTo(
+        const tw = gsap.fromTo(
           card,
-          { y: 20, opacity: 0.35 },
+          { y: 18, opacity: 0.35 },
           {
             y: 0,
             opacity: 1,
@@ -136,13 +131,30 @@ export function ManufacturingScrollStory() {
             clearProps: 'transform,opacity',
             scrollTrigger: {
               trigger: card,
-              start: 'top 93%',
+              start: 'top 95%',
               once: true,
+              invalidateOnRefresh: true,
             },
           }
         );
+        cardTweens.push(tw);
       });
     }, list);
+
+    const sweepCards = () => {
+      const limit = window.innerHeight * 0.96;
+      cards.forEach((card, idx) => {
+        const tw = cardTweens[idx];
+        if (tw && tw.progress() === 0 && card.getBoundingClientRect().top <= limit) {
+          tw.play();
+        }
+      });
+    };
+    window.addEventListener('scroll', sweepCards, { passive: true });
+    const unsubLoader = onLoaderCleared(() => {
+      ScrollTrigger.refresh();
+      sweepCards();
+    });
 
     const io = new IntersectionObserver(
       (entries) => {
@@ -161,11 +173,13 @@ export function ManufacturingScrollStory() {
           fill.style.transform = `scaleY(${Math.min(1, (activeIndex + 1) / Math.max(1, cards.length))})`;
         }
       },
-      { rootMargin: '-22% 0px -32% 0px', threshold: 0.1 }
+      { rootMargin: '-18% 0px -30% 0px', threshold: 0.1 }
     );
 
     cards.forEach((c) => io.observe(c));
     return () => {
+      unsubLoader();
+      window.removeEventListener('scroll', sweepCards);
       io.disconnect();
       ctx.revert();
       cards.forEach((c) => c.classList.remove('is-active'));
@@ -405,11 +419,15 @@ export function ManufacturingScrollStory() {
           <div data-rail-fill className="h-full w-full origin-top scale-y-0 bg-accent-red" />
         </div>
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 ps-8 lg:ps-0">
-          {PROCESS_STAGES.map((stage) => (
+          {PROCESS_STAGES.map((stage, idx) => (
             <div key={stage.number} data-stage-card className="stage-card relative">
             <span aria-hidden="true" className="stage-dot absolute -start-[30px] top-7 z-10 h-4 w-4 rounded-full border-2 border-control bg-card lg:hidden" />
             <article
-              className="bg-white dark:bg-[#12243B] border border-[#10243A]/14 dark:border-[#F4F8FC]/12 overflow-hidden flex flex-col"
+              className={`bg-white dark:bg-[#12243B] border transition-colors duration-300 overflow-hidden flex flex-col ${
+                activeMobileStage === idx
+                  ? 'border-brand dark:border-[#69C5F5]'
+                  : 'border-[#10243A]/14 dark:border-[#F4F8FC]/12'
+              }`}
             >
               <div data-stage-media className="aspect-video overflow-hidden bg-[#10243A]">
                 <ResilientImage

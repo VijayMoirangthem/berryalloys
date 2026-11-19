@@ -19,6 +19,7 @@ import type { PresenceLocation, PresenceRoute } from '../../data/globalPresence'
 import { KIND_LABEL } from '../../data/globalPresence';
 import { FlagIcon } from './FlagIcon';
 import { cn } from '../../lib/utils';
+import { incrementCanvasFrame, recordRuntimeError, upsertCanvasTelemetry } from '../../lib/motionDiagnostics';
 
 /**
  * GlobeScene — adapted from the Aceternity "globe" component (three-globe core: hex-polygon land, arcs, rings).
@@ -164,14 +165,16 @@ export default function GlobeScene(props: GlobeSceneProps) {
     let renderer: WebGLRenderer;
     try {
       renderer = new WebGLRenderer({ antialias: true, alpha: true, powerPreference: 'high-performance' });
-    } catch {
+    } catch (err) {
+      recordRuntimeError('GlobeScene.WebGLInit', err);
+      upsertCanvasTelemetry('globe-3d', { backend: 'fallback-2d', contextLost: false });
       live.current.onError('webgl-unavailable');
       return;
     }
     const gl = renderer.getContext();
     const dbg = gl.getExtension('WEBGL_debug_renderer_info');
     const softwareGl = /(swiftshader|llvmpipe|software|softpipe)/i.test(dbg ? String(gl.getParameter(dbg.UNMASKED_RENDERER_WEBGL)) : '');
-    renderer.setPixelRatio(Math.min(window.devicePixelRatio || 1, softwareGl ? 1 : 2));
+    renderer.setPixelRatio(Math.min(window.devicePixelRatio || 1, softwareGl ? 1 : 1.75));
     renderer.setClearColor(0x000000, 0);
     const canvas = renderer.domElement;
     canvas.style.display = 'block';
@@ -235,6 +238,7 @@ export default function GlobeScene(props: GlobeSceneProps) {
       const dir = camera.position.lengthSq() > 0 ? camera.position.clone().normalize() : dirFor(INITIAL_VIEW.lat, INITIAL_VIEW.lng);
       fitCamera(w, h);
       setCameraDir(dir);
+      upsertCanvasTelemetry('globe-3d', { backend: 'webgl', contextLost: false, width: w, height: h });
     };
 
     // ----- globe styling & data -----
@@ -460,6 +464,7 @@ export default function GlobeScene(props: GlobeSceneProps) {
       controls.autoRotate = autoRotate && !tween.active && !live.current.reducedMotion;
       controls.update();
       renderer.render(scene, camera);
+      incrementCanvasFrame('globe-3d');
       updateMarkers();
       if (firstRender) {
         firstRender = false;
@@ -485,6 +490,7 @@ export default function GlobeScene(props: GlobeSceneProps) {
 
     const onLost = (e: Event) => {
       e.preventDefault();
+      upsertCanvasTelemetry('globe-3d', { contextLost: true, backend: 'fallback-2d' });
       live.current.onError('context-lost');
     };
     canvas.addEventListener('webglcontextlost', onLost);

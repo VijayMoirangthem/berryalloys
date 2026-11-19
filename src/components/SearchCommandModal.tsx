@@ -12,6 +12,7 @@ import {
   X,
 } from 'lucide-react';
 import { AnimatePresence, motion, useReducedMotion } from 'motion/react';
+import { AWARD_RECORDS } from '../data/awards';
 import { HOME_CHAPTERS } from '../data/chapters';
 import { CORPORATE_DOCUMENT_GROUPS, NEWS_ITEMS } from '../data/communityNewsCareersDocs';
 import { OFFICES } from '../data/company';
@@ -143,6 +144,24 @@ export function SearchCommandModal() {
     ];
 
     const docItems: SearchResultItem[] = [
+      {
+        id: 'page-awards-achievements',
+        category: 'Updates & Filings' as const,
+        title: 'Awards & Achievements Archive',
+        subtitle: 'Published corporate, workplace, social impact, leadership, and export recognitions plus ISO credentials.',
+        badge: 'Archive',
+        searchBlob: 'awards achievements recognitions credentials iso crisil icra et edge best brand hurun icc vizag steel three star export house',
+        onSelect: () => go('/awards-achievements'),
+      },
+      ...AWARD_RECORDS.map((a) => ({
+        id: `award-${a.id}`,
+        category: 'Updates & Filings' as const,
+        title: a.title,
+        subtitle: `${a.displayDate} · ${a.issuer} · ${a.recipient}`,
+        badge: a.category,
+        searchBlob: `${a.title} ${a.issuer} ${a.recipient} ${a.category} ${a.displayDate} ${a.description}`.toLowerCase(),
+        onSelect: () => go('/awards-achievements'),
+      })),
       ...NEWS_ITEMS.map((n) => ({
         id: `news-${n.slug}`,
         category: 'Updates & Filings' as const,

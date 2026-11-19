@@ -46,20 +46,26 @@ export function GalleryLightbox({ items, index, onIndexChange, onClose, returnFo
     [items.length, onIndexChange]
   );
 
-  // Scroll lock, initial focus, focus restoration.
+  // Scroll lock, initial focus, and scroll/focus restoration.
   useEffect(() => {
+    const savedScrollY = window.scrollY;
     const scrollbar = window.innerWidth - document.documentElement.clientWidth;
     const prevOverflow = document.body.style.overflow;
     const prevPadding = document.body.style.paddingRight;
     document.body.style.overflow = 'hidden';
     if (scrollbar > 0) document.body.style.paddingRight = `${scrollbar}px`;
-    closeRef.current?.focus();
+    closeRef.current?.focus({ preventScroll: true });
     const target = returnFocusEl ?? fallbackFocus.current;
     return () => {
       document.body.style.overflow = prevOverflow;
       document.body.style.paddingRight = prevPadding;
+      if (Math.abs(window.scrollY - savedScrollY) > 2) {
+        window.scrollTo({ top: savedScrollY, behavior: 'auto' });
+      }
       window.requestAnimationFrame(() => {
-        if (target && document.contains(target)) target.focus();
+        if (target && document.contains(target)) {
+          target.focus({ preventScroll: true });
+        }
       });
     };
   }, [returnFocusEl]);

@@ -36,9 +36,13 @@ export function NewsDetailPage() {
   const heroVisual =
     item.slug === 'bobbili-growth-centre-project'
       ? ASSETS.newsBobbiliVisual
-      : item.slug === 'et-edge-workplace-recognition-2026'
-      ? ASSETS.awardEtEdge2026
       : undefined;
+
+  const isAwardAnnouncement =
+    item.slug === 'et-edge-workplace-recognition-2026' ||
+    item.slug.includes('award') ||
+    item.title.toLowerCase().includes('award') ||
+    item.title.toLowerCase().includes('brand');
 
   return (
     <div className="bg-[#FFFFFF] dark:bg-[#07111F] text-[#10243A] dark:text-[#F4F8FC] py-12 lg:py-16">
@@ -87,13 +91,23 @@ export function NewsDetailPage() {
           </div>
 
           <div className="pt-4 border-t border-[#10243A]/12 dark:border-[#F4F8FC]/12 flex flex-wrap items-center justify-between gap-4">
-            <Link
-              to="/news"
-              className="inline-flex items-center gap-1.5 text-xs font-semibold text-[#10243A] dark:text-[#F4F8FC] hover:text-brand dark:hover:text-[#69C5F5]"
-            >
-              <ArrowLeft className="w-3.5 h-3.5" aria-hidden="true" />
-              All News & Articles
-            </Link>
+            <div className="flex flex-wrap items-center gap-4">
+              <Link
+                to="/news"
+                className="inline-flex items-center gap-1.5 text-xs font-semibold text-[#10243A] dark:text-[#F4F8FC] hover:text-brand dark:hover:text-[#69C5F5]"
+              >
+                <ArrowLeft className="w-3.5 h-3.5" aria-hidden="true" />
+                All News &amp; Articles
+              </Link>
+              {isAwardAnnouncement && (
+                <Link
+                  to="/awards-achievements"
+                  className="inline-flex items-center gap-1.5 text-xs font-semibold text-brand dark:text-[#69C5F5] hover:underline"
+                >
+                  View Full Awards &amp; Achievements Archive →
+                </Link>
+              )}
+            </div>
             <a
               href={item.sourceUrl}
               target="_blank"

@@ -4,18 +4,18 @@ import { ArrowRight, ArrowUpRight, Mail, MapPin, Phone } from 'lucide-react';
 import { motion } from 'motion/react';
 import gsap from 'gsap';
 import { ScrollTrigger } from 'gsap/ScrollTrigger';
-import { ASSETS, GALLERY_ITEMS } from '../data/assets';
+import { ASSETS } from '../data/assets';
+import { AWARD_RECORDS } from '../data/awards';
 import {
   CERTIFICATIONS,
   COMPANY_INFO,
-  CREDENTIALS_AND_AWARDS,
   MEMBERSHIPS,
   OFFICES,
   UPCOMING_OFFICE_NOTICE,
 } from '../data/company';
 import { CSR_STORIES, NEWS_ITEMS } from '../data/communityNewsCareersDocs';
 import { CredentialLogoMarquee, CredentialStackedMatrix } from '../data/CredentialMatrices';
-import { CORPORATE_DOSSIER_PAGES, CSR_DIAGONAL_SLIDES, LIFE_CULTURE_SCATTER_SETS, PLANT_REVEAL_ROWS, QA_PERSPECTIVE_SLIDES } from '../data/showcaseCollections';
+import { CORPORATE_DOSSIER_PAGES } from '../data/showcaseCollections';
 import { useGuide } from '../context/GuideContext';
 import { BerryMonogram } from '../components/BerryMonogram';
 import { BrandLockup } from '../components/BrandLockup';
@@ -42,21 +42,14 @@ import { ScrollCue } from '../components/motion/ScrollCue';
 import { SplitText } from '../components/motion/SplitText';
 import { SpotlightSurface } from '../components/motion/SpotlightSurface';
 import { AnimatedTooltip } from '../components/ui/AnimatedTooltip';
-import { CursorCard } from '../components/ui/CursorCard';
-import { DiagonalCarousel } from '../components/ui/DiagonalCarousel';
 import { FlipFadeText } from '../components/ui/FlipFadeText';
 import { FlipText } from '../components/ui/FlipText';
 import { GooeyTextReveal } from '../components/ui/GooeyTextReveal';
-import { ImageRevealList } from '../components/ui/ImageRevealList';
-import { ImageScatter } from '../components/ui/ImageScatter';
-import { ImageTrail } from '../components/ui/ImageTrail';
 import { IndustrialButton } from '../components/ui/IndustrialButton';
 import { InteractiveBook } from '../components/ui/InteractiveBook';
 import { InteractiveParticles } from '../components/ui/InteractiveParticles';
 import { MorphText } from '../components/ui/MorphText';
-import { PerspectiveCarousel } from '../components/ui/PerspectiveCarousel';
-import { PixelatedImageTrail } from '../components/ui/PixelatedImageTrail';
-import { ScrollDissolveReveal } from '../components/ui/ScrollDissolveReveal';
+import { onLoaderCleared, setMotionInitStatus } from '../lib/motionDiagnostics';
 
 gsap.registerPlugin(ScrollTrigger);
 
@@ -72,9 +65,13 @@ export function HomePage() {
 
   useEffect(() => {
     const prefersReduced = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
-    if (prefersReduced || !heroSectionRef.current) return;
+    if (prefersReduced || !heroSectionRef.current) {
+      setMotionInitStatus('heroGsap', prefersReduced ? 'reduced-motion' : 'skipped');
+      return;
+    }
 
     ScrollTrigger.config({ ignoreMobileResize: true });
+    setMotionInitStatus('heroGsap', 'active');
     const mm = gsap.matchMedia();
 
     mm.add('(min-width: 1024px)', () => {
@@ -108,17 +105,18 @@ export function HomePage() {
     });
 
     mm.add('(max-width: 1023px)', () => {
-      gsap.from('.hero-reveal', {
+      const heroRevealTween = gsap.from('.hero-reveal', {
         y: 14,
-        opacity: 0.2,
+        opacity: 0.25,
         duration: 0.52,
         stagger: 0.06,
         ease: 'power3.out',
         clearProps: 'transform,opacity',
         scrollTrigger: {
           trigger: heroSectionRef.current,
-          start: 'top 93%',
+          start: 'top 95%',
           once: true,
+          invalidateOnRefresh: true,
         },
       });
 
@@ -135,6 +133,24 @@ export function HomePage() {
           },
         });
       }
+
+      const sweepHero = () => {
+        if (!heroSectionRef.current) return;
+        const rect = heroSectionRef.current.getBoundingClientRect();
+        if (rect.top <= window.innerHeight * 0.96 && heroRevealTween.progress() === 0) {
+          heroRevealTween.play();
+        }
+      };
+      window.addEventListener('scroll', sweepHero, { passive: true });
+      const unsub = onLoaderCleared(() => {
+        ScrollTrigger.refresh();
+        sweepHero();
+      });
+
+      return () => {
+        window.removeEventListener('scroll', sweepHero);
+        unsub();
+      };
     });
 
     document.fonts?.ready?.then(() => ScrollTrigger.refresh());
@@ -493,61 +509,32 @@ export function HomePage() {
               <div className="space-y-4 text-base text-[#465C72] dark:text-[#F4F8FC]/82 leading-relaxed max-w-[65ch]">
                 <p>
                   Rooted in the industrial ethos of{' '}
-                  <CursorCard
-                    imageSrc={ASSETS.corporateHouse.src}
-                    imageAlt={ASSETS.corporateHouse.alt}
-                    caption="DKG Group Lineage"
-                    description="Founding industrial steward whose manufacturing values anchor Berry Alloys Limited under RoC Kolkata (CIN U27310WB2006PLC145016)."
-                  >
+                  <strong className="font-semibold text-[#10243A] dark:text-[#F4F8FC]">
                     Late Shri Dashrath Kumar Gupta
-                  </CursorCard>
+                  </strong>
                   , founder of the DKG Group, Berry Alloys Limited translates multi-generational trading and manufacturing discipline into high-temperature metallurgical execution.
                 </p>
                 <p>
                   Within the broader promoter entrepreneurial footprint—including{' '}
-                  <CursorCard
-                    imageSrc={ASSETS.milestone2010Visual.src}
-                    imageAlt={ASSETS.milestone2010Visual.alt}
-                    caption="Promoter Steel Footprint"
-                    description="Managing Director Shri Vijay Gupta brings over 25 years across ferro alloys, steel manufacturing, real estate, and bulk international exports."
-                  >
+                  <strong className="font-semibold text-[#10243A] dark:text-[#F4F8FC]">
                     Captain Steel India
-                  </CursorCard>{' '}
+                  </strong>{' '}
                   co-founded by Managing Director Shri Vijay Gupta—the group built deep institutional relationships across primary steelmaking, raw ore procurement, and East Coast export logistics.
                 </p>
                 <p>
                   From first submerged-arc furnaces commissioned in 2010 to multi-unit operations spanning{' '}
-                  <CursorCard
-                    imageSrc={ASSETS.officialAerialComplex.src}
-                    imageAlt={ASSETS.officialAerialComplex.alt}
-                    caption="Vizianagaram Works"
-                    description="Integrated smelting bays, 6,000 MT/month AOD converter, and ₹1,200 crore project allocation across 93.43 acres in Andhra Pradesh."
-                  >
+                  <strong className="font-semibold text-[#10243A] dark:text-[#F4F8FC]">
                     Bobbili Growth Centre
-                  </CursorCard>{' '}
+                  </strong>{' '}
                   (Vizianagaram, Andhra Pradesh) and{' '}
-                  <CursorCard
-                    imageSrc={ASSETS.milestone2025Visual.src}
-                    imageAlt={ASSETS.milestone2025Visual.alt}
-                    caption="Jharkhand Operations"
-                    description="Existing 24 MVA operations paired with Unit-2 Kadambera DRI & planned 90 MW waste heat recovery expansion."
-                  >
+                  <strong className="font-semibold text-[#10243A] dark:text-[#F4F8FC]">
                     Kadambeda Village / Dhalbhumgarh
-                  </CursorCard>{' '}
+                  </strong>{' '}
                   (Singhbhum East, Jharkhand), the company links eastern India’s mineral belt directly to global vessels via{' '}
-                  <CursorCard
-                    imageSrc={ASSETS.portLogistics.src}
-                    imageAlt={ASSETS.portLogistics.alt}
-                    caption="Three Star Export Corridor"
-                    description="Visakhapatnam regional director office and deep-water port infrastructure enabling global container and bulk dispatch."
-                  >
+                  <strong className="font-semibold text-[#10243A] dark:text-[#F4F8FC]">
                     Visakhapatnam Harbour Port
-                  </CursorCard>
+                  </strong>
                   .
-                </p>
-                <p className="text-xs font-mono-tabular text-brand dark:text-[#69C5F5]">
-                  <span className="md:hidden">Tip: Tap any dashed underline above to inspect site imagery.</span>
-                  <span className="hidden md:inline">Tip: Hover or focus any dashed underline above to inspect site imagery.</span>
                 </p>
               </div>
 
@@ -583,49 +570,44 @@ export function HomePage() {
               </div>
             </div>
 
-            {/* Official Aerial Complex + Corporate House Pair */}
+            {/* Official Corporate House Feature + Statutory Registry Ledger */}
             <div className="lg:col-span-5 space-y-6">
               <figure className="bg-[#F1F6FB] dark:bg-[#12243B] border border-[#10243A]/12 dark:border-[#F4F8FC]/14 overflow-hidden">
                 <ImageReveal direction="up" className="aspect-[16/10] bg-[#10243A]">
                   <ResilientImage
-                    src={ASSETS.officialAerialComplex.src}
-                    alt={ASSETS.officialAerialComplex.alt}
+                    src={ASSETS.corporateHouse.src}
+                    alt={ASSETS.corporateHouse.alt}
                     containerClassName="w-full h-full"
                   />
                 </ImageReveal>
                 <figcaption className="px-4 py-3 text-xs text-[#465C72] dark:text-[#B5C5D7] border-t border-[#10243A]/10 dark:border-[#F4F8FC]/10">
-                  {ASSETS.officialAerialComplex.caption}
+                  {ASSETS.corporateHouse.caption}
                 </figcaption>
               </figure>
 
-              <motion.figure
-                initial={{ opacity: 0.35, y: 18 }}
-                whileInView={{ opacity: 1, y: 0 }}
-                viewport={{ once: true, amount: 'some' }}
-                transition={{ duration: 0.55, delay: 0.08, ease: [0.22, 1, 0.36, 1] }}
-                className="bg-white dark:bg-[#12243B] border border-[#10243A]/12 dark:border-[#F4F8FC]/14 grid grid-cols-12 overflow-hidden items-center"
-              >
-                <div className="col-span-5 aspect-[4/3] bg-[#10243A] overflow-hidden">
-                  <ImageReveal direction="left" className="w-full h-full">
-                    <ResilientImage
-                      src={ASSETS.corporateHouse.src}
-                      alt={ASSETS.corporateHouse.alt}
-                      containerClassName="w-full h-full"
-                    />
-                  </ImageReveal>
-                </div>
-                <figcaption className="col-span-7 p-4 space-y-1">
-                  <p className="text-[11px] font-mono-tabular uppercase tracking-wider text-brand dark:text-[#69C5F5]">
-                    Corporate Infrastructure
-                  </p>
-                  <p className="text-xs font-semibold text-[#10243A] dark:text-[#F4F8FC]">
-                    Kolkata Registered Office & Announced Chowringhee Hub
-                  </p>
-                  <p className="text-[11px] text-[#465C72] dark:text-[#B5C5D7] leading-relaxed">
-                    Active headquarters at 21A, Shakespeare Sarani; upcoming office announced at 56, Chowringhee Road, Kolkata.
-                  </p>
-                </figcaption>
-              </motion.figure>
+              <div className="bg-white dark:bg-[#12243B] border border-[#10243A]/12 dark:border-[#F4F8FC]/14 p-5 space-y-3">
+                <p className="text-[11px] font-mono-tabular uppercase tracking-wider text-brand dark:text-[#69C5F5]">
+                  Statutory &amp; Commercial Footprint
+                </p>
+                <dl className="divide-y divide-[#10243A]/10 dark:divide-[#F4F8FC]/10 text-xs">
+                  <div className="py-2 flex items-baseline justify-between gap-4">
+                    <dt className="text-[#465C72] dark:text-[#B5C5D7]">CIN</dt>
+                    <dd className="font-mono-tabular font-semibold text-[#10243A] dark:text-[#F4F8FC]">{COMPANY_INFO.cin}</dd>
+                  </div>
+                  <div className="py-2 flex items-baseline justify-between gap-4">
+                    <dt className="text-[#465C72] dark:text-[#B5C5D7]">Registered HQ</dt>
+                    <dd className="text-right text-[#10243A] dark:text-[#F4F8FC]">21A, Shakespeare Sarani, Kolkata</dd>
+                  </div>
+                  <div className="py-2 flex items-baseline justify-between gap-4">
+                    <dt className="text-[#465C72] dark:text-[#B5C5D7]">Announced Hub</dt>
+                    <dd className="text-right text-[#10243A] dark:text-[#F4F8FC]">56, Chowringhee Road, Kolkata</dd>
+                  </div>
+                  <div className="pt-2 flex items-baseline justify-between gap-4">
+                    <dt className="text-[#465C72] dark:text-[#B5C5D7]">Port Gateway</dt>
+                    <dd className="text-right text-[#10243A] dark:text-[#F4F8FC]">Visakhapatnam Harbour Port</dd>
+                  </div>
+                </dl>
+              </div>
             </div>
           </div>
 
@@ -896,20 +878,6 @@ export function HomePage() {
       {/* 05 / ALLOYS — Interactive Alloy Explorer (#alloys) */}
       <HomeAlloyShowcase onEnquireAlloy={handleEnquireAlloy} />
 
-      {/* Scroll-Driven Shader Dissolve Bridge: Integrated Complex -> Submerged-Arc Reduction */}
-      <ScrollDissolveReveal
-        image1={ASSETS.officialAerialComplex.src}
-        image2={ASSETS.heroSmelting.src}
-        image1Alt={ASSETS.officialAerialComplex.alt}
-        image2Alt={ASSETS.heroSmelting.alt}
-        leftKicker="Stage 01 · Bobbili & Jharkhand Complexes"
-        leftTitle="Raw Charge To Furnace Floor"
-        leftDescription="Manganese, quartz, chromite, and metallurgical coke staged across Eastern and Coastal Indian smelting sheds."
-        rightKicker="Stage 02 · Thermal & AOD Precision"
-        rightTitle="From Heat To Precision"
-        rightDescription="Submerged-arc tapping paired with 6,000 MT/month AOD decarburisation and traceable spectrographic testing."
-      />
-
       {/* 06 / PROCESS — Pinned Desktop Manufacturing Sequence (#process) */}
       <ManufacturingScrollStory />
 
@@ -964,64 +932,75 @@ export function HomePage() {
                 </div>
               </div>
 
-              {/* Displayed Credentials + Official ET Edge 2026 Crest */}
+              {/* Concise Typographic Awards & Achievements Teaser (zero duplicate imagery; full archive on /awards-achievements) */}
               <div className="border-t border-[#10243A]/15 dark:border-[#F4F8FC]/14 pt-5 space-y-4">
-                <h3 className="font-mono-tabular text-xs uppercase tracking-wider text-[#10243A] dark:text-[#F4F8FC]">
-                  Displayed Ratings, Awards & Affiliations
-                </h3>
-
-                <div className="bg-white dark:bg-[#12243B] border border-[#10243A]/12 dark:border-[#F4F8FC]/14 p-4 flex items-center gap-4">
-                  <div className="w-16 h-16 shrink-0 bg-[#FFFFFF] border border-[#10243A]/10 p-1.5 flex items-center justify-center">
-                    <img
-                      src={ASSETS.awardEtEdge2026.src}
-                      alt={ASSETS.awardEtEdge2026.alt}
-                      className="w-full h-full object-contain"
-                    />
-                  </div>
-                  <div className="space-y-0.5 text-xs">
-                    <p className="font-semibold text-[#10243A] dark:text-[#F4F8FC]">
-                      ET Edge Best Organization to Work 2026
-                    </p>
-                    <p className="text-[#465C72] dark:text-[#B5C5D7]">
-                      Workplace recognition displayed on Berry Alloys Limited’s official website alongside credit ratings CRISIL A- & ICRA AA-.
-                    </p>
-                  </div>
+                <div className="flex flex-wrap items-baseline justify-between gap-2">
+                  <h3 className="font-mono-tabular text-xs uppercase tracking-wider text-[#10243A] dark:text-[#F4F8FC]">
+                    Awards &amp; Recognition Archive
+                  </h3>
+                  <Link
+                    to="/awards-achievements"
+                    className="inline-flex items-center gap-1 text-xs font-semibold text-brand dark:text-[#69C5F5] hover:underline"
+                  >
+                    <span>Explore Awards &amp; Achievements</span>
+                    <ArrowRight className="w-3.5 h-3.5" aria-hidden="true" />
+                  </Link>
                 </div>
 
                 <ul className="divide-y divide-[#10243A]/10 dark:divide-[#F4F8FC]/10 border border-[#10243A]/12 dark:border-[#F4F8FC]/14 bg-white dark:bg-[#12243B] text-xs">
-                  {CREDENTIALS_AND_AWARDS.map((item) => (
+                  {AWARD_RECORDS.slice(1, 6).map((award) => (
                     <li
-                      key={item.title}
-                      className="px-4 py-2.5 flex flex-col sm:flex-row sm:items-baseline justify-between gap-1"
+                      key={award.id}
+                      className="px-4 py-3 flex flex-col sm:flex-row sm:items-baseline justify-between gap-1.5"
                     >
-                      <span className="font-semibold text-[#10243A] dark:text-[#F4F8FC]">
-                        {item.title}
-                      </span>
-                      <span className="text-[#465C72] dark:text-[#B5C5D7] sm:text-right">
-                        {item.detail}
+                      <div className="space-y-0.5">
+                        <p className="font-semibold text-[#10243A] dark:text-[#F4F8FC]">
+                          {award.title}
+                        </p>
+                        <p className="text-[11px] text-[#465C72] dark:text-[#B5C5D7]">
+                          {award.issuer}
+                        </p>
+                      </div>
+                      <span className="font-mono-tabular text-[11px] text-brand dark:text-[#69C5F5] sm:text-right shrink-0">
+                        {award.displayDate}
                       </span>
                     </li>
                   ))}
                 </ul>
+
                 <p className="text-[11px] text-[#465C72] dark:text-[#B5C5D7] leading-relaxed">
-                  Industry affiliations displayed on the company site: {MEMBERSHIPS.map((m) => `${m.name} (${m.role})`).join('; ')}. Homepage also references steelmaker client POSCO. Rating instruments and certificate archives remain pending audit confirmation.
+                  Industry affiliations displayed on the company site: {MEMBERSHIPS.map((m) => `${m.name} (${m.role})`).join('; ')}. Full traceable records, management system credentials, and credit-rating disclosures are documented on the{' '}
+                  <Link to="/awards-achievements" className="text-brand dark:text-[#69C5F5] hover:underline font-medium">
+                    Awards &amp; Achievements page
+                  </Link>
+                  .
                 </p>
               </div>
             </div>
 
             <div className="lg:col-span-6 space-y-6">
-              <figure className="bg-white dark:bg-[#12243B] border border-[#10243A]/12 dark:border-[#F4F8FC]/14 overflow-hidden">
-                <ImageReveal direction="left" className="aspect-video bg-[#10243A]">
-                  <ResilientImage
-                    src={ASSETS.qualityLab.src}
-                    alt={ASSETS.qualityLab.alt}
-                    containerClassName="w-full h-full"
-                  />
-                </ImageReveal>
-                <figcaption className="px-4 py-3 text-xs text-[#465C72] dark:text-[#B5C5D7] border-t border-[#10243A]/10 dark:border-[#F4F8FC]/10">
-                  {ASSETS.qualityLab.caption}
-                </figcaption>
-              </figure>
+              {/* Typographic Awards & Achievements Editorial Callout (No Ceremony Image Here) */}
+              <div className="bg-[#10243A] text-[#F4F8FC] border border-[#10243A] dark:border-[#F4F8FC]/14 p-6 sm:p-8 space-y-5 relative overflow-hidden">
+                <span aria-hidden="true" className="absolute top-0 inset-x-0 h-[2px] bg-gradient-to-r from-[#006393] via-[#69C5F5] to-[#C9233B]" />
+                <div className="flex flex-wrap items-center justify-between gap-2 text-[11px] font-mono-tabular uppercase tracking-widest text-[#69C5F5]">
+                  <span>Published Recognition Ledger</span>
+                  <span>Traceable Records</span>
+                </div>
+                <div className="space-y-2.5">
+                  <h3 className="font-display text-3xl sm:text-4xl font-bold uppercase tracking-tight text-[#F4F8FC]">
+                    Brand, Workplace, Social Impact &amp; Export Recognition
+                  </h3>
+                  <p className="text-sm text-[#B5C5D7] leading-relaxed">
+                    Inspect dated public records covering ET Best Brand of 2025, ET Edge Best Organization to Work 2026, ICC Social Impact Jury Recognition, JM Financial Hurun India Founders’ Awards 2026, and Three Star Export House status—kept separate from ISO management systems and credit-rating disclosures.
+                  </p>
+                </div>
+                <div className="pt-2">
+                  <IndustrialButton to="/awards-achievements" variant="primary">
+                    Open Awards &amp; Achievements Archive
+                    <ArrowRight className="w-4 h-4" aria-hidden="true" />
+                  </IndustrialButton>
+                </div>
+              </div>
 
               {/* Representative Chemistry Extract Across All 4 Alloy Families */}
               <div className="bg-white dark:bg-[#12243B] border border-[#10243A]/15 dark:border-[#F4F8FC]/14 overflow-hidden">
@@ -1152,14 +1131,6 @@ export function HomePage() {
               </p>
             </div>
             <CredentialStackedMatrix />
-          </div>
-
-          {/* 3D Perspective Plate Deck */}
-          <div className="pt-10 border-t border-[#10243A]/14 dark:border-[#F4F8FC]/14">
-            <PerspectiveCarousel
-              slides={QA_PERSPECTIVE_SLIDES}
-              heading="QA Lab & Certified Specimen Plates"
-            />
           </div>
         </div>
       </section>
@@ -1304,105 +1275,60 @@ export function HomePage() {
               </div>
             </div>
 
-            {/* Interactive Diagonal Fieldwork Carousel */}
-            <DiagonalCarousel
-              slides={CSR_DIAGONAL_SLIDES}
-              eyebrow="Grassroots CSR & Community Fieldwork"
-            />
+            {/* Ecological Plantation Fieldwork (Exclusive Placement) + Memorial & Education Records */}
+            <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-stretch">
+              <figure className="lg:col-span-6 bg-white dark:bg-[#12243B] border border-[#10243A]/14 dark:border-[#F4F8FC]/14 overflow-hidden flex flex-col">
+                <ImageReveal direction="up" className="aspect-[16/10] bg-[#10243A]">
+                  <ResilientImage
+                    src={ASSETS.csrPlantation.src}
+                    alt={ASSETS.csrPlantation.alt}
+                    containerClassName="w-full h-full"
+                  />
+                </ImageReveal>
+                <figcaption className="p-5 space-y-1.5 border-t border-[#10243A]/10 dark:border-[#F4F8FC]/10 flex-1 flex flex-col justify-between">
+                  <div className="space-y-1">
+                    <p className="text-[11px] font-mono-tabular uppercase tracking-wider text-brand dark:text-[#69C5F5]">
+                      Ecological Stewardship · Bobbili &amp; Dhalbhumgarh
+                    </p>
+                    <h4 className="font-display text-2xl font-bold uppercase text-[#10243A] dark:text-[#F4F8FC]">
+                      Native Sapling Plantation &amp; Green Belt Drives
+                    </h4>
+                  </div>
+                  <p className="text-xs text-[#465C72] dark:text-[#B5C5D7] leading-relaxed">
+                    {ASSETS.csrPlantation.caption}
+                  </p>
+                </figcaption>
+              </figure>
 
-            {/* Additional Documented Memorial & Education Records */}
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-              {csrSecondaryStories.map((story) => (
-                <article
-                  key={story.id}
-                  className="bg-[#F1F6FB] dark:bg-[#12243B] border border-[#10243A]/12 dark:border-[#F4F8FC]/14 p-5 space-y-1.5"
-                >
-                  <p className="text-[11px] font-mono-tabular uppercase tracking-wider text-brand dark:text-[#69C5F5]">
-                    {story.category} · {story.dateOrLocation}
-                  </p>
-                  <h4 className="font-display text-xl font-bold uppercase text-[#10243A] dark:text-[#F4F8FC]">
-                    {story.title}
-                  </h4>
-                  <p className="text-xs sm:text-sm text-[#465C72] dark:text-[#B5C5D7] leading-relaxed">
-                    {story.summary}
-                  </p>
-                </article>
-              ))}
-            </div>
-
-            {/* Part 3: Life & Culture at Berry Alloys (ImageScatter) + Pointer Image Trail */}
-            <div className="pt-10 border-t border-[#10243A]/14 dark:border-[#F4F8FC]/12 space-y-8">
-              <div className="flex flex-col sm:flex-row sm:items-end justify-between gap-4">
-                <div className="space-y-1.5 max-w-2xl">
-                  <p className="text-[11px] font-mono-tabular uppercase tracking-widest text-brand dark:text-[#69C5F5]">
-                    Life & Culture at Berry Alloys
-                  </p>
-                  <h3 className="font-display text-2xl sm:text-3xl font-bold uppercase text-[#10243A] dark:text-[#F4F8FC]">
-                    Workplace Pride, Medical Camps & Ecological Care
-                  </h3>
-                </div>
-                <div className="flex items-center gap-4 text-xs font-semibold">
-                  <Link
-                    to="/community"
-                    className="text-brand dark:text-[#69C5F5] hover:underline"
+              <div className="lg:col-span-6 flex flex-col justify-between gap-6">
+                {csrSecondaryStories.map((story) => (
+                  <article
+                    key={story.id}
+                    className="flex-1 bg-[#F1F6FB] dark:bg-[#12243B] border border-[#10243A]/12 dark:border-[#F4F8FC]/14 p-6 space-y-2 flex flex-col justify-between"
                   >
-                    Community Programs →
-                  </Link>
-                  <Link
-                    to="/careers"
-                    className="text-[#10243A] dark:text-[#F4F8FC] hover:underline"
-                  >
-                    Workplace & Careers →
-                  </Link>
-                </div>
+                    <div className="space-y-1.5">
+                      <p className="text-[11px] font-mono-tabular uppercase tracking-wider text-brand dark:text-[#69C5F5]">
+                        {story.category} · {story.dateOrLocation}
+                      </p>
+                      <h4 className="font-display text-2xl font-bold uppercase text-[#10243A] dark:text-[#F4F8FC]">
+                        {story.title}
+                      </h4>
+                      <p className="text-xs sm:text-sm text-[#465C72] dark:text-[#B5C5D7] leading-relaxed">
+                        {story.summary}
+                      </p>
+                    </div>
+                    <div className="pt-3 border-t border-[#10243A]/10 dark:border-[#F4F8FC]/10">
+                      <Link
+                        to="/community"
+                        className="inline-flex items-center gap-1.5 text-xs font-semibold text-brand dark:text-[#69C5F5] hover:underline"
+                      >
+                        Inspect CSR Archive
+                        <ArrowRight className="w-3.5 h-3.5" aria-hidden="true" />
+                      </Link>
+                    </div>
+                  </article>
+                ))}
               </div>
-
-              <ImageScatter imageSets={LIFE_CULTURE_SCATTER_SETS} />
-
-              <PixelatedImageTrail
-                images={GALLERY_ITEMS.slice(0, 8).map((a) => a.src)}
-                className="bg-[#07111F] text-[#F4F8FC] border border-[#10243A]/18 dark:border-[#F4F8FC]/14 bg-[radial-gradient(circle_at_20%_20%,rgba(40,148,204,0.16),transparent_55%),radial-gradient(circle_at_85%_85%,rgba(201,35,59,0.10),transparent_50%)] p-6 sm:p-10 lg:p-14 min-h-[480px] sm:min-h-[560px] lg:min-h-[680px] flex flex-col justify-between"
-              >
-                <div className="flex flex-wrap items-center justify-between gap-4 text-[11px] font-mono-tabular uppercase tracking-widest text-[#69C5F5]">
-                  <span>Interactive Archive Trail</span>
-                  <span className="inline-flex items-center gap-2 text-[#B5C5D7]">
-                    <span aria-hidden="true" className="relative inline-flex h-2 w-2">
-                      <span className="hero-breathe absolute inline-flex h-full w-full rounded-full bg-[#FF8091] opacity-75" />
-                      <span className="relative inline-flex h-2 w-2 rounded-full bg-[#FF8091]" />
-                    </span>
-                    <span className="md:hidden">Tap or swipe across the panel to reveal works &amp; people frames</span>
-                    <span className="hidden md:inline">Move your cursor or drag a finger across the surface to reveal works &amp; people frames</span>
-                  </span>
-                </div>
-                <div className="py-6 space-y-4 max-w-2xl bg-gradient-to-r from-[#07111F]/85 via-[#07111F]/60 to-transparent -mx-2 px-2">
-                  <h4 className="font-display text-4xl sm:text-5xl lg:text-6xl font-bold uppercase tracking-tight text-[#F4F8FC] leading-[0.95]">
-                    People, Plant Infrastructure & Community Fieldwork
-                  </h4>
-                  <p className="text-sm text-[#F4F8FC]/82 leading-relaxed">
-                    Every tonne shipped from Bobbili and Dhalbhumgarh reflects plant engineers, laboratory analysts, safety stewards, and regional community partnerships.
-                  </p>
-                </div>
-                <div className="flex flex-wrap items-center gap-4 pt-2">
-                  <Link
-                    to="/careers"
-                    className="inline-flex items-center gap-1.5 text-xs font-semibold uppercase tracking-wider text-[#69C5F5] hover:underline"
-                  >
-                    Explore Workplace & Roles
-                    <ArrowRight className="w-3.5 h-3.5" aria-hidden="true" />
-                  </Link>
-                  <a
-                    href="#plant-gallery"
-                    onClick={(e) => {
-                      e.preventDefault();
-                      scrollToChapter('plant-gallery');
-                    }}
-                    className="inline-flex items-center gap-1.5 text-xs font-semibold uppercase tracking-wider text-[#F4F8FC]/85 hover:underline"
-                  >
-                    Inspect Full Plant Gallery
-                    <ArrowRight className="w-3.5 h-3.5" aria-hidden="true" />
-                  </a>
-                </div>
-              </PixelatedImageTrail>
             </div>
           </div>
         </div>
@@ -1442,18 +1368,79 @@ export function HomePage() {
             <div className="flex flex-col sm:flex-row sm:items-end justify-between gap-2">
               <div>
                 <p className="text-[11px] font-mono-tabular uppercase tracking-widest text-brand dark:text-[#69C5F5]">
-                  Interactive Site Directory
+                  Site Directory
                 </p>
                 <h3 className="font-display text-2xl sm:text-3xl font-bold uppercase text-[#10243A] dark:text-[#F4F8FC]">
-                  Works, Export Gateways & Corporate Hubs
+                  Works, Export Gateways &amp; Corporate Hubs
                 </h3>
               </div>
               <p className="text-xs text-[#465C72] dark:text-[#B5C5D7]">
-                <span className="md:hidden">Tap any site row to unveil facility preview imagery.</span>
-                <span className="hidden md:inline">Hover or focus any site row to unveil facility preview imagery.</span>
+                Select any facility corridor or corporate hub to inspect operational details.
               </p>
             </div>
-            <ImageRevealList items={PLANT_REVEAL_ROWS} />
+            <div className="divide-y divide-[#10243A]/12 dark:divide-[#F4F8FC]/12 border-t border-b border-[#10243A]/12 dark:border-[#F4F8FC]/12 bg-white dark:bg-[#12243B]">
+              {[
+                {
+                  index: '01',
+                  label: 'Bobbili Growth Centre Complex',
+                  category: 'Vizianagaram · Andhra Pradesh',
+                  subtitle: 'Primary submerged-arc smelting, 6,000 MT/mo AOD converter & ₹1,200 Cr project site',
+                  to: '/manufacturing',
+                },
+                {
+                  index: '02',
+                  label: 'Dhalbhumgarh & Ghatsila Works',
+                  category: 'Singhbhum East · Jharkhand',
+                  subtitle: '24 MVA furnaces, Unit-2 Kadambera DRI & planned 90 MW waste heat recovery integration',
+                  to: '/manufacturing',
+                },
+                {
+                  index: '03',
+                  label: 'Visakhapatnam Port Gateway',
+                  category: 'Coastal Andhra · Export Corridor',
+                  subtitle: 'Director office (Visakhapatnam 530003) & Three Star Export House marine bulk dispatch',
+                  to: '/contact',
+                },
+                {
+                  index: '04',
+                  label: 'Kolkata Head Office & Chowringhee',
+                  category: '21A Shakespeare Sarani · 56 Chowringhee',
+                  subtitle: 'Registered corporate headquarters under RoC Kolkata (CIN U27310WB2006PLC145016)',
+                  to: '/about',
+                },
+                {
+                  index: '05',
+                  label: 'Captive Solar, Wind & Green Belt',
+                  category: 'ISO 14067 · CBAM · Clean Power',
+                  subtitle: '83 MW solar & 29.6 MW wind sustainability disclosures with planted ecological buffers',
+                  to: '/sustainability',
+                },
+              ].map((site) => (
+                <Link
+                  key={site.index}
+                  to={site.to}
+                  className="group px-5 py-4 grid grid-cols-1 md:grid-cols-12 gap-3 items-baseline hover:bg-[#F1F6FB] dark:hover:bg-[#0D1B2E] transition-colors"
+                >
+                  <div className="md:col-span-4 flex items-baseline gap-3">
+                    <span className="font-mono-tabular text-xs text-brand dark:text-[#69C5F5]">
+                      {site.index}
+                    </span>
+                    <span className="font-display text-xl font-bold uppercase text-[#10243A] dark:text-[#F4F8FC] group-hover:text-brand dark:group-hover:text-[#69C5F5] transition-colors">
+                      {site.label}
+                    </span>
+                  </div>
+                  <p className="md:col-span-3 text-xs font-mono-tabular text-[#465C72] dark:text-[#B5C5D7]">
+                    {site.category}
+                  </p>
+                  <p className="md:col-span-4 text-xs text-[#465C72] dark:text-[#B5C5D7] leading-relaxed">
+                    {site.subtitle}
+                  </p>
+                  <span className="md:col-span-1 md:text-right inline-flex md:justify-end items-center text-brand dark:text-[#69C5F5]">
+                    <ArrowRight className="w-4 h-4 transition-transform group-hover:translate-x-1" aria-hidden="true" />
+                  </span>
+                </Link>
+              ))}
+            </div>
           </div>
         </div>
       </section>
@@ -1468,20 +1455,17 @@ export function HomePage() {
 
         <div className="py-20 lg:py-24 bg-[#FFFFFF] dark:bg-[#07111F] border-t border-[#10243A]/12 dark:border-[#F4F8FC]/12">
           <div className="max-w-[1360px] mx-auto px-4 sm:px-6 lg:px-8 xl:px-14 2xl:px-8">
-            <ImageTrail
-              images={GALLERY_ITEMS.slice(0, 6).map((item) => ({ src: item.src, alt: item.alt }))}
-              className="border border-[#10243A]/12 dark:border-[#F4F8FC]/14 bg-[#F1F6FB]/55 dark:bg-[#0D1B2E]/70 p-6 sm:p-8 mb-6"
-            >
+            <div className="border border-[#10243A]/12 dark:border-[#F4F8FC]/14 bg-[#F1F6FB]/55 dark:bg-[#0D1B2E]/70 p-6 sm:p-8 mb-6">
               <div className="flex flex-col sm:flex-row sm:items-end justify-between gap-4">
                 <div>
                   <p className="text-xs font-mono-tabular uppercase tracking-widest text-brand dark:text-[#69C5F5] mb-2">
-                    10 / News & Technical Articles<span className="hidden md:inline"> · Hover Banner for Field Trail</span>
+                    10 / News &amp; Technical Articles
                   </p>
                   <h2
                     id="news-heading"
                     className="font-display fluid-section-title font-bold uppercase tracking-tight text-[#10243A] dark:text-[#F4F8FC]"
                   >
-                    Recent company announcements & metallurgy notes
+                    Recent company announcements &amp; metallurgy notes
                   </h2>
                 </div>
                 <Link
@@ -1499,7 +1483,7 @@ export function HomePage() {
                   />
                 </Link>
               </div>
-            </ImageTrail>
+            </div>
 
             <div className="divide-y divide-[#10243A]/12 dark:divide-[#F4F8FC]/12 border-b border-[#10243A]/12 dark:border-[#F4F8FC]/12">
               {curatedUpdates.map((item) => (

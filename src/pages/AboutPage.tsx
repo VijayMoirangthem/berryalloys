@@ -11,7 +11,6 @@ import { ResilientImage } from '../components/ResilientImage';
 import { CORPORATE_SUBNAV_LINKS, SubNav } from '../components/SubNav';
 import { ImageReveal } from '../components/motion/ImageReveal';
 import { SplitText } from '../components/motion/SplitText';
-import { CursorCard } from '../components/ui/CursorCard';
 import { GooeyTextReveal } from '../components/ui/GooeyTextReveal';
 import { InteractiveBook } from '../components/ui/InteractiveBook';
 
@@ -37,36 +36,21 @@ export function AboutPage() {
               <div className="space-y-4 text-base text-[#465C72] dark:text-[#F4F8FC]/82 leading-relaxed max-w-[64ch]">
                 <p>
                   Rooted in the industrial ethos of{' '}
-                  <CursorCard
-                    imageSrc={ASSETS.corporateHouse.src}
-                    imageAlt={ASSETS.corporateHouse.alt}
-                    caption="DKG Group Lineage"
-                    description="Founding pillar whose business discipline guides Berry Alloys Limited and allied steel operations."
-                  >
+                  <strong className="font-semibold text-[#10243A] dark:text-[#F4F8FC]">
                     Late Shri Dashrath Kumar Gupta
-                  </CursorCard>
+                  </strong>
                   , founder of the DKG Group, Berry Alloys Limited translates multi-generational trading and manufacturing discipline into high-temperature metallurgical execution.
                 </p>
                 <p>{COMPANY_INFO.legacyNarrative.alliedEnterprise}</p>
                 <p>
                   From first submerged-arc furnaces commissioned in 2010 to multi-unit operations spanning{' '}
-                  <CursorCard
-                    imageSrc={ASSETS.officialAerialComplex.src}
-                    imageAlt={ASSETS.officialAerialComplex.alt}
-                    caption="Bobbili & Dhalbhumgarh"
-                    description="Smelting facilities across Andhra Pradesh and Jharkhand connected directly to Visakhapatnam Harbour Port."
-                  >
+                  <strong className="font-semibold text-[#10243A] dark:text-[#F4F8FC]">
                     Bobbili Growth Centre and Dhalbhumgarh
-                  </CursorCard>
+                  </strong>
                   , the company links eastern India’s mineral belt directly to global vessels via{' '}
-                  <CursorCard
-                    imageSrc={ASSETS.portLogistics.src}
-                    imageAlt={ASSETS.portLogistics.alt}
-                    caption="Three Star Export House"
-                    description="Awarded by the Government of India for sustained bulk export dispatch performance."
-                  >
+                  <strong className="font-semibold text-[#10243A] dark:text-[#F4F8FC]">
                     Visakhapatnam Harbour Port
-                  </CursorCard>
+                  </strong>
                   .
                 </p>
               </div>
@@ -84,34 +68,13 @@ export function AboutPage() {
               <figure className="bg-[#F1F6FB] dark:bg-[#12243B] border border-[#10243A]/12 dark:border-[#F4F8FC]/14 overflow-hidden">
                 <ImageReveal direction="up" className="aspect-video bg-[#10243A]">
                   <ResilientImage
-                    src={ASSETS.officialPlantGate.src}
-                    alt={ASSETS.officialPlantGate.alt}
+                    src={ASSETS.newCorporateOffice.src}
+                    alt={ASSETS.newCorporateOffice.alt}
                     containerClassName="w-full h-full"
                   />
                 </ImageReveal>
                 <figcaption className="px-4 py-3 text-xs text-[#465C72] dark:text-[#B5C5D7] border-t border-[#10243A]/10 dark:border-[#F4F8FC]/10">
-                  {ASSETS.officialPlantGate.caption}
-                </figcaption>
-              </figure>
-
-              <figure className="bg-white dark:bg-[#12243B] border border-[#10243A]/12 dark:border-[#F4F8FC]/14 grid grid-cols-12 overflow-hidden items-center">
-                <div className="col-span-5 aspect-[4/3] bg-[#10243A]">
-                  <ResilientImage
-                    src={ASSETS.corporateHouse.src}
-                    alt={ASSETS.corporateHouse.alt}
-                    containerClassName="w-full h-full"
-                  />
-                </div>
-                <figcaption className="col-span-7 p-4 space-y-1 text-xs">
-                  <p className="font-mono-tabular uppercase text-[11px] text-brand dark:text-[#69C5F5]">
-                    Corporate Presence
-                  </p>
-                  <p className="font-semibold text-[#10243A] dark:text-[#F4F8FC]">
-                    Kolkata Registered Office & 56 Chowringhee Road
-                  </p>
-                  <p className="text-[11px] text-[#465C72] dark:text-[#B5C5D7]">
-                    Active Head Office remains 21A, Shakespeare Sarani, Kolkata.
-                  </p>
+                  {ASSETS.newCorporateOffice.caption} · Active Head Office remains 21A, Shakespeare Sarani, Kolkata.
                 </figcaption>
               </figure>
             </div>
@@ -207,30 +170,39 @@ export function AboutPage() {
 
             <div className="grid grid-cols-1 md:grid-cols-3 gap-5">
               {[
-                { asset: ASSETS.teamFurnaceEngineers, label: 'Smelting Floor Engineering' },
-                { asset: ASSETS.teamMetallurgyLab, label: 'QA & Chemical Assurance' },
-                { asset: ASSETS.teamSafetyHuddle, label: 'ISO 45001 Shift Briefings' },
+                {
+                  index: '01',
+                  label: 'Smelting Floor Engineering',
+                  title: 'Submerged-Arc & AOD Operations',
+                  summary: 'Furnace crews monitoring electrode columns, slag basicity, tapping schedules, and 6,000 MT/month AOD decarburisation lines.',
+                },
+                {
+                  index: '02',
+                  label: 'QA & Chemical Assurance',
+                  title: 'Metallurgical Assay Laboratories',
+                  summary: 'Quality chemists verifying manganese, silicon, chromium, carbon, phosphorus, sulfur, boron, and nitrogen bands before dispatch.',
+                },
+                {
+                  index: '03',
+                  label: 'ISO 45001 Shift Briefings',
+                  title: 'Occupational Safety Stewardship',
+                  summary: 'Cross-functional shift safety huddles upholding thermal-bay PPE discipline, preventive healthcare, and zero-harm protocols.',
+                },
               ].map((item) => (
-                <figure
-                  key={item.asset.id}
-                  className="bg-white dark:bg-[#12243B] border border-[#10243A]/12 dark:border-[#F4F8FC]/14 overflow-hidden"
+                <div
+                  key={item.index}
+                  className="bg-white dark:bg-[#12243B] border border-[#10243A]/12 dark:border-[#F4F8FC]/14 p-5 space-y-2"
                 >
-                  <div className="aspect-[16/10] bg-[#10243A] overflow-hidden">
-                    <ResilientImage
-                      src={item.asset.src}
-                      alt={item.asset.alt}
-                      containerClassName="w-full h-full"
-                    />
-                  </div>
-                  <figcaption className="p-4 space-y-1 text-xs">
-                    <p className="font-mono-tabular uppercase text-[11px] text-brand dark:text-[#69C5F5]">
-                      {item.label}
-                    </p>
-                    <p className="text-[#465C72] dark:text-[#B5C5D7] leading-relaxed">
-                      {item.asset.caption}
-                    </p>
-                  </figcaption>
-                </figure>
+                  <p className="font-mono-tabular uppercase text-[11px] text-brand dark:text-[#69C5F5]">
+                    {item.index} · {item.label}
+                  </p>
+                  <h4 className="font-display text-xl font-bold uppercase text-[#10243A] dark:text-[#F4F8FC]">
+                    {item.title}
+                  </h4>
+                  <p className="text-xs text-[#465C72] dark:text-[#B5C5D7] leading-relaxed">
+                    {item.summary}
+                  </p>
+                </div>
               ))}
             </div>
           </div>
@@ -241,16 +213,32 @@ export function AboutPage() {
           aria-labelledby="history-heading"
           className="pt-12 border-t border-[#10243A]/15 dark:border-[#F4F8FC]/14 space-y-8"
         >
-          <div className="max-w-2xl">
-            <p className="text-xs font-mono-tabular uppercase tracking-widest text-brand dark:text-[#69C5F5] mb-2">
-              Growth Trajectory (2010–2026+)
-            </p>
-            <h2 id="history-heading" className="font-display text-3xl sm:text-4xl font-bold uppercase text-[#10243A] dark:text-[#F4F8FC]">
-              Interactive Growth Chronicle & Disclosures
-            </h2>
-            <p className="text-xs text-[#465C72] dark:text-[#B5C5D7] mt-2">
-              Trace each smelting capacity step, export accreditation, AOD converter milestone, and 2026 announcement, including {UPCOMING_OFFICE_NOTICE.address}.
-            </p>
+          <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-end">
+            <div className="lg:col-span-7 space-y-2">
+              <p className="text-xs font-mono-tabular uppercase tracking-widest text-brand dark:text-[#69C5F5]">
+                Growth Trajectory (2010–2026+)
+              </p>
+              <h2 id="history-heading" className="font-display text-3xl sm:text-4xl font-bold uppercase text-[#10243A] dark:text-[#F4F8FC]">
+                Interactive Growth Chronicle & Disclosures
+              </h2>
+              <p className="text-sm text-[#465C72] dark:text-[#B5C5D7] leading-relaxed max-w-2xl">
+                Trace each smelting capacity step, export accreditation, AOD converter milestone, and 2026 state industrial expansion MoU—including {UPCOMING_OFFICE_NOTICE.address}.
+              </p>
+            </div>
+
+            <figure className="lg:col-span-5 bg-[#F1F6FB] dark:bg-[#12243B] border border-[#10243A]/12 dark:border-[#F4F8FC]/14 overflow-hidden">
+              <div className="aspect-[16/10] bg-[#10243A] overflow-hidden">
+                <ResilientImage
+                  src={ASSETS.aboutMouPresentation.src}
+                  alt={ASSETS.aboutMouPresentation.alt}
+                  className="w-full h-full object-cover object-top"
+                  containerClassName="w-full h-full"
+                />
+              </div>
+              <figcaption className="px-4 py-2.5 text-xs text-[#465C72] dark:text-[#B5C5D7] border-t border-[#10243A]/10 dark:border-[#F4F8FC]/10">
+                {ASSETS.aboutMouPresentation.caption}
+              </figcaption>
+            </figure>
           </div>
 
           <GrowthChronicle />

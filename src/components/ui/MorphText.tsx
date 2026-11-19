@@ -1,5 +1,6 @@
 import { useEffect, useId, useState } from 'react';
 import { AnimatePresence, motion } from 'motion/react';
+import { useMotion } from '../../context/MotionContext';
 import { cn } from '../../lib/utils';
 import { useIsCompactMobile } from '../../hooks/useIsCompactMobile';
 
@@ -23,7 +24,7 @@ export interface MorphTextProps {
 
 /**
  * MorphText — SVG threshold gooey morphing word rotator on desktop, and crisp blur-free
- * compositor crossfade on mobile screens so display lines never vanish mid-transition.
+ * compositor glide on mobile screens so display lines never vanish mid-transition on WebKit.
  */
 export function MorphText({
   words = ['HEAT TO PRECISION', 'FERRO MANGANESE', 'SILICO MANGANESE', 'FERRO CHROME', 'FERRO SILICON'],
@@ -40,24 +41,16 @@ export function MorphText({
   const filterId = `morph-threshold-${uid}`;
   const animName = `morph-word-rotate-${uid}`;
   const isCompactMobile = useIsCompactMobile(767);
+  const { reducedMotion, ambientActive } = useMotion();
   const [mobileIndex, setMobileIndex] = useState(0);
-  const [reducedMotion, setReducedMotion] = useState(false);
 
   useEffect(() => {
-    const mq = window.matchMedia('(prefers-reduced-motion: reduce)');
-    const sync = () => setReducedMotion(mq.matches);
-    sync();
-    mq.addEventListener('change', sync);
-    return () => mq.removeEventListener('change', sync);
-  }, []);
-
-  useEffect(() => {
-    if (!isCompactMobile || reducedMotion || words.length <= 1) return;
+    if (!isCompactMobile || reducedMotion || !ambientActive || words.length <= 1) return;
     const id = window.setInterval(() => {
       setMobileIndex((prev) => (prev + 1) % words.length);
     }, interval);
     return () => window.clearInterval(id);
-  }, [interval, isCompactMobile, reducedMotion, words.length]);
+  }, [ambientActive, interval, isCompactMobile, reducedMotion, words.length]);
 
   const wordDuration = interval / 1000;
   const totalDuration = wordDuration * words.length;
@@ -101,22 +94,16 @@ export function MorphText({
           style={{
             fontSize,
             fontFamily,
-            perspective: '900px',
-            WebkitPerspective: '900px',
           }}
         >
           <AnimatePresence mode="wait">
             <motion.span
               key={currentWord}
-              initial={{ opacity: 0, rotateX: -72, y: 12 }}
-              animate={{ opacity: 1, rotateX: 0, y: 0 }}
-              exit={{ opacity: 0, rotateX: 72, y: -12 }}
+              initial={{ opacity: 0, y: 12, scale: 0.97 }}
+              animate={{ opacity: 1, y: 0, scale: 1 }}
+              exit={{ opacity: 0, y: -12, scale: 0.97 }}
               transition={{ duration: 0.34, ease: [0.22, 1, 0.36, 1] }}
-              style={{
-                transformStyle: 'preserve-3d',
-                WebkitTransformStyle: 'preserve-3d',
-              }}
-              className={cn('font-bold uppercase tracking-[0.02em] leading-none block will-change-transform', textClassName)}
+              className={cn('font-bold uppercase tracking-[0.02em] leading-none block', textClassName)}
             >
               {currentWord}
             </motion.span>

@@ -1,6 +1,7 @@
 import { FormEvent, useState } from 'react';
-import { CheckCircle2, Info } from 'lucide-react';
-import { ASSETS, GALLERY_ITEMS } from '../data/assets';
+import { Link } from 'react-router-dom';
+import { ArrowRight, CheckCircle2, Info } from 'lucide-react';
+import { ASSETS } from '../data/assets';
 import { COMPANY_INFO } from '../data/company';
 import { CAREERS_DEPARTMENTS, JOB_VACANCIES } from '../data/communityNewsCareersDocs';
 import { Breadcrumbs } from '../components/Breadcrumbs';
@@ -10,7 +11,6 @@ import { SplitText } from '../components/motion/SplitText';
 import { CreepyButton } from '../components/ui/CreepyButton';
 import { FlipFadeText } from '../components/ui/FlipFadeText';
 import { IndustrialButton } from '../components/ui/IndustrialButton';
-import { PixelatedImageTrail } from '../components/ui/PixelatedImageTrail';
 
 interface CareersFormState {
   mode: 'role' | 'general';
@@ -107,7 +107,7 @@ export function CareersPage() {
           </p>
         </div>
 
-        {/* People Behind the Furnaces Photo Showcase */}
+        {/* People & Workplace Photo Showcase */}
         <section aria-labelledby="workforce-showcase-heading" className="space-y-6">
           <div className="grid grid-cols-2 lg:grid-cols-4 border-t border-b border-[#10243A]/14 dark:border-[#F4F8FC]/14 divide-y sm:divide-y-0 sm:divide-x divide-[#10243A]/14 dark:divide-[#F4F8FC]/14 bg-white dark:bg-[#12243B]">
             {COMPANY_INFO.workforceStory.highlights.map((item) => (
@@ -124,49 +124,64 @@ export function CareersPage() {
 
           <div className="space-y-4">
             <h2 id="workforce-showcase-heading" className="font-display text-2xl sm:text-3xl font-bold uppercase text-[#10243A] dark:text-[#F4F8FC]">
-              People Behind the Furnaces
+              People &amp; Culture Across Berry Alloys Works
             </h2>
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-5">
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
               {[
                 {
-                  asset: ASSETS.teamFurnaceEngineers,
-                  tag: 'Furnace Operations',
-                  title: 'Submerged-Arc & AOD Crew',
+                  code: '01 · Inclusive Recognition',
+                  title: 'Women Employees & Family Scholarships',
+                  summary:
+                    'Celebrating women team members alongside academic scholarships, bicycles, and school supplies awarded to employee families.',
+                  sites: 'Equal-Opportunity Workplace',
+                  asset: ASSETS.careersWomenTeam,
                 },
                 {
-                  asset: ASSETS.teamMetallurgyLab,
-                  tag: 'Quality & Assay',
-                  title: 'Spectrometry & QA Chemists',
+                  code: '02 · Plant & Commercial Teams',
+                  title: 'Cross-Functional Collaboration',
+                  summary:
+                    'Metallurgical operations, quality assurance, logistics, and corporate MIS teams spanning Bobbili, Dhalbhumgarh, Kolkata, and Vizag.',
+                  sites: '11 Functional Departments',
+                  asset: ASSETS.careersWorkplaceCulture,
                 },
                 {
-                  asset: ASSETS.teamSafetyHuddle,
-                  tag: 'Occupational Safety',
-                  title: 'ISO 45001 Shift Briefings',
+                  code: '03 · Workforce Welfare',
+                  title: 'Safety, Mentorship & Community',
+                  summary:
+                    'Structured pre-shift ISO 45001 safety briefings, practical mentoring, and periodic multi-specialty health checkups.',
+                  sites: 'ET Edge Best Organization 2026',
+                  asset: ASSETS.careersCommunityGathering,
                 },
               ].map((card) => (
-                <figure
-                  key={card.asset.id}
-                  className="bg-white dark:bg-[#12243B] border border-[#10243A]/12 dark:border-[#F4F8FC]/14 overflow-hidden flex flex-col"
+                <article
+                  key={card.code}
+                  className="bg-white dark:bg-[#12243B] border border-[#10243A]/12 dark:border-[#F4F8FC]/14 overflow-hidden flex flex-col justify-between"
                 >
-                  <div className="aspect-[16/10] bg-[#10243A] overflow-hidden">
-                    <ResilientImage
-                      src={card.asset.src}
-                      alt={card.asset.alt}
-                      containerClassName="w-full h-full"
-                    />
+                  <div>
+                    <div className="aspect-[16/10] bg-[#10243A] overflow-hidden">
+                      <ResilientImage
+                        src={card.asset.src}
+                        alt={card.asset.alt}
+                        className="w-full h-full object-cover object-center"
+                        containerClassName="w-full h-full"
+                      />
+                    </div>
+                    <div className="p-5 sm:p-6 space-y-2">
+                      <p className="text-[11px] font-mono-tabular uppercase tracking-wider text-brand dark:text-[#69C5F5]">
+                        {card.code}
+                      </p>
+                      <h3 className="font-display text-xl font-bold uppercase text-[#10243A] dark:text-[#F4F8FC]">
+                        {card.title}
+                      </h3>
+                      <p className="text-xs text-[#465C72] dark:text-[#B5C5D7] leading-relaxed">
+                        {card.summary}
+                      </p>
+                    </div>
                   </div>
-                  <figcaption className="p-4 space-y-1">
-                    <p className="text-[11px] font-mono-tabular uppercase tracking-wider text-brand dark:text-[#69C5F5]">
-                      {card.tag}
-                    </p>
-                    <h3 className="font-display text-xl font-bold uppercase text-[#10243A] dark:text-[#F4F8FC]">
-                      {card.title}
-                    </h3>
-                    <p className="text-xs text-[#465C72] dark:text-[#B5C5D7] leading-relaxed">
-                      {card.asset.caption}
-                    </p>
-                  </figcaption>
-                </figure>
+                  <p className="mx-5 sm:mx-6 pb-5 pt-3 border-t border-[#10243A]/10 dark:border-[#F4F8FC]/10 text-[11px] font-mono-tabular text-[#465C72] dark:text-[#B5C5D7]">
+                    {card.sites}
+                  </p>
+                </article>
               ))}
             </div>
           </div>
@@ -232,15 +247,11 @@ export function CareersPage() {
             </div>
           </div>
 
-          <PixelatedImageTrail
-            images={GALLERY_ITEMS.slice(0, 8).map((a) => a.src)}
-            className="mt-8 bg-[#07111F] text-[#F4F8FC] border border-[#10243A]/18 dark:border-[#F4F8FC]/14 p-8 sm:p-10 min-h-[240px] flex flex-col justify-between"
-          >
-            <div className="flex flex-wrap items-center justify-between gap-4 text-[11px] font-mono-tabular uppercase tracking-widest text-[#69C5F5]">
-              <span>Life at Berry Alloys · ET Edge 2026</span>
-              <span className="text-[#B5C5D7]">Move cursor to trace plant life & fieldwork photographs</span>
-            </div>
-            <div className="py-5 space-y-2 max-w-2xl">
+          <div className="mt-8 bg-[#07111F] text-[#F4F8FC] border border-[#10243A]/18 dark:border-[#F4F8FC]/14 p-8 sm:p-10 flex flex-col md:flex-row md:items-end justify-between gap-6">
+            <div className="space-y-3 max-w-2xl">
+              <p className="text-[11px] font-mono-tabular uppercase tracking-widest text-[#69C5F5]">
+                Life at Berry Alloys · ET Edge 2026
+              </p>
               <h3 className="font-display text-2xl sm:text-3xl font-bold uppercase tracking-tight text-[#F4F8FC]">
                 Recognized Workplace Culture Across Eleven Departments
               </h3>
@@ -248,10 +259,14 @@ export function CareersPage() {
                 From submerged-arc furnace operations in Bobbili and Dhalbhumgarh to commercial logistics and laboratories in Kolkata and Visakhapatnam.
               </p>
             </div>
-            <p className="text-[11px] font-mono-tabular text-[#B5C5D7]">
-              Interactive pointer trail · Reduced motion respected
-            </p>
-          </PixelatedImageTrail>
+            <Link
+              to="/awards-achievements"
+              className="inline-flex items-center gap-1.5 min-h-[44px] px-5 py-2.5 text-xs font-semibold border border-[#F4F8FC]/25 text-[#F4F8FC] hover:bg-[#F4F8FC] hover:text-[#10243A] transition-colors whitespace-nowrap shrink-0"
+            >
+              View Workplace &amp; Industry Recognitions
+              <ArrowRight className="w-3.5 h-3.5" aria-hidden="true" />
+            </Link>
+          </div>
         </section>
 
         {/* Documented Vacancies */}

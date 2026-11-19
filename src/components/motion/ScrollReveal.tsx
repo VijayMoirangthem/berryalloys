@@ -1,6 +1,7 @@
 import { useEffect, useRef } from 'react';
 import gsap from 'gsap';
 import { ScrollTrigger } from 'gsap/ScrollTrigger';
+import { onLoaderCleared } from '../../lib/motionDiagnostics';
 
 gsap.registerPlugin(ScrollTrigger);
 ScrollTrigger.config({ ignoreMobileResize: true });
@@ -32,12 +33,20 @@ export function ScrollReveal({
     if (prefersReduced || !container) return;
 
     const isCompact = window.matchMedia('(max-width: 767px)').matches;
+    let tween: gsap.core.Tween | null = null;
+
+    const ensurePlayed = () => {
+      if (!tween || tween.progress() > 0) return;
+      if (container.getBoundingClientRect().top <= window.innerHeight * 0.96) {
+        tween.play();
+      }
+    };
 
     const ctx = gsap.context(() => {
       const wordEls = container.querySelectorAll('.sr-word');
       if (!wordEls || wordEls.length === 0) return;
 
-      gsap.fromTo(
+      tween = gsap.fromTo(
         wordEls,
         { opacity: 0.25, y: isCompact ? 10 : 8 },
         {
@@ -49,7 +58,7 @@ export function ScrollReveal({
           clearProps: 'transform,opacity',
           scrollTrigger: {
             trigger: container,
-            start: isCompact ? 'top 93%' : 'top 84%',
+            start: isCompact ? 'top 95%' : 'top 84%',
             once: true,
             invalidateOnRefresh: true,
           },
@@ -57,7 +66,18 @@ export function ScrollReveal({
       );
     }, containerRef);
 
-    return () => ctx.revert();
+    const onScroll = () => ensurePlayed();
+    window.addEventListener('scroll', onScroll, { passive: true });
+    const unsub = onLoaderCleared(() => {
+      ScrollTrigger.refresh();
+      ensurePlayed();
+    });
+
+    return () => {
+      unsub();
+      window.removeEventListener('scroll', onScroll);
+      ctx.revert();
+    };
   }, []);
 
   return (

@@ -3,13 +3,11 @@ import { Link } from 'react-router-dom';
 import { ArrowRight } from 'lucide-react';
 import { ASSETS } from '../data/assets';
 import { SUSTAINABILITY_INITIATIVES, SustainabilityInitiative } from '../data/company';
-import { CSR_DIAGONAL_SLIDES } from '../data/showcaseCollections';
 import { Breadcrumbs } from '../components/Breadcrumbs';
 import { ResilientImage } from '../components/ResilientImage';
 import { OPERATIONS_SUBNAV_LINKS, SubNav } from '../components/SubNav';
 import { ImageReveal } from '../components/motion/ImageReveal';
 import { SplitText } from '../components/motion/SplitText';
-import { DiagonalCarousel } from '../components/ui/DiagonalCarousel';
 import { GooeyTextReveal } from '../components/ui/GooeyTextReveal';
 
 type StageFilter = 'All' | SustainabilityInitiative['stage'];
@@ -53,13 +51,13 @@ export function SustainabilityPage() {
               <figure className="bg-[#F1F6FB] dark:bg-[#12243B] border border-[#10243A]/12 dark:border-[#F4F8FC]/14 overflow-hidden">
                 <ImageReveal direction="up" className="aspect-video bg-[#10243A]">
                   <ResilientImage
-                    src={ASSETS.officialSolarRoof.src}
-                    alt={ASSETS.officialSolarRoof.alt}
+                    src={ASSETS.sustainabilityFeature.src}
+                    alt={ASSETS.sustainabilityFeature.alt}
                     containerClassName="w-full h-full"
                   />
                 </ImageReveal>
                 <figcaption className="px-4 py-3 text-xs text-[#465C72] dark:text-[#B5C5D7] border-t border-[#10243A]/10 dark:border-[#F4F8FC]/10">
-                  {ASSETS.officialSolarRoof.caption}
+                  {ASSETS.sustainabilityFeature.caption}
                 </figcaption>
               </figure>
             </div>
@@ -135,11 +133,59 @@ export function SustainabilityPage() {
           </div>
         </div>
 
-        {/* Ecological & Fieldwork Showcase */}
-        <DiagonalCarousel
-          slides={CSR_DIAGONAL_SLIDES}
-          eyebrow="Ecological & Community Fieldwork"
-        />
+        {/* Clean Energy & Carbon Verification Visuals */}
+        <section aria-labelledby="clean-energy-visuals-heading" className="space-y-6">
+          <div className="max-w-2xl space-y-1.5">
+            <p className="text-xs font-mono-tabular uppercase tracking-widest text-brand dark:text-[#69C5F5]">
+              Documented Energy &amp; Carbon Assets
+            </p>
+            <h2
+              id="clean-energy-visuals-heading"
+              className="font-display text-2xl sm:text-3xl font-bold uppercase text-[#10243A] dark:text-[#F4F8FC]"
+            >
+              ISO 14067 Verification &amp; Hybrid Renewable Corridors
+            </h2>
+          </div>
+
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+            {[
+              {
+                label: '01 · ISO 14067:2018 & EU CBAM',
+                asset: ASSETS.sustIso14067,
+              },
+              {
+                label: '02 · Hybrid Solar & Wind Assets',
+                asset: ASSETS.sustRenewableHybrid1,
+              },
+              {
+                label: '03 · Clean Power Corridor',
+                asset: ASSETS.sustRenewableHybrid2,
+              },
+            ].map((item) => (
+              <figure
+                key={item.asset.id}
+                className="bg-[#F1F6FB] dark:bg-[#12243B] border border-[#10243A]/12 dark:border-[#F4F8FC]/14 overflow-hidden flex flex-col"
+              >
+                <div className="aspect-[16/10] bg-[#10243A] overflow-hidden">
+                  <ResilientImage
+                    src={item.asset.src}
+                    alt={item.asset.alt}
+                    className="w-full h-full object-cover"
+                    containerClassName="w-full h-full"
+                  />
+                </div>
+                <figcaption className="p-4 space-y-1 border-t border-[#10243A]/10 dark:border-[#F4F8FC]/10 flex-1">
+                  <p className="text-[11px] font-mono-tabular uppercase tracking-wider text-brand dark:text-[#69C5F5]">
+                    {item.label}
+                  </p>
+                  <p className="text-xs text-[#465C72] dark:text-[#B5C5D7] leading-relaxed">
+                    {item.asset.caption}
+                  </p>
+                </figcaption>
+              </figure>
+            ))}
+          </div>
+        </section>
 
         {/* Methodological Note */}
         <aside className="bg-[#10243A] text-[#F4F8FC] border border-[#10243A] dark:border-[#F4F8FC]/14 p-6 sm:p-10 flex flex-col md:flex-row md:items-center justify-between gap-6">

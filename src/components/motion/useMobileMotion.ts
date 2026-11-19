@@ -1,4 +1,5 @@
 import { RefObject, useEffect } from 'react';
+import { onLoaderCleared, setMotionInitStatus } from '../../lib/motionDiagnostics';
 
 /**
  * Touch & compact-viewport metric enhancer.
@@ -9,9 +10,16 @@ export function useMobileMotion(rootRef: RefObject<HTMLElement | null>) {
   useEffect(() => {
     const root = rootRef.current;
     if (!root) return;
-    if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
-    if (!window.matchMedia('(max-width: 1023px), (pointer: coarse)').matches) return;
+    if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
+      setMotionInitStatus('mobileCountups', 'skipped-reduced-motion');
+      return;
+    }
+    if (!window.matchMedia('(max-width: 1023px), (pointer: coarse)').matches) {
+      setMotionInitStatus('mobileCountups', 'skipped-desktop');
+      return;
+    }
 
+    setMotionInitStatus('mobileCountups', 'active');
     const cleanups: Array<() => void> = [];
     const targets = Array.from(root.querySelectorAll<HTMLElement>('[data-countup]'));
 
@@ -32,17 +40,10 @@ export function useMobileMotion(rootRef: RefObject<HTMLElement | null>) {
 
       let started = false;
       let rafId = 0;
-      let pollId = 0;
+      let unsubLoader: (() => void) | null = null;
 
-      const runCount = () => {
+      const startAnimation = () => {
         if (started) return;
-        const loaderActive = Boolean(
-          document.querySelector('[aria-label="Loading Berry Alloys Limited presentation"]')
-        );
-        if (loaderActive) {
-          pollId = window.setTimeout(runCount, 90);
-          return;
-        }
         started = true;
         io.disconnect();
         window.removeEventListener('scroll', onScroll);
@@ -58,6 +59,14 @@ export function useMobileMotion(rootRef: RefObject<HTMLElement | null>) {
           }
         };
         rafId = window.requestAnimationFrame(tick);
+      };
+
+      const runCount = () => {
+        if (started || unsubLoader) return;
+        unsubLoader = onLoaderCleared(() => {
+          unsubLoader = null;
+          startAnimation();
+        });
       };
 
       const inViewport = () => {
@@ -85,7 +94,7 @@ export function useMobileMotion(rootRef: RefObject<HTMLElement | null>) {
       cleanups.push(() => {
         io.disconnect();
         window.removeEventListener('scroll', onScroll);
-        window.clearTimeout(pollId);
+        unsubLoader?.();
         if (rafId) window.cancelAnimationFrame(rafId);
         el.textContent = original;
       });

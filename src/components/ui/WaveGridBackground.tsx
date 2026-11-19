@@ -1,8 +1,14 @@
 import { useEffect, useRef, useState } from 'react';
 import * as THREE from 'three';
 import { useTheme } from '../../context/ThemeContext';
+import { useMotion } from '../../context/MotionContext';
 import { cn } from '../../lib/utils';
 import { useIsCompactMobile } from '../../hooks/useIsCompactMobile';
+import {
+  incrementCanvasFrame,
+  recordRuntimeError,
+  upsertCanvasTelemetry,
+} from '../../lib/motionDiagnostics';
 
 interface WaveGridBackgroundProps {
   className?: string;
@@ -14,9 +20,9 @@ interface WaveGridBackgroundProps {
 
 /**
  * WaveGridBackground — Three.js interactive 3D topographic wave lattice
- * adapted from VengeanceUI WaveGridBackground for Berry Alloys industrial backdrops.
- * Follows WebGL lifecycle hygiene: isSoftwareGl probe, IntersectionObserver visibility pause,
- * reduced-motion static frame, and deterministic GPU resource disposal on unmount.
+ * for Berry Alloys industrial backdrops.
+ * Gates WebGL allocation behind viewport proximity (IntersectionObserver rootMargin)
+ * so iOS WKWebView never hits active-context limits while hero or globe contexts are mounted.
  */
 export function WaveGridBackground({
   className,
@@ -24,15 +30,35 @@ export function WaveGridBackground({
   segments = 42,
 }: WaveGridBackgroundProps) {
   const { theme } = useTheme();
+  const { reducedMotion, ambientActive } = useMotion();
   const containerRef = useRef<HTMLDivElement>(null);
   const isCompactMobile = useIsCompactMobile(767);
   const [fallback, setFallback] = useState(false);
+  const [inProximity, setInProximity] = useState(false);
+  const ambientRef = useRef(ambientActive);
+  ambientRef.current = ambientActive;
 
   useEffect(() => {
     const container = containerRef.current;
     if (!container) return;
 
-    const prefersReduced = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+    const io = new IntersectionObserver(
+      (entries) => {
+        const entry = entries[entries.length - 1];
+        if (!entry) return;
+        setInProximity(entry.isIntersecting);
+      },
+      { rootMargin: '420px 0px', threshold: 0.01 }
+    );
+    io.observe(container);
+    return () => io.disconnect();
+  }, []);
+
+  useEffect(() => {
+    if (!inProximity || fallback) return;
+    const container = containerRef.current;
+    if (!container) return;
+
     const isDark = theme === 'dark';
 
     let renderer: THREE.WebGLRenderer | null = null;
@@ -42,18 +68,26 @@ export function WaveGridBackground({
         alpha: true,
         powerPreference: 'high-performance',
       });
-    } catch {
+    } catch (err) {
+      recordRuntimeError('WaveGridBackground.WebGLInit', err);
+      upsertCanvasTelemetry('wave-grid', { backend: 'fallback-css', contextLost: false });
       setFallback(true);
       return;
     }
 
     const gl = renderer.getContext();
+    if (!gl || gl.isContextLost()) {
+      renderer.dispose();
+      setFallback(true);
+      return;
+    }
+
     const dbg = gl.getExtension('WEBGL_debug_renderer_info');
     const rendererStr = dbg ? String(gl.getParameter(dbg.UNMASKED_RENDERER_WEBGL)) : '';
     const isSoftwareGl = /(swiftshader|llvmpipe|software)/i.test(rendererStr);
 
-    const width = Math.max(1, container.clientWidth);
-    const height = Math.max(1, container.clientHeight);
+    const width = Math.max(2, container.clientWidth);
+    const height = Math.max(2, container.clientHeight);
 
     renderer.setPixelRatio(Math.min(window.devicePixelRatio || 1, isSoftwareGl ? 1 : isCompactMobile ? 1.5 : 2));
     renderer.setSize(width, height);
@@ -64,6 +98,13 @@ export function WaveGridBackground({
     domCanvas.style.height = '100%';
     domCanvas.style.display = 'block';
     container.appendChild(domCanvas);
+
+    upsertCanvasTelemetry('wave-grid', {
+      backend: 'webgl',
+      contextLost: false,
+      width,
+      height,
+    });
 
     const scene = new THREE.Scene();
     const camera = new THREE.PerspectiveCamera(48, width / height, 0.1, 100);
@@ -105,13 +146,15 @@ export function WaveGridBackground({
 
     const pointer = new THREE.Vector2(0, 0);
     const smoothPointer = new THREE.Vector2(0, 0);
+    let lastTouchAt = 0;
 
     const updatePointerClient = (clientX: number, clientY: number) => {
-      if (prefersReduced) return;
+      if (reducedMotion) return;
       const rect = container.getBoundingClientRect();
       if (rect.width <= 0 || rect.height <= 0) return;
       pointer.x = ((clientX - rect.left) / rect.width - 0.5) * 2;
       pointer.y = ((clientY - rect.top) / rect.height - 0.5) * 2;
+      lastTouchAt = performance.now();
     };
     const onPointerMove = (e: PointerEvent) => {
       updatePointerClient(e.clientX, e.clientY);
@@ -136,20 +179,24 @@ export function WaveGridBackground({
 
     const onResize = () => {
       if (!container || !renderer) return;
-      const w = Math.max(1, container.clientWidth);
-      const h = Math.max(1, container.clientHeight);
+      const w = container.clientWidth;
+      const h = container.clientHeight;
+      if (w < 2 || h < 2) return;
       camera.aspect = w / h;
       camera.updateProjectionMatrix();
       renderer.setSize(w, h);
+      upsertCanvasTelemetry('wave-grid', { width: w, height: h });
     };
+    const ro = new ResizeObserver(onResize);
+    ro.observe(container);
     window.addEventListener('resize', onResize);
 
-    let lastTouchAt = 0;
-    const onTouchMark = () => {
-      lastTouchAt = performance.now();
+    const onContextLost = (e: Event) => {
+      e.preventDefault();
+      upsertCanvasTelemetry('wave-grid', { contextLost: true, backend: 'fallback-css' });
+      setFallback(true);
     };
-    window.addEventListener('pointermove', onTouchMark, { passive: true });
-    window.addEventListener('touchstart', onTouchMark, { passive: true });
+    domCanvas.addEventListener('webglcontextlost', onContextLost);
 
     const updateWave = (t: number) => {
       const idleOnCompact = isCompactMobile && performance.now() - lastTouchAt > 2500;
@@ -175,9 +222,9 @@ export function WaveGridBackground({
       posAttr.needsUpdate = true;
     };
 
-    // Always render initial crisp frame
     updateWave(0.8);
     renderer.render(scene, camera);
+    incrementCanvasFrame('wave-grid');
 
     let rafId = 0;
     let timeoutId = 0;
@@ -185,7 +232,7 @@ export function WaveGridBackground({
     const startTime = performance.now();
 
     const afterDraw = () => {
-      if (disposed || prefersReduced) return;
+      if (disposed || reducedMotion) return;
       if (!isSoftwareGl) {
         rafId = window.requestAnimationFrame(loop);
         return;
@@ -220,17 +267,17 @@ export function WaveGridBackground({
     };
 
     const loop = () => {
-      if (disposed || prefersReduced) return;
-      const ambientPaused = document.documentElement.dataset.ambient === 'paused';
-      if (isVisible && !document.hidden && !ambientPaused) {
+      if (disposed || reducedMotion) return;
+      if (isVisible && !document.hidden && ambientRef.current) {
         const elapsed = (performance.now() - startTime) * 0.001;
         updateWave(elapsed);
         renderer?.render(scene, camera);
+        incrementCanvasFrame('wave-grid');
       }
       afterDraw();
     };
 
-    if (!prefersReduced) {
+    if (!reducedMotion) {
       rafId = window.requestAnimationFrame(loop);
     }
 
@@ -239,12 +286,12 @@ export function WaveGridBackground({
       window.cancelAnimationFrame(rafId);
       window.clearTimeout(timeoutId);
       observer.disconnect();
+      ro.disconnect();
+      domCanvas.removeEventListener('webglcontextlost', onContextLost);
       window.removeEventListener('pointermove', onPointerMove);
       window.removeEventListener('pointerdown', onPointerMove);
       window.removeEventListener('touchstart', onTouchUpdate);
       window.removeEventListener('touchmove', onTouchUpdate);
-      window.removeEventListener('pointermove', onTouchMark);
-      window.removeEventListener('touchstart', onTouchMark);
       window.removeEventListener('resize', onResize);
 
       geometry.dispose();
@@ -257,16 +304,13 @@ export function WaveGridBackground({
         container.removeChild(domCanvas);
       }
     };
-  }, [amplitude, isCompactMobile, segments, theme]);
+  }, [amplitude, fallback, inProximity, isCompactMobile, reducedMotion, segments, theme]);
 
   if (fallback) {
     return (
       <div
         aria-hidden="true"
-        className={cn(
-          'pointer-events-none opacity-25',
-          className
-        )}
+        className={cn('pointer-events-none opacity-25', className)}
         style={{
           backgroundImage:
             'linear-gradient(to right, rgba(40,148,204,0.18) 1px, transparent 1px), linear-gradient(to bottom, rgba(40,148,204,0.18) 1px, transparent 1px)',
@@ -284,3 +328,4 @@ export function WaveGridBackground({
     />
   );
 }
+
