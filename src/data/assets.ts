@@ -1,7 +1,7 @@
 // Real official images sourced from berryalloys.com alongside high-resolution metallurgical scenes
 import logoBerryImg from '../assets/images/official/berry_logo_clean.png';
 import logoBerryDarkImg from '../assets/images/official/berry_logo_dark.png';
-import aboutPlantImg from '../assets/images/official/about_plant.jpeg';
+import aboutPlantImg from '../assets/images/hero_plant_clean_1795110703388.jpg';
 import heroAerialPlantImg from '../assets/images/official/hero_slide_1.jpg';
 import heroSolarRoofImg from '../assets/images/official/hero_slide_2.jpg';
 import heroGreenBeltImg from '../assets/images/official/hero_slide_3.jpg';
@@ -128,6 +128,10 @@ import webWorkforceLabImg from '../assets/images/curated/web_workforce_lab.jpg';
 import webWorkforceWeldingImg from '../assets/images/curated/web_workforce_welding.jpg';
 import webWorkforceLogisticsImg from '../assets/images/curated/web_workforce_logistics.jpg';
 import webWorkforceSolarImg from '../assets/images/curated/web_workforce_solar.jpg';
+import processSafTappingImg from '../assets/images/process_saf_tapping_1795119102649.jpg';
+import processXrfAssayLabImg from '../assets/images/process_xrf_assay_lab_1795119104873.jpg';
+import careersWindSolarCrewImg from '../assets/images/careers_wind_solar_crew_1795119109230.jpg';
+import careersPortShippingDeskImg from '../assets/images/careers_port_shipping_desk_1795119103676.jpg';
 
 export interface VisualAsset {
   id: string;
@@ -996,6 +1000,34 @@ export const ASSETS = {
     alt: 'Utility-scale photovoltaic solar panel rows angled toward a clear blue sky',
     caption: 'Utility-scale renewable solar arrays supporting industrial power',
     category: 'Energy',
+  },
+  processSafTapping: {
+    id: 'process-saf-tapping',
+    src: processSafTappingImg,
+    alt: 'Modern 24 MVA submerged-arc electric furnace bay showing vertical Söderberg carbon electrodes and gleaming copper busbar clamps above glowing molten bath',
+    caption: '24 MVA submerged-arc electric furnace columns, copper busbars & molten reduction bath',
+    category: 'Smelting',
+  },
+  processXrfAssayLab: {
+    id: 'process-xrf-assay-lab',
+    src: processXrfAssayLabImg,
+    alt: 'ISO 9001 metallurgical quality assurance laboratory with precision XRF and optical emission spectrometer verifying polished ferro-manganese alloy discs',
+    caption: 'XRF & OES metallurgical laboratory verifying alloy chemistry and trace tolerances',
+    category: 'Quality Lab',
+  },
+  careersWindSolarCrew: {
+    id: 'careers-wind-solar-crew',
+    src: careersWindSolarCrewImg,
+    alt: 'Clean-energy electrical engineers inspecting utility-scale photovoltaic solar panels with wind turbines turning on sunlit hills behind them',
+    caption: 'Hybrid solar & wind utility engineers',
+    category: 'Energy',
+  },
+  careersPortShippingDesk: {
+    id: 'careers-port-shipping-desk',
+    src: careersPortShippingDeskImg,
+    alt: 'Maritime export logistics specialists reviewing bulk shipment schedules overlooking deep-water gantry cranes and a docked cargo vessel at golden hour',
+    caption: 'Harbour export dispatch coordination',
+    category: 'Logistics',
   },
 } as const satisfies Record<string, VisualAsset>;
 

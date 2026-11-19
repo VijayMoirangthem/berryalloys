@@ -21,10 +21,10 @@ const CAMERA_PRESETS: Record<
   CameraPreset,
   { pos: [number, number, number]; target: [number, number, number]; label: string }
 > = {
-  overview: { pos: [14.5, 9.2, 16.5], target: [0.5, 2.2, 0.0], label: 'Overview' },
-  truck: { pos: [-7.5, 4.6, 8.2], target: [-3.2, 1.8, 1.4], label: 'Tipper Truck' },
-  crane: { pos: [2.2, 8.5, 11.4], target: [0.8, 3.6, 0.2], label: 'Port Crane' },
-  ship: { pos: [12.8, 6.2, 10.6], target: [5.4, 2.1, -1.6], label: 'Bulk Ship' },
+  overview: { pos: [14.0, 9.2, 16.8], target: [0.8, 2.2, 0.4], label: 'Overview' },
+  truck: { pos: [-2.4, 4.9, 9.8], target: [0.6, 2.1, 1.4], label: 'Tipper Truck' },
+  crane: { pos: [2.6, 8.4, 11.8], target: [1.6, 3.6, 0.6], label: 'Port Crane' },
+  ship: { pos: [13.2, 6.2, 10.8], target: [6.2, 2.2, -1.2], label: 'Bulk Ship' },
 };
 
 const PHASE_META: Record<
@@ -33,7 +33,7 @@ const PHASE_META: Record<
 > = {
   auto: {
     label: 'Auto Cycle',
-    caption: 'Continuous automated sequence: Silo Fill → Quay Haulage → Hydraulic Tip → Crane to Ship Hold',
+    caption: 'Continuous automated sequence: Silo Fill → Quay Haulage → Rear Hydraulic Tip → Gantry Crane to Ship Hold',
   },
   load: {
     label: 'Load Truck',
@@ -41,15 +41,15 @@ const PHASE_META: Record<
   },
   drive: {
     label: 'Drive To Berth',
-    caption: 'Loaded bulk carrier truck rolls along the Visakhapatnam quay corridor to the dockside hopper.',
+    caption: 'Loaded tipper truck backs neatly to the dockside hopper facing Visakhapatnam Harbour Berth.',
   },
   unload: {
     label: 'Unload & Tip',
-    caption: 'Hydraulic telescopic cylinder extends to 42°, opening the rear tailgate to pour alloy cargo.',
+    caption: 'Front hydraulic piston lifts the dump bed skyward to 42°, opening the rear tailgate directly into the hopper.',
   },
   crane: {
     label: 'Crane To Ship',
-    caption: 'Rail-mounted port gantry crane lifts 1-MT FIBC bulk alloy bags directly into M.V. Berry Export.',
+    caption: 'Rail-mounted port gantry crane hoists 1-MT FIBC bulk alloy bags directly into M.V. Berry Export.',
   },
 };
 
@@ -67,7 +67,6 @@ function makeQuayStripeTexture(maxAnisotropy: number): THREE.CanvasTexture {
   ctx.fillStyle = '#253140';
   ctx.fillRect(0, 0, 512, 512);
 
-  // Concrete expansion joints
   ctx.strokeStyle = 'rgba(255,255,255,0.06)';
   ctx.lineWidth = 2;
   for (let i = 0; i <= 512; i += 64) {
@@ -81,7 +80,6 @@ function makeQuayStripeTexture(maxAnisotropy: number): THREE.CanvasTexture {
     ctx.stroke();
   }
 
-  // Yellow safety edge stripe along quay wall
   ctx.fillStyle = '#EAB308';
   ctx.fillRect(0, 0, 512, 18);
   ctx.fillStyle = '#18212C';
@@ -95,7 +93,6 @@ function makeQuayStripeTexture(maxAnisotropy: number): THREE.CanvasTexture {
     ctx.fill();
   }
 
-  // Dashed truck lane markings
   ctx.fillStyle = 'rgba(244,248,252,0.52)';
   for (let x = 20; x < 512; x += 64) {
     ctx.fillRect(x, 260, 34, 8);
@@ -159,8 +156,13 @@ function makeTruckBannerTexture(maxAnisotropy: number): THREE.CanvasTexture {
 
 /**
  * PortLogistics3DViewer — Interactive 3D Three.js Visakhapatnam Port & Smelter Dispatch Simulator.
- * Lets visitors orbit, switch camera views, trigger Load / Drive / Unload / Crane-to-Ship cycles,
- * and manually operate the truck hydraulic dump bed and port gantry crane trolley in real time.
+ *
+ * Mechanical Alignment (Verified):
+ * - Cab faces inland (-X) so the rear hydraulic dump chute (+X) backs directly over the dockside
+ *   intake hopper (x = +3.55), just like real harbour bulk-unloading operations.
+ * - dumpBedPivot sits at rear hinge (+2.42, 0.92, 0). Rotating around +Z by -bedAngle raises the
+ *   front of the bed (at x = -3.06 behind the cab) cleanly SKYWARD while the rear tailgate at +X
+ *   swings outward (+tailgateAngle) and discharges alloy lumps straight down into the hopper.
  */
 export function PortLogistics3DViewer({ className }: { className?: string }) {
   const mountRef = useRef<HTMLDivElement>(null);
@@ -176,14 +178,12 @@ export function PortLogistics3DViewer({ className }: { className?: string }) {
     shipHoldPct: 48,
   });
 
-  // Mutable refs read inside animation loop without recreating WebGL context
   const stateRef = useRef({
     phase: 'auto' as LogisticsPhase,
     manualOverride: false,
     manualBedTilt: 0,
     manualCranePos: 0.15,
     cameraTargetPreset: 'overview' as CameraPreset | null,
-    resetSeq: 0,
   });
 
   const controlsRef = useRef<OrbitControls | null>(null);
@@ -242,7 +242,6 @@ export function PortLogistics3DViewer({ className }: { className?: string }) {
     const container = mountRef.current;
     if (!container) return;
 
-    // Detect software WebGL cleanly from GPU renderer string
     const isSoftwareGl = (() => {
       try {
         const probe = document.createElement('canvas').getContext('webgl2');
@@ -269,7 +268,7 @@ export function PortLogistics3DViewer({ className }: { className?: string }) {
 
     renderer.outputColorSpace = THREE.SRGBColorSpace;
     renderer.toneMapping = THREE.ACESFilmicToneMapping;
-    renderer.toneMappingExposure = 1.12;
+    renderer.toneMappingExposure = 1.14;
     renderer.setPixelRatio(isSoftwareGl ? 1 : Math.min(window.devicePixelRatio, 2));
     renderer.shadowMap.enabled = !isSoftwareGl;
     renderer.shadowMap.type = THREE.PCFSoftShadowMap;
@@ -286,9 +285,8 @@ export function PortLogistics3DViewer({ className }: { className?: string }) {
 
     const scene = new THREE.Scene();
     scene.background = new THREE.Color('#0B1B2E');
-    scene.fog = new THREE.FogExp2('#0B1B2E', 0.016);
+    scene.fog = new THREE.FogExp2('#0B1B2E', 0.015);
 
-    // Mandatory studio environment map for PBR metals & glass
     const pmrem = new THREE.PMREMGenerator(renderer);
     const envTex = pmrem.fromScene(new RoomEnvironment(), 0.04).texture;
     scene.environment = envTex;
@@ -306,16 +304,15 @@ export function PortLogistics3DViewer({ className }: { className?: string }) {
     controls.minDistance = 6.5;
     controls.maxDistance = 34;
     controls.addEventListener('start', () => {
-      // Never fight user manual orbit
       stateRef.current.cameraTargetPreset = null;
     });
     controlsRef.current = controls;
 
     // 3-Point Warm/Cool Lighting Rig
-    const hemi = new THREE.HemisphereLight('#8FD3FA', '#162436', 0.85);
+    const hemi = new THREE.HemisphereLight('#8FD3FA', '#162436', 0.88);
     scene.add(hemi);
 
-    const sun = new THREE.DirectionalLight('#FFF3DC', 2.4);
+    const sun = new THREE.DirectionalLight('#FFF3DC', 2.45);
     sun.position.set(16, 22, 14);
     sun.castShadow = !isSoftwareGl;
     sun.shadow.mapSize.set(2048, 2048);
@@ -329,7 +326,7 @@ export function PortLogistics3DViewer({ className }: { className?: string }) {
     sun.shadow.normalBias = 0.02;
     scene.add(sun);
 
-    const rimLight = new THREE.DirectionalLight('#69C5F5', 0.9);
+    const rimLight = new THREE.DirectionalLight('#69C5F5', 0.92);
     rimLight.position.set(-14, 10, -12);
     scene.add(rimLight);
 
@@ -370,8 +367,8 @@ export function PortLogistics3DViewer({ className }: { className?: string }) {
       metalness: 0.05,
     });
     const matAlloyLump = new THREE.MeshStandardMaterial({
-      color: '#7E8D9E',
-      roughness: 0.28,
+      color: '#8898AA',
+      roughness: 0.26,
       metalness: 0.88,
     });
     const matGlass = new THREE.MeshPhysicalMaterial({
@@ -401,12 +398,12 @@ export function PortLogistics3DViewer({ className }: { className?: string }) {
     });
 
     // ─── 1. HARBOUR ENVIRONMENT: Concrete Quay Deck & Animated Ocean Water ───
-    const quayDeck = new THREE.Mesh(new THREE.BoxGeometry(24, 2.2, 13), matQuay);
-    quayDeck.position.set(-4.5, -1.1, 2.2);
+    const quayDeck = new THREE.Mesh(new THREE.BoxGeometry(26, 2.2, 13), matQuay);
+    quayDeck.position.set(-5.5, -1.1, 2.2);
     quayDeck.receiveShadow = true;
     scene.add(quayDeck);
 
-    // Rubber port fenders along the dock wall (x = 7.5 edge facing water)
+    // Rubber port fenders along dock wall (x = 7.5 facing ocean)
     for (let z = -3.2; z <= 7.2; z += 2.6) {
       const fender = new THREE.Mesh(
         new THREE.CylinderGeometry(0.22, 0.22, 1.4, 12),
@@ -415,7 +412,6 @@ export function PortLogistics3DViewer({ className }: { className?: string }) {
       fender.position.set(7.55, -0.5, z);
       scene.add(fender);
 
-      // Mooring bollard on quay edge
       const bollard = new THREE.Mesh(
         new THREE.CylinderGeometry(0.14, 0.18, 0.45, 12),
         matAmber
@@ -443,20 +439,20 @@ export function PortLogistics3DViewer({ className }: { className?: string }) {
       waterBaseY[i] = waterPosAttr.getY(i);
     }
 
-    // Crane Steel Rails embedded on quay (slightly elevated +0.04 to prevent Z-fighting)
-    for (const rx of [-1.2, 5.8]) {
+    // Crane Steel Rails embedded on quay
+    for (const rx of [-0.8, 5.8]) {
       const rail = new THREE.Mesh(new THREE.BoxGeometry(0.16, 0.08, 12.2), matChrome);
       rail.position.set(rx, 0.04, 2.0);
       scene.add(rail);
     }
 
-    // ─── 2. SMELTER OVERHEAD LOADING SILO HOPPER (Left Quay x = -8.6) ───
+    // ─── 2. SMELTER OVERHEAD LOADING SILO HOPPER (Left Quay x = -8.8) ───
     const siloGroup = new THREE.Group();
     siloGroup.position.set(-8.8, 0, 1.4);
     scene.add(siloGroup);
 
-    for (const sx of [-1.45, 1.45]) {
-      for (const sz of [-1.45, 1.45]) {
+    for (const sx of [-1.55, 1.55]) {
+      for (const sz of [-1.55, 1.55]) {
         const leg = new THREE.Mesh(new THREE.BoxGeometry(0.24, 5.6, 0.24), matSteelDark);
         leg.position.set(sx, 2.8, sz);
         leg.castShadow = true;
@@ -480,92 +476,101 @@ export function PortLogistics3DViewer({ className }: { className?: string }) {
     siloFunnel.castShadow = true;
     siloGroup.add(siloFunnel);
 
-    // Dockside Unloading Intake Hopper (x = 3.2, z = 1.4)
+    // Dockside Unloading Intake Hopper (x = +3.55, z = 1.4 — right beneath crane pick-up)
     const dockHopper = new THREE.Group();
-    dockHopper.position.set(3.2, 0, 1.4);
+    dockHopper.position.set(3.55, 0, 1.4);
     scene.add(dockHopper);
     const hopperWalls = new THREE.Mesh(
-      new THREE.CylinderGeometry(1.45, 0.85, 1.25, 4),
+      new THREE.CylinderGeometry(1.5, 0.88, 1.2, 4),
       matSteelDark
     );
     hopperWalls.rotation.y = Math.PI / 4;
-    hopperWalls.position.y = 0.62;
+    hopperWalls.position.y = 0.6;
     hopperWalls.castShadow = true;
     dockHopper.add(hopperWalls);
+    const hopperRim = new THREE.Mesh(
+      new THREE.BoxGeometry(2.15, 0.14, 2.15),
+      matAmber
+    );
+    hopperRim.position.y = 1.22;
+    dockHopper.add(hopperRim);
     const hopperAlloyPile = new THREE.Mesh(
-      new THREE.ConeGeometry(0.95, 0.65, 9),
+      new THREE.ConeGeometry(1.0, 0.68, 9),
       matAlloyLump
     );
     hopperAlloyPile.position.y = 0.85;
     dockHopper.add(hopperAlloyPile);
 
     // ─── 3. COMPOSITE 12-PART HEAVY INDUSTRIAL TIPPER TRUCK ───
+    // Cab sits at -X (facing inland) and Rear Dump Tailgate sits at +X (backing cleanly up to Dock Hopper)
+    const TRUCK_LOAD_X = -9.65;
+    const TRUCK_UNLOAD_X = 0.25;
     const truckGroup = new THREE.Group();
-    truckGroup.position.set(-8.8, 0, 1.4);
+    truckGroup.position.set(TRUCK_LOAD_X, 0, 1.4);
     scene.add(truckGroup);
 
     // Chassis Frame
     const chassis = new THREE.Mesh(new THREE.BoxGeometry(5.1, 0.32, 1.65), matSteelDark);
-    chassis.position.set(-0.2, 0.72, 0);
+    chassis.position.set(0.2, 0.72, 0);
     chassis.castShadow = true;
     truckGroup.add(chassis);
 
-    // Fuel Tank + Step
+    // Fuel Tank
     const fuelTank = new THREE.Mesh(
       new THREE.CylinderGeometry(0.24, 0.24, 1.1, 14),
       matChrome
     );
     fuelTank.rotation.z = Math.PI / 2;
-    fuelTank.position.set(0.35, 0.62, 0.82);
+    fuelTank.position.set(-0.35, 0.62, 0.84);
     truckGroup.add(fuelTank);
 
-    // Cab Lower + Upper Hood
+    // Cab Lower + Hood on -X side (facing inland away from quay wall)
     const cabBody = new THREE.Mesh(new THREE.BoxGeometry(1.65, 1.52, 1.88), matBrandBlue);
-    cabBody.position.set(1.65, 1.62, 0);
+    cabBody.position.set(-1.65, 1.62, 0);
     cabBody.castShadow = true;
     truckGroup.add(cabBody);
 
     const cabNose = new THREE.Mesh(new THREE.BoxGeometry(0.65, 0.92, 1.78), matBrandBlue);
-    cabNose.position.set(2.68, 1.32, 0);
+    cabNose.position.set(-2.68, 1.32, 0);
     cabNose.castShadow = true;
     truckGroup.add(cabNose);
 
-    // Front Radiator Grille & Chrome Bumper
+    // Front Radiator Grille & Chrome Bumper on -X nose
     const grille = new THREE.Mesh(new THREE.BoxGeometry(0.08, 0.62, 1.32), matSteelDark);
-    grille.position.set(3.02, 1.32, 0);
+    grille.position.set(-3.02, 1.32, 0);
     truckGroup.add(grille);
 
     const bumper = new THREE.Mesh(new THREE.BoxGeometry(0.22, 0.28, 1.98), matChrome);
-    bumper.position.set(3.04, 0.72, 0);
+    bumper.position.set(-3.04, 0.72, 0);
     truckGroup.add(bumper);
 
-    // Headlights
+    // Headlights on -X nose
     for (const hz of [-0.66, 0.66]) {
       const lamp = new THREE.Mesh(new THREE.BoxGeometry(0.1, 0.18, 0.26), matHeadlight);
-      lamp.position.set(3.02, 1.02, hz);
+      lamp.position.set(-3.02, 1.02, hz);
       truckGroup.add(lamp);
     }
 
-    // Cab Windshield & Side Glass
+    // Cab Windshield facing -X
     const windshield = new THREE.Mesh(new THREE.BoxGeometry(0.12, 0.62, 1.64), matGlass);
-    windshield.position.set(2.44, 1.94, 0);
-    windshield.rotation.z = -0.14;
+    windshield.position.set(-2.44, 1.94, 0);
+    windshield.rotation.z = 0.14;
     truckGroup.add(windshield);
 
-    // Roof Safety Beacon & Exhaust Stacks
+    // Roof Safety Beacon & Dual Chrome Exhaust Stacks behind cab
     const beacon = new THREE.Mesh(new THREE.CylinderGeometry(0.11, 0.13, 0.18, 12), matAmber);
-    beacon.position.set(1.65, 2.48, 0);
+    beacon.position.set(-1.65, 2.48, 0);
     truckGroup.add(beacon);
 
     for (const ez of [-0.88, 0.88]) {
       const stack = new THREE.Mesh(new THREE.CylinderGeometry(0.06, 0.06, 1.55, 10), matChrome);
-      stack.position.set(0.76, 1.88, ez);
+      stack.position.set(-0.76, 1.88, ez);
       truckGroup.add(stack);
     }
 
-    // 6 Multi-Part Rotating Wheels (Rubber Tire + Chrome Rim)
+    // 6 Multi-Part Rotating Wheels (Rubber Tire + Chrome Rim + Crimson Lug Bar)
     const wheelMeshes: THREE.Group[] = [];
-    const wheelXPositions = [-1.95, -0.82, 1.95];
+    const wheelXPositions = [-1.95, 0.82, 1.95];
     for (const wx of wheelXPositions) {
       for (const wz of [-0.94, 0.94]) {
         const wheelGrp = new THREE.Group();
@@ -583,7 +588,6 @@ export function PortLogistics3DViewer({ className }: { className?: string }) {
         );
         rim.rotation.x = Math.PI / 2;
         wheelGrp.add(rim);
-        // Lug bar to make rotation clearly visible
         const spoke = new THREE.Mesh(new THREE.BoxGeometry(0.38, 0.07, 0.38), matCrimson);
         wheelGrp.add(spoke);
         truckGroup.add(wheelGrp);
@@ -591,10 +595,18 @@ export function PortLogistics3DViewer({ className }: { className?: string }) {
       }
     }
 
-    // Articulated Hydraulic Dump Bed (pivots at rear hinge x = -2.42, y = 0.92)
+    // Articulated Hydraulic Dump Bed — pivots cleanly at REAR HINGE (+2.42, 0.92, 0)
     const dumpBedPivot = new THREE.Group();
-    dumpBedPivot.position.set(-2.42, 0.92, 0);
+    dumpBedPivot.position.set(2.42, 0.92, 0);
     truckGroup.add(dumpBedPivot);
+
+    // Rear hinge trunnion pin visual
+    const hingePin = new THREE.Mesh(
+      new THREE.CylinderGeometry(0.1, 0.1, 2.04, 12),
+      matChrome
+    );
+    hingePin.rotation.x = Math.PI / 2;
+    dumpBedPivot.add(hingePin);
 
     const matBedSide = new THREE.MeshStandardMaterial({
       map: truckBannerTex,
@@ -602,46 +614,46 @@ export function PortLogistics3DViewer({ className }: { className?: string }) {
       metalness: 0.42,
     });
     const bedFloor = new THREE.Mesh(new THREE.BoxGeometry(3.15, 0.16, 1.94), matSteelDark);
-    bedFloor.position.set(1.55, 0.08, 0);
+    bedFloor.position.set(-1.55, 0.08, 0);
     bedFloor.castShadow = true;
     dumpBedPivot.add(bedFloor);
 
     // Side walls with Berry Alloys livery
     for (const bz of [-0.92, 0.92]) {
       const sideWall = new THREE.Mesh(new THREE.BoxGeometry(3.15, 1.05, 0.12), matBedSide);
-      sideWall.position.set(1.55, 0.62, bz);
+      sideWall.position.set(-1.55, 0.62, bz);
       sideWall.castShadow = true;
       dumpBedPivot.add(sideWall);
     }
-    const frontWall = new THREE.Mesh(new THREE.BoxGeometry(0.14, 1.15, 1.94), matSteelDark);
-    frontWall.position.set(3.06, 0.68, 0);
+    // Front bulkhead wall (behind cab at x = -3.06 relative to hinge)
+    const frontWall = new THREE.Mesh(new THREE.BoxGeometry(0.14, 1.18, 1.94), matSteelDark);
+    frontWall.position.set(-3.06, 0.68, 0);
     frontWall.castShadow = true;
     dumpBedPivot.add(frontWall);
 
-    // Hinged Rear Tailgate (pivots from top rear bar)
+    // Hinged Rear Tailgate (at x = 0 facing the Dock Hopper; swings OUTWARD toward +X when tipping!)
     const tailgatePivot = new THREE.Group();
-    tailgatePivot.position.set(0.02, 1.12, 0);
+    tailgatePivot.position.set(-0.02, 1.12, 0);
     dumpBedPivot.add(tailgatePivot);
     const tailgate = new THREE.Mesh(new THREE.BoxGeometry(0.12, 1.02, 1.84), matCrimson);
     tailgate.position.set(0, -0.5, 0);
     tailgate.castShadow = true;
     tailgatePivot.add(tailgate);
 
-    // Cargo Pile inside Dump Bed (scales vertically as truck loads/unloads)
+    // Cargo Pile inside Dump Bed (slides slightly toward rear chute and empties cleanly on tip)
     const bedCargoMesh = new THREE.Mesh(
       new THREE.ConeGeometry(1.15, 0.95, 7),
       matAlloyLump
     );
     bedCargoMesh.scale.set(1.22, 1, 0.78);
-    bedCargoMesh.position.set(1.55, 0.66, 0);
+    bedCargoMesh.position.set(-1.55, 0.66, 0);
     dumpBedPivot.add(bedCargoMesh);
 
-    // Telescopic Hydraulic Cylinder linking Chassis to Dump Bed
+    // Telescopic Hydraulic Cylinder (dynamically spans chassis base to underside of raised bed front)
     const hydraulicPiston = new THREE.Mesh(
-      new THREE.CylinderGeometry(0.08, 0.11, 1.8, 12),
+      new THREE.CylinderGeometry(0.085, 0.12, 1.0, 12),
       matChrome
     );
-    hydraulicPiston.position.set(-0.2, 1.1, 0);
     truckGroup.add(hydraulicPiston);
 
     // ─── 4. COMPOSITE 10-PART BULK CARRIER SHIP (M.V. BERRY EXPORT) ───
@@ -660,7 +672,6 @@ export function PortLogistics3DViewer({ className }: { className?: string }) {
     hullMain.receiveShadow = true;
     shipGroup.add(hullMain);
 
-    // Tapered Bow Section
     const bow = new THREE.Mesh(
       new THREE.ConeGeometry(3.4, 3.6, 4),
       new THREE.MeshStandardMaterial({ color: '#0D2238', roughness: 0.4, metalness: 0.5 })
@@ -671,7 +682,6 @@ export function PortLogistics3DViewer({ className }: { className?: string }) {
     bow.position.set(0, 0.62, -8.8);
     shipGroup.add(bow);
 
-    // Main Deck & Cargo Hold Coaming Walls
     const deck = new THREE.Mesh(
       new THREE.BoxGeometry(5.4, 0.16, 13.8),
       new THREE.MeshStandardMaterial({ color: '#33485E', roughness: 0.72, metalness: 0.25 })
@@ -679,7 +689,6 @@ export function PortLogistics3DViewer({ className }: { className?: string }) {
     deck.position.set(0, 1.9, 0);
     shipGroup.add(deck);
 
-    // Open Cargo Hold Rim & Rising Alloy Bulk Cargo inside Ship Hold
     const holdCoaming = new THREE.Mesh(new THREE.BoxGeometry(3.8, 0.65, 5.8), matSteelDark);
     holdCoaming.position.set(0, 2.25, -1.0);
     shipGroup.add(holdCoaming);
@@ -691,7 +700,6 @@ export function PortLogistics3DViewer({ className }: { className?: string }) {
     shipCargoMound.position.set(0, 2.22, -1.0);
     shipGroup.add(shipCargoMound);
 
-    // White Multi-Tier Aft Bridge Superstructure
     const matBridgeWhite = new THREE.MeshStandardMaterial({
       color: '#F1F5F9',
       roughness: 0.45,
@@ -711,7 +719,6 @@ export function PortLogistics3DViewer({ className }: { className?: string }) {
     bridgeGlass.position.set(0, 4.42, 4.6);
     shipGroup.add(bridgeGlass);
 
-    // Signature Berry Alloys Funnel & Radar Mast
     const funnel = new THREE.Mesh(new THREE.CylinderGeometry(0.45, 0.58, 1.65, 16), matBrandBlue);
     funnel.position.set(0, 4.85, 5.85);
     shipGroup.add(funnel);
@@ -725,10 +732,10 @@ export function PortLogistics3DViewer({ className }: { className?: string }) {
 
     // ─── 5. COMPOSITE 8-PART RAIL-MOUNTED PORT GANTRY CRANE ───
     const craneGroup = new THREE.Group();
-    craneGroup.position.set(2.3, 0, 1.4);
+    craneGroup.position.set(2.5, 0, 1.4);
     scene.add(craneGroup);
 
-    for (const lx of [-3.5, 3.5]) {
+    for (const lx of [-3.3, 3.3]) {
       for (const lz of [-2.4, 2.4]) {
         const leg = new THREE.Mesh(new THREE.BoxGeometry(0.36, 7.6, 0.36), matBrandBlue);
         leg.position.set(lx, 3.8, lz);
@@ -740,7 +747,6 @@ export function PortLogistics3DViewer({ className }: { className?: string }) {
       craneGroup.add(crossBeam);
     }
 
-    // Overhead Cantilever Boom extending over the Ship's Cargo Hold
     const boom = new THREE.Mesh(new THREE.BoxGeometry(17.8, 0.56, 1.45), matBrandBlue);
     boom.position.set(3.2, 7.6, 0);
     boom.castShadow = true;
@@ -750,9 +756,9 @@ export function PortLogistics3DViewer({ className }: { className?: string }) {
     boomStripe.position.set(3.2, 7.9, 0);
     craneGroup.add(boomStripe);
 
-    // Moving Crane Trolley + Hoist Cables + FIBC Bulk Jumbo Bag Spreader
+    // Moving Crane Trolley (local x = 1.05 aligns directly over dock hopper x = 3.55; x = 9.1 aligns over ship hold x = 11.6)
     const trolleyGroup = new THREE.Group();
-    trolleyGroup.position.set(0.9, 7.22, 0);
+    trolleyGroup.position.set(1.05, 7.22, 0);
     craneGroup.add(trolleyGroup);
 
     const trolleyBox = new THREE.Mesh(new THREE.BoxGeometry(1.4, 0.45, 1.58), matAmber);
@@ -769,7 +775,6 @@ export function PortLogistics3DViewer({ className }: { className?: string }) {
     const spreaderBar = new THREE.Mesh(new THREE.BoxGeometry(1.15, 0.18, 1.15), matCrimson);
     spreaderGroup.add(spreaderBar);
 
-    // Suspended 1-MT Woven FIBC Bulk Alloy Jumbo Bag
     const fibcBag = new THREE.Mesh(new THREE.BoxGeometry(0.95, 1.05, 0.95), matJumboBag);
     fibcBag.position.y = -0.68;
     fibcBag.castShadow = true;
@@ -778,8 +783,8 @@ export function PortLogistics3DViewer({ className }: { className?: string }) {
     fibcBand.position.y = -0.68;
     spreaderGroup.add(fibcBand);
 
-    // ─── 6. INSTANCED METALLIC FERRO-ALLOY LUMP PARTICLES (Cascading Flow!) ───
-    const PARTICLE_COUNT = 36;
+    // ─── 6. INSTANCED METALLIC FERRO-ALLOY LUMP PARTICLES ───
+    const PARTICLE_COUNT = 38;
     const lumpGeo = new THREE.DodecahedronGeometry(0.14, 0);
     const lumpInst = new THREE.InstancedMesh(lumpGeo, matAlloyLump, PARTICLE_COUNT);
     lumpInst.frustumCulled = false;
@@ -796,14 +801,13 @@ export function PortLogistics3DViewer({ className }: { className?: string }) {
       renderer.compile(scene, camera);
     }
 
-    // Animation State Variables
-    let clock = new THREE.Clock();
+    const clock = new THREE.Clock();
     let elapsed = 0;
-    let truckX = -8.8;
+    let truckX = TRUCK_LOAD_X;
     let bedAngle = 0;
     let tailgateAngle = 0;
     let cargoFill = 0.65;
-    let craneX = 0.9; // 0.9 = over dock hopper, 9.3 = over ship hold
+    let craneX = 1.05;
     let hoistLen = 2.4;
     let carryBag = true;
     let shipFill = 0.5;
@@ -840,7 +844,6 @@ export function PortLogistics3DViewer({ className }: { className?: string }) {
       const dt = Math.min(0.05, clock.getDelta());
       elapsed += dt;
 
-      // Subtle ocean wave undulation
       for (let i = 0; i < waterPosAttr.count; i++) {
         const vx = waterPosAttr.getX(i);
         const vz = waterPosAttr.getZ(i);
@@ -851,31 +854,28 @@ export function PortLogistics3DViewer({ className }: { className?: string }) {
       }
       waterPosAttr.needsUpdate = true;
 
-      // Gentle vessel buoyancy heave & roll
       shipGroup.position.y = -0.35 - shipFill * 0.18 + Math.sin(elapsed * 1.1) * 0.08;
       shipGroup.rotation.z = Math.sin(elapsed * 0.85) * 0.015;
 
-      // Determine active target targets from phase or manual sliders
       const st = stateRef.current;
-      let targetTruckX = -8.8;
+      let targetTruckX = TRUCK_LOAD_X;
       let targetBedAngle = 0;
       let targetCargoFill = 0.7;
-      let targetCraneX = 0.9;
+      let targetCraneX = 1.05;
       let targetHoistLen = 2.6;
       let activeFlow: 'none' | 'silo' | 'unload' = 'none';
       let stageText = 'Operating';
 
       if (st.manualOverride) {
-        targetTruckX = 0.2;
+        targetTruckX = TRUCK_UNLOAD_X;
         targetBedAngle = st.manualBedTilt * 0.72;
         targetCargoFill = Math.max(0.08, 1 - st.manualBedTilt * 0.85);
-        targetCraneX = THREE.MathUtils.lerp(0.9, 9.3, st.manualCranePos);
+        targetCraneX = THREE.MathUtils.lerp(1.05, 9.1, st.manualCranePos);
         targetHoistLen = 2.0 + Math.sin(st.manualCranePos * Math.PI) * 1.2 + (st.manualCranePos > 0.85 ? 2.0 : 0);
         carryBag = st.manualCranePos < 0.94;
-        activeFlow = st.manualBedTilt > 0.35 ? 'unload' : 'none';
+        activeFlow = st.manualBedTilt > 0.32 ? 'unload' : 'none';
         stageText = 'Manual Operator Control';
       } else {
-        // Compute effective phase (if auto, 16-second seamless loop across 4 phases)
         let activePhase: Exclude<LogisticsPhase, 'auto'> = 'load';
         let localT = 0;
 
@@ -887,12 +887,12 @@ export function PortLogistics3DViewer({ className }: { className?: string }) {
           } else if (cycle < 7.2) {
             activePhase = 'drive';
             localT = (cycle - 3.6) / 3.6;
-          } else if (cycle < 11.2) {
+          } else if (cycle < 11.4) {
             activePhase = 'unload';
-            localT = (cycle - 7.2) / 4.0;
+            localT = (cycle - 7.2) / 4.2;
           } else {
             activePhase = 'crane';
-            localT = (cycle - 11.2) / 4.8;
+            localT = (cycle - 11.4) / 4.6;
           }
         } else {
           activePhase = st.phase;
@@ -900,62 +900,61 @@ export function PortLogistics3DViewer({ className }: { className?: string }) {
         }
 
         if (activePhase === 'load') {
-          targetTruckX = -8.8;
+          targetTruckX = TRUCK_LOAD_X;
           targetBedAngle = 0;
           targetCargoFill = 0.15 + localT * 0.85;
-          targetCraneX = 0.9;
+          targetCraneX = 1.05;
           targetHoistLen = 2.2;
           carryBag = false;
           activeFlow = 'silo';
           stageText = 'Loading Assayed Ferro-Alloys at Silo';
         } else if (activePhase === 'drive') {
-          targetTruckX = THREE.MathUtils.lerp(-8.8, 0.2, Math.min(1, localT * 1.15));
+          targetTruckX = THREE.MathUtils.lerp(TRUCK_LOAD_X, TRUCK_UNLOAD_X, Math.min(1, localT * 1.15));
           targetBedAngle = 0;
           targetCargoFill = 1.0;
-          targetCraneX = 0.9;
+          targetCraneX = 1.05;
           targetHoistLen = 2.3;
           carryBag = false;
-          stageText = 'Hauling 35 MT Batch to Visakhapatnam Berth';
+          stageText = 'Backing 35 MT Tipper to Visakhapatnam Berth Hopper';
         } else if (activePhase === 'unload') {
-          targetTruckX = 0.2;
+          targetTruckX = TRUCK_UNLOAD_X;
           const liftWave = Math.sin(Math.min(1, localT) * Math.PI);
           targetBedAngle = liftWave * 0.72;
           targetCargoFill = Math.max(0.08, 1 - localT * 0.92);
-          targetCraneX = 0.9;
+          targetCraneX = 1.05;
           targetHoistLen = 2.4;
           carryBag = false;
-          activeFlow = liftWave > 0.35 ? 'unload' : 'none';
-          stageText = 'Hydraulic Tipping Into Export Berth Hopper';
+          activeFlow = liftWave > 0.32 ? 'unload' : 'none';
+          stageText = 'Rear Hydraulic Tipping Into Export Berth Hopper';
         } else if (activePhase === 'crane') {
-          targetTruckX = st.phase === 'auto' ? THREE.MathUtils.lerp(0.2, -8.8, Math.min(1, localT * 1.1)) : 0.2;
+          targetTruckX =
+            st.phase === 'auto'
+              ? THREE.MathUtils.lerp(TRUCK_UNLOAD_X, TRUCK_LOAD_X, Math.min(1, localT * 1.1))
+              : TRUCK_UNLOAD_X;
           targetBedAngle = 0;
           targetCargoFill = 0.12;
           if (localT < 0.22) {
-            // Lower to pick up FIBC bag at dock
-            targetCraneX = 0.9;
+            targetCraneX = 1.05;
             targetHoistLen = THREE.MathUtils.lerp(2.2, 4.9, localT / 0.22);
             carryBag = localT > 0.14;
           } else if (localT < 0.65) {
-            // Lift and swing across boom to vessel hold
             const p = (localT - 0.22) / 0.43;
-            targetCraneX = THREE.MathUtils.lerp(0.9, 9.3, p);
+            targetCraneX = THREE.MathUtils.lerp(1.05, 9.1, p);
             targetHoistLen = 2.0;
             carryBag = true;
           } else if (localT < 0.85) {
-            // Lower into ship cargo hold & release
             const p = (localT - 0.65) / 0.2;
-            targetCraneX = 9.3;
+            targetCraneX = 9.1;
             targetHoistLen = THREE.MathUtils.lerp(2.0, 4.5, p);
             carryBag = p < 0.75;
             shipFill = Math.min(1, 0.4 + p * 0.55);
           } else {
-            // Raise spreader and return
             const p = (localT - 0.85) / 0.15;
-            targetCraneX = THREE.MathUtils.lerp(9.3, 0.9, p);
+            targetCraneX = THREE.MathUtils.lerp(9.1, 1.05, p);
             targetHoistLen = 2.2;
             carryBag = false;
           }
-          stageText = 'Gantry Crane Loading M.V. Berry Export Hold';
+          stageText = 'Gantry Crane Hoisting Bulk Bags Into M.V. Berry Export';
         }
       }
 
@@ -963,31 +962,41 @@ export function PortLogistics3DViewer({ className }: { className?: string }) {
       const prevTruckX = truckX;
       truckX = THREE.MathUtils.damp(truckX, targetTruckX, 4.2, dt);
       bedAngle = THREE.MathUtils.damp(bedAngle, targetBedAngle, 5.2, dt);
-      tailgateAngle = THREE.MathUtils.damp(tailgateAngle, bedAngle > 0.18 ? bedAngle * 0.85 : 0, 6.5, dt);
+      tailgateAngle = THREE.MathUtils.damp(tailgateAngle, bedAngle > 0.14 ? bedAngle * 0.92 : 0, 6.5, dt);
       cargoFill = THREE.MathUtils.damp(cargoFill, targetCargoFill, 4.0, dt);
       craneX = THREE.MathUtils.damp(craneX, targetCraneX, 4.8, dt);
       hoistLen = THREE.MathUtils.damp(hoistLen, targetHoistLen, 5.2, dt);
 
-      // Apply truck position & spin wheels proportionally to travel distance
       truckGroup.position.x = truckX;
       const wheelDelta = -(truckX - prevTruckX) / 0.48;
       for (const w of wheelMeshes) {
         w.rotation.z += wheelDelta;
       }
 
-      // Amber cab beacon pulse rotation
       beacon.rotation.y += dt * 4.5;
 
-      // Apply dump bed tilt, tailgate swing, cargo scale, and telescopic piston stretch
+      // VERIFIED KINEMATICS:
+      // With rear hinge at +2.42 and bed extending along -X toward cab,
+      // rotation.z = -bedAngle lifts the cab-side front wall UPWARD (+Y),
+      // while tailgatePivot.rotation.z = +tailgateAngle swings the rear door OPEN outward toward +X (the dock hopper)!
       dumpBedPivot.rotation.z = -bedAngle;
       tailgatePivot.rotation.z = tailgateAngle;
       bedCargoMesh.scale.y = Math.max(0.06, cargoFill);
+      bedCargoMesh.position.x = -1.55 + bedAngle * 0.72;
       bedCargoMesh.visible = cargoFill > 0.09;
 
-      const pistonStretch = 1 + bedAngle * 1.15;
-      hydraulicPiston.scale.y = pistonStretch;
-      hydraulicPiston.position.y = 1.0 + bedAngle * 0.65;
-      hydraulicPiston.rotation.z = -bedAngle * 0.35;
+      // Exact Telescopic Hydraulic Cylinder linking chassis mount to underside of rising bed front
+      const baseX = -0.35;
+      const baseY = 0.86;
+      const attachLocalX = -2.45; // local to dumpBedPivot
+      const tipX = 2.42 + attachLocalX * Math.cos(-bedAngle);
+      const tipY = 0.92 + attachLocalX * Math.sin(-bedAngle);
+      const dxP = tipX - baseX;
+      const dyP = tipY - baseY;
+      const cylLen = Math.max(0.25, Math.hypot(dxP, dyP));
+      hydraulicPiston.position.set((baseX + tipX) * 0.5, (baseY + tipY) * 0.5, 0);
+      hydraulicPiston.scale.set(1, cylLen, 1);
+      hydraulicPiston.rotation.z = Math.atan2(dyP, dxP) - Math.PI / 2;
 
       // Apply crane trolley, hoist cable, and spreader bag
       trolleyGroup.position.x = craneX;
@@ -997,9 +1006,8 @@ export function PortLogistics3DViewer({ className }: { className?: string }) {
       fibcBag.visible = carryBag;
       fibcBand.visible = carryBag;
 
-      // Update ship hold cargo level & dock hopper mound
       shipCargoMound.scale.y = 0.45 + shipFill * 1.3;
-      hopperAlloyPile.scale.setScalar(activeFlow === 'unload' ? 1.15 : 0.92);
+      hopperAlloyPile.scale.setScalar(activeFlow === 'unload' ? 1.18 : 0.94);
 
       // Update cascading InstancedMesh Ferro-Alloy lumps
       for (let i = 0; i < PARTICLE_COUNT; i++) {
@@ -1013,11 +1021,12 @@ export function PortLogistics3DViewer({ className }: { className?: string }) {
           );
           _dummy.scale.setScalar(0.85 + (i % 3) * 0.18);
         } else if (activeFlow === 'unload') {
-          const p = (elapsed * 1.45 + seed.phaseOffset) % 1;
-          // Spill cleanly from rear of tilted truck into dock hopper
+          const p = (elapsed * 1.55 + seed.phaseOffset) % 1;
+          // Spill cleanly out of the OPEN REAR TAILGATE (+X side at truckX + 2.42) straight into Dock Hopper (x = 3.55)!
+          const chuteX = truckX + 2.42;
           _dummy.position.set(
-            truckX - 2.35 + p * 0.9 + seed.jx * 0.4,
-            THREE.MathUtils.lerp(1.45, 0.65, p * p),
+            THREE.MathUtils.lerp(chuteX + 0.08, 3.55 + seed.jx * 0.55, p),
+            THREE.MathUtils.lerp(1.42, 0.72, p * p),
             1.4 + seed.jz * 0.72
           );
           _dummy.scale.setScalar(0.85 + (i % 3) * 0.2);
@@ -1031,7 +1040,6 @@ export function PortLogistics3DViewer({ className }: { className?: string }) {
       }
       lumpInst.instanceMatrix.needsUpdate = true;
 
-      // Smooth damped camera preset transitions
       if (st.cameraTargetPreset) {
         const presetCfg = CAMERA_PRESETS[st.cameraTargetPreset];
         _vPos.set(...presetCfg.pos);
@@ -1049,7 +1057,6 @@ export function PortLogistics3DViewer({ className }: { className?: string }) {
       controls.update();
       renderer.render(scene, camera);
 
-      // Sync React HUD telemetry gently (~4 Hz) so React never thrashing-renders
       if (elapsed - lastUiSync > 0.28) {
         lastUiSync = elapsed;
         setTelemetry({
@@ -1117,10 +1124,10 @@ export function PortLogistics3DViewer({ className }: { className?: string }) {
         className
       )}
     >
-      {/* Dedicated WebGL Canvas Mount (Isolated from React HUD Siblings) */}
+      {/* Dedicated WebGL Canvas Mount */}
       <div ref={mountRef} className="absolute inset-0 w-full h-full" />
 
-      {/* Minimal Top-Left Spec Badge (No Side Clutter, No Backdrop Blur over WebGL) */}
+      {/* Minimal Top-Left Spec Badge (No Backdrop Blur over WebGL) */}
       <div className="pointer-events-none absolute top-4 left-4 z-20 bg-[#07111F]/90 border border-[#F4F8FC]/16 px-3.5 py-2.5 max-w-[82vw] sm:max-w-md">
         <p className="text-[10px] font-mono-tabular uppercase tracking-widest text-[#69C5F5]">
           Interactive 3D Port &amp; Tipper Simulator · Visakhapatnam Corridor
@@ -1137,7 +1144,7 @@ export function PortLogistics3DViewer({ className }: { className?: string }) {
         </div>
       </div>
 
-      {/* Unified Collapsible Bottom Control Dock (Zero Center Occlusion) */}
+      {/* Unified Collapsible Bottom Control Dock */}
       <div className="absolute bottom-3 left-1/2 -translate-x-1/2 z-30 w-[min(920px,94%)] flex flex-col items-center">
         <button
           type="button"
@@ -1159,7 +1166,6 @@ export function PortLogistics3DViewer({ className }: { className?: string }) {
 
         {!dockCollapsed && (
           <div className="w-full bg-[#07111F]/94 border border-[#F4F8FC]/20 p-3 sm:p-4 space-y-3 shadow-2xl">
-            {/* Row 1: Operation Phases + Camera Views */}
             <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-2.5">
               <div className="flex flex-wrap items-center gap-1.5">
                 {(
@@ -1213,7 +1219,6 @@ export function PortLogistics3DViewer({ className }: { className?: string }) {
               </div>
             </div>
 
-            {/* Row 2: Direct Manual Mechanical Sliders (Hydraulic Bed Tilt & Crane Trolley) */}
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 pt-2 border-t border-[#F4F8FC]/12">
               <label className="flex items-center gap-3 text-[10px] font-mono-tabular uppercase tracking-wider text-[#B5C5D7]">
                 <span className="shrink-0 text-[#69C5F5] inline-flex items-center gap-1">
@@ -1247,7 +1252,7 @@ export function PortLogistics3DViewer({ className }: { className?: string }) {
                     setManualOverride(true);
                     setManualCranePos(Number(e.target.value) / 100);
                   }}
-                  className="w-full accent-[#C9233B] cursor-pointer"
+                  className="w-full accent-[#69C5F5] cursor-pointer"
                 />
               </label>
             </div>

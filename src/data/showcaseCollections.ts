@@ -531,9 +531,9 @@ export const HOME_PIXEL_TRAIL_IMAGES: string[] = [
 export const HOME_CAREERS_SCATTER_SETS: ScatterImageSet[] = [
   {
     id: 'home-plant-engineering',
-    label: 'Smelting Floor, Assay & Zero-Harm Culture',
+    label: 'Smelting, Assay & Safety',
     subtitle:
-      'ET Edge Best Organization to Work 2026 — morning furnace briefings, OES laboratory verification, and shift safety milestones.',
+      'ET Edge Best Organisation to Work 2026 — SCADA furnace control, OES assay labs, and daily ISO 45001 zero-harm briefings.',
     images: [
       {
         src: ASSETS.scatterHomeHelmetBriefing.src,
@@ -541,9 +541,24 @@ export const HOME_CAREERS_SCATTER_SETS: ScatterImageSet[] = [
         caption: ASSETS.scatterHomeHelmetBriefing.caption,
       },
       {
+        src: ASSETS.cultureControlRoom.src,
+        alt: ASSETS.cultureControlRoom.alt,
+        caption: 'SCADA furnace control bay',
+      },
+      {
         src: ASSETS.scatterHomeLabSpectrometer.src,
         alt: ASSETS.scatterHomeLabSpectrometer.alt,
         caption: ASSETS.scatterHomeLabSpectrometer.caption,
+      },
+      {
+        src: ASSETS.cultureLabChemists.src,
+        alt: ASSETS.cultureLabChemists.alt,
+        caption: 'Metallurgical QA/QC chemists',
+      },
+      {
+        src: ASSETS.cultureSafetyWalk.src,
+        alt: ASSETS.cultureSafetyWalk.alt,
+        caption: 'Daily ISO 45001 safety walk',
       },
       {
         src: ASSETS.scatterHomeSafetyAward.src,
@@ -553,15 +568,53 @@ export const HOME_CAREERS_SCATTER_SETS: ScatterImageSet[] = [
     ],
   },
   {
-    id: 'home-energy-export',
-    label: 'Clean Power, Export Bay & Maritime Trade',
+    id: 'home-clean-energy-campus',
+    label: 'Clean Power & Green Belt',
     subtitle:
-      'Captive solar utility engineers, certified FIBC bulk bag dispatch teams, and ocean-going coastal vessel logistics.',
+      'Captive solar & wind utility engineers, baghouse emission control towers, landscaped works campuses, and Unit-2 expansion.',
     images: [
+      {
+        src: ASSETS.careersWindSolarCrew.src,
+        alt: ASSETS.careersWindSolarCrew.alt,
+        caption: ASSETS.careersWindSolarCrew.caption,
+      },
       {
         src: ASSETS.scatterHomeSolarInspection.src,
         alt: ASSETS.scatterHomeSolarInspection.alt,
         caption: ASSETS.scatterHomeSolarInspection.caption,
+      },
+      {
+        src: ASSETS.sustRenewableHybrid2.src,
+        alt: ASSETS.sustRenewableHybrid2.alt,
+        caption: 'Hybrid wind & solar corridor',
+      },
+      {
+        src: ASSETS.cultureCampusGreen.src,
+        alt: ASSETS.cultureCampusGreen.alt,
+        caption: 'Landscaped green-belt campus',
+      },
+      {
+        src: ASSETS.trailArchiveBaghouse.src,
+        alt: ASSETS.trailArchiveBaghouse.alt,
+        caption: 'Baghouse clean-air towers',
+      },
+      {
+        src: ASSETS.mfgUnit2Kadambeda.src,
+        alt: ASSETS.mfgUnit2Kadambeda.alt,
+        caption: 'Unit-2 Kadambeda kiln works',
+      },
+    ],
+  },
+  {
+    id: 'home-port-export-trade',
+    label: 'Maritime & Bulk Logistics',
+    subtitle:
+      'Three Star Export House — harbour dispatch desks, certified 1-MT FIBC export bags, automated weighbridges, and Bay of Bengal lanes.',
+    images: [
+      {
+        src: ASSETS.careersPortShippingDesk.src,
+        alt: ASSETS.careersPortShippingDesk.alt,
+        caption: ASSETS.careersPortShippingDesk.caption,
       },
       {
         src: ASSETS.scatterHomeDispatchYard.src,
@@ -572,6 +625,59 @@ export const HOME_CAREERS_SCATTER_SETS: ScatterImageSet[] = [
         src: ASSETS.homeAwardExportStar.src,
         alt: ASSETS.homeAwardExportStar.alt,
         caption: 'Bay of Bengal bulk dispatch',
+      },
+      {
+        src: ASSETS.cultureLogisticsDesk.src,
+        alt: ASSETS.cultureLogisticsDesk.alt,
+        caption: 'Export trade & vessel desk',
+      },
+      {
+        src: ASSETS.trailArchiveWeighbridge.src,
+        alt: ASSETS.trailArchiveWeighbridge.alt,
+        caption: 'Automated fleet weighbridge',
+      },
+      {
+        src: ASSETS.trailArchiveOreYard.src,
+        alt: ASSETS.trailArchiveOreYard.alt,
+        caption: 'Blended manganese ore yard',
+      },
+    ],
+  },
+  {
+    id: 'home-mentorship-craft',
+    label: 'Mentorship & Heavy Craft',
+    subtitle:
+      'Graduate metallurgy apprenticeships, 132 kV electrical maintenance, molten ladle gantry operations, and team milestone townhalls.',
+    images: [
+      {
+        src: ASSETS.cultureTrainingWorkshop.src,
+        alt: ASSETS.cultureTrainingWorkshop.alt,
+        caption: 'Graduate engineering mentorship',
+      },
+      {
+        src: ASSETS.cultureMechanicalMaint.src,
+        alt: ASSETS.cultureMechanicalMaint.alt,
+        caption: '132 kV substation maintenance',
+      },
+      {
+        src: ASSETS.cultureTownhallAward.src,
+        alt: ASSETS.cultureTownhallAward.alt,
+        caption: 'Workforce milestone townhall',
+      },
+      {
+        src: ASSETS.trailArchiveCrusher.src,
+        alt: ASSETS.trailArchiveCrusher.alt,
+        caption: 'Precision alloy crushing bay',
+      },
+      {
+        src: ASSETS.trailArchiveLadleCrane.src,
+        alt: ASSETS.trailArchiveLadleCrane.alt,
+        caption: 'Overhead molten ladle crane',
+      },
+      {
+        src: ASSETS.detailAlloyFeMn.src,
+        alt: ASSETS.detailAlloyFeMn.alt,
+        caption: 'Assayed Ferro Manganese grain',
       },
     ],
   },

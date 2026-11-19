@@ -1,6 +1,6 @@
-import { useEffect, useRef, useState } from 'react';
+import { useEffect, useMemo, useRef, useState } from 'react';
 import * as THREE from 'three';
-import { animate, motion, useMotionValue, useMotionValueEvent, useScroll, useTransform } from 'motion/react';
+import { motion, useMotionValueEvent, useScroll } from 'motion/react';
 import { useDrag } from '@use-gesture/react';
 import { cn } from '../../lib/utils';
 import { useIsCompactMobile } from '../../hooks/useIsCompactMobile';
@@ -187,9 +187,20 @@ const EDGE_OVERLAY_FRAGMENT_SHADER = `
   }
 `;
 
+export interface ScrollDissolveSlide {
+  image: string;
+  alt: string;
+  kicker: string;
+  title: string;
+  description: string;
+}
+
 export interface ScrollDissolveRevealProps {
-  image1: string;
-  image2: string;
+  /** Optional multi-stage sequence (2 to 6 images) dissolved sequentially on scroll. */
+  slides?: ScrollDissolveSlide[];
+  /** Legacy 2-image props preserved for backwards compatibility. */
+  image1?: string;
+  image2?: string;
   image1Alt?: string;
   image2Alt?: string;
   edgeColor?: string;
@@ -203,15 +214,17 @@ export interface ScrollDissolveRevealProps {
 }
 
 /**
- * ScrollDissolveReveal — Scroll-scrubbed Sobel-edge + FBM noise GLSL dissolve shader
- * built directly on Vanilla Three.js + motion/react useScroll (React 19 safe, zero @react-three/fiber dep).
+ * ScrollDissolveReveal — Multi-stage scroll-scrubbed Sobel-edge + FBM noise GLSL dissolve shader
+ * built directly on Vanilla Three.js + motion/react useScroll. Supports 2 to 6 sequential scenes
+ * with live stage rails on desktop and touch-swipe cross-fade on compact mobile viewports.
  */
 export function ScrollDissolveReveal({
+  slides: slidesProp,
   image1,
   image2,
   image1Alt = 'First transition frame',
   image2Alt = 'Second transition frame',
-  edgeColor = '#EC743C',
+  edgeColor = '#69C5F5',
   leftKicker,
   leftTitle,
   leftDescription,
@@ -220,20 +233,50 @@ export function ScrollDissolveReveal({
   rightDescription,
   className,
 }: ScrollDissolveRevealProps) {
+  const slides = useMemo<ScrollDissolveSlide[]>(() => {
+    if (slidesProp && slidesProp.length >= 2) return slidesProp;
+    return [
+      {
+        image: image1 ?? '',
+        alt: image1Alt,
+        kicker: leftKicker ?? 'Stage 01 · Integrated Complex',
+        title: leftTitle ?? 'Bobbili & Jharkhand Works',
+        description:
+          leftDescription ??
+          'Raw manganese, quartz, chromite, and metallurgical reductants prepared across multi-furnace production sheds.',
+      },
+      {
+        image: image2 ?? '',
+        alt: image2Alt,
+        kicker: rightKicker ?? 'Stage 02 · High-Temperature Reduction',
+        title: rightTitle ?? 'From Heat To Precision',
+        description:
+          rightDescription ??
+          'Submerged-arc electrodes, 6,000 MT/month AOD converters, and spectrographic assay verification.',
+      },
+    ];
+  }, [
+    slidesProp,
+    image1,
+    image2,
+    image1Alt,
+    image2Alt,
+    leftKicker,
+    leftTitle,
+    leftDescription,
+    rightKicker,
+    rightTitle,
+    rightDescription,
+  ]);
+
   const containerRef = useRef<HTMLDivElement>(null);
   const stageRef = useRef<HTMLDivElement>(null);
   const targetRevealRef = useRef(0);
   const isCompactMobile = useIsCompactMobile(1023);
-  const [mobileStage, setMobileStage] = useState<0 | 1>(0);
-  const [manualMobileOverride, setManualMobileOverride] = useState<0 | 1 | null>(null);
+  const [activeIndex, setActiveIndex] = useState(0);
+  const [manualMobileIndex, setManualMobileIndex] = useState<number | null>(null);
   const [revealPercent, setRevealPercent] = useState(0);
   const [fallback, setFallback] = useState(false);
-
-  const mobileMix = useMotionValue(0);
-  const mobileImage1Scale = useTransform(mobileMix, [0, 1], [1.0, 1.06]);
-  const mobileImage2Scale = useTransform(mobileMix, [0, 1], [1.05, 1.0]);
-  const mobileGlowOpacity = useTransform(mobileMix, [0, 0.45, 0.55, 1], [0, 0.9, 0.9, 0]);
-  const mobileGlowX = useTransform(mobileMix, [0, 1], ['-15%', '110%']);
 
   const { scrollYProgress } = useScroll({
     target: containerRef,
@@ -242,44 +285,44 @@ export function ScrollDissolveReveal({
 
   useMotionValueEvent(scrollYProgress, 'change', (latest) => {
     targetRevealRef.current = latest;
-    if (!isCompactMobile || manualMobileOverride === null) {
-      setRevealPercent(Math.round(latest * 100));
-    }
-    if (isCompactMobile && manualMobileOverride === null) {
-      const clamped = Math.max(0, Math.min(1, (latest - 0.14) / 0.68));
-      mobileMix.set(clamped);
-      const nextStage: 0 | 1 = clamped >= 0.5 ? 1 : 0;
-      setMobileStage((prev) => (prev === nextStage ? prev : nextStage));
+    const clamped = Math.max(0, Math.min(1, latest));
+    const idx = Math.min(slides.length - 1, Math.floor(clamped * (slides.length - 0.001)));
+    if (!isCompactMobile || manualMobileIndex === null) {
+      setRevealPercent(Math.round(clamped * 100));
+      setActiveIndex((prev) => (prev === idx ? prev : idx));
     }
   });
 
-  const selectMobileStage = (stage: 0 | 1 | null) => {
-    setManualMobileOverride(stage);
-    if (stage === null) {
-      const clamped = Math.max(0, Math.min(1, (targetRevealRef.current - 0.14) / 0.68));
-      animate(mobileMix, clamped, { duration: 0.45, ease: [0.22, 1, 0.36, 1] });
-      setMobileStage(clamped >= 0.5 ? 1 : 0);
-      setRevealPercent(Math.round(targetRevealRef.current * 100));
+  const selectMobileSlide = (idx: number | null) => {
+    setManualMobileIndex(idx);
+    if (idx === null) {
+      const clamped = Math.max(0, Math.min(1, targetRevealRef.current));
+      setActiveIndex(Math.min(slides.length - 1, Math.floor(clamped * (slides.length - 0.001))));
+      setRevealPercent(Math.round(clamped * 100));
       return;
     }
-    setMobileStage(stage);
-    setRevealPercent(stage === 1 ? 100 : 0);
-    animate(mobileMix, stage, { duration: 0.48, ease: [0.22, 1, 0.36, 1] });
+    const safeIdx = (idx + slides.length) % slides.length;
+    setActiveIndex(safeIdx);
+    setRevealPercent(Math.round((safeIdx / Math.max(1, slides.length - 1)) * 100));
   };
 
   const bindMobileSwipe = useDrag(
     ({ last, movement: [mx], velocity: [vx], direction: [dx] }) => {
       if (!last) return;
       if (Math.abs(mx) > 36 || vx > 0.3) {
-        selectMobileStage(dx < 0 || mx < 0 ? 1 : 0);
+        const delta = dx < 0 || mx < 0 ? 1 : -1;
+        selectMobileSlide(activeIndex + delta);
       }
     },
     { axis: 'x', filterTaps: true, threshold: 8, pointer: { capture: false } }
   );
 
+  // Build stable URL signature so Three.js only rebuilds if image URLs actually change
+  const imageKey = slides.map((s) => s.image).join('|');
+
   useEffect(() => {
     const stage = stageRef.current;
-    if (!stage || isCompactMobile) return;
+    if (!stage || isCompactMobile || slides.length < 2) return;
 
     const prefersReduced = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
     if (prefersReduced) {
@@ -317,28 +360,27 @@ export function ScrollDissolveReveal({
     camera.position.z = 5;
 
     const loader = new THREE.TextureLoader();
-    const tex1 = loader.load(image1, () => {
-      tex1.colorSpace = THREE.SRGBColorSpace;
-      const img = tex1.image as HTMLImageElement;
-      if (img) baseUniforms.uTextureSize1.value.set(img.width || 1280, img.height || 720);
-      renderer?.render(scene, camera);
+    const texSizes = slides.map(() => new THREE.Vector2(1600, 900));
+    const textures = slides.map((slide, idx) => {
+      const tex = loader.load(slide.image, () => {
+        tex.colorSpace = THREE.SRGBColorSpace;
+        const img = tex.image as HTMLImageElement;
+        if (img) {
+          texSizes[idx].set(img.width || 1600, img.height || 900);
+        }
+        renderer?.render(scene, camera);
+      });
+      tex.minFilter = THREE.LinearFilter;
+      return tex;
     });
-    const tex2 = loader.load(image2, () => {
-      tex2.colorSpace = THREE.SRGBColorSpace;
-      const img = tex2.image as HTMLImageElement;
-      if (img) baseUniforms.uTextureSize2.value.set(img.width || 1280, img.height || 720);
-      renderer?.render(scene, camera);
-    });
-    tex1.minFilter = THREE.LinearFilter;
-    tex2.minFilter = THREE.LinearFilter;
 
     const baseUniforms = {
-      uTexture1: { value: tex1 },
-      uTexture2: { value: tex2 },
-      uReveal: { value: targetRevealRef.current },
+      uTexture1: { value: textures[0] },
+      uTexture2: { value: textures[1] },
+      uReveal: { value: 0 },
       uPlaneSize: { value: new THREE.Vector2(width, height) },
-      uTextureSize1: { value: new THREE.Vector2(1600, 900) },
-      uTextureSize2: { value: new THREE.Vector2(1600, 900) },
+      uTextureSize1: { value: texSizes[0].clone() },
+      uTextureSize2: { value: texSizes[1].clone() },
       uEdgeColor: { value: new THREE.Color(edgeColor) },
     };
 
@@ -385,7 +427,22 @@ export function ScrollDissolveReveal({
     let disposed = false;
     let rafId = 0;
     let timeoutId = 0;
+    const segmentCount = slides.length - 1;
 
+    const applySegmentUniforms = (progress: number) => {
+      const clamped = Math.max(0, Math.min(1, progress));
+      const scaled = clamped * segmentCount;
+      const segIdx = Math.min(segmentCount - 1, Math.floor(scaled));
+      const localReveal = Math.max(0, Math.min(1, scaled - segIdx));
+
+      baseUniforms.uTexture1.value = textures[segIdx];
+      baseUniforms.uTexture2.value = textures[segIdx + 1];
+      baseUniforms.uTextureSize1.value.copy(texSizes[segIdx]);
+      baseUniforms.uTextureSize2.value.copy(texSizes[segIdx + 1]);
+      baseUniforms.uReveal.value = localReveal;
+    };
+
+    applySegmentUniforms(currentReveal);
     renderer.render(scene, camera);
 
     const afterDraw = () => {
@@ -427,7 +484,7 @@ export function ScrollDissolveReveal({
       if (disposed) return;
       if (isVisible && !document.hidden) {
         currentReveal = THREE.MathUtils.lerp(currentReveal, targetRevealRef.current, 0.14);
-        baseUniforms.uReveal.value = currentReveal;
+        applySegmentUniforms(currentReveal);
         renderer?.render(scene, camera);
       }
       afterDraw();
@@ -445,8 +502,7 @@ export function ScrollDissolveReveal({
       planeGeo.dispose();
       baseMat.dispose();
       edgeMat.dispose();
-      tex1.dispose();
-      tex2.dispose();
+      textures.forEach((t) => t.dispose());
       scene.remove(baseMesh);
       scene.remove(edgeMesh);
       renderer?.dispose();
@@ -454,90 +510,76 @@ export function ScrollDissolveReveal({
         stage.removeChild(canvasEl);
       }
     };
-  }, [edgeColor, image1, image2, isCompactMobile]);
+  }, [edgeColor, imageKey, isCompactMobile, slides]);
+
+  const currentSlide = slides[Math.min(activeIndex, slides.length - 1)];
+  const nextSlide = slides[Math.min(activeIndex + 1, slides.length - 1)];
 
   if (isCompactMobile) {
     return (
       <section
         ref={containerRef}
-        aria-label="Transition from plant complex to submerged-arc furnace smelting"
+        aria-label="Multi-stage smelting to export visual transition"
         className={cn('w-full bg-[#07111F] text-[#F4F8FC] py-12 px-4 border-t border-[#F4F8FC]/10', className)}
       >
-        <div className="max-w-xl mx-auto space-y-5">
+        <div className="max-w-xl mx-auto space-y-4">
           <div className="flex items-center justify-between gap-3 text-[11px] font-mono-tabular uppercase tracking-widest text-[#69C5F5]">
-            <span>Thermal Reduction Bridge</span>
+            <span>Thermal Reduction Sequence</span>
             <span>
-              Stage {mobileStage === 0 ? '01' : '02'} · {revealPercent}%
+              {String(activeIndex + 1).padStart(2, '0')} / {String(slides.length).padStart(2, '0')} · {revealPercent}%
             </span>
           </div>
 
-          {/* Segmented Stage Toggle + Scroll Link */}
-          <div role="tablist" aria-label="Thermal reduction visual stage" className="grid grid-cols-2 gap-2">
-            <motion.button
-              type="button"
-              role="tab"
-              aria-selected={mobileStage === 0}
-              whileTap={{ scale: 0.97 }}
-              onClick={() => selectMobileStage(0)}
-              className={cn(
-                'min-h-[44px] px-3 py-2 text-xs font-mono-tabular uppercase tracking-wider border text-left transition-colors cursor-pointer',
-                mobileStage === 0
-                  ? 'bg-[#0A6AA1] text-[#FFFFFF] border-[#69C5F5]'
-                  : 'bg-[#0D1B2E] text-[#B5C5D7] border-[#F4F8FC]/16'
-              )}
-            >
-              01 · Raw Charge
-            </motion.button>
-            <motion.button
-              type="button"
-              role="tab"
-              aria-selected={mobileStage === 1}
-              whileTap={{ scale: 0.97 }}
-              onClick={() => selectMobileStage(1)}
-              className={cn(
-                'min-h-[44px] px-3 py-2 text-xs font-mono-tabular uppercase tracking-wider border text-left transition-colors cursor-pointer',
-                mobileStage === 1
-                  ? 'bg-[#0A6AA1] text-[#FFFFFF] border-[#69C5F5]'
-                  : 'bg-[#0D1B2E] text-[#B5C5D7] border-[#F4F8FC]/16'
-              )}
-            >
-              02 · Heat &amp; AOD
-            </motion.button>
+          <div
+            role="tablist"
+            aria-label="Production stage selector"
+            className="flex flex-wrap gap-1.5"
+          >
+            {slides.map((s, idx) => (
+              <button
+                key={s.title}
+                type="button"
+                role="tab"
+                aria-selected={activeIndex === idx}
+                onClick={() => selectMobileSlide(idx)}
+                className={cn(
+                  'min-h-[36px] px-2.5 py-1 text-[10px] font-mono-tabular uppercase tracking-wider border transition-colors cursor-pointer',
+                  activeIndex === idx
+                    ? 'bg-[#0A6AA1] text-[#FFFFFF] border-[#69C5F5]'
+                    : 'bg-[#0D1B2E] text-[#B5C5D7] border-[#F4F8FC]/16'
+                )}
+              >
+                0{idx + 1}
+              </button>
+            ))}
           </div>
 
-          {/* Scroll-Scrubbed + Swipeable Cross-Dissolve Viewport */}
           <div
             {...bindMobileSwipe()}
             style={{ touchAction: 'pan-y' }}
             className="relative aspect-[16/10] w-full overflow-hidden border border-[#F4F8FC]/18 bg-[#0D1B2E]"
           >
-            <motion.img
-              src={image1}
-              alt={image1Alt}
-              style={{ scale: mobileImage1Scale }}
-              className="absolute inset-0 w-full h-full object-cover will-change-transform"
-            />
-            <motion.img
-              src={image2}
-              alt={image2Alt}
-              style={{ opacity: mobileMix, scale: mobileImage2Scale }}
-              className="absolute inset-0 w-full h-full object-cover will-change-transform"
-            />
-            {/* Travelling Molten Copper Dissolve Seam */}
-            <motion.div
-              aria-hidden="true"
-              style={{ opacity: mobileGlowOpacity, left: mobileGlowX }}
-              className="pointer-events-none absolute inset-y-0 w-16 -translate-x-1/2 bg-gradient-to-r from-transparent via-[#EC743C]/65 to-transparent blur-[6px]"
-            />
-            <div aria-hidden="true" className="pointer-events-none absolute inset-x-0 bottom-0 h-16 bg-gradient-to-t from-[#07111F]/90 to-transparent" />
+            {slides.map((slide, idx) => (
+              <motion.img
+                key={slide.image}
+                src={slide.image}
+                alt={slide.alt}
+                initial={false}
+                animate={{
+                  opacity: idx === activeIndex ? 1 : 0,
+                  scale: idx === activeIndex ? 1 : 1.05,
+                }}
+                transition={{ duration: 0.55, ease: [0.22, 1, 0.36, 1] }}
+                className="absolute inset-0 w-full h-full object-cover will-change-transform"
+              />
+            ))}
+            <div aria-hidden="true" className="pointer-events-none absolute inset-x-0 bottom-0 h-20 bg-gradient-to-t from-[#07111F]/92 to-transparent" />
             <div className="absolute bottom-3 left-3 right-3 flex items-center justify-between gap-2 text-[11px] font-mono-tabular text-[#69C5F5]">
-              <span className="truncate">
-                {mobileStage === 0 ? leftKicker ?? 'Stage 01 · Integrated Complex' : rightKicker ?? 'Stage 02 · Thermal Reduction'}
-              </span>
-              {manualMobileOverride !== null && (
+              <span className="truncate">{currentSlide.kicker}</span>
+              {manualMobileIndex !== null && (
                 <button
                   type="button"
-                  onClick={() => selectMobileStage(null)}
+                  onClick={() => selectMobileSlide(null)}
                   className="shrink-0 underline underline-offset-2 text-[#F4F8FC]/85 cursor-pointer"
                 >
                   Sync Scroll
@@ -546,15 +588,12 @@ export function ScrollDissolveReveal({
             </div>
           </div>
 
-          {/* Active Stage Narrative Card */}
-          <div className="bg-[#0D1B2E] border border-[#F4F8FC]/16 p-5 space-y-2 transition-colors">
+          <div className="bg-[#0D1B2E] border border-[#F4F8FC]/16 p-5 space-y-1.5">
             <h3 className="font-display text-2xl font-bold uppercase text-[#F4F8FC]">
-              {mobileStage === 0 ? leftTitle ?? 'Bobbili & Jharkhand Works' : rightTitle ?? 'From Heat To Precision'}
+              {currentSlide.title}
             </h3>
             <p className="text-xs text-[#F4F8FC]/82 leading-relaxed">
-              {mobileStage === 0
-                ? leftDescription ?? 'Raw manganese, quartz, chromite, and metallurgical reductants prepared across multi-furnace production sheds.'
-                : rightDescription ?? 'Submerged-arc electrodes, 6,000 MT/month AOD converters, and spectrographic assay verification.'}
+              {currentSlide.description}
             </p>
           </div>
         </div>
@@ -565,14 +604,19 @@ export function ScrollDissolveReveal({
   return (
     <section
       ref={containerRef}
-      aria-label="Transition from plant complex to submerged-arc furnace smelting"
-      className={cn('relative w-full h-[160vh] bg-[#07111F] text-[#F4F8FC]', className)}
+      aria-label="Multi-stage scroll transition from submerged-arc smelting through assay and renewable power to port export"
+      className={cn(
+        'relative w-full bg-[#07111F] text-[#F4F8FC]',
+        slides.length >= 4 ? 'h-[320vh]' : slides.length === 3 ? 'h-[240vh]' : 'h-[160vh]',
+        className
+      )}
     >
-      <div className="sticky top-16 h-[calc(100vh-4rem)] min-h-[500px] w-full overflow-hidden">
+      <div className="sticky top-16 h-[calc(100vh-4rem)] min-h-[520px] w-full overflow-hidden">
         {fallback ? (
-          <div className="relative h-full w-full grid grid-cols-1 md:grid-cols-2">
-            <img src={image1} alt={image1Alt} className="w-full h-full object-cover" />
-            <img src={image2} alt={image2Alt} className="w-full h-full object-cover" />
+          <div className="relative h-full w-full grid grid-cols-2 md:grid-cols-3">
+            {slides.map((s) => (
+              <img key={s.image} src={s.image} alt={s.alt} className="w-full h-full object-cover" />
+            ))}
           </div>
         ) : (
           <div ref={stageRef} className="absolute inset-0 h-full w-full" aria-hidden="true" />
@@ -581,40 +625,74 @@ export function ScrollDissolveReveal({
         {/* Measured Contrast Scrim */}
         <div
           aria-hidden="true"
-          className="pointer-events-none absolute inset-0 bg-gradient-to-t from-[#07111F]/88 via-[#07111F]/25 to-[#07111F]/55"
+          className="pointer-events-none absolute inset-0 bg-gradient-to-t from-[#07111F]/90 via-[#07111F]/22 to-[#07111F]/60"
         />
 
-        {/* Editorial Split Caption Overlay */}
-        <div className="pointer-events-none relative z-10 max-w-[1360px] mx-auto h-full px-4 sm:px-6 lg:px-8 xl:px-14 2xl:px-8 py-10 flex flex-col justify-between">
-          <div className="flex items-center justify-between gap-4 text-[11px] font-mono-tabular uppercase tracking-widest text-[#F4F8FC]/80">
-            <span>Thermal Reduction Bridge</span>
-            <span className="text-[#69C5F5]">Transformation {revealPercent}%</span>
+        {/* Editorial Split Caption Overlay + Live Multi-Stage Progress Rail */}
+        <div className="pointer-events-none relative z-10 max-w-[1360px] mx-auto h-full px-4 sm:px-6 lg:px-8 xl:px-14 2xl:px-8 py-8 flex flex-col justify-between">
+          <div className="space-y-3">
+            <div className="flex flex-wrap items-center justify-between gap-4 text-[11px] font-mono-tabular uppercase tracking-widest text-[#F4F8FC]/82">
+              <span>
+                Thermal Reduction &amp; Export Bridge · {slides.length} Visual Stages
+              </span>
+              <span className="text-[#69C5F5]">
+                Stage {String(activeIndex + 1).padStart(2, '0')} / {String(slides.length).padStart(2, '0')} · {revealPercent}%
+              </span>
+            </div>
+
+            {/* Segmented Stage Indicator Track */}
+            <div className="grid gap-2" style={{ gridTemplateColumns: `repeat(${slides.length}, minmax(0, 1fr))` }}>
+              {slides.map((s, idx) => {
+                const isDone = idx < activeIndex;
+                const isCurrent = idx === activeIndex;
+                return (
+                  <div key={s.title} className="space-y-1">
+                    <div className="h-[3px] w-full bg-[#F4F8FC]/20 overflow-hidden">
+                      <div
+                        className="h-full bg-[#69C5F5] transition-all duration-300"
+                        style={{ width: isDone ? '100%' : isCurrent ? '100%' : '0%', opacity: isCurrent ? 1 : isDone ? 0.65 : 0 }}
+                      />
+                    </div>
+                    <p
+                      className={cn(
+                        'text-[10px] font-mono-tabular uppercase tracking-wider truncate transition-colors',
+                        isCurrent ? 'text-[#69C5F5] font-semibold' : 'text-[#F4F8FC]/55'
+                      )}
+                    >
+                      0{idx + 1} · {s.title}
+                    </p>
+                  </div>
+                );
+              })}
+            </div>
           </div>
 
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6 items-end pb-4">
-            <div className="bg-[#07111F]/92 border border-[#F4F8FC]/16 p-5 space-y-1.5 max-w-md">
+            <div className="bg-[#07111F]/92 border border-[#69C5F5]/45 p-5 space-y-1.5 max-w-md">
               <p className="text-[11px] font-mono-tabular uppercase tracking-wider text-[#69C5F5]">
-                {leftKicker ?? 'Stage 01 · Integrated Complex'}
+                {currentSlide.kicker}
               </p>
               <h3 className="font-display text-2xl sm:text-3xl font-bold uppercase text-[#F4F8FC]">
-                {leftTitle ?? 'Bobbili & Jharkhand Works'}
+                {currentSlide.title}
               </h3>
-              <p className="text-xs sm:text-sm text-[#F4F8FC]/82 leading-relaxed">
-                {leftDescription ?? 'Raw manganese, quartz, chromite, and metallurgical reductants prepared across multi-furnace production sheds.'}
+              <p className="text-xs sm:text-sm text-[#F4F8FC]/84 leading-relaxed">
+                {currentSlide.description}
               </p>
             </div>
 
-            <div className="bg-[#07111F]/92 border border-[#F4F8FC]/16 p-5 space-y-1.5 max-w-md md:ml-auto">
-              <p className="text-[11px] font-mono-tabular uppercase tracking-wider text-[#69C5F5]">
-                {rightKicker ?? 'Stage 02 · High-Temperature Reduction'}
-              </p>
-              <h3 className="font-display text-2xl sm:text-3xl font-bold uppercase text-[#F4F8FC]">
-                {rightTitle ?? 'From Heat To Precision'}
-              </h3>
-              <p className="text-xs sm:text-sm text-[#F4F8FC]/82 leading-relaxed">
-                {rightDescription ?? 'Submerged-arc electrodes, 6,000 MT/month AOD converters, and spectrographic assay verification.'}
-              </p>
-            </div>
+            {nextSlide && nextSlide !== currentSlide && (
+              <div className="bg-[#07111F]/80 border border-[#F4F8FC]/16 p-5 space-y-1.5 max-w-md md:ml-auto">
+                <p className="text-[11px] font-mono-tabular uppercase tracking-wider text-[#B5C5D7]">
+                  Next On Scroll · {nextSlide.kicker}
+                </p>
+                <h3 className="font-display text-xl sm:text-2xl font-bold uppercase text-[#F4F8FC]/90">
+                  {nextSlide.title}
+                </h3>
+                <p className="text-xs text-[#F4F8FC]/70 leading-relaxed line-clamp-2">
+                  {nextSlide.description}
+                </p>
+              </div>
+            )}
           </div>
         </div>
       </div>

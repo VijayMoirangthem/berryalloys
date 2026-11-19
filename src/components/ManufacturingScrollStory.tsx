@@ -28,7 +28,7 @@ const PROCESS_STAGES: ProcessStage[] = [
     description:
       'Manganese, chrome, and quartz raw materials are reduced in submerged-arc electric furnaces under controlled slag basicity to establish target alloy chemistry.',
     fact: 'Capacity scaled from 2 × 10 MVA in 2010 across 12 MVA and 8.25 MVA furnaces plus existing 24 MVA operations.',
-    image: ASSETS.furnaceElectrodes,
+    image: ASSETS.processSafTapping,
   },
   {
     number: '02',
@@ -46,7 +46,7 @@ const PROCESS_STAGES: ProcessStage[] = [
     description:
       'Batch samples are verified across manganese, silicon, chromium, carbon, phosphorus, sulfur, and trace elements while maintaining ISO 9001, 14001, 45001, and ISO 14067:2018 CFP systems.',
     fact: 'Verified Q4 2023 CBAM emission data reporting readiness.',
-    image: ASSETS.qualityLab,
+    image: ASSETS.processXrfAssayLab,
   },
   {
     number: '04',

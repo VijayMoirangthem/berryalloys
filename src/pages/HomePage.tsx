@@ -524,6 +524,39 @@ export function HomePage() {
         </div>
       </div>
 
+      {/* SIGNATURE 3D SHOWCASE — Interactive Tipper Truck Loading, Hydraulic Unloading & Bulk Vessel Port Simulator */}
+      <section
+        id="port-simulator-3d"
+        aria-labelledby="port-simulator-heading"
+        className="scroll-mt-20 py-16 lg:py-22 bg-[#F1F6FB] text-[#10243A] dark:bg-[#0B1728] dark:text-[#F4F8FC] border-b border-[#10243A]/12 dark:border-[#F4F8FC]/12"
+      >
+        <div className="max-w-[1360px] mx-auto px-4 sm:px-6 lg:px-8 xl:px-14 2xl:px-8 space-y-6">
+          <div className="flex flex-col lg:flex-row lg:items-end justify-between gap-4">
+            <div className="space-y-1.5">
+              <p className="text-[11px] font-mono-tabular uppercase tracking-widest text-brand dark:text-[#69C5F5]">
+                Interactive 3D Port &amp; Bulk Dispatch Simulator
+              </p>
+              <FlipText
+                className="font-display text-xl sm:text-2xl font-bold uppercase tracking-[0.18em] text-[#C9233B] dark:text-[#69C5F5]"
+                duration={2.4}
+              >
+                PLANT TO VESSEL
+              </FlipText>
+              <h2
+                id="port-simulator-heading"
+                className="font-display text-2xl sm:text-4xl font-bold uppercase tracking-tight text-[#10243A] dark:text-[#F4F8FC]"
+              >
+                3D Tipper Truck Loading, Hydraulic Unloading &amp; Ship Hoist
+              </h2>
+            </div>
+            <p className="text-xs sm:text-sm text-[#465C72] dark:text-[#B5C5D7] max-w-md lg:text-right leading-relaxed">
+              Orbit in real-time 3D, switch views between the smelter silo, rear-tipping bulk truck, and Visakhapatnam bulk carrier, or operate the hydraulic dump bed and port crane manually.
+            </p>
+          </div>
+          <PortLogistics3DViewer />
+        </div>
+      </section>
+
       {/* 02 / LEGACY — DKG Group Roots, Founding Heritage & Expansion Geography */}
       <section
         id="legacy"
@@ -1043,19 +1076,51 @@ export function HomePage() {
       {/* 05 / ALLOYS — Interactive Alloy Explorer (#alloys) */}
       <HomeAlloyShowcase onEnquireAlloy={handleEnquireAlloy} />
 
-      {/* Restored WebGL Sobel-Edge + FBM Noise Scroll Dissolve Bridge: Molten Furnace Tap -> Deep-Water Export Berth */}
+      {/* Expanded 5-Stage WebGL Sobel-Edge + FBM Noise Scroll Dissolve Journey */}
       <ScrollDissolveReveal
-        image1={ASSETS.dissolveFurnaceTap.src}
-        image2={ASSETS.dissolveRefinedAlloyShip.src}
-        image1Alt={ASSETS.dissolveFurnaceTap.alt}
-        image2Alt={ASSETS.dissolveRefinedAlloyShip.alt}
         edgeColor="#69C5F5"
-        leftKicker="Stage A · Submerged-Arc Reduction"
-        leftTitle="1,500°C Molten Alloy Tapping"
-        leftDescription="Continuous high-temperature reduction across Bobbili and Dhalbhumgarh furnaces establishes primary manganese, silicon, and chromium alloy chemistry."
-        rightKicker="Stage B · Deep-Water Maritime Berth"
-        rightTitle="Precision Export Vessel Dispatch"
-        rightDescription="Assayed, sized, and packed into certified FIBC jumbo bags and bulk lots for direct maritime export through Visakhapatnam Harbour Port."
+        slides={[
+          {
+            image: ASSETS.dissolveFurnaceTap.src,
+            alt: ASSETS.dissolveFurnaceTap.alt,
+            kicker: 'Stage 01 · Submerged-Arc Reduction',
+            title: '1,500°C Molten Alloy Tapping',
+            description:
+              'Continuous high-temperature reduction across Bobbili and Dhalbhumgarh furnaces establishes primary manganese, silicon, and chromium alloy chemistry.',
+          },
+          {
+            image: ASSETS.furnaceElectrodes.src,
+            alt: ASSETS.furnaceElectrodes.alt,
+            kicker: 'Stage 02 · Söderberg Electrode Control',
+            title: 'Multi-Furnace Thermal Precision',
+            description:
+              'Self-baking carbon electrode columns and 132 kV captive substations maintain stable smelting burden and consistent heat recovery across 4,11,000 TPA scale.',
+          },
+          {
+            image: ASSETS.qualityLab.src,
+            alt: ASSETS.qualityLab.alt,
+            kicker: 'Stage 03 · Spectrographic Assay Lab',
+            title: 'OES & XRF Chemistry Verification',
+            description:
+              'Every tapped heat undergoes optical emission spectrometry for tight trace-element tolerances — including Low Phosphorus, Low Boron (≤ 50 ppm), and Low Nitrogen grades.',
+          },
+          {
+            image: ASSETS.sustRenewableHybrid1.src,
+            alt: ASSETS.sustRenewableHybrid1.alt,
+            kicker: 'Stage 04 · Clean-Energy Integration',
+            title: '83 MW Solar & 29.6 MW Wind Belt',
+            description:
+              'Documented operational renewable power generation paired with ISO 14067:2018 product carbon accounting prepares export batches for EU CBAM disclosures.',
+          },
+          {
+            image: ASSETS.dissolveRefinedAlloyShip.src,
+            alt: ASSETS.dissolveRefinedAlloyShip.alt,
+            kicker: 'Stage 05 · Deep-Water Maritime Berth',
+            title: 'Precision Export Vessel Dispatch',
+            description:
+              'Assayed, crushed, and packed into certified FIBC jumbo bags and bulk lots for direct coastal export through Visakhapatnam Harbour Port to ~35 countries.',
+          },
+        ]}
       />
 
       {/* 06 / PROCESS — Pinned Desktop Manufacturing Sequence (#process) */}
@@ -1691,30 +1756,6 @@ export function HomePage() {
           <GlobalPresenceSection />
 
           <LogisticsJourney />
-
-          {/* Interactive 3D Three.js Truck Loading/Unloading & Bulk Carrier Port Simulator */}
-          <div className="pt-6 space-y-4">
-            <div className="flex flex-col lg:flex-row lg:items-end justify-between gap-4">
-              <div className="space-y-1.5">
-                <p className="text-[11px] font-mono-tabular uppercase tracking-widest text-brand dark:text-[#69C5F5]">
-                  Interactive 3D Port &amp; Bulk Dispatch Simulator
-                </p>
-                <FlipText
-                  className="font-display text-xl sm:text-2xl font-bold uppercase tracking-[0.18em] text-[#C9233B] dark:text-[#69C5F5]"
-                  duration={2.4}
-                >
-                  PLANT TO VESSEL
-                </FlipText>
-                <h3 className="font-display text-2xl sm:text-3xl font-bold uppercase text-[#10243A] dark:text-[#F4F8FC]">
-                  3D Tipper Truck Loading, Hydraulic Unloading &amp; Ship Hoist
-                </h3>
-              </div>
-              <p className="text-xs sm:text-sm text-[#465C72] dark:text-[#B5C5D7] max-w-md lg:text-right leading-relaxed">
-                Drag to orbit in full 3D, switch camera angles between the smelter tipper truck and bulk carrier ship, or command hydraulic tipping and gantry crane loading manually.
-              </p>
-            </div>
-            <PortLogistics3DViewer />
-          </div>
 
           <FacilityCorridorMap />
 
