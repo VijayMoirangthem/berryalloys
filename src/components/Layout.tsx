@@ -991,7 +991,7 @@ export function Layout({ children }: LayoutProps) {
             </div>
           </div>
 
-          <div className="pt-8 flex flex-col sm:flex-row sm:items-center justify-between gap-4 text-xs text-[#465C72] dark:text-[#B5C5D7]">
+          <div className="pt-8 pb-24 sm:pb-0 flex flex-col sm:flex-row sm:items-center justify-between gap-4 text-xs text-[#465C72] dark:text-[#B5C5D7]">
             <p>© 2026 Berry Alloys Limited. Presentation prototype.</p>
             <div className="flex flex-wrap items-center gap-4">
               <AmbientMotionToggle />

@@ -66,7 +66,7 @@ export function CredentialStackedMatrix({ className = '' }: { className?: string
             <p className="font-mono-tabular text-[10px] uppercase tracking-widest text-brand dark:text-[#69C5F5]">
               Quality System
             </p>
-            <p className="font-display text-2xl font-bold uppercase text-[#10243A] dark:text-[#F4F8FC]">
+            <p className="font-display text-lg sm:text-2xl leading-tight break-words font-bold uppercase text-[#10243A] dark:text-[#F4F8FC]">
               ISO 9001:2015
             </p>
             <p className="text-[11px] text-[#465C72] dark:text-[#B5C5D7]">Assay & Process Control</p>
@@ -80,7 +80,7 @@ export function CredentialStackedMatrix({ className = '' }: { className?: string
             <p className="font-mono-tabular text-[10px] uppercase tracking-widest text-brand dark:text-[#69C5F5]">
               Environmental
             </p>
-            <p className="font-display text-2xl font-bold uppercase text-[#10243A] dark:text-[#F4F8FC]">
+            <p className="font-display text-lg sm:text-2xl leading-tight break-words font-bold uppercase text-[#10243A] dark:text-[#F4F8FC]">
               ISO 14001:2015
             </p>
             <p className="text-[11px] text-[#465C72] dark:text-[#B5C5D7]">Smelting Site Stewardship</p>
@@ -96,7 +96,7 @@ export function CredentialStackedMatrix({ className = '' }: { className?: string
             <p className="font-mono-tabular text-[10px] uppercase tracking-widest text-brand dark:text-[#69C5F5]">
               Occupational Safety
             </p>
-            <p className="font-display text-2xl font-bold uppercase text-[#10243A] dark:text-[#F4F8FC]">
+            <p className="font-display text-lg sm:text-2xl leading-tight break-words font-bold uppercase text-[#10243A] dark:text-[#F4F8FC]">
               ISO 45001:2018
             </p>
             <p className="text-[11px] text-[#465C72] dark:text-[#B5C5D7]">Workforce Shopfloor Safety</p>
@@ -110,7 +110,7 @@ export function CredentialStackedMatrix({ className = '' }: { className?: string
             <p className="font-mono-tabular text-[10px] uppercase tracking-widest text-brand dark:text-[#69C5F5]">
               Product Carbon
             </p>
-            <p className="font-display text-2xl font-bold uppercase text-[#10243A] dark:text-[#F4F8FC]">
+            <p className="font-display text-lg sm:text-2xl leading-tight break-words font-bold uppercase text-[#10243A] dark:text-[#F4F8FC]">
               ISO 14067:2018
             </p>
             <p className="text-[11px] text-[#465C72] dark:text-[#B5C5D7]">CBAM Q4 2023 Aligned</p>
@@ -126,7 +126,7 @@ export function CredentialStackedMatrix({ className = '' }: { className?: string
             <p className="font-mono-tabular text-[10px] uppercase tracking-widest text-brand dark:text-[#69C5F5]">
               Credit Ratings
             </p>
-            <p className="font-display text-2xl font-bold uppercase text-[#10243A] dark:text-[#F4F8FC]">
+            <p className="font-display text-lg sm:text-2xl leading-tight break-words font-bold uppercase text-[#10243A] dark:text-[#F4F8FC]">
               CRISIL A- / ICRA AA-
             </p>
             <p className="text-[11px] text-[#465C72] dark:text-[#B5C5D7]">Displayed Website Badges</p>
@@ -140,7 +140,7 @@ export function CredentialStackedMatrix({ className = '' }: { className?: string
             <p className="font-mono-tabular text-[10px] uppercase tracking-widest text-brand dark:text-[#69C5F5]">
               DGFT Status
             </p>
-            <p className="font-display text-2xl font-bold uppercase text-[#10243A] dark:text-[#F4F8FC]">
+            <p className="font-display text-lg sm:text-2xl leading-tight break-words font-bold uppercase text-[#10243A] dark:text-[#F4F8FC]">
               3-Star Export House
             </p>
             <p className="text-[11px] text-[#465C72] dark:text-[#B5C5D7]">Visakhapatnam Marine Dispatch</p>
@@ -156,7 +156,7 @@ export function CredentialStackedMatrix({ className = '' }: { className?: string
             <p className="font-mono-tabular text-[10px] uppercase tracking-widest text-brand dark:text-[#69C5F5]">
               Industry Bodies
             </p>
-            <p className="font-display text-2xl font-bold uppercase text-[#10243A] dark:text-[#F4F8FC]">
+            <p className="font-display text-lg sm:text-2xl leading-tight break-words font-bold uppercase text-[#10243A] dark:text-[#F4F8FC]">
               IMnI · IFAPA
             </p>
             <p className="text-[11px] text-[#465C72] dark:text-[#B5C5D7]">Fastmarkets · CRU</p>
@@ -170,7 +170,7 @@ export function CredentialStackedMatrix({ className = '' }: { className?: string
             <p className="font-mono-tabular text-[10px] uppercase tracking-widest text-brand dark:text-[#69C5F5]">
               Recognitions
             </p>
-            <p className="font-display text-2xl font-bold uppercase text-[#10243A] dark:text-[#F4F8FC]">
+            <p className="font-display text-lg sm:text-2xl leading-tight break-words font-bold uppercase text-[#10243A] dark:text-[#F4F8FC]">
               {CREDENTIALS_AND_AWARDS[3].title.replace(' Best Organization 2026', ' 2026')}
             </p>
             <p className="text-[11px] text-[#465C72] dark:text-[#B5C5D7]">Vizag Steel Award · POSCO</p>
