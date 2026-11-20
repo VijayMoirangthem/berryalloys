@@ -21,6 +21,7 @@ import { AmbientMotionToggle } from './AmbientMotionToggle';
 import { LanguageSelector } from './localized/LanguageSelector';
 import { ScrollProgress } from './motion/ScrollProgress';
 import { useTapTargets } from './motion/useTapTargets';
+import { useMobileRails } from './motion/useMobileRails';
 import { AnimatedFooterCanvas } from './ui/AnimatedFooterCanvas';
 import { triggerReplayIntro } from './ui/KineticLoader';
 import { RouteTransitionLoader } from './ui/RouteTransitionLoader';
@@ -236,6 +237,7 @@ export function Layout({ children }: LayoutProps) {
   const { pathname, search, hash } = useLocation();
   const { openSearch } = useSearch();
   useTapTargets();
+  useMobileRails();
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [sectionsMenuOpen, setSectionsMenuOpen] = useState(false);
   const [activeMegaKey, setActiveMegaKey] = useState<string | null>(null);

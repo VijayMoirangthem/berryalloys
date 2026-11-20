@@ -97,7 +97,7 @@ export function ManufacturingPage() {
             </p>
           </div>
 
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+          <div className="m-rail grid grid-cols-1 md:grid-cols-3 gap-6">
             <SpotlightSurface className="bg-white dark:bg-[#12243B] border border-[#10243A]/14 dark:border-[#F4F8FC]/14 p-6">
               <article className="space-y-3">
                 <p className="font-mono-tabular text-xs text-brand dark:text-[#69C5F5]">

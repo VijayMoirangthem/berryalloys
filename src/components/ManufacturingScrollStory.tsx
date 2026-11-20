@@ -416,13 +416,13 @@ export function ManufacturingScrollStory() {
         )}
 
         <div ref={mobileListRef} className="relative">
-        <div aria-hidden="true" className="absolute start-[7px] top-2 bottom-2 w-[2px] bg-subtle lg:hidden">
+        <div aria-hidden="true" className="absolute start-[7px] top-2 bottom-2 w-[2px] bg-subtle hidden md:block lg:hidden">
           <div data-rail-fill className="h-full w-full origin-top scale-y-0 bg-accent-red" />
         </div>
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 ps-8 lg:ps-0">
+        <div className="m-rail grid grid-cols-1 lg:grid-cols-2 gap-8 ps-8 lg:ps-0 max-md:!ps-4">
           {PROCESS_STAGES.map((stage, idx) => (
             <div key={stage.number} data-stage-card className="stage-card relative">
-            <span aria-hidden="true" className="stage-dot absolute -start-[30px] top-7 z-10 h-4 w-4 rounded-full border-2 border-control bg-card lg:hidden" />
+            <span aria-hidden="true" className="stage-dot absolute -start-[30px] top-7 z-10 h-4 w-4 rounded-full border-2 border-control bg-card hidden md:block lg:hidden" />
             <article
               className={`bg-white dark:bg-[#12243B] border transition-colors duration-300 overflow-hidden flex flex-col ${
                 activeMobileStage === idx

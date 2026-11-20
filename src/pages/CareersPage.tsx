@@ -128,7 +128,7 @@ export function CareersPage() {
             <h2 id="workforce-showcase-heading" className="font-display text-2xl sm:text-3xl font-bold uppercase text-[#10243A] dark:text-[#F4F8FC]">
               People &amp; Culture Across Berry Alloys Works
             </h2>
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+            <div className="m-rail grid grid-cols-1 md:grid-cols-3 gap-6">
               {[
                 {
                   code: '01 · Inclusive Recognition',

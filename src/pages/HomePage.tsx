@@ -907,7 +907,7 @@ export function HomePage() {
               ))}
             </div>
 
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-5">
+            <div className="m-rail grid grid-cols-1 md:grid-cols-3 gap-5">
               {[
                 {
                   asset: ASSETS.teamFurnaceEngineers,
@@ -983,7 +983,7 @@ export function HomePage() {
               />
 
               {/* Six Substantive Workplace Culture Pillars */}
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 pt-2">
+              <div className="m-rail grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 pt-2">
                 {WORKFORCE_CULTURE_PILLARS.map((pillar, idx) => (
                   <motion.article
                     key={pillar.code}
@@ -1044,7 +1044,7 @@ export function HomePage() {
                 Explore Full Governance →
               </Link>
             </div>
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5">
+            <div className="m-rail grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5">
               {COMPANY_INFO.values.map((val, idx) => (
                 <motion.div
                   key={val.title}
@@ -1821,11 +1821,11 @@ export function HomePage() {
               </div>
             </div>
 
-            <div className="divide-y divide-[#10243A]/12 dark:divide-[#F4F8FC]/12 border-b border-[#10243A]/12 dark:border-[#F4F8FC]/12">
+            <div className="m-rail m-rail--narrow divide-y divide-[#10243A]/12 dark:divide-[#F4F8FC]/12 border-b border-[#10243A]/12 dark:border-[#F4F8FC]/12 max-md:divide-y-0 max-md:border-b-0">
               {curatedUpdates.map((item) => (
                 <article
                   key={item.slug}
-                  className="py-6 grid grid-cols-1 lg:grid-cols-12 gap-4 items-baseline group"
+                  className="py-6 grid grid-cols-1 lg:grid-cols-12 gap-4 items-baseline group max-md:content-start max-md:border max-md:border-[#10243A]/14 max-md:dark:border-[#F4F8FC]/14 max-md:bg-white max-md:dark:bg-[#12243B] max-md:p-5"
                 >
                   <div className="lg:col-span-3 flex items-center gap-3 text-xs font-mono-tabular text-[#465C72] dark:text-[#B5C5D7]">
                     <time>{item.date}</time>
@@ -2027,7 +2027,7 @@ export function HomePage() {
           </div>
 
           {/* Statutory Filing Groups Summary */}
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+          <div className="m-rail grid grid-cols-1 md:grid-cols-3 gap-6">
             {CORPORATE_DOCUMENT_GROUPS.map((group) => (
               <div
                 key={group.id}

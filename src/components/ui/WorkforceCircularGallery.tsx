@@ -108,12 +108,14 @@ export function WorkforceCircularGallery({
     const fitRing = () => {
       const { width, height } = root.getBoundingClientRect();
       if (!width || !height) return;
+      // Phones: let the ring overflow the viewport sides so the cards stay big enough to read; spinning reveals the rest.
+      const phone = width < 640;
       const scale = Math.min(
         1,
-        (width - 40) / (radius * 2.15),
+        phone ? (width * 1.5) / (radius * 2.15) : (width - 40) / (radius * 2.15),
         (height - 44) / (radius * 1.55)
       );
-      gsap.set(gallery, { scale: Math.max(0.28, scale) });
+      gsap.set(gallery, { scale: Math.max(phone ? 0.5 : 0.28, scale) });
     };
     const resizeObserver = new ResizeObserver(fitRing);
     resizeObserver.observe(root);
@@ -244,7 +246,7 @@ export function WorkforceCircularGallery({
       ref={rootRef}
       style={{ cursor: 'grab', touchAction: 'pan-y' }}
       className={cn(
-        'relative h-[430px] sm:h-[500px] lg:h-[540px] w-full select-none overflow-hidden [perspective:1500px]',
+        'relative h-[460px] sm:h-[500px] lg:h-[540px] w-full select-none overflow-hidden [perspective:1500px]',
         'border border-[#10243A]/14 dark:border-[#F4F8FC]/14',
         'bg-[radial-gradient(circle_at_50%_42%,#F6FAFE,#E4EFF9)] dark:bg-[radial-gradient(circle_at_50%_42%,#112339,#050C17)]',
         className

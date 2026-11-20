@@ -93,6 +93,8 @@ export function useIndustrialReveals(rootRef: RefObject<HTMLElement | null>, ski
           ':scope > div > .grid, :scope > div > div > .grid, :scope > div > ul, :scope > div > ol'
         );
         containers.forEach((container) => {
+          // Phone rails are horizontal swipe lists: their off-screen cards must not wait on a vertical reveal.
+          if (container.classList.contains('m-rail') && window.matchMedia('(max-width: 767px)').matches) return;
           const items = Array.from(container.children).filter(
             (c): c is HTMLElement => c instanceof HTMLElement && !c.hasAttribute('data-no-reveal') && c.offsetHeight < 950
           );

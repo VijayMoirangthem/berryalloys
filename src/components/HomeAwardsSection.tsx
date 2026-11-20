@@ -281,7 +281,7 @@ export function HomeAwardsSection() {
         )}
 
         {/* 4 Authentic Official Ceremony Photography Cards (Click Any To Open Lightbox) */}
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5">
+        <div className="m-rail grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5">
           {ceremonyGalleryRecords.map((record, idx) => (
             <motion.figure
               key={record.id}
@@ -374,7 +374,7 @@ export function HomeAwardsSection() {
             </div>
           </div>
 
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+          <div className="m-rail grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
             {filteredRecords.map((record) => {
               const isExpanded = expandedId === record.id;
               return (

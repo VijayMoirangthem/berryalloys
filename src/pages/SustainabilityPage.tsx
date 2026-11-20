@@ -153,7 +153,7 @@ export function SustainabilityPage() {
             </h2>
           </div>
 
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+          <div className="m-rail grid grid-cols-1 md:grid-cols-3 gap-6">
             {[
               {
                 label: '01 · ISO 14067:2018 & EU CBAM',

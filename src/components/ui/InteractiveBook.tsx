@@ -829,7 +829,7 @@ export function InteractiveBook({
 
     return (
       <div
-        className="relative h-[412px] shadow-[0_22px_40px_-20px_rgba(7,17,31,0.52)]"
+        className="relative h-[min(70svh,560px)] min-h-[412px] shadow-[0_22px_40px_-20px_rgba(7,17,31,0.52)]"
         style={perspectiveStyle}
       >
         {/* Base sheet pushed back slightly in Z so iOS WebKit sorts Leaf cleanly above */}

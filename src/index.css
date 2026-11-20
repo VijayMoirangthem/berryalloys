@@ -867,3 +867,66 @@ html[data-ambient="paused"] .diagram-ring-ping {
   position: absolute;
   inset: calc(var(--tap-y, 0px) * -1) calc(var(--tap-x, 0px) * -1);
 }
+
+/* ───────── Mobile rails: long vertical card stacks become swipeable horizontal rails (<768px) ───────── */
+@media (max-width: 767px) {
+  .m-rail {
+    display: flex !important;
+    flex-direction: row;
+    flex-wrap: nowrap;
+    overflow-x: auto;
+    overflow-y: hidden;
+    gap: 0.75rem !important;
+    margin-inline: -1rem;
+    padding-inline: 1rem;
+    padding-bottom: 0.25rem;
+    scroll-snap-type: x mandatory;
+    scroll-padding-inline: 1rem;
+    overscroll-behavior-x: contain;
+    -webkit-overflow-scrolling: touch;
+    scrollbar-width: none;
+    touch-action: pan-x pan-y;
+    align-items: stretch;
+  }
+  .m-rail::-webkit-scrollbar { display: none; }
+  .m-rail > * {
+    flex: 0 0 84%;
+    min-width: 0;
+    scroll-snap-align: start;
+    scroll-snap-stop: always;
+  }
+  .m-rail--narrow > * { flex-basis: 72%; }
+  .m-rail-dots {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 6px;
+    padding-top: 0.75rem;
+  }
+  .m-rail-dots button {
+    height: 6px;
+    width: 6px;
+    border-radius: 9999px;
+    padding: 0;
+    border: 0;
+    background: color-mix(in srgb, currentColor 25%, transparent);
+    transition: width 0.3s ease, background-color 0.3s ease;
+  }
+  .m-rail-dots button[aria-current='true'] {
+    width: 22px;
+    background: var(--brand, #0a6aa1);
+  }
+  .m-rail-hint {
+    display: block;
+    text-align: center;
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 10px;
+    letter-spacing: 0.22em;
+    text-transform: uppercase;
+    opacity: 0.6;
+    padding-top: 0.4rem;
+  }
+}
+@media (min-width: 768px) {
+  .m-rail-dots, .m-rail-hint { display: none; }
+}

@@ -171,7 +171,8 @@ export function PortLogistics3DViewer({ className }: { className?: string }) {
   const [manualBedTilt, setManualBedTilt] = useState(0); // 0..1
   const [manualCranePos, setManualCranePos] = useState(0.15); // 0..1
   const [manualOverride, setManualOverride] = useState(false);
-  const [dockCollapsed, setDockCollapsed] = useState(false);
+  // Phones: start with the scene unobstructed; controls are one tap away.
+  const [dockCollapsed, setDockCollapsed] = useState(() => typeof window !== 'undefined' && window.matchMedia('(max-width: 639px)').matches);
   const [telemetry, setTelemetry] = useState({
     stageLabel: 'Auto Sequence Active',
     cargoTonnes: 24,
@@ -303,6 +304,8 @@ export function PortLogistics3DViewer({ className }: { className?: string }) {
     controls.minPolarAngle = 0.2;
     controls.minDistance = 6.5;
     controls.maxDistance = 34;
+    // OrbitControls forces touch-action:none, which traps page scrolling over a tall canvas on phones.
+    renderer.domElement.style.touchAction = 'pan-y';
     controls.addEventListener('start', () => {
       stateRef.current.cameraTargetPreset = null;
     });
@@ -1120,7 +1123,7 @@ export function PortLogistics3DViewer({ className }: { className?: string }) {
       onKeyDown={handleKeyDown}
       aria-label="Interactive 3D Visakhapatnam port logistics simulator. Drag to orbit or use arrow keys to rotate."
       className={cn(
-        'relative w-full h-[540px] sm:h-[600px] lg:h-[640px] overflow-hidden border border-[#10243A]/18 dark:border-[#F4F8FC]/16 bg-[#0B1B2E] outline-none focus-visible:ring-2 focus-visible:ring-brand',
+        'relative w-full h-[min(78svh,640px)] sm:h-[600px] lg:h-[640px] touch-pan-y overflow-hidden border border-[#10243A]/18 dark:border-[#F4F8FC]/16 bg-[#0B1B2E] outline-none focus-visible:ring-2 focus-visible:ring-brand',
         className
       )}
     >
@@ -1130,7 +1133,8 @@ export function PortLogistics3DViewer({ className }: { className?: string }) {
       {/* Minimal Top-Left Spec Badge (No Backdrop Blur over WebGL) */}
       <div className="pointer-events-none absolute top-4 left-4 z-20 bg-[#07111F]/90 border border-[#F4F8FC]/16 px-3.5 py-2.5 max-w-[82vw] sm:max-w-md">
         <p className="text-[10px] font-mono-tabular uppercase tracking-widest text-[#69C5F5]">
-          Interactive 3D Port &amp; Tipper Simulator · Visakhapatnam Corridor
+          <span className="sm:hidden">3D Port Simulator</span>
+          <span className="hidden sm:inline">Interactive 3D Port &amp; Tipper Simulator · Visakhapatnam Corridor</span>
         </p>
         <p className="font-display text-lg sm:text-xl font-bold uppercase text-[#F4F8FC] leading-tight mt-0.5">
           {telemetry.stageLabel}
@@ -1140,7 +1144,7 @@ export function PortLogistics3DViewer({ className }: { className?: string }) {
           <span aria-hidden="true">/</span>
           <span>Vessel Hold: {telemetry.shipHoldPct}%</span>
           <span aria-hidden="true">/</span>
-          <span className="text-[#69C5F5]">Drag to Orbit · Scroll to Zoom</span>
+          <span className="text-[#69C5F5]"><span className="sm:hidden">Drag · Pinch to zoom</span><span className="hidden sm:inline">Drag to Orbit · Scroll to Zoom</span></span>
         </div>
       </div>
 
